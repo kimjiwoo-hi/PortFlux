@@ -12,21 +12,16 @@ import MainLayout from "./layouts/MainLayout";
 import NotFound from "./pages/NotFound";
 import BoardLookup from "./pages/BoardLookupPage.jsx";
 
-// Componentes
-
-
 const router = createBrowserRouter([
   {
     path: "/",
     element: <MainLayout />,
     errorElement: <NotFound />,
     children: [
-      /*
       {
-        path: 'about',
-        element: <About />,
+        path: 'boardlookup',
+        element: <BoardLookup />,
       }
-      */
     ],
   },
 ]);

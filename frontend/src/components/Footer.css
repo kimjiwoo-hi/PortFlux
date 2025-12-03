@@ -12,6 +12,7 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
+    color: #6A6A6A;
 }
 
 .logo {
@@ -26,7 +27,7 @@
     align-items: center; /* 세로 가운데 정렬 (선택) */
 }
 
-.icon-row > img {
+.icon-row img {
     width: 40px;
     height: 40px;
 }
@@ -43,9 +44,10 @@
 
 .reserved {
     position: absolute;
-    top: 160px;
+    top: 170px;
     left: 0;
     right: 0;
     margin: 0 auto;
     width: fit-content;
+    color: #6A6A6A;
 }
