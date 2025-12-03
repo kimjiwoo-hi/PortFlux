@@ -6,7 +6,6 @@ function BoardLookupPage() {
     return (
         <div>
         <h1>Board Lookup Page</h1>
-        <BoardLookup />
         </div>
     );
     }

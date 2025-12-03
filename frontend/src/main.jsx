@@ -10,6 +10,7 @@ import MainLayout from "./layouts/MainLayout";
 
 // Pages
 import NotFound from "./pages/NotFound";
+import BoardLookup from "./pages/BoardLookupPage.jsx";
 
 // Componentes
 
