@@ -9,6 +9,7 @@ import './index.css'
 import MainLayout from './layouts/MainLayout';
 
 // Pages
+import BoardLookup from './pages/BoardLookup.jsx'; 
 import NotFound from "./pages/NotFound"
 
 // Componentes
