@@ -1,0 +1,51 @@
+.footer {
+    background-color: #d9d9d9;
+    height: 200px;
+    display: flex;            /* flex 컨테이너로 만들기 */
+    justify-content: center;  /* 세로 가운데 정렬 */
+    align-items: center;       /* 가로 가운데 정렬 */
+    gap: 250px;
+    position: relative; /* 기준점 */
+}
+
+.footer-object {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.logo {
+    width: 152px;
+    height: auto;
+}
+
+.icon-row {
+    display: flex;
+    width: 152px;        /* 고정 너비 */
+    justify-content: space-between;  /* 요소 양 끝에 붙이기 */
+    align-items: center; /* 세로 가운데 정렬 (선택) */
+}
+
+.icon-row > img {
+    width: 40px;
+    height: 40px;
+}
+
+.footer-row {
+    display: flex;
+    gap: 170px;
+}
+
+.row {
+    display: flex;
+    gap: 20px;
+}
+
+.reserved {
+    position: absolute;
+    top: 160px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: fit-content;
+}
