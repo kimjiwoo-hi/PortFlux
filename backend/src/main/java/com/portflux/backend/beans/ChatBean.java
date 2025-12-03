@@ -9,10 +9,10 @@ import lombok.Setter;
 @Setter
 public class ChatBean {
 
-    private int room_id;
-    private int user1_num;
-    private int user2_num;
+    private Long roomId;
+    private Long user1Num;
+    private Long user2Num;
     private Date createdAt;
-    private Date last_message_at;
+    private Date lastMessageAt;
     private String status;
 }

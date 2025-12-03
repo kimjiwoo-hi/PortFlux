@@ -1,5 +1,9 @@
 package com.portflux.backend.mapper;
 
-public class FollowMapper {
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface FollowMapper {
+    
     
 }
