@@ -9,7 +9,7 @@ import './index.css'
 
 
 // Pages
-
+import BoardLookup from './pages/BoardLookup.jsx'; 
 
 // Componentes
 
