@@ -1,0 +1,36 @@
+.tag-box {
+  /* 1. 위치 지정 방식 설정 (필수!) */
+  position: absolute;
+
+  /* 2. y축 위치 설정: 상단으로부터 50px 아래로 */
+  top: 237px;
+
+  /* 3. x축 위치 설정: 왼쪽으로부터 100px 오른쪽으로 */
+  left: 27px;
+
+  width: 231px;
+  height: 734px;
+  background-color: #ffffff;
+  border: 1px solid #9e9e9e;
+  border-radius: 10px;
+}
+
+.tag-search-bar {
+  position: absolute;
+  top: 18px;
+  left: 13px;
+
+  width: 203px;
+  height: 36px;
+  background-color: #ffffff;
+  border: 1px solid #9e9e9e;
+  border-radius: 40px;
+
+  /* 도형 안 폰트 스타일 */
+  font-size: 18px;
+  padding-top: 7px;
+  padding-left: 15px;
+  color: #9e9e9e;
+
+  /* 돋보기 스타일 */
+}
