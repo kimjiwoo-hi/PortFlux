@@ -10,7 +10,11 @@ import MainLayout from "./layouts/MainLayout";
 
 // Pages
 import NotFound from "./pages/NotFound";
+import BoardFree from "./pages/BoardFreePage";
+import BoardJob from "./pages/BoardJobPage.jsx";
 import BoardLookup from "./pages/BoardLookupPage.jsx";
+import Cart from "./pages/CartPage.jsx";
+import MyPage from "./pages/MyPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -19,9 +23,25 @@ const router = createBrowserRouter([
     errorElement: <NotFound />,
     children: [
       {
-        path: 'boardlookup',
-        element: <BoardLookup />,
-      }
+        path: "boardfree",
+        element: <BoardFree />
+      },
+      {
+        path: "boardjob",
+        element: <BoardJob />
+      },
+      {
+        path: "boardlookup",
+        element: <BoardLookup />
+      },
+      {
+        path: "cart",
+        element: <Cart />
+      },
+      {
+        path: "mypage",
+        element: <MyPage />
+      },
     ],
   },
 ]);
