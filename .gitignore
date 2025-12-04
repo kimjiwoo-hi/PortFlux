@@ -77,3 +77,8 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# ========================
+# 개인 차로 인해 제외
+# ========================
+application.properties
