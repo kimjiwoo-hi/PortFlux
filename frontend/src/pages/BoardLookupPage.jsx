@@ -1,10 +1,9 @@
-import React from "react";
 import "./BoardLookupPage.css";
 
 function BoardLookupPage() {
   return (
-    <div>
-      <h1>Board Lookup Page</h1>
+    <div className="tag-box">
+      <div className="tag-search-bar">Search...</div>
     </div>
   );
 }
