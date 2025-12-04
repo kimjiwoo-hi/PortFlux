@@ -12,8 +12,20 @@ const Footer = () => {
           <img src={PortFluxLogo} alt="PortFluxLogo.png" />
         </div>
         <div className="icon-row">
-          <img src={GithubLogo} alt="Github Icon" />
-          <img src={NotionLogo} alt="Notion Icon" />
+          <a
+            href="https://github.com/kimjiwoo-hi/PortFlux"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img src={GithubLogo} alt="Github Icon" />
+          </a>
+          <a
+            href="https://www.notion.so/J-H-2b4de73ed55681948a16ea1b73604e92?source=copy_link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img src={NotionLogo} alt="Notion Icon" />
+          </a>
         </div>
       </div>
       <div className="footer-row">
