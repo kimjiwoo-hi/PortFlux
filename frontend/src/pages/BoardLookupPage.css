@@ -55,45 +55,6 @@
   }
 }
 
-/* -------------------- 우측 컨텐츠 영역 (회색 네모 박스) -------------------- */
-.content-container {
-  /* tag-box의 너비(231px) + 여백을 고려하여 시작 위치를 지정합니다. */
-  margin-left: 300px; 
-  margin-top: 27px;
-  
-  display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3열 그리드 */
-  gap: 20px; /* 컨텐츠 박스 간의 간격 */
-  width: calc(100% - 320px); /* 화면 너비에 맞춰 유동적으로 너비 설정 */
-}
 
-.content-card {
-  width: 100%;
-  padding-bottom: 70%; /* 높이를 너비에 비례하게 설정 (반응형 박스) */
-  background-color: #e0e0e0; /* 회색 네모 박스 */
-  border-radius: 10px;
-  position: relative;
-  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.card-info {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  padding: 10px;
-  width: 100%;
-  color: #333;
-}
-
-.card-subject {
-  font-weight: bold;
-  font-size: 16px;
-  margin-bottom: 2px;
-}
-
-.card-writer {
-  font-size: 12px;
-  color: #666;
-}
 
 
