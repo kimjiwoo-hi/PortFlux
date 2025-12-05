@@ -1,0 +1,213 @@
+/* 전체 래퍼 */
+.rf-wrapper {
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(20,20,20,0.04);
+  padding: 12px;
+  font-family: "Noto Sans KR", "Arial", sans-serif;
+  color: #222;
+}
+
+/* top bar */
+.rf-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: start;
+  margin-bottom: 10px;
+}
+
+/* left title + inline tags */
+.rf-left-title {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  min-width: 380px;
+}
+
+.rf-pin { font-size:16px; margin-right:6px; }
+.rf-left-title strong { font-size:16px; }
+.rf-sub { margin-left:6px; color:#777; font-size:13px; }
+
+.rf-selected-inline { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:6px; }
+
+.rf-inline-tag {
+  background:#f3f7ff;
+  border:1px solid #d8e4ff;
+  padding:6px 8px;
+  border-radius:18px;
+  font-size:13px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+/* search box */
+.rf-searchbox {
+  position:relative;
+  flex:1;
+  max-width: 680px;
+}
+.rf-searchbox input {
+  width:100%;
+  padding:10px 38px 10px 12px;
+  border-radius:6px;
+  border:1px solid #ddd;
+  font-size:14px;
+}
+.clear-input {
+  position:absolute;
+  right:8px;
+  top:50%;
+  transform:translateY(-50%);
+  background:transparent;
+  border:none;
+  font-size:16px;
+  cursor:pointer;
+  color:#888;
+}
+
+/* main area layout */
+.rf-main {
+  display:grid;
+  grid-template-columns: 200px 1fr 260px;
+  gap:14px;
+  margin-bottom:12px;
+  min-height: 270px;
+}
+
+/* left column region list */
+.rf-col-left {
+  border-right:1px solid #f0f0f0;
+  padding-right:8px;
+  max-height: 360px;
+  overflow:auto;
+}
+.rf-region-btn {
+  display:block;
+  width:100%;
+  text-align:left;
+  padding:8px;
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  border-radius:4px;
+  color:#333;
+}
+.rf-region-btn:hover { background:#fafafa; }
+.rf-region-btn.active {
+  background:#f0f6ff;
+  color:#155bd6;
+  font-weight:600;
+}
+
+/* center column */
+.rf-col-center {
+  padding:6px 6px 6px 12px;
+}
+.rf-center-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+}
+.rf-checkbox-row { display:flex; align-items:center; gap:10px; font-size:14px; }
+.rf-children {
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:6px 20px;
+  max-height: 320px;
+  overflow:auto;
+  padding-right:6px;
+}
+.rf-child {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px;
+  border-radius:6px;
+  border:1px solid transparent;
+}
+.rf-child:hover { background:#fafafa; border-color:#f0f0f0; }
+.rf-child-name { flex:1; }
+.rf-count { color:#888; font-size:13px; }
+
+/* right column help */
+.rf-col-right {
+  padding:6px;
+  border-left:1px solid #f0f0f0;
+}
+
+/* bottom area */
+.rf-bottom {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding-top:12px;
+  border-top:1px solid #f2f2f2;
+}
+.rf-bottom-left {
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.rf-bottom-tag {
+  background:#f6f6f6;
+  padding:6px 8px;
+  border-radius:16px;
+  font-size:13px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.tag-x {
+  background:transparent;
+  border:none;
+  font-size:13px;
+  cursor:pointer;
+  color:#666;
+}
+
+/* right: summary + button */
+.rf-bottom-right {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.rf-summary {
+  background:#111;
+  color:#fff;
+  padding:10px 12px;
+  border-radius:6px;
+  text-align:center;
+  min-width:90px;
+}
+.selected-count { font-size:18px; font-weight:700; }
+.selected-label { font-size:12px; color:#ddd; }
+
+.rf-search-btn {
+  background:#111;
+  color:#fff;
+  border:none;
+  padding:12px 18px;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:700;
+}
+.rf-search-btn:hover { opacity:0.95; }
+
+/* empty */
+.rf-empty { color:#888; padding:18px; }
+
+/* small helper */
+.muted { color:#8b8b8b; }
+.small { font-size:12px; }
+
+/* responsive */
+@media (max-width: 1000px) {
+  .rf-main { grid-template-columns: 140px 1fr; grid-template-rows: auto; }
+  .rf-col-right { display:none; }
+}
