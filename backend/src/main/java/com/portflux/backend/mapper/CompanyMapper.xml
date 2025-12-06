@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.portflux.backend.mapper.CompanyUserMapper">
+
+    <insert id="insertCompanyUser" parameterType="com.portflux.backend.beans.CompanyUserBean">
+        INSERT INTO COMPANY (
+            company_num, company_id, business_number, company_password, 
+            company_name, company_phone, company_email, drown_company, 
+            company_create_at, company_image, company_banner
+        ) VALUES (
+            SEQ_COMPANY.NEXTVAL, 
+            #{companyEmail},    #{businessNumber}, 
+            #{companyPassword}, 
+            #{companyName},     #{companyPhone}, 
+            #{companyEmail}, 
+            'N', 
+            SYSDATE, 
+            NULL, 
+            NULL
+        )
+    </insert>
+
+    <select id="findCompanyByEmail" parameterType="String" resultType="com.portflux.backend.beans.CompanyUserBean">
+        SELECT 
+            company_num AS companyNum,
+            company_id AS companyId,
+            business_number AS businessNumber,
+            company_password AS companyPassword,
+            company_name AS companyName,
+            company_phone AS companyPhone,
+            company_email AS companyEmail,
+            drown_company AS drownCompany,
+            company_create_at AS companyCreateAt
+        FROM COMPANY
+        WHERE company_email = #{email}
+    </select>
+
+</mapper>
