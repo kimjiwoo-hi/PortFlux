@@ -57,3 +57,10 @@ dependencyManagement {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+// [수정된 설정] 충돌 없이 Java 폴더의 XML만 빌드에 포함시키는 코드
+tasks.named('processResources') {
+    from('src/main/java') {
+        include '**/*.xml'
+    }
+}
