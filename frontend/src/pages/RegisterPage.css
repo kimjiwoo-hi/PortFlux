@@ -1,0 +1,159 @@
+/* 전체 페이지 래퍼 */
+.register-page-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: calc(100vh - 80px);
+  background-color: #fff;
+  padding: 40px 20px; /* 상하 패딩도 조금 줄임 */
+}
+
+/* 회원가입 박스 */
+.register-box {
+  width: 100%;
+  max-width: 500px; /* 박스 너비 살짝 줄임 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 타이틀 */
+.register-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 30px; /* 타이틀 아래 여백 줄임 */
+}
+
+/* 탭 (개인/기업) - 버튼 형태 */
+.register-tabs {
+  display: flex;
+  width: 100%;
+  margin-bottom: 25px; /* 탭 아래 여백 줄임 */
+  gap: 8px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 12px; /* 탭 버튼 높이 줄임 */
+  font-size: 15px;
+  font-weight: 600;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #888;
+  transition: all 0.2s;
+}
+
+.tab-btn.active {
+  border: 2px solid #3b5bdb;
+  color: #3b5bdb;
+  font-weight: 700;
+}
+
+/* 입력 폼 영역 */
+.form-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* [수정] 입력창 덩어리 사이 간격을 20px -> 12px로 좁힘 */
+}
+
+/* 입력 필드 그룹 (라벨 + 인풋) */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px; /* [수정] 라벨과 입력창 사이 간격을 8px -> 4px로 좁힘 */
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  margin-left: 2px; /* 라벨 살짝 들여쓰기 */
+}
+
+/* 인풋 + 버튼 가로 배치용 */
+.input-with-btn {
+  display: flex;
+  gap: 8px; /* 버튼 사이 간격도 살짝 좁힘 */
+}
+
+/* 공통 인풋 스타일 */
+.reg-input {
+  width: 100%;
+  padding: 12px; /* 인풋 내부 여백 줄임 */
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.reg-input:focus {
+  border-color: #3b5bdb;
+}
+
+.reg-input::placeholder {
+  color: #aaa;
+}
+
+/* 작은 버튼 (인증코드 발송 등) */
+.btn-small {
+  width: 110px;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  background-color: #e0e0e0;
+  color: #555;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-small:hover {
+  background-color: #d0d0d0;
+}
+
+/* 회원가입 완료 버튼 */
+.btn-submit {
+  width: 100%; /* 버튼 꽉 차게 변경 (선택사항) */
+  padding: 15px;
+  margin-top: 20px; /* 버튼 위 여백 줄임 */
+  background-color: #3b5bdb;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-submit:hover {
+  background-color: #2f49b0;
+}
+
+/* [수정] 유효성 검사 메시지 (더 찰싹 붙게) */
+.valid-msg {
+  font-size: 12px;
+  color: #3b5bdb; 
+  margin-top: 2px; /* [핵심] 입력창 바로 밑에 붙음 */
+  margin-left: 2px;
+  font-weight: 600;
+}
+
+.error-msg {
+  font-size: 12px;
+  color: #fa5252; 
+  margin-top: 2px; /* [핵심] 입력창 바로 밑에 붙음 */
+  margin-left: 2px;
+  font-weight: 600;
+}
+
+/* 에러 발생 시 인풋 테두리 붉게 */
+.input-error {
+  border-color: #fa5252 !important;
+}
