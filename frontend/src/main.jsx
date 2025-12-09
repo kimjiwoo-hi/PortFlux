@@ -15,6 +15,8 @@ import BoardJob from "./pages/BoardJobPage.jsx";
 import BoardLookup from "./pages/BoardLookupPage.jsx";
 import Cart from "./pages/CartPage.jsx";
 import MyPage from "./pages/MyPage.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
+import RegisterPage from "./pages/RegisterPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -42,6 +44,14 @@ const router = createBrowserRouter([
         path: "mypage",
         element: <MyPage />
       },
+      {
+        path: "login",
+        element: <LoginPage />
+      },
+      {
+        path: "register",
+        element: <RegisterPage />
+      }
     ],
   },
 ]);
