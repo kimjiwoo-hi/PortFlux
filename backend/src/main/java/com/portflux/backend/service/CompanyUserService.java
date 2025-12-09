@@ -16,39 +16,44 @@ import lombok.RequiredArgsConstructor;
 public class CompanyUserService {
 
     private final CompanyUserDao companyUserDao;
-    private final BusinessNumApi businessNumApi; // 아까 만든 API
-    private final PasswordEncoder passwordEncoder; // Config에 등록한 암호화 기계
+    private final BusinessNumApi businessNumApi;
+    private final PasswordEncoder passwordEncoder;
 
+    // 1. 기업 회원가입 처리
     @Transactional
     public boolean registerCompany(CompanyRegisterBean registerBean) {
         
-        // 1. 사업자 등록번호 진위 확인 (API 호출)
+        // 1) 사업자 등록번호 유효성 재확인
         boolean isValid = businessNumApi.checkBusinessNumber(registerBean.getBusinessNumber());
         if (!isValid) {
-            return false; // 가짜 사업자번호면 가입 거절
+            return false;
         }
 
-        // 2. 비밀번호 일치 확인
+        // 2) 비밀번호 일치 확인
         if (!registerBean.getPassword().equals(registerBean.getPasswordCheck())) {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
 
-        // 3. 비밀번호 암호화
+        // 3) 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(registerBean.getPassword());
 
-        // 4. DB 저장용 Bean으로 변환
+        // 4) DB 저장용 Bean 생성 및 설정
         CompanyUserBean companyUser = new CompanyUserBean();
         companyUser.setBusinessNumber(registerBean.getBusinessNumber());
         companyUser.setCompanyEmail(registerBean.getEmail());
-        companyUser.setCompanyPassword(encodedPassword); // 암호화된 비번 저장
-        companyUser.setCompanyName(registerBean.getNickname()); // 닉네임을 기업명으로 사용 (기획에 따라 조정)
+        companyUser.setCompanyPassword(encodedPassword);
+        companyUser.setCompanyName(registerBean.getNickname());
         companyUser.setCompanyPhone(registerBean.getPhoneNumber());
-        // 아이디는 이메일과 동일하게 설정
         companyUser.setCompanyId(registerBean.getEmail());
 
-        // 5. DB 저장 (DAO 호출)
+        // 5) DB 저장
         companyUserDao.insertCompanyUser(companyUser);
         
         return true;
+    }
+
+    // 2. 사업자번호 유효성 검증 (API 호출)
+    public boolean isBusinessNumberValid(String businessNumber) {
+        return businessNumApi.checkBusinessNumber(businessNumber);
     }
 }
