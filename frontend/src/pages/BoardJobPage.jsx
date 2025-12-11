@@ -1,15 +1,6 @@
-// src/components/BoardJobPage.jsx
 import React, { useState, useMemo, useEffect } from "react";
 import regions from "../database/regions"; // 경로: 이 파일이 src/components/ 에 있을 때 ../database/regions
 import "./BoardJobPage.css";
-
-/**
- * 이 파일은 RegionFilter 컴포넌트를 내부에 포함합니다.
- * - CSS는 BoardJobPage.css (너가 제공한 내용을 복사해서 저장)
- * - regions 데이터는 src/database/regions.js 에서 가져옵니다.
- *
- * 필요하면 RegionFilter를 별도 파일로 분리해서 import해도 됩니다.
- */
 
 /* Debounce 훅 */
 function useDebounce(value, delay = 250) {
@@ -30,45 +21,41 @@ function RegionFilter({ onSearch }) {
   const [selected, setSelected] = useState({});
   const [counts, setCounts] = useState({});
 
-useEffect(() => {
-  const controller = new AbortController();
-  const signal = controller.signal;
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
 
-  (async () => {
-    try {
-      const res = await fetch("/api/region-count", { signal });
-      if (!res.ok) throw new Error("no counts api");
-      const data = await res.json();
-      const map = {};
-      data.forEach((item) => {
-        map[item.region] = item.count;
-      });
-      setCounts(map);
-    } catch (err) {
-      if (err.name === 'AbortError') {
-        // 요청이 취소된 경우: 무시
-        return;
+    (async () => {
+      try {
+        const res = await fetch("/api/region-count", { signal });
+        if (!res.ok) throw new Error("no counts api");
+        const data = await res.json();
+        const map = {};
+        data.forEach((item) => {
+          map[item.region] = item.count;
+        });
+        setCounts(map);
+      } catch (err) {
+        if (err.name === "AbortError") {
+          return;
+        }
+        console.error("region-count fetch failed:", err);
       }
-      // 실제 에러는 로그로 남겨두면 문제 찾기 쉬움
-      console.error('region-count fetch failed:', err);
-    }
-  })();
+    })();
 
-  return () => {
-    controller.abort(); // 언마운트 시 fetch 취소
-  };
-}, []);
-
+    return () => {
+      controller.abort();
+    };
+  }, []);
 
   const activeRegion = useMemo(
     () => regions.find((r) => r.id === activeRegionId) || regions[0],
     [activeRegionId]
   );
 
-const children = useMemo(() => {
-  return activeRegion?.children || [];
-}, [activeRegion]);
-
+  const children = useMemo(() => {
+    return activeRegion?.children || [];
+  }, [activeRegion]);
 
   const filteredChildren = useMemo(() => {
     if (!q) return children;
@@ -134,38 +121,34 @@ const children = useMemo(() => {
     <div className="rf-wrapper" role="region" aria-label="지역 필터">
       <div className="rf-top">
         <div className="rf-left-title">
-          <span className="rf-pin">📍</span>
+          {/* 핀 삭제됨 */}
           <strong>지역</strong>
-          <span className="rf-sub">({selectedList.length})</span>
-          <div className="rf-selected-inline">
-            {selectedList.length === 0 ? (
-              <span className="muted">선택된 지역 없음</span>
-            ) : (
-              selectedList.map((s) => (
-                <span key={s.id} className="rf-inline-tag">
-                  {s.parentName} &gt; {s.name}
-                  <button onClick={() => removeTag(s.id)} aria-label={`제거 ${s.name}`} className="tag-x">
-                    ✕
-                  </button>
-                </span>
-              ))
-            )}
-            {selectedList.length > 0 && (
-              <button className="rf-clear" onClick={clearAll}>
-                초기화
-              </button>
-            )}
-          </div>
         </div>
 
+        {/* rf-searchbox를 일반적인 flex 아이템으로 배치 (절대 위치 제거) */}
         <div className="rf-searchbox">
-          <input type="text" placeholder="지역명 입력" value={query} onChange={(e) => setQuery(e.target.value)} />
+          <input
+            type="text"
+            placeholder="지역명 입력"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            aria-label="지역 검색"
+          />
           {query && (
-            <button className="clear-input" onClick={() => setQuery("")}>
+            <button className="clear-input" onClick={() => setQuery("")} aria-label="입력 지우기">
               ×
             </button>
           )}
+
+          {/* 검색 버튼을 searchbox 바깥으로 빼내어 rf-top의 마지막 flex 아이템으로 배치 */}
+          {/* 이미지와 같이 버튼을 검색창 오른쪽에 붙이기 위해, 이 div를 rf-top 내부의 마지막 아이템으로 배치하는 것이 더 깔끔합니다. */}
         </div>
+        
+        {/* 검색 버튼을 rf-top의 직접적인 자식으로 배치하여, rf-left-title, rf-searchbox와 함께 flex 정렬되도록 수정 */}
+        {/* rf-search-actions 대신 버튼만 직접 배치하여 HTML 구조 단순화 및 CSS flex 활용 */}
+        <button className="rf-search-btn" onClick={handleSearch}>
+          검색하기
+        </button>
       </div>
 
       <div className="rf-main">
@@ -231,17 +214,28 @@ const children = useMemo(() => {
               </span>
             ))
           )}
+
+          <div className="rf-bottom-actions">
+            {/* 숫자만 표시 (선택된 텍스트 제거) */}
+            <div className="rf-summary rf-summary-bottom">
+              <div className="selected-count">{selectedCount.toLocaleString()}</div>
+            </div>
+
+            {/* 초기화 버튼 - 선택이 있을 때만 렌더 */}
+            {selectedCount > 0 && (
+              <button
+                type="button"
+                className="rf-reset-btn rf-reset-btn-bottom"
+                onClick={clearAll}
+                aria-label="선택 초기화"
+              >
+                초기화
+              </button>
+            )}
+          </div>
         </div>
 
-        <div className="rf-bottom-right">
-          <div className="rf-summary">
-            <div className="selected-count">{selectedCount.toLocaleString()}</div>
-            <div className="selected-label">선택된</div>
-          </div>
-          <button className="rf-search-btn" onClick={handleSearch}>
-            검색하기
-          </button>
-        </div>
+        <div className="rf-bottom-right" />
       </div>
     </div>
   );
@@ -256,16 +250,13 @@ function BoardJobPage() {
 
   return (
     <div className="board-job-page">
-      {/* 예: 상단 헤더 자리 */}
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 10 }}>
         <h2>채용 공고 검색</h2>
       </div>
 
-      {/* RegionFilter 삽입 (header/footer 사이에 넣기 적합) */}
       <RegionFilter onSearch={handleSearch} />
 
-      {/* 아래에 공고 리스트, 페이징 등 추가 */}
-      <div style={{ marginTop: 20 }}>
+      <div style={{ marginTop: 10 }}>
         {/* TODO: 검색 결과 영역 */}
       </div>
     </div>

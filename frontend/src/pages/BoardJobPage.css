@@ -1,10 +1,10 @@
-/* 전체 래퍼 */
+/* 전체 래퍼: 더 콤팩트하게 */
 .rf-wrapper {
   background: #fff;
   border: 1px solid #e6e6e6;
   border-radius: 6px;
   box-shadow: 0 1px 3px rgba(20,20,20,0.04);
-  padding: 12px;
+  padding: 8px; /* 더 줄임 */
   font-family: "Noto Sans KR", "Arial", sans-serif;
   color: #222;
 }
@@ -12,132 +12,167 @@
 /* top bar */
 .rf-top {
   display: flex;
-  justify-content: space-between;
+  align-items: center; 
   gap: 12px;
-  align-items: start;
-  margin-bottom: 10px;
+  margin-bottom: 6px; 
+  position: relative; 
 }
 
-/* left title + inline tags */
+/* left title (핀 제거되었으므로 작은 너비) */
 .rf-left-title {
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  min-width: 380px;
+  gap: 6px;
+  min-width: 140px; 
+  align-self: center; 
 }
+.rf-left-title strong { font-size: 16px; }
 
-.rf-pin { font-size:16px; margin-right:6px; }
-.rf-left-title strong { font-size:16px; }
-.rf-sub { margin-left:6px; color:#777; font-size:13px; }
-
-.rf-selected-inline { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:6px; }
-
-.rf-inline-tag {
-  background:#f3f7ff;
-  border:1px solid #d8e4ff;
-  padding:6px 8px;
-  border-radius:18px;
-  font-size:13px;
-  display:flex;
-  gap:8px;
-  align-items:center;
-}
-
-/* search box */
+/* 검색박스: Flexbox 기반으로 수정 (겹침 방지) */
 .rf-searchbox {
-  position:relative;
-  flex:1;
-  max-width: 680px;
+  flex: 1; 
+  display: flex;
+  align-items: center;
+  
+  /* ⭐️⭐️⭐️ 수정 사항: 검색창 최대 길이 조정 ⭐️⭐️⭐️ */
+  /* 필요에 따라 이 값을 조정하여 검색창 길이를 제어할 수 있습니다. */
+  max-width: 500px; 
 }
+
+/* 입력 필드 높이/패딩 조정: 더 컴팩트하게 (세로 36px 수준) */
 .rf-searchbox input {
-  width:100%;
-  padding:10px 38px 10px 12px;
-  border-radius:6px;
-  border:1px solid #ddd;
-  font-size:14px;
+  flex: 1;
+  height: 36px;
+  padding: 6px 30px 6px 12px; 
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  box-sizing: border-box;
 }
+
+/* clear 버튼 위치: 검색 버튼이 분리되었으므로, input의 오른쪽 끝에만 위치하도록 조정 */
 .clear-input {
-  position:absolute;
-  right:8px;
-  top:50%;
-  transform:translateY(-50%);
-  background:transparent;
-  border:none;
-  font-size:16px;
-  cursor:pointer;
-  color:#888;
+  position: absolute;
+  /* input의 right 기준: input의 padding 30px 고려하여 8px 위치 */
+  right: 8px; 
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #888;
 }
 
-/* main area layout */
+/* 검색 버튼 높이도 입력과 동일하게 */
+.rf-search-btn {
+  background: #111;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  height: 36px;
+  display: flex; 
+  align-items: center;
+  justify-content: center;
+}
+.rf-search-btn:hover { opacity: 0.95; }
+
+/* main area: 전체 세로 고정 */
 .rf-main {
-  display:grid;
-  grid-template-columns: 200px 1fr 260px;
-  gap:14px;
-  margin-bottom:12px;
-  min-height: 270px;
+  display: grid;
+  grid-template-columns: 170px 1fr 220px;
+  gap: 12px;
+  margin-bottom: 6px;
+  min-height: 170px; 
 }
 
-/* left column region list */
+/* left column height */
 .rf-col-left {
-  border-right:1px solid #f0f0f0;
-  padding-right:8px;
-  max-height: 360px;
-  overflow:auto;
-}
-.rf-region-btn {
-  display:block;
-  width:100%;
-  text-align:left;
-  padding:8px;
-  border:none;
-  background:transparent;
-  cursor:pointer;
-  border-radius:4px;
-  color:#333;
-}
-.rf-region-btn:hover { background:#fafafa; }
-.rf-region-btn.active {
-  background:#f0f6ff;
-  color:#155bd6;
-  font-weight:600;
+  /* ⭐️⭐️⭐️ 수정 사항: 광역 지역 버튼 디자인 및 레이아웃 수정 ⭐️⭐️⭐️ */
+  display: grid; /* Flex 대신 Grid 사용 */
+  grid-template-columns: repeat(2, 1fr); /* 2열 배치 */
+  gap: 4px; /* 버튼 간격 줄임 */
+  
+  border-right: 1px solid #f0f0f0;
+  padding-right: 6px;
+  max-height: 260px; 
+  overflow: auto;
+  
+  /* 기존 padding-right 6px 때문에 버튼이 우측으로 붙지 않게 padding 조정 */
+  padding-right: 0; 
+  padding-left: 0;
 }
 
-/* center column */
+/* 광역 지역 버튼 스타일 */
+.rf-region-btn {
+  /* 버튼의 기본 스타일을 재설정 */
+  background: #f8f8f8; /* 배경색 추가 */
+  color: #333;
+  border: 1px solid #eee;
+  padding: 6px 4px; /* 패딩 조정 */
+  border-radius: 4px; /* 둥근 모서리 추가 */
+  font-size: 13px; /* 폰트 크기 조정 */
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  height: auto; /* 높이 자동 조절 */
+  
+  /* 버튼 내부 span의 텍스트 정렬 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rf-region-btn:hover {
+  background: #e9e9e9;
+  border-color: #ddd;
+}
+.rf-region-btn.active {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+  font-weight: 700;
+}
+
+
+/* center column children 높이 고정 */
 .rf-col-center {
-  padding:6px 6px 6px 12px;
+  padding: 6px 6px 6px 10px;
 }
 .rf-center-header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
 }
 .rf-checkbox-row { display:flex; align-items:center; gap:10px; font-size:14px; }
+
 .rf-children {
-  display:grid;
+  display: grid;
   grid-template-columns: repeat(2, minmax(0,1fr));
-  gap:6px 20px;
-  max-height: 320px;
-  overflow:auto;
-  padding-right:6px;
+  gap: 6px 16px;
+  align-content: start; 
+  min-height: 220px; 
+  max-height: 220px; 
+  overflow: auto;
+  padding-right: 6px;
 }
-.rf-child {
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:8px;
-  border-radius:6px;
-  border:1px solid transparent;
+
+/* 항목 자체의 패딩을 일정하게 유지 */
+.rf-child { 
+  display:flex; 
+  align-items:center; 
+  gap:10px; 
+  padding:6px 8px; /* 상하 패딩을 8px에서 6px로 줄여 간격 미세 조정 */
+  border-radius:6px; 
+  border:1px solid transparent; 
 }
 .rf-child:hover { background:#fafafa; border-color:#f0f0f0; }
 .rf-child-name { flex:1; }
 .rf-count { color:#888; font-size:13px; }
 
 /* right column help */
-.rf-col-right {
-  padding:6px;
-  border-left:1px solid #f0f0f0;
-}
+.rf-col-right { padding:6px; border-left:1px solid #f0f0f0; }
 
 /* bottom area */
 .rf-bottom {
@@ -145,7 +180,7 @@
   justify-content:space-between;
   align-items:center;
   gap:12px;
-  padding-top:12px;
+  padding-top:8px;
   border-top:1px solid #f2f2f2;
 }
 .rf-bottom-left {
@@ -154,55 +189,48 @@
   flex-wrap:wrap;
   align-items:center;
 }
-.rf-bottom-tag {
-  background:#f6f6f6;
-  padding:6px 8px;
-  border-radius:16px;
-  font-size:13px;
-  display:flex;
-  gap:8px;
-  align-items:center;
-}
-.tag-x {
-  background:transparent;
-  border:none;
-  font-size:13px;
-  cursor:pointer;
-  color:#666;
-}
 
-/* right: summary + button */
-.rf-bottom-right {
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-.rf-summary {
+/* bottom tags */
+.rf-bottom-tag { background:#f6f6f6; padding:6px 8px; border-radius:16px; font-size:13px; display:flex; gap:8px; align-items:center; }
+.tag-x { background:transparent; border:none; font-size:13px; cursor:pointer; color:#666; }
+
+/* bottom action area */
+.rf-bottom-actions { display:flex; gap:8px; align-items:center; margin-left:12px; }
+
+/* 숫자 박스 */
+.rf-summary-bottom {
   background:#111;
   color:#fff;
-  padding:10px 12px;
+  padding:6px 10px;
   border-radius:6px;
   text-align:center;
-  min-width:90px;
+  min-width:56px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
-.selected-count { font-size:18px; font-weight:700; }
-.selected-label { font-size:12px; color:#ddd; }
+.selected-count { font-size:16px; font-weight:700; line-height:1; }
 
-.rf-search-btn {
-  background:#111;
-  color:#fff;
-  border:none;
-  padding:12px 18px;
-  border-radius:6px;
-  cursor:pointer;
-  font-weight:700;
+/* 초기화 버튼 (하단) */
+.rf-reset-btn {
+  background: transparent;
+  color: #111;
+  border: 1px solid #e0e0e0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: 700;
 }
-.rf-search-btn:hover { opacity:0.95; }
+.rf-reset-btn:hover { background: #fafafa; }
 
-/* empty */
-.rf-empty { color:#888; padding:18px; }
+/* bottom-right placeholder */
+.rf-bottom-right { min-width: 120px; display:flex; align-items:center; justify-content:flex-end; }
 
-/* small helper */
+.rf-empty { color:#888; padding:12px; }
 .muted { color:#8b8b8b; }
 .small { font-size:12px; }
 
@@ -210,4 +238,56 @@
 @media (max-width: 1000px) {
   .rf-main { grid-template-columns: 140px 1fr; grid-template-rows: auto; }
   .rf-col-right { display:none; }
+  
+  .rf-searchbox {
+      max-width: none; /* 모바일에서는 최대 길이 제한 해제 */
+  }
+
+  /* 모바일 상단 레이아웃 */
+  .rf-top {
+      flex-direction: row;
+      flex-wrap: wrap; 
+      align-items: center; 
+      gap: 12px;
+  }
+  .rf-left-title {
+      flex-basis: 100%; 
+      order: 1; 
+      align-self: flex-start; 
+      margin-bottom: 0;
+  }
+  .rf-searchbox {
+      flex: 1; 
+      order: 2; 
+      display: block; 
+  }
+  .rf-search-btn {
+      order: 3; 
+      height: 36px;
+  }
+  
+  .rf-searchbox input { 
+      padding-right: 30px; 
+      width: 100%;
+  }
+
+  /* clear-input 위치 조정 */
+  .clear-input { 
+      right: 8px; 
+  }
+  
+  /* 모바일에서 rf-children 높이를 고정하여 컴포넌트 높이 변동 방지 */
+  .rf-children {
+    min-height: 220px; 
+    align-content: start; /* 모바일에서도 상단 정렬 유지 */
+  }
+  
+  /* 모바일에서 광역 지역 버튼 레이아웃 조정 */
+  .rf-col-left {
+      grid-template-columns: repeat(4, 1fr); /* 모바일에서 4열 배치 */
+      padding-right: 0;
+      border-right: none;
+      /* max-height: none; */
+      overflow: visible;
+  }
 }
