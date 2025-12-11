@@ -1,75 +1,144 @@
+/* =================================
+   메인 컨테이너
+================================= */
 .tag-box {
-  /* 1. 위치 지정 방식 설정 (필수!) */
   position: absolute;
-
-  /* 2. y축 위치 설정: 상단으로부터 50px 아래로 */
   top: 237px;
-
-  /* 3. x축 위치 설정: 왼쪽으로부터 100px 오른쪽으로 */
   left: 27px;
-
   width: 231px;
   height: 734px;
   background-color: #ffffff;
-  border: 1px solid #9e9e9e;
-  border-radius: 10px;
+  border: 1px solid #e0e0e0; /* 더 부드러운 회색으로 변경 */
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* 약간의 그림자 추가 */
+  box-sizing: border-box; /* 패딩을 포함하여 크기 계산 */
+  padding: 15px; /* 내부 여백 추가 */
+  display: flex;
+  flex-direction: column;
+}
+
+/* =================================
+   검색 영역
+================================= */
+.tag-search-area {
+  position: relative; /* 자식 요소의 기준이 되도록 */
+  width: 100%;
+  margin-bottom: 15px; /* 아래 태그 컨테이너와의 간격 */
 }
 
 .tag-search-bar {
-  /* 위치 설정 */
-  position: absolute;
-  top: 18px;
-  left: 13px;
-
-  /* 크기 및 배경/테두리 설정 */
-  width: 203px;
-  height: 36px;
-  background-color: #ffffff; /* 요청하신 배경색 */
-  border: 1px solid #9e9e9e; /* 요청하신 테두리색 */
+  width: 100%;
+  height: 38px;
+  background-color: #f5f5f5; /* 배경색 변경 */
+  border: 1px solid #eeeeee; /* 테두리색 변경 */
   border-radius: 40px;
-
-  /* Input 필드 스타일 */
   font-size: 14px;
-  padding-left: 15px; /* 왼쪽 텍스트/플레이스홀더 간격 */
-  padding-right: 35px; /* 오른쪽 여백 (돋보기 아이콘 공간 확보) */
-  color: #333333; /* 입력되는 텍스트 색상 (원래 코드의 #9e9e9e는 플레이스홀더에 적합) */
+  padding-left: 18px;
+  padding-right: 40px;
+  color: #333333;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s;
+}
 
-  /* Input 필드 기본 스타일 제거 */
-  box-sizing: border-box; /* 패딩과 테두리가 width/height에 포함되도록 설정 */
-  outline: none; /* 포커스 시 나타나는 기본 테두리 제거 */
+.tag-search-bar:focus {
+  border-color: #3f3f3f; /* 포커스 시 테두리 색상 강조 */
 }
 
 .tag-search-circle {
   position: absolute;
-  top: 18px;
-  left: 183px;
-
-  width: 33px;
-  height: 36px;
+  top: 0;
+  right: 0; /* 오른쪽 정렬 */
+  width: 38px;
+  height: 38px;
   background-color: #3f3f3f;
   border-radius: 50%;
-
   display: flex;
   justify-content: center;
   align-items: center;
-
-  /* 돋보기 아이콘을 원 안에 중앙에 배치 */
-  .icon-white {
-    width: 18px;
-    height: 11.09px;
-    transform: translate(-50%, -50%);
-  }
+  cursor: pointer;
 }
 
+.search-icon {
+  width: 18px;
+  height: 18px;
+}
 
+/* =================================
+   태그 선택 UI
+================================= */
+.tag-categories-container {
+  flex-grow: 1; /* 남은 공간을 모두 차지하도록 설정 */
+  overflow-y: auto; /* 스크롤 가능하게 */
 
+  /* 스크롤바 숨기기 (Chrome, Safari, Edge) */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
 
-/*========================오른쪽 컨텐츠 영역========================*/
+/* 스크롤바 숨기기 (Webkit 기반 브라우저) */
+.tag-categories-container::-webkit-scrollbar {
+  display: none;
+}
 
-.main-content {
-  flex: 1;
-  width: 100%;
-  max-width: 1200px; /* 콘텐츠 최대 너비 제한 */
-  margin: 0 auto; /* 중앙 정렬 */
-  padding: 2rem 1.5rem; /* 좌우 여백 추가 */
-}   
+/* 개별 카테고리 섹션 */
+.tag-category {
+  margin-bottom: 15px;
+  padding-bottom: 15px; /* 밑줄과의 간격을 위해 패딩 추가 */
+}
+
+/* 마지막 카테고리를 제외하고 밑줄 추가 */
+.tag-category:not(:last-child) {
+  border-bottom: 1px solid #f0f0f0; /* 얇은 밑줄 추가 */
+}
+
+/* 카테고리 제목 */
+.tag-category-title {
+  font-size: 1rem;
+  font-weight: 600; /* 조금 더 굵게 */
+  color: #222;
+  margin: 0 0 12px 0; /* 상하 여백 조정 */
+}
+
+/* 태그들이 나열될 리스트 */
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px; /* 태그 사이의 간격 */
+}
+
+/* 개별 태그 아이템 (체크박스를 감싸는 라벨) */
+.tag-item {
+  display: inline-block;
+  cursor: pointer;
+}
+
+/* 실제 체크박스는 숨김 */
+.tag-item input[type="checkbox"] {
+  display: none;
+}
+
+/* 체크박스를 대신할 태그 모양의 span */
+.tag-item span {
+  display: block;
+  padding: 5px 12px; /* 패딩 조정 */
+  border-radius: 16px; /* 둥근 정도 조정 */
+  background-color: #f0f0f0;
+  color: #555;
+  font-size: 0.8rem; /* 폰트 크기 미세 조정 */
+  transition: all 0.2s ease-in-out;
+  border: 1px solid transparent; /* 기본 테두리는 투명하게 */
+}
+
+/* 마우스를 올렸을 때 스타일 */
+.tag-item:hover span {
+  background-color: #e9e9e9;
+  border-color: #e0e0e0;
+}
+
+/* 체크박스가 선택되었을 때의 스타일 */
+.tag-item input[type="checkbox"]:checked + span {
+  background-color: #3f3f3f;
+  color: white;
+  border-color: #3f3f3f;
+}
