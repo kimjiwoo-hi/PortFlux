@@ -11,15 +11,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api")
 public class FollowController {
-<<<<<<< HEAD
-    
-    @GetMapping("/follow")
-    public String getFollow(@RequestParam String param) {
-        return new String();
-    }
-    
-=======
->>>>>>> KSH-chatting
 
     @Autowired
     private FollowService followService;

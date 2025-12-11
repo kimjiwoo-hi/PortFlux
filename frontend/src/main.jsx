@@ -16,10 +16,7 @@ import BoardLookup from "./pages/BoardLookupPage.jsx";
 import Cart from "./pages/CartPage.jsx";
 import MyPage from "./pages/MyPage.jsx";
 import OrderResultPage from "./pages/OrderResultPage.jsx";
-<<<<<<< HEAD
 import Chat from "./pages/ChattingPage.jsx";
-=======
->>>>>>> 4a5835726b0396c26f0d34b837aa53a755ff7bba
 
 const router = createBrowserRouter([
   {
@@ -49,11 +46,11 @@ const router = createBrowserRouter([
       },
       {
         path: "order-result",
-        element: <OrderResultPage />
+        element: <OrderResultPage />,
       },
       {
         path: "order-result",
-        element: <OrderResultPage />
+        element: <OrderResultPage />,
       },
     ],
   },
