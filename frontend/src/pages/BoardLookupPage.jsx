@@ -58,7 +58,7 @@ function BoardLookupPage() {
         <div className="tag-search-area">
           <input
             type="text"
-            placeholder="태그 검색 (e.g., 자바, Python)"
+            placeholder="Search tags..."
             className="tag-search-bar"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)} // 입력 시 searchQuery 업데이트
