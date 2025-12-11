@@ -35,12 +35,12 @@ public class FollowService {
     }
 
     // 팔로윙 확인
-    public List<Long> isFollowingList(Long me){
+    public List<Long> getFollowingList(Long me){
         return followMapper.selectFollowingIds(me);
     }
 
     // 팔로워 
-    public List<Long> isFollowerList(Long me){
+    public List<Long> getFollowersList(Long me){
         return followMapper.selectFollowerIds(me);
     }
 

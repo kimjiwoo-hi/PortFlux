@@ -17,4 +17,20 @@ export async function confirmPayment(payload) {
   return api.post("/payments/confirm", payload);
 }
 
+export async function getFollowing(userId) {
+  return api.get(`/${userId}/following`);
+}
+
+export async function getFollowers(userId) {
+  return api.get(`/${userId}/followers`);
+}
+
+export async function follow(followerId, followingId) {
+  return api.post("/follow", { followerId, followingId });
+}
+
+export async function unfollow(followerId, followingId) {
+  return api.delete("/unfollow", { data: { followerId, followingId } });
+}
+
 export default api;

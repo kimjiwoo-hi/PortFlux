@@ -33,9 +33,9 @@ public interface FollowMapper {
 
     //팔로워 수 조회
     @Select("Select following_id From Follows where follower_id = #{followerId}")
-    List<Long> selectFollowerIds(Long followerId);
+    List<Long> selectFollowingIds(Long followerId);
 
     //팔로잉 수 조회
     @Select("Select follower_id From Follows where following_id = #{followingId}")
-    List<Long> selectFollowingIds(Long followingId);
+    List<Long> selectFollowerIds(Long followingId);
 }
