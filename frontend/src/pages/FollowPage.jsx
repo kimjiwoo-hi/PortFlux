@@ -1,15 +1,8 @@
-<<<<<<< HEAD
-function MyPage() {
-  return (<div className="mypage">
-    asd
-  </div>);
-}
-=======
 import React, { useState, useEffect } from 'react';
 import { getFollowing, getFollowers, follow, unfollow } from '../api/api';
 import './FollowPage.css';
 
-const MyPage = () => {
+const FollowPage = () => {
     const [following, setFollowing] = useState([]);
     const [followers, setFollowers] = useState([]);
     const [activeTab, setActiveTab] = useState('following');
@@ -73,6 +66,5 @@ const MyPage = () => {
         </div>
     );
 };
->>>>>>> KSH-chatting
 
-export default MyPage;
+export default FollowPage;
