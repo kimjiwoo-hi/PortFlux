@@ -11,7 +11,6 @@ export const REGIONS = [
     id: 'seoul',
     name: '서울',
     children: [
-      { id: 'seoul_all', name: '서울 전체' },
       { id: 'seoul_jongno', name: '종로구' },
       { id: 'seoul_junggu', name: '중구' },
       { id: 'seoul_yongsan', name: '용산구' },
@@ -47,7 +46,6 @@ export const REGIONS = [
     id: 'busan',
     name: '부산',
     children: [
-      { id: 'busan_all', name: '부산 전체' },
       { id: 'busan_junggu', name: '중구' },
       { id: 'busan_seogu', name: '서구' },
       { id: 'busan_donggu', name: '동구' },
@@ -74,7 +72,6 @@ export const REGIONS = [
     id: 'daegu',
     name: '대구',
     children: [
-      { id: 'daegu_all', name: '대구 전체' },
       { id: 'daegu_junggu', name: '중구' },
       { id: 'daegu_donggu', name: '동구' },
       { id: 'daegu_seogu', name: '서구' },
@@ -93,7 +90,6 @@ export const REGIONS = [
     id: 'incheon',
     name: '인천',
     children: [
-      { id: 'incheon_all', name: '인천 전체' },
       { id: 'incheon_junggu', name: '중구' },
       { id: 'incheon_donggu', name: '동구' },
       { id: 'incheon_michuhol', name: '미추홀구' },
@@ -114,7 +110,6 @@ export const REGIONS = [
     id: 'gwangju',
     name: '광주',
     children: [
-      { id: 'gwangju_all', name: '광주 전체' },
       { id: 'gwangju_donggu', name: '동구' },
       { id: 'gwangju_seogu', name: '서구' },
       { id: 'gwangju_namgu', name: '남구' },
@@ -130,7 +125,6 @@ export const REGIONS = [
     id: 'daejeon',
     name: '대전',
     children: [
-      { id: 'daejeon_all', name: '대전 전체' },
       { id: 'daejeon_donggu', name: '동구' },
       { id: 'daejeon_junggu', name: '중구' },
       { id: 'daejeon_seogu', name: '서구' },
@@ -146,7 +140,6 @@ export const REGIONS = [
     id: 'ulsan',
     name: '울산',
     children: [
-      { id: 'ulsan_all', name: '울산 전체' },
       { id: 'ulsan_junggu', name: '중구' },
       { id: 'ulsan_namgu', name: '남구' },
       { id: 'ulsan_donggu', name: '동구' },
@@ -162,7 +155,6 @@ export const REGIONS = [
     id: 'sejong',
     name: '세종',
     children: [
-      { id: 'sejong_all', name: '세종 전체' },
       { id: 'sejong_sejong', name: '세종시' }
     ]
   },
@@ -174,7 +166,6 @@ export const REGIONS = [
     id: 'gyeonggi',
     name: '경기',
     children: [
-      { id: 'gyeonggi_all', name: '경기 전체' },
       { id: 'gyeonggi_suwon', name: '수원시' },
       { id: 'gyeonggi_seongnam', name: '성남시' },
       { id: 'gyeonggi_anyang', name: '안양시' },
@@ -200,9 +191,8 @@ export const REGIONS = [
       { id: 'gyeonggi_yeoju', name: '여주시' },
       { id: 'gyeonggi_uwijeongbu', name: '의정부시' },
       { id: 'gyeonggi_gunpo', name: '군포시' },
-      { id: 'gyeonggi_uiwang', name: '의왕시' },
-      { id: 'gyeonggi_gaepyeong', name: '개평(명칭참고)' } // placeholder if needed
-    ].filter(Boolean)
+      { id: 'gyeonggi_uiwang', name: '의왕시' }
+    ]
   },
 
   // -------------------------------
@@ -212,7 +202,6 @@ export const REGIONS = [
     id: 'gangwon',
     name: '강원',
     children: [
-      { id: 'gangwon_all', name: '강원 전체' },
       { id: 'gangwon_chuncheon', name: '춘천시' },
       { id: 'gangwon_wonju', name: '원주시' },
       { id: 'gangwon_gangneung', name: '강릉시' },
@@ -241,7 +230,6 @@ export const REGIONS = [
     id: 'chungbuk',
     name: '충북',
     children: [
-      { id: 'chungbuk_all', name: '충북 전체' },
       { id: 'chungbuk_cheongju', name: '청주시' },
       { id: 'chungbuk_chungju', name: '충주시' },
       { id: 'chungbuk_jecheon', name: '제천시' },
@@ -262,7 +250,6 @@ export const REGIONS = [
     id: 'chungnam',
     name: '충남',
     children: [
-      { id: 'chungnam_all', name: '충남 전체' },
       { id: 'chungnam_cheonan', name: '천안시' },
       { id: 'chungnam_gongju', name: '공주시' },
       { id: 'chungnam_boryeong', name: '보령시' },
@@ -288,7 +275,6 @@ export const REGIONS = [
     id: 'jeonbuk',
     name: '전북',
     children: [
-      { id: 'jeonbuk_all', name: '전북 전체' },
       { id: 'jeonbuk_jeonju', name: '전주시' },
       { id: 'jeonbuk_gunsan', name: '군산시' },
       { id: 'jeonbuk_iksan', name: '익산시' },
@@ -313,7 +299,6 @@ export const REGIONS = [
     id: 'jeonnam',
     name: '전남',
     children: [
-      { id: 'jeonnam_all', name: '전남 전체' },
       { id: 'jeonnam_mokpo', name: '목포시' },
       { id: 'jeonnam_yeosu', name: '여수시' },
       { id: 'jeonnam_suncheon', name: '순천시' },
@@ -346,7 +331,6 @@ export const REGIONS = [
     id: 'gyeongbuk',
     name: '경북',
     children: [
-      { id: 'gyeongbuk_all', name: '경북 전체' },
       { id: 'gyeongbuk_pohang', name: '포항시' },
       { id: 'gyeongbuk_gyeongju', name: '경주시' },
       { id: 'gyeongbuk_gimcheon', name: '김천시' },
@@ -380,7 +364,6 @@ export const REGIONS = [
     id: 'gyeongnam',
     name: '경남',
     children: [
-      { id: 'gyeongnam_all', name: '경남 전체' },
       { id: 'gyeongnam_changwon', name: '창원시' },
       { id: 'gyeongnam_jinju', name: '진주시' },
       { id: 'gyeongnam_tongyeong', name: '통영시' },
@@ -409,7 +392,6 @@ export const REGIONS = [
     id: 'jeju',
     name: '제주',
     children: [
-      { id: 'jeju_all', name: '제주 전체' },
       { id: 'jeju_jeju', name: '제주시' },
       { id: 'jeju_seogwipo', name: '서귀포시' }
     ]
