@@ -16,13 +16,13 @@ const Header = () => {
           <Link to="/boardlookup">
             <div className="link">둘러보기</div>
           </Link>
-          <Link>
+          <Link to="/boardjob">
             <div className="link">채용</div>
           </Link>
-          <Link>
+          <Link to="/boardfree">
             <div className="link">커뮤니티</div>
           </Link>
-          <Link>
+          <Link to="">
             <div className="link">기타</div>
           </Link>
         </div>
