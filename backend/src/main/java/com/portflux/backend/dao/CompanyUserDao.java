@@ -1,24 +1,24 @@
 package com.portflux.backend.dao;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
+import com.portflux.backend.beans.CompanyRegisterBean;
 import com.portflux.backend.beans.CompanyUserBean;
 import com.portflux.backend.mapper.CompanyUserMapper;
 
+import lombok.RequiredArgsConstructor;
+
 @Repository
+@RequiredArgsConstructor
 public class CompanyUserDao {
 
-    @Autowired
-    private CompanyUserMapper companyUserMapper;
+    private final CompanyUserMapper companyUserMapper;
 
-    // 기업 회원가입
-    public void insertCompanyUser(CompanyUserBean companyUserBean) {
-        companyUserMapper.insertCompanyUser(companyUserBean);
+    // 파라미터를 RegisterBean으로 받아서 Mapper로 전달
+    public void insertCompanyUser(CompanyRegisterBean companyRegisterBean) {
+        companyUserMapper.insertCompanyUser(companyRegisterBean);
     }
-
-    // 이메일로 기업 정보 가져오기
-    public CompanyUserBean getCompanyInfo(String email) {
+    
+    public CompanyUserBean findCompanyByEmail(String email) {
         return companyUserMapper.findCompanyByEmail(email);
     }
 }

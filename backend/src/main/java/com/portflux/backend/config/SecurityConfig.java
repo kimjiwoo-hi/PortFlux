@@ -26,39 +26,49 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // 1. CORS 설정 (Security 필터 레벨)
-            .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
-                @Override
-                public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-                    CorsConfiguration config = new CorsConfiguration();
+                // 1. CORS 설정 (Security 필터 레벨)
+                .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
+                    @Override
+                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+                        CorsConfiguration config = new CorsConfiguration();
+
+                        // ★★★ [수정 핵심] 와일드카드 대신 프론트엔드 URL 명시 ★★★
+                        // 프론트엔드가 5173 포트를 사용하므로 명시합니다.
+                        config.setAllowedOriginPatterns(Collections.singletonList("http://localhost:5173"));
+
+                        config.setAllowedMethods(Collections.singletonList("*"));
+                        config.setAllowCredentials(true);
+                        config.setAllowedHeaders(Collections.singletonList("*"));
+                        return config;
+                    }
+                }))
+
+                // 2. CSRF 비활성화
+                .csrf(csrf -> csrf.disable())
+
+                // 3. 세션 설정
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // 4. URL 권한 설정 (가장 중요)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/user/register/check-id").permitAll()
                     
-                    // Credentials 허용 시 '*' 대신 allowedOriginPatterns 사용 필수
-                    config.setAllowedOriginPatterns(Collections.singletonList("*")); 
-                    
-                    config.setAllowedMethods(Collections.singletonList("*")); 
-                    config.setAllowCredentials(true); 
-                    config.setAllowedHeaders(Collections.singletonList("*")); 
-                    return config;
-                }
-            }))
-            
-            // 2. CSRF 비활성화 (REST API 방식이므로 불필요)
-            .csrf(csrf -> csrf.disable())
-            
-            // 3. 세션 설정 (JWT 등 토큰 방식 사용 시 STATELESS 권장)
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            
-            // 4. URL 권한 설정
-            .authorizeHttpRequests(auth -> auth
-                // 기업 회원가입 및 중복확인 관련 API 허용
-                .requestMatchers("/company/register/**").permitAll()
-                // 사용자 로그인/회원가입 관련 API 허용
-                .requestMatchers("/user/login/**", "/user/register/**").permitAll()
-                // 정적 리소스(CSS, JS, 이미지) 허용
-                .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
-                // 그 외 모든 요청은 인증 필요
-                .anyRequest().authenticated()
-            );
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/user/register/**").permitAll()
+                        .requestMatchers("/user/register/**").permitAll()
+                        .requestMatchers("/company/register/**").permitAll()
+                        // [추가] 아이디 찾기 API 허용
+                        .requestMatchers("/user/find/**").permitAll()
+
+                        // API 및 로그인 관련 경로 허용
+                        .requestMatchers("/api/mail/**").permitAll()
+                        .requestMatchers("/user/login/**").permitAll()
+
+                        // 정적 리소스 허용
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                        // 컨트롤러 매핑 오류(404) 시 시큐리티가 403으로 막지 않도록 에러 경로 허용
+                        .requestMatchers("/error").permitAll()
+                        // ★★★ [최하위 우선순위] 그 외 모든 요청은 인증 필요 ★★★
+                        .anyRequest().authenticated());
 
         return http.build();
     }

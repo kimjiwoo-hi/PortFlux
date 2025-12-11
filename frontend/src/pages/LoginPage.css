@@ -189,3 +189,12 @@
   text-decoration: underline;
   color: #333;
 }
+/* 로그인 에러 메시지 스타일 */
+.login-error-msg {
+  color: #ff4d4d; /* 붉은색 */
+  font-size: 13px;
+  margin-top: 5px;
+  text-align: left;
+  width: 100%;
+  display: block;
+}

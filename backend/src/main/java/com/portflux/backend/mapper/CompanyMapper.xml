@@ -4,23 +4,30 @@
 
 <mapper namespace="com.portflux.backend.mapper.CompanyUserMapper">
 
-    <insert id="insertCompanyUser" parameterType="com.portflux.backend.beans.CompanyUserBean">
+    <insert id="insertCompanyUser" parameterType="com.portflux.backend.beans.CompanyRegisterBean">
         INSERT INTO COMPANY (
-            company_num, company_id, business_number, company_password, 
-            company_name, company_phone, company_email, drown_company, 
-            company_create_at, company_image, company_banner
+            company_id, 
+            company_password, 
+            company_name, 
+            company_phone, 
+            company_email, 
+            drawn_company, 
+            company_create_at, 
+            business_number
         ) VALUES (
-            SEQ_COMPANY.NEXTVAL, 
-            #{companyEmail},    #{businessNumber}, 
-            #{companyPassword}, 
-            #{companyName},     #{companyPhone}, 
-            #{companyEmail}, 
+            #{email},           #{password}, 
+            #{name},            #{phoneNumber}, 
+            #{email}, 
             'N', 
             SYSDATE, 
-            NULL, 
-            NULL
-        )
+            #{businessNumber}   )
     </insert>
+
+    <select id="checkBusinessNumber" parameterType="String" resultType="int">
+        SELECT COUNT(*) 
+        FROM COMPANY 
+        WHERE business_number = #{businessNumber}
+    </select>
 
     <select id="findCompanyByEmail" parameterType="String" resultType="com.portflux.backend.beans.CompanyUserBean">
         SELECT 
@@ -31,7 +38,7 @@
             company_name AS companyName,
             company_phone AS companyPhone,
             company_email AS companyEmail,
-            drown_company AS drownCompany,
+            drawn_company AS drawnCompany,
             company_create_at AS companyCreateAt
         FROM COMPANY
         WHERE company_email = #{email}
