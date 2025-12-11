@@ -15,6 +15,7 @@ import BoardJob from "./pages/BoardJobPage.jsx";
 import BoardLookup from "./pages/BoardLookupPage.jsx";
 import Cart from "./pages/CartPage.jsx";
 import MyPage from "./pages/MyPage.jsx";
+import OrderResultPage from "./pages/OrderResultPage.jsx";
 import Chat from "./pages/ChattingPage.jsx";
 
 const router = createBrowserRouter([
@@ -42,6 +43,10 @@ const router = createBrowserRouter([
       {
         path: "chat",
         element: <Chat />,
+      },
+      {
+        path: "order-result",
+        element: <OrderResultPage />
       },
     ],
   },
