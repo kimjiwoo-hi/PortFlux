@@ -15,6 +15,7 @@ import BoardJob from "./pages/BoardJobPage.jsx";
 import BoardLookup from "./pages/BoardLookupPage.jsx";
 import Cart from "./pages/CartPage.jsx";
 import MyPage from "./pages/MyPage.jsx";
+import Chat from "./pages/ChattingPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -24,19 +25,23 @@ const router = createBrowserRouter([
     children: [
       {
         path: "boardfree",
-        element: <BoardFree />
+        element: <BoardFree />,
       },
       {
         path: "boardjob",
-        element: <BoardJob />
+        element: <BoardJob />,
       },
       {
         path: "cart",
-        element: <Cart />
+        element: <Cart />,
       },
       {
         path: "mypage",
-        element: <MyPage />
+        element: <MyPage />,
+      },
+      {
+        path: "chat",
+        element: <Chat />,
       },
     ],
   },
@@ -46,7 +51,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "boardlookup",
-        element: <BoardLookup />
+        element: <BoardLookup />,
       },
     ],
   },

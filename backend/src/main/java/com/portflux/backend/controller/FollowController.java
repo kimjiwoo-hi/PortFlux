@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class FollowController {
     
     @GetMapping("/follow")
-    public String getMethodName(@RequestParam String param) {
+    public String getFollow(@RequestParam String param) {
         return new String();
     }
     
