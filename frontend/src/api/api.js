@@ -17,7 +17,10 @@ export async function confirmPayment(payload) {
   return api.post("/payments/confirm", payload);
 }
 
+<<<<<<< HEAD
 // Follow APIs
+=======
+>>>>>>> KSH-chatting
 export async function getFollowing(userId) {
   return api.get(`/${userId}/following`);
 }
@@ -34,6 +37,7 @@ export async function unfollow(followerId, followingId) {
   return api.delete("/unfollow", { data: { followerId, followingId } });
 }
 
+<<<<<<< HEAD
 // Chat APIs
 export async function getChatRooms(userId) {
   return api.get(`/chats?userId=${userId}`);
@@ -47,4 +51,6 @@ export async function getOrCreateChatRoom(payload) {
   return api.post("/chats", payload);
 }
 
+=======
+>>>>>>> KSH-chatting
 export default api;
