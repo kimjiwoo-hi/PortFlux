@@ -4,21 +4,31 @@
 
 <mapper namespace="com.portflux.backend.mapper.UserMapper">
 
-    <insert id="insertUser" parameterType="com.portflux.backend.beans.UserBean">
+    <insert id="registerUser" parameterType="com.portflux.backend.beans.UserRegisterBean">
         INSERT INTO USERS (
-            user_num, user_id, user_password, user_name, user_phone, 
-            user_email, user_nickname, drawn_user, user_create_at, 
-            user_level, user_image, user_banner
+            user_id, 
+            user_password, 
+            user_name, 
+            user_phone, 
+            user_email, 
+            user_nickname, 
+            drawn_user, 
+            user_create_at, 
+            user_level
         ) VALUES (
-            SEQ_USERS.NEXTVAL,  #{userEmail},       #{userPassword}, 
-            #{userNickname},    #{userPhone}, 
-            #{userEmail}, 
-            #{userNickname}, 
-            'N', 
+            #{email},        #{password}, 
+            #{name},         #{phoneNumber}, 
+            #{email},        #{nickname},     'N', 
             SYSDATE, 
-            1,                  NULL,               NULL
+            1
         )
     </insert>
+
+    <select id="checkNicknameCount" parameterType="String" resultType="int">
+        SELECT COUNT(*) 
+        FROM USERS 
+        WHERE user_nickname = #{nickname}
+    </select>
 
     <select id="findUserByEmail" parameterType="String" resultType="com.portflux.backend.beans.UserBean">
         SELECT 
@@ -34,14 +44,6 @@
             user_level AS userLevel
         FROM USERS
         WHERE user_email = #{email}
-    </select>
-
-    <select id="checkNicknameExist" parameterType="String" resultType="int">
-        SELECT COUNT(*) FROM USERS WHERE user_nickname = #{nickname}
-    </select>
-
-    <select id="checkEmailExist" parameterType="String" resultType="int">
-        SELECT COUNT(*) FROM USERS WHERE user_email = #{email}
     </select>
 
 </mapper>

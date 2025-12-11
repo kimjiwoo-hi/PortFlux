@@ -1,15 +1,17 @@
 package com.portflux.backend.beans;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class UserRegisterBean {
-    private String email;
-    private String authCode;
+    private String userId;     
+    private String email;        
     private String password;
     private String passwordCheck;
+    private String name;
     private String nickname;
     private String phoneNumber;
+    private String authCode;     // 인증코드 (DB 저장 X)
+    
+    
 }

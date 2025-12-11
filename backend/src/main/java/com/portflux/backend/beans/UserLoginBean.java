@@ -1,12 +1,10 @@
 package com.portflux.backend.beans;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class UserLoginBean {
-    private String email;
+    private String userId;  
     private String password;
     private boolean autoLogin;
 }

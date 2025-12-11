@@ -1,34 +1,30 @@
 package com.portflux.backend.dao;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
 import com.portflux.backend.beans.UserBean;
+import com.portflux.backend.beans.UserRegisterBean;
 import com.portflux.backend.mapper.UserMapper;
 
+import lombok.RequiredArgsConstructor;
+
 @Repository
+@RequiredArgsConstructor
 public class UserDao {
 
-    @Autowired
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
 
-    // 회원가입
-    public void insertUser(UserBean userBean) {
-        userMapper.insertUser(userBean);
+    // 1. 회원가입: Service에서 RegisterBean을 받아 Mapper로 넘김
+    public void insertUser(UserRegisterBean userRegisterBean) {
+        userMapper.registerUser(userRegisterBean);
     }
 
-    // 이메일로 유저 정보 가져오기
+    // 2. 닉네임 중복 확인
+    public int checkNicknameExist(String nickname) {
+        return userMapper.checkNicknameCount(nickname);
+    }
+
+    // 3. 로그인 정보 조회
     public UserBean getUserInfo(String email) {
         return userMapper.findUserByEmail(email);
-    }
-
-    // 닉네임 중복 확인 (true: 중복됨, false: 사용가능)
-    public boolean checkNickname(String nickname) {
-        return userMapper.checkNicknameExist(nickname) > 0;
-    }
-
-    // 이메일 중복 확인
-    public boolean checkEmail(String email) {
-        return userMapper.checkEmailExist(email) > 0;
     }
 }
