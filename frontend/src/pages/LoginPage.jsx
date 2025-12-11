@@ -13,15 +13,11 @@ function LoginPage() {
   // === 상태 변수 ===
   const [isIndividual, setIsIndividual] = useState(true);
   
-  // 이메일 대신 아이디(userId) 사용
   const [userId, setUserId] = useState(""); 
   const [password, setPassword] = useState("");
   const [autoLogin, setAutoLogin] = useState(false);
 
-  // 로그인 에러 메시지 상태
   const [loginError, setLoginError] = useState("");
-
-  // 중복 실행 방지용
   const isRun = useRef(false);
 
   // ---------------------------------------------------------
@@ -112,7 +108,6 @@ function LoginPage() {
         console.log("로그인 성공:", json);
         
         // 로그인 성공 시 이전 페이지로 이동
-        // 일반 로그인은 페이지 새로고침이 없었으므로 location.state가 살아있음
         const targetPath = location.state?.from || "/";
         navigate(targetPath);
 
@@ -146,8 +141,7 @@ function LoginPage() {
 
     if (authCode) {
       isRun.current = true;
-      
-      // 주소창 정리 (URL 뒤에 붙은 code=... 제거)
+      // 주소창 정리
       window.history.replaceState({}, null, window.location.pathname);
       
       setTimeout(() => {
@@ -182,7 +176,6 @@ function LoginPage() {
 
         {/* 입력창 */}
         <div className="input-group">
-          {/* 아이디 입력창 */}
           <input
             type="text"
             className="input-field"
