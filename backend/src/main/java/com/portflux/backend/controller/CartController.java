@@ -32,7 +32,8 @@ public class CartController {
         List<CartItem> items = Arrays.asList(item1, item2);
         CartResponse res = new CartResponse();
         res.setItems(items);
-        res.setTotal(items.stream().map(i -> i.getUnitPrice().multiply(new BigDecimal(i.getQty()))).reduce(BigDecimal.ZERO, BigDecimal::add));
+        res.setTotal(items.stream().map(i -> i.getUnitPrice().multiply(new BigDecimal(i.getQty())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
 
         return ResponseEntity.ok(res);
     }
