@@ -7,54 +7,54 @@ import NotionLogo from "../assets/notion.svg";
 const Footer = () => {
   return (
     <footer className="footer">
-      <div className="footer-object">
-        <div className="logo">
-          <img src={PortFluxLogo} alt="PortFluxLogo.png" />
-        </div>
-        <div className="icon-row">
-          <a
-            href="https://github.com/kimjiwoo-hi/PortFlux"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <img src={GithubLogo} alt="Github Icon" />
-          </a>
-          <a
-            href="https://www.notion.so/J-H-2b4de73ed55681948a16ea1b73604e92?source=copy_link"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <img src={NotionLogo} alt="Notion Icon" />
-          </a>
-        </div>
-      </div>
-      <div className="footer-row">
-        <div className="footer-object">
-          <h2>Language</h2>
-          <div className="row">
-            <p>JavaScript</p>
-            <p>Java</p>
-            <p>SQL</p>
+      <div className="footer-container">
+        <div className="footer-left">
+          <div className="logo">
+            <img src={PortFluxLogo} alt="PortFluxLogo.png" />
           </div>
+          <p className="copyright">© 2025 Team JH. All rights reserved.</p>
         </div>
-        <div className="footer-object">
-          <h2>Skill</h2>
-          <div className="row">
-            <p>React</p>
-            <p>Spring Boot</p>
-            <p>Oracle</p>
+        <div className="footer-right">
+          <div className="footer-links">
+            <div className="footer-link-group">
+              <h3>Tech Stack</h3>
+              <ul>
+                <li>JavaScript</li>
+                <li>React</li>
+                <li>Java</li>
+                <li>Spring Boot</li>
+                <li>SQL</li>
+                <li>Oracle</li>
+              </ul>
+            </div>
+            <div className="footer-link-group">
+              <h3>Tools</h3>
+              <ul>
+                <li>VS Code</li>
+                <li>Git</li>
+                <li>Notion</li>
+              </ul>
+            </div>
+            <div className="footer-link-group">
+              <h3>Contact</h3>
+              <div className="social-icons">
+                <a
+                  href="https://github.com/kimjiwoo-hi/PortFlux"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img src={GithubLogo} alt="Github Icon" />
+                </a>
+                <a
+                  href="https://www.notion.so/J-H-2b4de73ed55681948a16ea1b73604e92?source=copy_link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img src={NotionLogo} alt="Notion Icon" />
+                </a>
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="footer-object">
-          <h2>Tool</h2>
-          <div className="row">
-            <p>VS Code</p>
-            <p>Git</p>
-            <p>Notion</p>
-          </div>
-        </div>
-        <div className="reserved">
-          <p>© 2025 Team JH. All rights reserved.</p>
         </div>
       </div>
     </footer>
