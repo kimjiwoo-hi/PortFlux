@@ -19,6 +19,7 @@ import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
 import FindIdPage from "./pages/FindIdPage.jsx";
 import FindPasswordPage from "./pages/FindPasswordPage.jsx";
+import SuccessPage from "./pages/SuccessPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -61,6 +62,10 @@ const router = createBrowserRouter([
       {
         path: "findpassword",
         element: <FindPasswordPage /> 
+      },
+      {
+        path: "success",
+        element: <SuccessPage />
       }
     ],
   },
