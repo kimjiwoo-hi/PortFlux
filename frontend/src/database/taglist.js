@@ -1,4 +1,4 @@
-const tagData = {
+export const tagData = {
   '프로그래밍 언어': [
     'JavaScript', 'Python', 'Java', 'TypeScript', 'C#', 'C++', 'Go', 'PHP', 'Kotlin', 'Swift',
     'Ruby', 'Rust', 'Scala', 'Perl', 'Haskell', 'Lua', 'Dart', 'Julia', 'R', 'Objective-C',
@@ -29,4 +29,19 @@ const tagData = {
   ]
 };
 
-export default tagData;
+export const tagSearchMap = {
+  'javascript': ['javascript', '자바스크립트', '자바'],
+  'python': ['python', '파이썬', '파이'],
+  'java': ['java', '자바'],
+  'typescript': ['typescript', '타입스크립트', '타입'],
+  'c#': ['c#', 'csharp', '씨샵'],
+  'c++': ['c++', 'cpp', '씨쁠쁠'],
+  'go': ['go', '고'],
+  'php': ['php', '피에이치피'],
+  'kotlin': ['kotlin', '코틀린'],
+  'swift': ['swift', '스위프트'],
+  '프론트엔드': ['프론트엔드', 'frontend'],
+  '백엔드': ['백엔드', 'backend'],
+  '풀스택': ['풀스택', 'fullstack'],
+  // 다른 태그들도 필요에 따라 추가 가능
+};
