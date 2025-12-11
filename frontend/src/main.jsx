@@ -1,5 +1,4 @@
 import { StrictMode } from "react";
-
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
@@ -7,6 +6,7 @@ import "./index.css";
 
 // Layout
 import MainLayout from "./layouts/MainLayout";
+import NoFooterLayout from "./layouts/NoFooterLayout";
 
 // Pages
 import NotFound from "./pages/NotFound";
@@ -31,16 +31,22 @@ const router = createBrowserRouter([
         element: <BoardJob />
       },
       {
-        path: "boardlookup",
-        element: <BoardLookup />
-      },
-      {
         path: "cart",
         element: <Cart />
       },
       {
         path: "mypage",
         element: <MyPage />
+      },
+    ],
+  },
+  {
+    element: <NoFooterLayout />,
+    errorElement: <NotFound />,
+    children: [
+      {
+        path: "boardlookup",
+        element: <BoardLookup />
       },
     ],
   },
