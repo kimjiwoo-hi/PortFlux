@@ -31,18 +31,9 @@ public class CartController {
                         item.getUnitPrice(),
                         item.getQty()))
                 .collect(Collectors.toList());
-
-<<<<<<< HEAD
-        List<CartItem> items = Arrays.asList(item1, item2);
-        CartResponse res = new CartResponse();
-        res.setItems(items);
-        res.setTotal(items.stream().map(i -> i.getUnitPrice().multiply(new BigDecimal(i.getQty())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add));
-=======
         BigDecimal total = itemResponses.stream()
                 .map(item -> item.getUnitPrice().multiply(new BigDecimal(item.getQty())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
->>>>>>> 4a5835726b0396c26f0d34b837aa53a755ff7bba
 
         CartResponse res = new CartResponse(itemResponses, total);
         return ResponseEntity.ok(res);
