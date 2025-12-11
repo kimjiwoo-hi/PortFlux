@@ -8,7 +8,6 @@ import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
 import com.portflux.backend.beans.ChatMessageBean;
-import com.portflux.backend.repository.OrderRepository;
 
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class SocketModule implements CommandLineRunner{
 
-    private final OrderRepository orderRepository;
     private final SocketIOServer server;
+    private final ChatService chatService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -26,13 +25,13 @@ public class SocketModule implements CommandLineRunner{
         log.info("Socket.IO 서버가 시작되었습니다.");
     }
 
-    public SocketModule(SocketIOServer server, OrderRepository orderRepository) {
+    public SocketModule(SocketIOServer server, ChatService chatService) {
         this.server = server;
+        this.chatService = chatService;
         server.addConnectListener(onConnected());
         server.addDisconnectListener(onDisconnected());
         server.addEventListener("joinRoom", String.class, onJoinRoom());
         server.addEventListener("chatMessage", ChatMessageBean.class, onChatMessage());
-        this.orderRepository = orderRepository;
     }
 
     // 이용자가 방에 연결 시
@@ -40,7 +39,6 @@ public class SocketModule implements CommandLineRunner{
         return (client, roomName, ackSender) -> {
             client.joinRoom(roomName);
             log.info("Socket ID : "+client.getSessionId().toString()+"님이 "+roomName+"에 입장하였습니다.");
-            client.joinRoom(roomName);
         };
     }
 
@@ -48,6 +46,7 @@ public class SocketModule implements CommandLineRunner{
     private DataListener<ChatMessageBean> onChatMessage() {
         return (client, data, ackSender) -> {
             log.info(data.getSenderNum() + "님이"+ data.getContent()+"메시지를 전송하였습니다.");
+            chatService.saveMessage(data);
             // 해당 방에 메시지 브로드캐스트
             String roomName = data.getRoomId().toString();
             server.getRoomOperations(roomName).sendEvent("chatMessage", data);
