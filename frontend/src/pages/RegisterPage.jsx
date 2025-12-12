@@ -13,11 +13,14 @@ function RegisterPage() {
 
   const [isIndividual, setIsIndividual] = useState(true);
   const [userId, setUserId] = useState("");
+  
+  // 이메일 상태 (초기값 설정)
   const [email, setEmail] = useState(googleEmail);
+  const [userName, setUserName] = useState(googleName); 
+  
   const [authCode, setAuthCode] = useState(""); 
   const [password, setPassword] = useState("");
   const [passwordCheck, setPasswordCheck] = useState("");
-  const [userName, setUserName] = useState(googleName); 
   const [nickname, setNickname] = useState(""); 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [businessNumber, setBusinessNumber] = useState("");
@@ -26,7 +29,7 @@ function RegisterPage() {
   const [isIdAvailable, setIsIdAvailable] = useState(null);
   
   const [isEmailValid, setIsEmailValid] = useState(isGoogle ? true : null);
-  const [emailMsg, setEmailMsg] = useState(isGoogle ? "구글 계정 이메일이 자동 입력되었습니다." : ""); 
+  const [emailMsg, setEmailMsg] = useState(isGoogle ? "구글 계정 이메일이 자동 입력되었습니다" : ""); 
   
   const [isPwdValid, setIsPwdValid] = useState(null);
   const [isPwdMatch, setIsPwdMatch] = useState(null);
@@ -45,26 +48,36 @@ function RegisterPage() {
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
   const phoneRegex = /^010-\d{4}-\d{4}$/;
 
+  // 탭 전환 시 초기화 함수
   const resetForm = () => {
-    setUserId(""); setIsIdAvailable(null);
-    setEmail(""); setEmailMsg("");
+    setUserId(""); 
+    setIsIdAvailable(null);
+    
+    // 구글 로그인이면 정보 유지
+    setEmail(isGoogle ? googleEmail : ""); 
+    setUserName(isGoogle ? googleName : "");
+    setEmailMsg(isGoogle ? "구글 계정 이메일이 자동 입력되었습니다" : "");
+    setIsAuthVerified(isGoogle);
+    setIsEmailValid(isGoogle ? true : null);
+
     setAuthCode("");
-    setPassword(""); setPasswordCheck("");
-    setUserName(""); 
+    setPassword(""); 
+    setPasswordCheck("");
     setNickname(""); 
     setPhoneNumber(""); 
     setBusinessNumber("");
     setIsBizNumValid(null);
-    setIsEmailValid(null);
     setIsPwdValid(null);
     setIsPwdMatch(null);
     setIsNicknameAvailable(null);
-    setIsAuthVerified(false);
     setCodeMsg(""); 
     setIsPhoneValid(null);
   };
 
-  const handleIdChange = (e) => { setUserId(e.target.value); setIsIdAvailable(null); };
+  const handleIdChange = (e) => {
+    setUserId(e.target.value);
+    setIsIdAvailable(null);
+  };
 
   const handleCheckId = async () => {
     if (!userId) return; 
@@ -82,19 +95,22 @@ function RegisterPage() {
   };
 
   const handleEmailChange = (e) => {
-    if (isGoogle) return;
+    if (isGoogle) return; 
     const val = e.target.value;
     setEmail(val);
+    
     setIsAuthVerified(false);
     setCodeMsg(""); 
+    
     if (val.length === 0) { setIsEmailValid(null); setEmailMsg(""); return; }
-    if (!emailRegex.test(val)) { setIsEmailValid(false); setEmailMsg("이메일 형식이 올바르지 않습니다."); } 
+    if (!emailRegex.test(val)) { setIsEmailValid(false); setEmailMsg("이메일 형식이 올바르지 않습니다"); } 
     else { setIsEmailValid(null); setEmailMsg(""); }
   };
 
   useEffect(() => {
     if (isGoogle) return;
     if (!email || !emailRegex.test(email)) return;
+    
     const timer = setTimeout(async () => {
       try {
         const res = await fetch("http://localhost:8080/user/register/check-email", {
@@ -102,8 +118,13 @@ function RegisterPage() {
         });
         if (res.ok) {
           const isDuplicate = await res.json();
-          if (isDuplicate) { setIsEmailValid(false); setEmailMsg("이미 사용중인 이메일입니다."); } 
-          else { setIsEmailValid(true); setEmailMsg("사용 가능한 이메일입니다."); }
+          if (isDuplicate) { 
+             setIsEmailValid(false); 
+             setEmailMsg("이미 사용중인 이메일입니다"); 
+          } else { 
+             setIsEmailValid(true); 
+             setEmailMsg("사용 가능한 이메일입니다"); 
+          }
         }
       } catch (e) { console.error(e); }
     }, 500);
@@ -125,7 +146,10 @@ function RegisterPage() {
     else setIsPwdMatch(val === password);
   };
 
-  const handleNicknameChange = (e) => { setNickname(e.target.value); setIsNicknameAvailable(null); };
+  const handleNicknameChange = (e) => {
+    setNickname(e.target.value);
+    setIsNicknameAvailable(null);
+  };
 
   const handleCheckNickname = async () => {
     if (!nickname) return;
@@ -181,6 +205,7 @@ function RegisterPage() {
   const handleSendAuthCode = async () => {
     if (isEmailValid === false) return; 
     if (isEmailValid === null) return;
+
     try {
       const res = await fetch("http://localhost:8080/api/mail/send", {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: email }),
@@ -188,9 +213,19 @@ function RegisterPage() {
       if (res.ok) { 
         setAuthCode(""); 
         setIsAuthVerified(false);
-        setEmailMsg("인증번호 발송이 되었습니다");
+        
+        // [수정] 딜레이(setTimeout) 제거 -> 즉시 변경
+        setEmailMsg("인증번호가 발송되었습니다");
+        
+      } else {
+        setIsEmailValid(false);
+        setEmailMsg("인증번호 발송에 실패했습니다");
       }
-    } catch { console.error("서버 오류"); }
+    } catch { 
+        console.error("서버 오류");
+        setIsEmailValid(false);
+        setEmailMsg("서버 오류가 발생했습니다");
+    }
   };
 
   const handleVerifyAuthCode = async () => {
@@ -206,7 +241,7 @@ function RegisterPage() {
         }
         else { 
           setIsAuthVerified(false); 
-          setCodeMsg("인증번호가 일치하지 않습니다."); 
+          setCodeMsg("인증번호가 일치하지 않습니다"); 
         }
       }
     } catch { console.error("서버 오류"); }
@@ -215,7 +250,7 @@ function RegisterPage() {
   const handleRegister = async () => {
     if (!userId || !email || !password || !passwordCheck || !userName || !nickname || !phoneNumber) return;
     
-    if (!isAuthVerified && !authCode) return;
+    if (!isAuthVerified && !authCode && !isGoogle) return; 
     if (isIdAvailable !== true) return;
     if (isEmailValid !== true) return;
     if (isPwdValid === false) return;
@@ -236,10 +271,10 @@ function RegisterPage() {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data),
       });
       if (res.ok) { 
-        // [수정] 성공 시 통합 완료 페이지로 이동
         navigate("/success", { 
-            state: {  
-                message: "회원가입이 성공적으로 완료되었습니다." 
+            state: { 
+                title: "회원가입 완료", 
+                message: "회원가입이 성공적으로 완료되었습니다. 로그인을 진행해주세요." 
             } 
         });
       } else { console.error(await res.text()); }
@@ -262,8 +297,8 @@ function RegisterPage() {
               <label className="form-label">사업자등록번호</label>
               <input type="text" className={`reg-input ${isBizNumValid === false ? "input-error" : ""}`} 
                      placeholder="사업자 등록번호 10자리" value={businessNumber} onChange={handleBusinessNumberChange} maxLength={12} />
-              {isBizNumValid === true && <span className="valid-msg">확인 완료.</span>}
-              {isBizNumValid === false && <span className="error-msg">유효하지 않은 번호입니다.</span>}
+              {isBizNumValid === true && <span className="valid-msg">확인 완료</span>}
+              {isBizNumValid === false && <span className="error-msg">유효하지 않은 번호입니다</span>}
             </div>
           )}
 
@@ -275,57 +310,76 @@ function RegisterPage() {
               <button className="btn-small" onClick={handleCheckId}>중복확인</button>
             </div>
             {isIdAvailable === true && <span className="valid-msg">사용 가능한 아이디입니다.</span>}
-            {isIdAvailable === false && <span className="error-msg">이미 사용중인 아이디입니다.</span>}
+            {isIdAvailable === false && <span className="error-msg">이미 사용중인 아이디입니다</span>}
           </div>
 
           <div className="form-group">
-            <label className="form-label">이메일(인증)</label>
+            <label className="form-label">이메일</label>
             <div className="input-with-btn">
-              <input type="text" className={`reg-input ${isEmailValid === false ? "input-error" : ""}`} 
-                placeholder="이메일을 입력해 주세요." value={email} onChange={handleEmailChange} 
-                readOnly={isAuthVerified} style={isAuthVerified ? { backgroundColor: "#e9ecef", color: "#6c757d" } : {}}
+              <input 
+                type="text" 
+                className={`reg-input ${isEmailValid === false ? "input-error" : ""}`} 
+                placeholder="이메일을 입력해 주세요." 
+                value={email} 
+                onChange={handleEmailChange} 
+                readOnly={isAuthVerified} 
+                style={isAuthVerified ? { backgroundColor: "#e9ecef", color: "#6c757d" } : {}}
               />
               <button className="btn-small" onClick={handleSendAuthCode} disabled={isAuthVerified}>
                 {isAuthVerified ? "인증완료" : "인증코드 발송"}
               </button>
             </div>
+            
+            {/* 이메일 메시지 */}
             {isEmailValid === false && <span className="error-msg">{emailMsg}</span>}
             {isEmailValid === true && <span className="valid-msg">{emailMsg}</span>}
             
             <div className="input-with-btn" style={{marginTop: '10px'}}>
               <input type="text" className="reg-input" placeholder="인증코드 6자리" 
                      value={authCode} onChange={(e) => setAuthCode(e.target.value)} 
-                     readOnly={isAuthVerified} disabled={isAuthVerified} 
+                     readOnly={isAuthVerified} 
+                     disabled={isAuthVerified} 
                      style={isAuthVerified ? { backgroundColor: "#e9ecef" } : {}}
               />
               <button className="btn-small" onClick={handleVerifyAuthCode} disabled={isAuthVerified}>
                 {isAuthVerified ? "확인완료" : "인증하기"}
               </button>
             </div>
-            {codeMsg && (<div style={{ color: isAuthVerified ? 'blue' : 'red', fontSize: '13px', marginTop: '5px' }}>{codeMsg}</div>)}
+            
+            {/* 인증 완료 메시지 (스타일 통일) */}
+            {codeMsg && (
+                <span className={isAuthVerified ? "valid-msg" : "error-msg"}>
+                    {codeMsg}
+                </span>
+            )}
           </div>
 
           <div className="form-group">
             <label className="form-label">비밀번호</label>
             <input type="password" className={`reg-input ${isPwdValid === false ? "input-error" : ""}`} 
                    placeholder="8~16자/영문 대소문자,숫자,특수문자 조합" value={password} onChange={handlePasswordChange} />
-            {isPwdValid === false && (<span className="error-msg">옳지 않은 비밀번호 형식입니다.</span>)}
+            {isPwdValid === false && (<span className="error-msg">옳지 않은 비밀번호 형식입니다</span>)}
 
             <input type="password" className={`reg-input ${isPwdMatch === false ? "input-error" : ""}`} 
-                   placeholder="비밀번호를 재입력해 주세요." value={passwordCheck} onChange={handlePasswordCheckChange} />
+                   placeholder="비밀번호를 재입력해 주세요" value={passwordCheck} onChange={handlePasswordCheckChange} />
             {isPwdMatch === false && <span className="error-msg">비밀번호가 일치하지 않습니다.</span>}
           </div>
 
           <div className="form-group">
             <label className="form-label">이름(닉네임)</label>
-            <input type="text" className="reg-input" placeholder="이름을 입력해 주세요." value={userName} onChange={(e) => setUserName(e.target.value)} />
+            <input type="text" className="reg-input" placeholder="이름을 입력해 주세요" 
+                   value={userName} onChange={(e) => setUserName(e.target.value)} 
+                   readOnly={isGoogle} 
+                   style={isGoogle ? { backgroundColor: "#e9ecef", color: "#6c757d" } : {}}
+            />
+            
             <div className="input-with-btn" style={{marginTop:"5px"}}>
                 <input type="text" className={`reg-input ${isNicknameAvailable === false ? "input-error" : ""}`} 
                        placeholder="닉네임을 입력해 주세요." value={nickname} onChange={handleNicknameChange} />
                 <button className="btn-small" onClick={handleCheckNickname}>중복확인</button>
             </div>
-            {isNicknameAvailable === true && <span className="valid-msg">사용 가능한 닉네임입니다.</span>}
-            {isNicknameAvailable === false && <span className="error-msg">이미 사용중인 닉네임입니다.</span>}
+            {isNicknameAvailable === true && <span className="valid-msg">사용 가능한 닉네임입니다</span>}
+            {isNicknameAvailable === false && <span className="error-msg">이미 사용중인 닉네임입니다</span>}
           </div>
 
           <div className="form-group">
@@ -333,13 +387,13 @@ function RegisterPage() {
             <input 
                 type="text" 
                 className={`reg-input ${isPhoneValid === false ? "input-error" : ""}`} 
-                placeholder="번호를 입력해 주세요." 
+                placeholder="번호를 입력해 주세요" 
                 value={phoneNumber} 
                 onChange={handlePhoneNumberChange} 
                 maxLength={13} 
             />
             {isPhoneValid === false && (
-                <span className="error-msg">올바른 전화번호 형식이 아닙니다.</span>
+                <span className="error-msg">올바른 전화번호 형식이 아닙니다</span>
             )}
           </div>
 

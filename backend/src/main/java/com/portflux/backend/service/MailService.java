@@ -5,6 +5,7 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -21,6 +22,7 @@ public class MailService {
     private final Map<String, String> authCodeMap = new HashMap<>();
 
     // 1. 메일 발송 (MailApi의 sendAuthEmail과 이름 일치시킴)
+    @Async
     public void sendAuthEmail(String email) {
         String authCode = createCode();
         authCodeMap.put(email, authCode); // 저장

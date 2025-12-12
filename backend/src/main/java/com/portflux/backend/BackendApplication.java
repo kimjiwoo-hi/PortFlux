@@ -3,9 +3,11 @@ package com.portflux.backend;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
 @MapperScan("com.portflux.backend.mapper")
+@EnableAsync
 
 public class BackendApplication {
 
