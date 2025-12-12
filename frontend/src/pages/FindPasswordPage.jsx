@@ -49,11 +49,11 @@ function FindPasswordPage() {
     }
     if (!emailRegex.test(val)) {
       setIsEmailValid(false);
-      setEmailMsg("올바른 이메일 형식이 아닙니다.");
+      setEmailMsg("올바른 이메일 형식이 아닙니다");
       setIsEmailError(true);
     } else {
       setIsEmailValid(true);
-      setEmailMsg("사용 가능한 이메일 형식입니다.");
+      setEmailMsg("사용 가능한 이메일 형식입니다");
       setIsEmailError(false);
     }
   };
@@ -67,7 +67,7 @@ function FindPasswordPage() {
       });
       if (res.ok) {
         setShowAuthInput(true);
-        setEmailMsg("인증번호 발송이 되었습니다");
+        setEmailMsg("인증번호가 발송되었습니다");
         setIsEmailError(false);
       } else {
         setEmailMsg("가입되지 않은 이메일입니다");
@@ -75,7 +75,7 @@ function FindPasswordPage() {
       }
     } catch (e) { 
       console.error(e);
-      setEmailMsg("서버 오류가 발생했습니다.");
+      setEmailMsg("서버 오류가 발생했습니다");
       setIsEmailError(true);
     }
   };
@@ -91,7 +91,7 @@ function FindPasswordPage() {
         setAuthMsg("인증이 완료되었습니다");
       } else {
         setIsAuthVerified(false); 
-        setAuthMsg("인증번호가 일치하지 않습니다."); 
+        setAuthMsg("인증번호가 일치하지 않습니다"); 
       }
     } catch (e) { console.error(e); }
   };
@@ -140,7 +140,7 @@ function FindPasswordPage() {
   const handleSubmitChange = async () => {
     // 유효성 검사 추가
     if (!isAuthVerified) {
-        alert("이메일 인증을 먼저 진행해주세요.");
+        alert("이메일 인증을 먼저 진행해주세요");
         return;
     }
     if (isPwdValid !== true) return;
@@ -161,12 +161,12 @@ function FindPasswordPage() {
         if (errorText) {
              setServerErrorMsg(errorText);
         } else {
-             setServerErrorMsg("비밀번호 변경에 실패했습니다. (서버 오류)");
+             setServerErrorMsg("비밀번호 변경에 실패했습니다 (서버 오류)");
         }
       }
     } catch { 
         console.error("서버 오류");
-        setServerErrorMsg("서버 연결에 실패했습니다.");
+        setServerErrorMsg("서버 연결에 실패했습니다");
     }
   };
 
@@ -179,7 +179,7 @@ function FindPasswordPage() {
           {/* 1. 본인 인증 섹션 */}
           <div className="form-group">
             <label className="form-label">아이디</label>
-            <input type="text" className="find-input" placeholder="아이디를 입력하세요" 
+            <input type="text" className="find-input" placeholder="아이디를 입력해 주세요" 
                    value={userId} onChange={(e) => setUserId(e.target.value)} 
                    disabled={isAuthVerified} 
                    style={isAuthVerified ? { backgroundColor: "#f2f2f2" } : {}}
@@ -188,7 +188,7 @@ function FindPasswordPage() {
 
           <div className="form-group">
             <label className="form-label">이름</label>
-            <input type="text" className="find-input" placeholder="이름을 입력하세요" 
+            <input type="text" className="find-input" placeholder="이름을 입력해 주세요" 
                    value={name} onChange={(e) => setName(e.target.value)} 
                    disabled={isAuthVerified}
                    style={isAuthVerified ? { backgroundColor: "#f2f2f2" } : {}}
@@ -266,7 +266,7 @@ function FindPasswordPage() {
                         placeholder="8~16자 (영문, 숫자, 특수문자)" 
                         value={newPassword} onChange={handlePasswordChange} />
                 
-                {isPwdValid === false && <span className="error-msg">올바른 비밀번호 형식이 아닙니다.</span>}
+                {isPwdValid === false && <span className="error-msg">올바른 비밀번호 형식이 아닙니다</span>}
                 {serverErrorMsg && <span className="error-msg">{serverErrorMsg}</span>}
                 </div>
                 <div className="form-group">
@@ -275,7 +275,7 @@ function FindPasswordPage() {
                         className={`find-input ${isPwdMatch === false ? "input-error" : ""}`}
                         placeholder="비밀번호를 다시 입력해 주세요." 
                         value={confirmPassword} onChange={handleConfirmChange} />
-                {isPwdMatch === false && <span className="error-msg">비밀번호가 일치하지 않습니다.</span>}
+                {isPwdMatch === false && <span className="error-msg">비밀번호가 일치하지 않습니다</span>}
                 </div>
                 <button className="btn-submit" onClick={handleSubmitChange}>
                 비밀번호 변경 완료

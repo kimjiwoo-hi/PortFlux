@@ -39,10 +39,10 @@ function FindIdPage() {
     }
 
     if (!emailRegex.test(val)) {
-      setEmailMsg("이메일 형식이 올바르지 않습니다.");
+      setEmailMsg("이메일 형식이 올바르지 않습니다");
       setIsEmailError(true);
     } else {
-      setEmailMsg("사용 가능한 이메일 형식입니다.");
+      setEmailMsg("사용 가능한 이메일 형식입니다");
       setIsEmailError(false);
     }
   };
@@ -60,7 +60,7 @@ function FindIdPage() {
 
       if (res.ok) {
         setIsCodeSent(true);
-        setEmailMsg("인증번호 발송이 되었습니다");
+        setEmailMsg("인증번호가 발송되었습니다");
         setIsEmailError(false);
       } else {
         console.error("메일 발송 실패");
@@ -69,7 +69,7 @@ function FindIdPage() {
       }
     } catch (e) {
       console.error("서버 연결 실패", e);
-      setEmailMsg("서버 오류가 발생했습니다.");
+      setEmailMsg("서버 오류가 발생했습니다");
       setIsEmailError(true);
     }
   };
@@ -90,7 +90,7 @@ function FindIdPage() {
           setIsVerified(true);
           setCodeMsg("인증이 완료되었습니다");
         } else {
-          setCodeMsg("인증번호가 일치하지 않습니다.");
+          setCodeMsg("인증번호가 일치하지 않습니다");
         }
       }
     } catch (e) {
@@ -111,7 +111,7 @@ function FindIdPage() {
         // 성공 시 SuccessPage로 이동
         navigate("/success", { 
             state: { 
-                message: "회원님의 정보와 일치하는 아이디입니다.",
+                message: "회원님의 정보와 일치하는 아이디입니다",
                 data: resultId 
             } 
         });
