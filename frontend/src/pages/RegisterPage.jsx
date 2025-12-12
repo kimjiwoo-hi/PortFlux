@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom"; 
 import "./RegisterPage.css";
 
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
 function RegisterPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -44,7 +46,6 @@ function RegisterPage() {
   
   // 정규식 정의
   const idRegex = /^[a-z0-9]{4,12}$/;
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
   const phoneRegex = /^010-\d{4}-\d{4}$/;
 
