@@ -142,3 +142,95 @@
   color: white;
   border-color: #3f3f3f;
 }
+
+/* =================================
+   페이지 전체 레이아웃 (신규 추가)
+================================= */
+.board-lookup-page {
+  display: flex;
+  gap: 30px; /* 사이드바와 그리드 사이의 간격 */
+  padding-top: 20px;
+  padding-right: 20px;
+  padding-bottom: 20px;
+  /* 사이드바 너비(231px) + 사이 간격(30px) 만큼 왼쪽 여백 추가 */
+  padding-left: calc(231px + 30px + 27px); 
+}
+
+/* =================================
+   Behance 스타일 게시판 그리드 (신규 추가)
+================================= */
+.board-grid {
+  flex-grow: 1; /* 남은 공간을 모두 차지 */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px; /* 그리드 아이템 사이의 간격 */
+}
+
+.board-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  cursor: pointer;
+  aspect-ratio: 4 / 3; /* 이미지 비율 유지 */
+  background-color: #f0f0f0; /* 이미지 로딩 전 배경색 */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease;
+}
+
+.board-item:hover {
+  transform: translateY(-5px); /* 호버 시 살짝 위로 이동 */
+}
+
+.board-item-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 이미지가 컨테이너에 꽉 차도록 */
+  transition: transform 0.4s ease;
+}
+
+.board-item:hover .board-item-thumbnail {
+  transform: scale(1.05); /* 호버 시 약간 확대 */
+}
+
+.board-item-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 60%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 15px;
+  box-sizing: border-box;
+}
+
+.board-item:hover .board-item-overlay {
+  opacity: 1;
+}
+
+.overlay-content {
+  color: white;
+  transform: translateY(15px);
+  transition: transform 0.4s ease;
+  transition-delay: 0.1s;
+}
+
+.board-item:hover .overlay-content {
+  transform: translateY(0);
+}
+
+.overlay-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 5px 0;
+}
+
+.overlay-author {
+  font-size: 0.85rem;
+  font-weight: 500;
+  opacity: 0.9;
+}
