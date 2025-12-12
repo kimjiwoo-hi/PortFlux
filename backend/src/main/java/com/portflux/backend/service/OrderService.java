@@ -33,4 +33,8 @@ public class OrderService {
     public Order findByMerchantUid(String merchantUid) {
         return orderRepository.findByMerchantUid(merchantUid).orElse(null);
     }
+
+    public Order updateOrderStatus(Order order) {
+        return orderRepository.save(order);
+    }
 }
