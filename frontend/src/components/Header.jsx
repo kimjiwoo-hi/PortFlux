@@ -86,10 +86,10 @@ const Header = () => {
           </div>
         </div>
         <div className="user">
-          <Link to="/login">
+          <Link to="/login" state={{ from: location.pathname }}>
             <button className="login">로그인</button>
           </Link>
-          <Link to="/join">
+          <Link to="/register">
             <button className="join">회원가입</button>
           </Link>
           <div className="profile-container" ref={profileRef}>
