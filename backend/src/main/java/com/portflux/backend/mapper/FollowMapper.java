@@ -25,3 +25,4 @@ public interface FollowMapper {
     int countFollowing(@Param("userId") Long userId);
 
 }
+
