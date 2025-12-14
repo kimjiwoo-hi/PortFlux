@@ -1,0 +1,171 @@
+/* RegisterPage.css */
+
+/* 전체 페이지 래퍼 - 중앙 정렬 */
+.register-page-wrapper {
+  min-height: calc(100vh - 92px);
+  display: flex;
+  justify-content: center;
+  align-items: center; /* 수직 중앙 정렬 */
+  background-color: #fff; /* 배경 흰색으로 변경 (사진 기준) */
+  padding: 50px 0;
+}
+
+/* 회원가입 박스 */
+.register-box {
+  width: 500px; /* PC 화면에 적절한 너비 */
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 타이틀 "회원가입" */
+.register-title {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 40px;
+  color: #000;
+}
+
+/* 탭 버튼 (개인회원 / 기업회원) */
+.register-tabs {
+  display: flex;
+  gap: 10px; /* 탭 사이 간격 */
+  margin-bottom: 30px;
+}
+
+.tab-btn {
+  flex: 1; /* 1:1 비율 */
+  height: 52px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 선택된 탭 스타일 (사진처럼 파란 테두리) */
+.tab-btn.active {
+  border: 2px solid #3b5bdb;
+  color: #3b5bdb;
+  background-color: #fff;
+}
+
+/* 폼 컨테이너 */
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* 각 입력 그룹 간의 간격 */
+}
+
+/* 입력 그룹 (라벨 + 인풋) */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 라벨 스타일 (사진처럼 진하게) */
+.form-label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #000;
+}
+
+/* 인풋창 기본 스타일 */
+.reg-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 12px;
+  border: 1px solid #ccc; /* 옅은 회색 테두리 */
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.reg-input:focus {
+  outline: none;
+  border-color: #3b5bdb; /* 포커스 시 파란색 */
+}
+
+.reg-input::placeholder {
+  color: #aaa;
+}
+
+/* 인풋 + 버튼 가로 배치 (아이디, 이메일, 인증번호) */
+.input-with-btn {
+  display: flex;
+  gap: 10px;
+}
+
+/* 작은 버튼 (중복확인, 인증번호 발송 - 회색톤) */
+.btn-small {
+  width: 120px; /* 버튼 너비 고정 */
+  height: 48px;
+  background-color: #ccc; /* 사진의 회색 버튼 색상 */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.btn-small:hover {
+  background-color: #bbb;
+}
+
+.btn-small:disabled {
+  background-color: #eee;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+/* 회원가입 완료 버튼 (하단 파란색) */
+.btn-submit {
+  width: 100%;
+  height: 52px;
+  background-color: #3b5bdb; /* 사진의 진한 파란색 */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 30px; /* 위쪽 요소와 간격 */
+}
+
+.btn-submit:hover {
+  background-color: #2f49b0;
+}
+
+/* 유효성 메시지 */
+.valid-msg {
+  font-size: 12px;
+  color: #3b5bdb;
+  margin-top: 4px;
+}
+
+.error-msg {
+  font-size: 12px;
+  color: #fa5252;
+  margin-top: 4px;
+}
+
+/* 에러 시 인풋 테두리 */
+.input-error {
+  border-color: #fa5252 !important;
+}
+
+/* [추가] 안내 문구 스타일 (완료 화면 등에서 사용) */
+.info-text {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.5;
+}
