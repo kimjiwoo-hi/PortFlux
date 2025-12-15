@@ -36,7 +36,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.ai:spring-ai-starter-model-openai'
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
-
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
     implementation 'org.springframework.boot:spring-boot-starter-security'// 로그인, 암호화 기능
 

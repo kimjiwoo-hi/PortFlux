@@ -1,16 +1,42 @@
 package com.portflux.backend.beans;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.Data;
 
-@Getter
-@Setter
+/**
+ * [팔로우 엔티티]
+ * - USERS ↔ USERS 간의 팔로우 관계를 저장
+ * - followerId : 팔로우를 건 사람
+ * - followingId : 팔로우 당한 사람
+ */
+@Entity
+@Table(
+    name = "FOLLOWS",
+    uniqueConstraints = @UniqueConstraint(
+        name = "uq_follows",
+        columnNames = {"FOLLOWER_ID", "FOLLOWING_ID"}
+    )
+)
+@Data
 public class FollowBean {
-    
+
+    /** 팔로우 고유 번호 (PK) */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "FOLLOW_ID")
     private Long followId;
+
+    /** 팔로우를 건 유저 (user_num) */
+    @Column(name = "FOLLOWER_ID", nullable = false)
     private Long followerId;
+
+    /** 팔로우 당한 유저 (user_num) */
+    @Column(name = "FOLLOWING_ID", nullable = false)
     private Long followingId;
-    private Date createdAt;
+
+    /** 팔로우 생성 시각 */
+    @Column(name = "CREATED_AT", nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 }
