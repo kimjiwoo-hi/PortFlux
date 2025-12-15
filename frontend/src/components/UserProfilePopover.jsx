@@ -34,7 +34,7 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
       </div>
 
       <div className="menu-list">
-        <Link to="mypage">
+        <Link to="/mypage/myinfo">
           <button className="menu-item">내 정보 보기</button>
         </Link>
         <Link to="/cart">
