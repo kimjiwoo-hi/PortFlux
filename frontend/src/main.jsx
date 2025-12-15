@@ -25,59 +25,65 @@ import SuccessPage from "./pages/SuccessPage.jsx";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <MainLayout />,
-    errorElement: <NotFound />,
+    element: <NoFooterLayout />,
     children: [
       {
-        path: "boardfree",
-        element: <BoardFree />
+        index: true,
+        element: <BoardLookup />
       },
-      {
-        path: "boardjob",
-        element: <BoardJob />
-      },
-      {
-        path: "cart",
-        element: <Cart />
-      },
-      {
-        path: "mypage",
-        element: <MyPage />
-      },
-      {
-        path: "order-result",
-        element: <OrderResultPage />
-      },
-           {
-        path: "login",
-        element: <LoginPage />
-      },
-      {
-        path: "register",
-        element: <RegisterPage />
-      },
-      {
-        path: "findid",
-        element: <FindIdPage /> 
-      },
-      {
-        path: "findpassword",
-        element: <FindPasswordPage /> 
-      },
-      {
-        path: "success",
-        element: <SuccessPage />
-      }
     ],
   },
   {
-    element: <NoFooterLayout />,
-    errorElement: <NotFound />,
+    element: <MainLayout />,
     children: [
       {
-        path: "boardlookup",
-        element: <BoardLookup />
+        path: "/boardfree",
+        element: <BoardFree />
       },
+      {
+        path: "/boardjob",
+        element: <BoardJob />
+      },
+      {
+        path: "/cart",
+        element: <Cart />
+      },
+      {
+        path: "/mypage",
+        element: <MyPage />
+      },
+      {
+        path: "/order-result",
+        element: <OrderResultPage />
+      },
+      {
+        path: "/login",
+        element: <LoginPage />
+      },
+      {
+        path: "/register",
+        element: <RegisterPage />
+      },
+      {
+        path: "/findid",
+        element: <FindIdPage />
+      },
+      {
+        path: "/findpassword",
+        element: <FindPasswordPage />
+      },
+      {
+        path: "/success",
+        element: <SuccessPage />
+      },
+      {
+        path: "/etc",
+        element: <NotFound />
+      },
+      {
+        path: "*",
+        element: <NotFound />
+      }
     ],
   },
 ]);

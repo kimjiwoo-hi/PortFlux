@@ -70,6 +70,11 @@ function LoginPage() {
           // 기존 회원: 로그인 성공
           console.log("구글 로그인 성공:", json);
           
+          // ▼▼▼ [추가] 로그인 성공 상태 저장 (Header 감지용) ▼▼▼
+          localStorage.setItem("isLoggedIn", "true");
+          localStorage.setItem("userId", json.email); // 구글은 이메일을 ID 대용으로 저장
+          // ▲▲▲ 추가 끝 ▲▲▲
+
           // 원래 있던 페이지로 이동
           const targetPath = getPreviousPage();
           sessionStorage.removeItem("prevPage"); // 사용했으니 삭제
@@ -107,6 +112,18 @@ function LoginPage() {
         const json = await res.json();
         console.log("로그인 성공:", json);
         
+        // ▼▼▼ [수정] 로그인 유지 체크 여부에 따라 저장소 분기 ▼▼▼
+        if (autoLogin) {
+            // [체크 함] 로컬 스토리지에 저장 (브라우저 꺼도 유지)
+            localStorage.setItem("isLoggedIn", "true");
+            localStorage.setItem("userId", userId);
+        } else {
+            // [체크 안 함] 세션 스토리지에 저장 (브라우저 끄면 삭제됨)
+            sessionStorage.setItem("isLoggedIn", "true");
+            sessionStorage.setItem("userId", userId);
+        }
+        // ▲▲▲ 수정 끝 ▲▲▲
+
         // 로그인 성공 시 이전 페이지로 이동
         const targetPath = location.state?.from || "/";
         navigate(targetPath);
