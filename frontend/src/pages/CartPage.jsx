@@ -1,22 +1,67 @@
-import React, { useEffect, useState } from "react";
-import { getCart, createOrder } from "../api/api";
+import React, { useEffect, useState, useCallback } from "react";
+import { getCart, createOrder, removeFromCart, updateCartQuantity } from "../api/api";
 import CheckoutModal from "../components/CheckoutModal";
+
+// TODO: 임시 사용자 ID. 실제 프로덕션에서는 로그인 및 인증을 통해 동적으로 받아와야 합니다.
+const TEMP_USER_ID = 1;
 
 export default function CartPage() {
   const [cart, setCart] = useState({ items: [], total: 0 });
   const [checkoutInfo, setCheckoutInfo] = useState(null);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    // TODO: 실제 API 경로에 맞춰 호출합니다. 현재 예시는 /api/cart가 필요합니다.
-    getCart()
-      .then((res) => setCart(res.data))
-      .catch((e) => console.error(e));
+  const fetchCart = useCallback(async () => {
+    try {
+      setError(null);
+      const res = await getCart(TEMP_USER_ID);
+      setCart(res.data);
+    } catch (e) {
+      console.error(e);
+      setError("장바구니 정보를 불러오는데 실패했습니다.");
+    }
   }, []);
 
+  useEffect(() => {
+    fetchCart();
+  }, [fetchCart]);
+
+  const handleUpdateQuantity = async (cartId, newQty) => {
+    const originalQty = cart.items.find(item => item.cartId === cartId)?.qty;
+    
+    if (newQty <= 0) {
+      // 수량이 0 이하면 삭제 처리
+      await handleRemove(cartId);
+      return;
+    }
+
+    if (newQty === originalQty) return; // 수량 변경이 없으면 아무것도 하지 않음
+
+    try {
+      await updateCartQuantity(cartId, newQty);
+      // 성공 시 장바구니 정보 다시 로드
+      await fetchCart();
+    } catch (e) {
+      console.error(e);
+      alert("수량 변경에 실패했습니다.");
+    }
+  };
+
+  const handleRemove = async (cartId) => {
+    if (!window.confirm("정말로 이 상품을 삭제하시겠습니까?")) return;
+
+    try {
+      await removeFromCart(cartId);
+      // 성공 시 장바구니 정보 다시 로드
+      await fetchCart();
+    } catch (e) {
+      console.error(e);
+      alert("상품 삭제에 실패했습니다.");
+    }
+  };
+
   const handleCheckout = async () => {
-    // 예시: userId는 임시로 1 사용. 실제로는 로그인 유저 id 사용
     const payload = {
-      userId: 1,
+      userId: TEMP_USER_ID,
       items: cart.items.map((it) => ({
         productId: it.productId,
         productName: it.productName,
@@ -35,21 +80,35 @@ export default function CartPage() {
     }
   };
 
+  if (error) {
+    return <div className="cart-page"><p>{error}</p></div>;
+  }
+
   return (
     <div className="cart-page">
       <h2>장바구니</h2>
       <ul>
         {cart.items && cart.items.length > 0 ? (
           cart.items.map((it) => (
-            <li key={it.productId}>
-              {it.productName} - {it.qty} x {it.unitPrice}
+            <li key={it.cartId}>
+              <span>{it.productName} (단가: {it.unitPrice.toLocaleString()}원)</span>
+              <div>
+                <input
+                  type="number"
+                  min="1"
+                  defaultValue={it.qty}
+                  onBlur={(e) => handleUpdateQuantity(it.cartId, parseInt(e.target.value, 10))}
+                  style={{ width: "50px", marginRight: "10px" }}
+                />
+                <button onClick={() => handleRemove(it.cartId)}>삭제</button>
+              </div>
             </li>
           ))
         ) : (
           <li>장바구니가 비어있습니다.</li>
         )}
       </ul>
-      <div className="summary">총 합계: {cart.total}</div>
+      <div className="summary">총 합계: {cart.total.toLocaleString()}원</div>
       <button onClick={handleCheckout} disabled={!cart.items || cart.items.length === 0}>
         결제하러 가기
       </button>
