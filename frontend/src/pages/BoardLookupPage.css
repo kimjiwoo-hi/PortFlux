@@ -142,3 +142,96 @@
   color: white;
   border-color: #3f3f3f;
 }
+
+/* =================================
+   페이지 전체 레이아웃 (신규 추가)
+   -> 자식 요소들이 페이지(viewport)를 기준으로 위치하도록 변경
+================================= */
+.board-lookup-page {
+  /* position: relative; 속성을 제거하여 자식 요소들이 페이지(viewport)를 기준으로 위치하도록 합니다. */
+  /* width: 100%; 와 min-height: 100vh; 도 제거하여 기본 블록 요소의 동작을 따릅니다. */
+}
+
+/* =================================
+   Behance 스타일 게시판 그리드
+   (게시물 전체 위치 및 개별 게시물 크기 결정)
+================================= */
+.board-grid {
+  position: absolute;
+  top: 237px;
+  left: 312px;
+  
+  display: grid;
+  /* 316px 너비의 열을 3개 만들도록 고정합니다. */
+  grid-template-columns: repeat(3, 316px); 
+  column-gap: 63px;
+  row-gap: 67px;
+}
+
+/* 개별 게시물 아이템 (크기, 그림자, 호버 효과 등) */
+.board-item {
+  position: relative;
+  cursor: pointer;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.board-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.board-item-thumbnail {
+  width: 100%;
+  aspect-ratio: 4 / 3; /* 이전의 이미지 비율 */
+  object-fit: cover;
+  transition: transform 0.4s ease;
+  display: block; /* 하단 공백 제거 */
+}
+
+.board-item:hover .board-item-thumbnail {
+  transform: scale(1.05);
+}
+
+.board-item-info {
+  padding: 15px; /* 이전 패딩 */
+}
+
+.info-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0 0 8px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.4;
+}
+
+.info-author {
+  font-size: 0.85rem;
+  color: #555;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.info-author:hover {
+  color: #000;
+  text-decoration: underline;
+}
+
+/* 좋아요/조회수 영역은 일단 숨김 처리 (주석 처리된 JSX에 대응) */
+.item-stats {
+  display: none;
+}
+
+/* =================================
+   '게시물 추가' 아이템 스타일 (제거)
+================================= */
+/* 프로필 팝업 스타일 (제거) */

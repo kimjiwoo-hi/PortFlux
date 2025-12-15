@@ -1,20 +1,21 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom"; 
-import "./LoginPage.css"; 
+import { useNavigate, useLocation } from "react-router-dom";
+import "./LoginPage.css";
 
 function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation(); // 현재 페이지 정보 가져오기 (이전 페이지 경로 확인용)
 
   // [설정] 구글 클라이언트 ID & 리다이렉트 URI
-  const GOOGLE_CLIENT_ID = "922053814206-nef3nk7celbbvkooeu6aeivo9f7753o1.apps.googleusercontent.com";
-  const REDIRECT_URI = "http://localhost:5173/login"; 
+  const GOOGLE_CLIENT_ID =
+    "922053814206-nef3nk7celbbvkooeu6aeivo9f7753o1.apps.googleusercontent.com";
+  const REDIRECT_URI = "http://localhost:5173/login";
 
   // === 상태 변수 ===
   const [isIndividual, setIsIndividual] = useState(true);
-  
+
   // 이메일 대신 아이디(userId) 사용
-  const [userId, setUserId] = useState(""); 
+  const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [autoLogin, setAutoLogin] = useState(false);
 
@@ -56,28 +57,27 @@ function LoginPage() {
 
       if (res.ok) {
         const json = await res.json();
-        
+
         // 백엔드 응답(json)에 status, email, name이 포함되어 있다고 가정
         if (json.status === "NEW_USER") {
           // 신규 회원: 회원가입 페이지로 이동 (이메일, 이름 전달)
-          navigate("/register", { 
-            state: { 
-              email: json.email, 
+          navigate("/register", {
+            state: {
+              email: json.email,
               name: json.name,
-              provider: 'google' 
-            } 
+              provider: "google",
+            },
           });
           // 회원가입으로 가므로 이전 페이지 저장 기록은 삭제
           sessionStorage.removeItem("prevPage");
-
         } else {
           // 기존 회원: 로그인 성공
           console.log("구글 로그인 성공:", json);
-          
+
           // 원래 있던 페이지로 이동
           const targetPath = getPreviousPage();
           sessionStorage.removeItem("prevPage"); // 사용했으니 삭제
-          navigate(targetPath); 
+          navigate(targetPath);
         }
       } else {
         const text = await res.text();
@@ -110,12 +110,11 @@ function LoginPage() {
         setLoginError("");
         const json = await res.json();
         console.log("로그인 성공:", json);
-        
+
         // 로그인 성공 시 이전 페이지로 이동
         // 일반 로그인은 페이지 새로고침이 없었으므로 location.state가 살아있음
         const targetPath = location.state?.from || "/";
         navigate(targetPath);
-
       } else {
         setLoginError("아이디 혹은 비밀번호가 일치하지 않습니다.");
       }
@@ -146,10 +145,10 @@ function LoginPage() {
 
     if (authCode) {
       isRun.current = true;
-      
+
       // 주소창 정리 (URL 뒤에 붙은 code=... 제거)
       window.history.replaceState({}, null, window.location.pathname);
-      
+
       setTimeout(() => {
         sendGoogleCodeToBackend(authCode);
       }, 0);
@@ -166,15 +165,21 @@ function LoginPage() {
 
         {/* 탭 */}
         <div className="login-tabs">
-          <div 
+          <div
             className={`tab-item ${isIndividual ? "active" : ""}`}
-            onClick={() => { setIsIndividual(true); setLoginError(""); }}
+            onClick={() => {
+              setIsIndividual(true);
+              setLoginError("");
+            }}
           >
             개인회원
           </div>
-          <div 
+          <div
             className={`tab-item ${!isIndividual ? "active" : ""}`}
-            onClick={() => { setIsIndividual(false); setLoginError(""); }}
+            onClick={() => {
+              setIsIndividual(false);
+              setLoginError("");
+            }}
           >
             기업회원
           </div>
@@ -189,8 +194,8 @@ function LoginPage() {
             placeholder={isIndividual ? "아이디 입력" : "기업 아이디 입력"}
             value={userId}
             onChange={(e) => {
-                setUserId(e.target.value);
-                setLoginError(""); 
+              setUserId(e.target.value);
+              setLoginError("");
             }}
           />
           <input
@@ -199,23 +204,21 @@ function LoginPage() {
             placeholder="비밀번호 입력"
             value={password}
             onChange={(e) => {
-                setPassword(e.target.value);
-                setLoginError(""); 
+              setPassword(e.target.value);
+              setLoginError("");
             }}
-            onKeyDown={(e) => e.key === 'Enter' && handleLogin()} 
+            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
           />
-          
+
           {/* 에러 메시지 출력 */}
-          {loginError && (
-            <span className="login-error-msg">{loginError}</span>
-          )}
+          {loginError && <span className="login-error-msg">{loginError}</span>}
         </div>
 
         {/* 옵션 */}
         <div className="options-row">
           <label>
-            <input 
-              type="checkbox" 
+            <input
+              type="checkbox"
               checked={autoLogin}
               onChange={(e) => setAutoLogin(e.target.checked)}
             />
@@ -235,11 +238,28 @@ function LoginPage() {
 
         {/* 구글 로그인 버튼 */}
         <button className="btn-google" onClick={handleGoogleLogin}>
-          <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
-            <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
-            <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
-            <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
-            <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 18 18"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"
+              fill="#4285F4"
+            />
+            <path
+              d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"
+              fill="#34A853"
+            />
+            <path
+              d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"
+              fill="#FBBC05"
+            />
+            <path
+              d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"
+              fill="#EA4335"
+            />
           </svg>
           구글 계정으로 계속
         </button>
