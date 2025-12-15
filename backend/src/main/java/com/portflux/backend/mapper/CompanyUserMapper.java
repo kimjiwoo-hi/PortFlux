@@ -1,6 +1,8 @@
 package com.portflux.backend.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
 import com.portflux.backend.beans.CompanyRegisterBean;
 import com.portflux.backend.beans.CompanyUserBean;
 
@@ -11,4 +13,5 @@ public interface CompanyUserMapper {
     
     int checkBusinessNumber(String businessNumber);
     CompanyUserBean findCompanyByEmail(String email);
+    int existsByCompanyName(@Param("name") String name);
 }
