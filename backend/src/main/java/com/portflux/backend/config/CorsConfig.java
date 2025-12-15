@@ -5,16 +5,19 @@ import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+// CorsConfig.java 파일 내부
+
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(@NonNull CorsRegistry registry) {
-        registry.addMapping("/**") // 모든 경로에 대해
-                .allowedOrigins("http://localhost:3000", "http://localhost:5173") // 프론트엔드 개발 서버 주소 허용
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // 허용할 HTTP 메소드
-                .allowedHeaders("*") // 모든 헤더 허용
-                .allowCredentials(true) // 쿠키 등 자격 증명 정보 허용
-                .maxAge(3600); // pre-flight 요청의 캐시 시간(초)
+        registry.addMapping("/**")
+                // ★★★ [수정 핵심] 와일드카드 대신 프론트엔드 URL 명시 ★★★
+                .allowedOriginPatterns("http://localhost:5173")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(3600);
     }
 }
