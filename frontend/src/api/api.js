@@ -33,16 +33,13 @@ export async function confirmPayment(payload) {
   return api.post("/payments/confirm", payload);
 }
 
-<<<<<<< HEAD
-// Follow APIs
-=======
->>>>>>> KSH-chatting
+// --- Follow APIs ---
 export async function getFollowing(userId) {
-  return api.get(`/${userId}/following`);
+  return api.get(`/users/${userId}/following`);
 }
 
 export async function getFollowers(userId) {
-  return api.get(`/${userId}/followers`);
+  return api.get(`/users/${userId}/followers`);
 }
 
 export async function follow(followerId, followingId) {
@@ -50,11 +47,11 @@ export async function follow(followerId, followingId) {
 }
 
 export async function unfollow(followerId, followingId) {
+  // axios.delete에서 body를 사용하려면 data 속성으로 감싸야 합니다.
   return api.delete("/unfollow", { data: { followerId, followingId } });
 }
 
-<<<<<<< HEAD
-// Chat APIs
+// --- Chat APIs ---
 export async function getChatRooms(userId) {
   return api.get(`/chats?userId=${userId}`);
 }
@@ -67,6 +64,5 @@ export async function getOrCreateChatRoom(payload) {
   return api.post("/chats", payload);
 }
 
-=======
->>>>>>> KSH-chatting
 export default api;
+
