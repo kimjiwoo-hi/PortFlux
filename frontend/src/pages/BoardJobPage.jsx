@@ -522,7 +522,7 @@ function BoardJobPage() {
 
   return (
     <div className="board-job-page">
-      <h1 className="page-title">채용 공고 검색</h1>
+      <h1 className="page-title"></h1>
       <JobSearchFilter onFilterChange={handleFilterChange} />
       <JobList filters={filters} />
     </div>

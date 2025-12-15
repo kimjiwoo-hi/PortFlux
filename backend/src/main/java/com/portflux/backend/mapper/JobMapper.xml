@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.portflux.backend.mapper.JobRepository">
+
+    <!-- ResultMap: 채용공고 기본 정보 -->
+    <resultMap id="JobResultMap" type="com.portflux.backend.beans.JobDto">
+        <id property="postId" column="post_id"/>
+        <result property="companyNum" column="company_num"/>
+        <result property="companyName" column="company_name"/>
+        <result property="companyImage" column="company_image"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="viewCnt" column="view_cnt"/>
+        <result property="jobRegion" column="job_region"/>
+        <result property="jobEducation" column="job_education"/>
+        <result property="jobEducationExclude" column="job_education_exclude"/>
+        <result property="jobSalaryMin" column="job_salary_min"/>
+        <result property="jobSalaryMax" column="job_salary_max"/>
+        <result property="jobDeadline" column="job_deadline"/>
+        <result property="jobStatus" column="job_status"/>
+        <result property="isBookmarked" column="is_bookmarked"/>
+    </resultMap>
+
+    <!-- 채용공고 목록 조회 -->
+    <select id="findJobs" resultMap="JobResultMap">
+        SELECT 
+            p.post_id,
+            p.company_num,
+            c.company_name,
+            c.company_image,
+            p.title,
+            p.content,
+            p.created_at,
+            p.updated_at,
+            p.view_cnt,
+            p.job_region,
+            p.job_career_type,
+            p.job_career_years,
+            p.job_education,
+            p.job_education_exclude,
+            p.job_salary_min,
+            p.job_salary_max,
+            p.job_deadline,
+            p.job_status,
+            p.job_industries,
+            p.job_company_types,
+            p.job_work_types,
+            p.job_work_days,
+            <if test="userNum != null">
+                CASE WHEN ps.save_num IS NOT NULL THEN 1 ELSE 0 END as is_bookmarked
+            </if>
+            <if test="userNum == null">
+                0 as is_bookmarked
+            </if>
+        FROM POST p
+        INNER JOIN COMPANY_USER c ON p.company_num = c.company_num
+        <if test="userNum != null">
+            LEFT JOIN POST_SAVE ps ON p.post_id = ps.post_id AND ps.user_num = #{userNum}
+        </if>
+        WHERE p.board_type = 'job'
+            AND p.job_status = 'ACTIVE'
+            AND (p.job_deadline IS NULL OR p.job_deadline >= SYSDATE)
+            
+            <!-- 지역 필터 -->
+            <if test="filter.regions != null and filter.regions.size() > 0">
+                AND p.job_region IN
+                <foreach collection="filter.regions" item="region" open="(" separator="," close=")">
+                    #{region}
+                </foreach>
+            </if>
+            
+            <!-- 경력 타입 필터 -->
+            <if test="filter.careerType != null and filter.careerType.size() > 0">
+                AND (
+                <foreach collection="filter.careerType" item="type" separator=" OR ">
+                    p.job_career_type LIKE '%' || #{type} || '%'
+                </foreach>
+                )
+            </if>
+            
+            <!-- 경력 연차 필터 -->
+            <if test="filter.careerYears != null and filter.careerYears.size() > 0">
+                AND (
+                <foreach collection="filter.careerYears" item="year" separator=" OR ">
+                    p.job_career_years LIKE '%' || #{year} || '%'
+                </foreach>
+                )
+            </if>
+            
+            <!-- 학력 필터 -->
+            <if test="filter.education != null">
+                AND p.job_education = #{filter.education}
+            </if>
+            
+            <!-- 학력무관 필터 -->
+            <if test="filter.educationExclude != null and filter.educationExclude == true">
+                AND p.job_education_exclude = 'Y'
+            </if>
+            
+            <!-- 업종 필터 -->
+            <if test="filter.industries != null and filter.industries.size() > 0">
+                AND (
+                <foreach collection="filter.industries" item="industry" separator=" OR ">
+                    p.job_industries LIKE '%' || #{industry} || '%'
+                </foreach>
+                )
+            </if>
+            
+            <!-- 기업형태 필터 -->
+            <if test="filter.companyTypes != null and filter.companyTypes.size() > 0">
+                AND (
+                <foreach collection="filter.companyTypes" item="companyType" separator=" OR ">
+                    p.job_company_types LIKE '%' || #{companyType} || '%'
+                </foreach>
+                )
+            </if>
+            
+            <!-- 근무형태 필터 -->
+            <if test="filter.workTypes != null and filter.workTypes.size() > 0">
+                AND (
+                <foreach collection="filter.workTypes" item="workType" separator=" OR ">
+                    p.job_work_types LIKE '%' || #{workType} || '%'
+                </foreach>
+                )
+            </if>
+            
+            <!-- 근무요일 필터 -->
+            <if test="filter.workDays != null and filter.workDays.size() > 0">
+                AND (
+                <foreach collection="filter.workDays" item="workDay" separator=" OR ">
+                    p.job_work_days LIKE '%' || #{workDay} || '%'
+                </foreach>
+                )
+            </if>
+            
+            <!-- 최소 급여 필터 -->
+            <if test="filter.salaryMin != null">
+                AND (p.job_salary_min IS NULL OR p.job_salary_min >= #{filter.salaryMin})
+            </if>
+            
+            <!-- 키워드 검색 (제목, 기업명) -->
+            <if test="filter.keyword != null and filter.keyword != ''">
+                AND (
+                    p.title LIKE '%' || #{filter.keyword} || '%'
+                    OR c.company_name LIKE '%' || #{filter.keyword} || '%'
+                )
+            </if>
+            
+        <!-- 정렬 -->
+        <choose>
+            <when test="filter.sort == 'views'">
+                ORDER BY p.view_cnt DESC, p.created_at DESC
+            </when>
+            <when test="filter.sort == 'deadline'">
+                ORDER BY p.job_deadline ASC, p.created_at DESC
+            </when>
+            <otherwise>
+                ORDER BY p.created_at DESC
+            </otherwise>
+        </choose>
+        
+        <!-- 페이징 -->
+        OFFSET #{filter.offset} ROWS
+        FETCH NEXT #{filter.limit} ROWS ONLY
+    </select>
+
+    <!-- 채용공고 총 개수 -->
+    <select id="countJobs" resultType="int">
+        SELECT COUNT(*)
+        FROM POST p
+        INNER JOIN COMPANY_USER c ON p.company_num = c.company_num
+        WHERE p.board_type = 'job'
+            AND p.job_status = 'ACTIVE'
+            AND (p.job_deadline IS NULL OR p.job_deadline >= SYSDATE)
+            
+            <if test="filter.regions != null and filter.regions.size() > 0">
+                AND p.job_region IN
+                <foreach collection="filter.regions" item="region" open="(" separator="," close=")">
+                    #{region}
+                </foreach>
+            </if>
+            
+            <if test="filter.careerType != null and filter.careerType.size() > 0">
+                AND (
+                <foreach collection="filter.careerType" item="type" separator=" OR ">
+                    p.job_career_type LIKE '%' || #{type} || '%'
+                </foreach>
+                )
+            </if>
+            
+            <if test="filter.careerYears != null and filter.careerYears.size() > 0">
+                AND (
+                <foreach collection="filter.careerYears" item="year" separator=" OR ">
+                    p.job_career_years LIKE '%' || #{year} || '%'
+                </foreach>
+                )
+            </if>
+            
+            <if test="filter.education != null">
+                AND p.job_education = #{filter.education}
+            </if>
+            
+            <if test="filter.educationExclude != null and filter.educationExclude == true">
+                AND p.job_education_exclude = 'Y'
+            </if>
+            
+            <if test="filter.industries != null and filter.industries.size() > 0">
+                AND (
+                <foreach collection="filter.industries" item="industry" separator=" OR ">
+                    p.job_industries LIKE '%' || #{industry} || '%'
+                </foreach>
+                )
+            </if>
+            
+            <if test="filter.companyTypes != null and filter.companyTypes.size() > 0">
+                AND (
+                <foreach collection="filter.companyTypes" item="companyType" separator=" OR ">
+                    p.job_company_types LIKE '%' || #{companyType} || '%'
+                </foreach>
+                )
+            </if>
+            
+            <if test="filter.workTypes != null and filter.workTypes.size() > 0">
+                AND (
+                <foreach collection="filter.workTypes" item="workType" separator=" OR ">
+                    p.job_work_types LIKE '%' || #{workType} || '%'
+                </foreach>
+                )
+            </if>
+            
+            <if test="filter.workDays != null and filter.workDays.size() > 0">
+                AND (
+                <foreach collection="filter.workDays" item="workDay" separator=" OR ">
+                    p.job_work_days LIKE '%' || #{workDay} || '%'
+                </foreach>
+                )
+            </if>
+            
+            <if test="filter.salaryMin != null">
+                AND (p.job_salary_min IS NULL OR p.job_salary_min >= #{filter.salaryMin})
+            </if>
+            
+            <if test="filter.keyword != null and filter.keyword != ''">
+                AND (
+                    p.title LIKE '%' || #{filter.keyword} || '%'
+                    OR c.company_name LIKE '%' || #{filter.keyword} || '%'
+                )
+            </if>
+    </select>
+
+    <!-- 채용공고 상세 조회 -->
+    <select id="findJobById" resultMap="JobResultMap">
+        SELECT 
+            p.post_id,
+            p.company_num,
+            c.company_name,
+            c.company_image,
+            p.title,
+            p.content,
+            p.created_at,
+            p.updated_at,
+            p.view_cnt,
+            p.job_region,
+            p.job_career_type,
+            p.job_career_years,
+            p.job_education,
+            p.job_education_exclude,
+            p.job_salary_min,
+            p.job_salary_max,
+            p.job_deadline,
+            p.job_status,
+            p.job_industries,
+            p.job_company_types,
+            p.job_work_types,
+            p.job_work_days,
+            <if test="userNum != null">
+                CASE WHEN ps.save_num IS NOT NULL THEN 1 ELSE 0 END as is_bookmarked
+            </if>
+            <if test="userNum == null">
+                0 as is_bookmarked
+            </if>
+        FROM POST p
+        INNER JOIN COMPANY_USER c ON p.company_num = c.company_num
+        <if test="userNum != null">
+            LEFT JOIN POST_SAVE ps ON p.post_id = ps.post_id AND ps.user_num = #{userNum}
+        </if>
+        WHERE p.post_id = #{postId}
+            AND p.board_type = 'job'
+    </select>
+
+    <!-- 채용공고 생성 -->
+    <insert id="insertJob">
+        INSERT INTO POST (
+            post_id,
+            company_num,
+            board_type,
+            title,
+            content,
+            job_region,
+            job_career_type,
+            job_career_years,
+            job_education,
+            job_education_exclude,
+            job_salary_min,
+            job_salary_max,
+            job_deadline,
+            job_status,
+            job_industries,
+            job_company_types,
+            job_work_types,
+            job_work_days,
+            created_at,
+            updated_at,
+            view_cnt
+        ) VALUES (
+            post_seq.NEXTVAL,
+            #{companyNum},
+            'job',
+            #{request.title},
+            #{request.content},
+            #{request.jobRegion},
+            #{request.jobCareerType, typeHandler=com.portflux.backend.mapper.JsonArrayTypeHandler},
+            #{request.jobCareerYears, typeHandler=com.portflux.backend.mapper.JsonArrayTypeHandler},
+            #{request.jobEducation},
+            <if test="request.jobEducationExclude != null and request.jobEducationExclude == true">'Y'</if>
+            <if test="request.jobEducationExclude == null or request.jobEducationExclude == false">'N'</if>,
+            #{request.jobSalaryMin},
+            #{request.jobSalaryMax},
+            #{request.jobDeadline},
+            'ACTIVE',
+            #{request.jobIndustries, typeHandler=com.portflux.backend.mapper.JsonArrayTypeHandler},
+            #{request.jobCompanyTypes, typeHandler=com.portflux.backend.mapper.JsonArrayTypeHandler},
+            #{request.jobWorkTypes, typeHandler=com.portflux.backend.mapper.JsonArrayTypeHandler},
+            #{request.jobWorkDays, typeHandler=com.portflux.backend.mapper.JsonArrayTypeHandler},
+            SYSDATE,
+            SYSDATE,
+            0
+        )
+    </insert>
+
+    <!-- 채용공고 수정 -->
+    <update id="updateJob">
+        UPDATE POST
+        SET 
+            title = #{request.title},
+            content = #{request.content},
+            job_region = #{request.jobRegion},
+            job_career_type = #{request.jobCareerType, typeHandler=com.portflux.backend.mapper.JsonArrayTypeHandler},
+            job_career_years = #{request.jobCareerYears, typeHandler=com.portflux.backend.mapper.JsonArrayTypeHandler},
+            job_education = #{request.jobEducation},
+            job_education_exclude = <if test="request.jobEducationExclude != null and request.jobEducationExclude == true">'Y'</if>
+                                   <if test="request.jobEducationExclude == null or request.jobEducationExclude == false">'N'</if>,
+            job_salary_min = #{request.jobSalaryMin},
+            job_salary_max = #{request.jobSalaryMax},
+            job_deadline = #{request.jobDeadline},
+            job_industries = #{request.jobIndustries, typeHandler=com.portflux.backend.mapper.JsonArrayTypeHandler},
+            job_company_types = #{request.jobCompanyTypes, typeHandler=com.portflux.backend.mapper.JsonArrayTypeHandler},
+            job_work_types = #{request.jobWorkTypes, typeHandler=com.portflux.backend.mapper.JsonArrayTypeHandler},
+            job_work_days = #{request.jobWorkDays, typeHandler=com.portflux.backend.mapper.JsonArrayTypeHandler},
+            updated_at = SYSDATE
+        WHERE post_id = #{postId}
+            AND board_type = 'job'
+    </update>
+
+    <!-- 채용공고 삭제 -->
+    <delete id="deleteJob">
+        DELETE FROM POST
+        WHERE post_id = #{postId}
+            AND board_type = 'job'
+    </delete>
+
+    <!-- 채용공고 상태 변경 -->
+    <update id="updateJobStatus">
+        UPDATE POST
+        SET job_status = #{status},
+            updated_at = SYSDATE
+        WHERE post_id = #{postId}
+            AND board_type = 'job'
+    </update>
+
+    <!-- 조회수 증가 -->
+    <update id="incrementViewCount">
+        UPDATE POST
+        SET view_cnt = view_cnt + 1
+        WHERE post_id = #{postId}
+    </update>
+
+    <!-- 북마크 추가 -->
+    <insert id="insertBookmark">
+        INSERT INTO POST_SAVE (save_num, post_id, user_num, saved_at)
+        VALUES (post_save_seq.NEXTVAL, #{postId}, #{userNum}, SYSDATE)
+    </insert>
+
+    <!-- 북마크 삭제 -->
+    <delete id="deleteBookmark">
+        DELETE FROM POST_SAVE
+        WHERE post_id = #{postId}
+            AND user_num = #{userNum}
+    </delete>
+
+    <!-- 북마크 여부 확인 -->
+    <select id="existsBookmark" resultType="int">
+        SELECT COUNT(*)
+        FROM POST_SAVE
+        WHERE post_id = #{postId}
+            AND user_num = #{userNum}
+    </select>
+
+    <!-- 북마크 목록 조회 -->
+    <select id="findBookmarks" resultMap="JobResultMap">
+        SELECT 
+            p.post_id,
+            p.company_num,
+            c.company_name,
+            c.company_image,
+            p.title,
+            p.content,
+            p.created_at,
+            p.updated_at,
+            p.view_cnt,
+            p.job_region,
+            p.job_career_type,
+            p.job_career_years,
+            p.job_education,
+            p.job_education_exclude,
+            p.job_salary_min,
+            p.job_salary_max,
+            p.job_deadline,
+            p.job_status,
+            p.job_industries,
+            p.job_company_types,
+            p.job_work_types,
+            p.job_work_days,
+            1 as is_bookmarked
+        FROM POST p
+        INNER JOIN COMPANY_USER c ON p.company_num = c.company_num
+        INNER JOIN POST_SAVE ps ON p.post_id = ps.post_id
+        WHERE ps.user_num = #{userNum}
+            AND p.board_type = 'job'
+        ORDER BY ps.saved_at DESC
+        OFFSET #{offset} ROWS
+        FETCH NEXT #{limit} ROWS ONLY
+    </select>
+
+    <!-- 북마크 총 개수 -->
+    <select id="countBookmarks" resultType="int">
+        SELECT COUNT(*)
+        FROM POST_SAVE ps
+        INNER JOIN POST p ON ps.post_id = p.post_id
+        WHERE ps.user_num = #{userNum}
+            AND p.board_type = 'job'
+    </select>
+
+    <!-- 지역별 채용공고 개수 -->
+    <select id="countJobsByRegion" resultType="map">
+        SELECT 
+            job_region,
+            COUNT(*) as job_count
+        FROM POST
+        WHERE board_type = 'job'
+            AND job_status = 'ACTIVE'
+            AND (job_deadline IS NULL OR job_deadline >= SYSDATE)
+        GROUP BY job_region
+    </select>
+
+    <!-- 내가 작성한 채용공고 목록 -->
+    <select id="findMyJobs" resultMap="JobResultMap">
+        SELECT 
+            p.post_id,
+            p.company_num,
+            c.company_name,
+            c.company_image,
+            p.title,
+            p.content,
+            p.created_at,
+            p.updated_at,
+            p.view_cnt,
+            p.job_region,
+            p.job_career_type,
+            p.job_career_years,
+            p.job_education,
+            p.job_education_exclude,
+            p.job_salary_min,
+            p.job_salary_max,
+            p.job_deadline,
+            p.job_status,
+            p.job_industries,
+            p.job_company_types,
+            p.job_work_types,
+            p.job_work_days,
+            0 as is_bookmarked
+        FROM POST p
+        INNER JOIN COMPANY_USER c ON p.company_num = c.company_num
+        WHERE p.company_num = #{companyNum}
+            AND p.board_type = 'job'
+        ORDER BY p.created_at DESC
+        OFFSET #{offset} ROWS
+        FETCH NEXT #{limit} ROWS ONLY
+    </select>
+
+    <!-- 내가 작성한 채용공고 총 개수 -->
+    <select id="countMyJobs" resultType="int">
+        SELECT COUNT(*)
+        FROM POST
+        WHERE company_num = #{companyNum}
+            AND board_type = 'job'
+    </select>
+
+    <!-- 마감일 지난 공고 자동 만료 처리 -->
+    <update id="expireJobs">
+        UPDATE POST
+        SET job_status = 'EXPIRED',
+            updated_at = SYSDATE
+        WHERE board_type = 'job'
+            AND job_status = 'ACTIVE'
+            AND job_deadline &lt; SYSDATE
+    </update>
+
+    <!-- 채용공고 작성자 확인 -->
+    <select id="isJobOwner" resultType="int">
+        SELECT COUNT(*)
+        FROM POST
+        WHERE post_id = #{postId}
+            AND company_num = #{companyNum}
+            AND board_type = 'job'
+    </select>
+
+</mapper>
