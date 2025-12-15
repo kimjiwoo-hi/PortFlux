@@ -275,7 +275,7 @@ function RegisterPage() {
         navigate("/success", { 
             state: { 
                 title: "회원가입 완료", 
-                message: "회원가입이 성공적으로 완료되었습니다. 로그인을 진행해주세요." 
+                message: "회원가입이 성공적으로 완료되었습니다." 
             } 
         });
       } else { console.error(await res.text()); }
