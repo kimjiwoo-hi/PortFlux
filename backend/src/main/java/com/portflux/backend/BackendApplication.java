@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @MapperScan("com.portflux.backend.mapper")
+
 public class BackendApplication {
 
 	public static void main(String[] args) {

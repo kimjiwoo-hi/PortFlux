@@ -39,3 +39,4 @@ public interface FollowMapper {
     @Select("Select follower_id From Follows where following_id = #{followingId}")
     List<Long> selectFollowerIds(Long followingId);
 }
+
