@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
 import { getFollowing, getFollowers, follow, unfollow } from '../api/api';
 import './FollowPage.css';
@@ -66,5 +67,12 @@ const MyPage = () => {
         </div>
     );
 };
+=======
+function MyPage() {
+  return (<div className="mypage">
+    asd
+  </div>);
+}
+>>>>>>> 3968d1dc1b5459df3f312b811cb6e0565e4d6349
 
 export default MyPage;
