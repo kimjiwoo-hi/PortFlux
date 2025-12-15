@@ -44,4 +44,9 @@
         WHERE company_email = #{email}
     </select>
 
+    <select id="existsByCompanyName" parameterType="String" resultType="int">
+        SELECT COUNT(*)
+        FROM COMPANY
+        WHERE lower(company_name) = lower(#{name})
+    </select>
 </mapper>
