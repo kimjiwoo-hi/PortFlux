@@ -78,12 +78,12 @@ const Header = () => {
       <header className="header">
         <div className="logolink">
           <div className="header-logo">
-            <Link to="/boardlookup">
+            <Link to="/">
               <img src={PortFluxLogo} alt="PortFluxLogo.png" />
             </Link>
           </div>
           <div className="link-container">
-            <Link to="/boardlookup"><div className={getLinkClass("/boardlookup")}>둘러보기</div></Link>
+            <Link to="/"><div className={getLinkClass("/")}>둘러보기</div></Link>
             <Link to="/boardjob"><div className={getLinkClass("/boardjob")}>채용</div></Link>
             <Link to="/boardfree"><div className={getLinkClass("/boardfree")}>커뮤니티</div></Link>
             <Link to="/etc"><div className={getLinkClass("/etc")}>기타</div></Link>
