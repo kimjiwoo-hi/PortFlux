@@ -23,10 +23,10 @@ public class IamportClient {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    @Value("${iamport.key:${IAMPORT_KEY:imp_test_key}}")
+    @Value("${iamport.key:imp_test_key}")
     private String iamportKey;
 
-    @Value("${iamport.secret:${IAMPORT_SECRET:imp_test_secret}}")
+    @Value("${iamport.secret:imp_test_secret}")
     private String iamportSecret;
 
     private static final String IAMPORT_API_BASE = "https://api.iamport.kr";

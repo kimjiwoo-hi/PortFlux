@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.portflux.backend.mapper.UserMapper">
+
+    <insert id="registerUser" parameterType="com.portflux.backend.beans.UserRegisterBean">
+        INSERT INTO USERS (
+            user_id, 
+            user_password, 
+            user_name, 
+            user_phone, 
+            user_email, 
+            user_nickname, 
+            drawn_user, 
+            user_create_at, 
+            user_level
+        ) VALUES (
+            #{email},        #{password}, 
+            #{name},         #{phoneNumber}, 
+            #{email},        #{nickname},     'N', 
+            SYSDATE, 
+            1
+        )
+    </insert>
+
+    <select id="checkNicknameCount" parameterType="String" resultType="int">
+        SELECT COUNT(*) 
+        FROM USERS 
+        WHERE user_nickname = #{nickname}
+    </select>
+
+    <select id="findUserByEmail" parameterType="String" resultType="com.portflux.backend.beans.UserBean">
+        SELECT 
+            user_num AS userNum,
+            user_id AS userId,
+            user_password AS userPassword,
+            user_name AS userName,
+            user_phone AS userPhone,
+            user_email AS userEmail,
+            user_nickname AS userNickname,
+            drawn_user AS drawnUser,
+            user_create_at AS userCreateAt,
+            user_level AS userLevel
+        FROM USERS
+        WHERE user_email = #{email}
+    </select>
+
+</mapper>

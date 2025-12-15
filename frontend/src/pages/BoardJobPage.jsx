@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect } from "react";
-import regions from "../database/regions"; // 경로: 이 파일이 src/components/ 에 있을 때 ../database/regions
+import regions from "../database/regions";
 import "./BoardJobPage.css";
 
 /* Debounce 훅 */
-function useDebounce(value, delay = 250) {
+function useDebounce(value, delay = 300) {
   const [v, setV] = useState(value);
   useEffect(() => {
     const t = setTimeout(() => setV(value), delay);
@@ -12,230 +12,499 @@ function useDebounce(value, delay = 250) {
   return v;
 }
 
-/* RegionFilter 컴포넌트 (내부 포함) */
-function RegionFilter({ onSearch }) {
-  const [activeRegionId, setActiveRegionId] = useState(regions[0]?.id || null);
-  const [query, setQuery] = useState("");
-  const q = useDebounce(query, 220);
+/* JobSearchFilter 컴포넌트 */
+function JobSearchFilter({ onFilterChange }) {
+  // 지역 선택
+  const [showRegionPanel, setShowRegionPanel] = useState(true);
+  const [selectedRegionId, setSelectedRegionId] = useState("seoul");
+  const [selectedDistricts, setSelectedDistricts] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const [selected, setSelected] = useState({});
-  const [counts, setCounts] = useState({});
+  // 경력 선택
+  const [showCareerPanel, setShowCareerPanel] = useState(false);
+  const [careerType, setCareerType] = useState([]); // ['신입', '경력', '경력무관']
+  const [careerYears, setCareerYears] = useState([]);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
+  // 학력 선택
+  const [showEducationPanel, setShowEducationPanel] = useState(false);
+  const [educationType, setEducationType] = useState(null);
+  const [educationExclude, setEducationExclude] = useState(false);
 
-    (async () => {
-      try {
-        const res = await fetch("/api/region-count", { signal });
-        if (!res.ok) throw new Error("no counts api");
-        const data = await res.json();
-        const map = {};
-        data.forEach((item) => {
-          map[item.region] = item.count;
-        });
-        setCounts(map);
-      } catch (err) {
-        if (err.name === "AbortError") {
-          return;
-        }
-        console.error("region-count fetch failed:", err);
-      }
-    })();
+  // 상세조건
+  const [showAdvancedPanel, setShowAdvancedPanel] = useState(false);
 
-    return () => {
-      controller.abort();
-    };
-  }, []);
+  const debouncedQuery = useDebounce(searchQuery, 300);
 
-  const activeRegion = useMemo(
-    () => regions.find((r) => r.id === activeRegionId) || regions[0],
-    [activeRegionId]
+  // 현재 선택된 지역 객체
+  const selectedRegion = useMemo(
+    () => regions.find((r) => r.id === selectedRegionId) || regions[0],
+    [selectedRegionId]
   );
 
-  const children = useMemo(() => {
-    return activeRegion?.children || [];
-  }, [activeRegion]);
+  // 필터링된 하위 지역
+  const filteredDistricts = useMemo(() => {
+    const districts = selectedRegion?.children || [];
+    if (!debouncedQuery) return districts;
+    const q = debouncedQuery.toLowerCase();
+    return districts.filter((d) => d.name.toLowerCase().includes(q));
+  }, [selectedRegion, debouncedQuery]);
 
-  const filteredChildren = useMemo(() => {
-    if (!q) return children;
-    const qq = q.trim().toLowerCase();
-    return children.filter((c) => {
-      const name = (c.name || "").toLowerCase();
-      return name.includes(qq) || (counts[c.id] && String(counts[c.id]).includes(qq));
-    });
-  }, [children, q, counts]);
+  // 전체 선택 체크 여부
+  const isAllSelected = useMemo(() => {
+    const districtIds = (selectedRegion?.children || []).map((d) => d.id);
+    return districtIds.length > 0 && districtIds.every((id) => selectedDistricts[id]);
+  }, [selectedRegion, selectedDistricts]);
 
-  function toggleChild(childId) {
-    setSelected((prev) => {
-      const next = { ...prev };
-      if (next[childId]) delete next[childId];
-      else next[childId] = true;
-      return next;
-    });
+  // 선택된 지역 개수
+  const selectedCount = useMemo(() => {
+    return Object.keys(selectedDistricts).filter((key) => selectedDistricts[key]).length;
+  }, [selectedDistricts]);
+
+  // 지역 전체 선택/해제
+  function toggleAllDistricts() {
+    const districtIds = (selectedRegion?.children || []).map((d) => d.id);
+    if (isAllSelected) {
+      setSelectedDistricts((prev) => {
+        const next = { ...prev };
+        districtIds.forEach((id) => delete next[id]);
+        return next;
+      });
+    } else {
+      setSelectedDistricts((prev) => {
+        const next = { ...prev };
+        districtIds.forEach((id) => (next[id] = true));
+        return next;
+      });
+    }
   }
 
-  function toggleRegionAll(region) {
-    const ids = (region.children || []).map((c) => c.id);
-    const allSelected = ids.length > 0 && ids.every((id) => selected[id]);
-    setSelected((prev) => {
+  // 개별 지역 선택/해제
+  function toggleDistrict(districtId) {
+    setSelectedDistricts((prev) => {
       const next = { ...prev };
-      if (allSelected) {
-        ids.forEach((id) => delete next[id]);
+      if (next[districtId]) {
+        delete next[districtId];
       } else {
-        ids.forEach((id) => {
-          next[id] = true;
-        });
+        next[districtId] = true;
       }
       return next;
     });
   }
 
-  const selectedList = useMemo(() => {
-    const map = {};
-    regions.forEach((r) => (r.children || []).forEach((c) => (map[c.id] = { ...c, parentId: r.id, parentName: r.name })));
-    return Object.keys(selected).map((id) => map[id]).filter(Boolean);
-  }, [selected]);
-
-  const selectedCount = selectedList.length;
-
-  function removeTag(id) {
-    setSelected((prev) => {
+  // 지역 초기화
+  function resetRegion() {
+    const districtIds = (selectedRegion?.children || []).map((d) => d.id);
+    setSelectedDistricts((prev) => {
       const next = { ...prev };
-      delete next[id];
+      districtIds.forEach((id) => delete next[id]);
       return next;
     });
   }
 
-  function clearAll() {
-    setSelected({});
+  // 경력 타입 토글
+  function toggleCareerType(type) {
+    setCareerType((prev) => {
+      if (prev.includes(type)) {
+        return prev.filter((t) => t !== type);
+      } else {
+        return [...prev, type];
+      }
+    });
   }
 
+  // 경력 연차 토글
+  function toggleCareerYear(year) {
+    setCareerYears((prev) => {
+      if (prev.includes(year)) {
+        return prev.filter((y) => y !== year);
+      } else {
+        return [...prev, year];
+      }
+    });
+  }
+
+  // 경력 선택 초기화
+  function resetCareer() {
+    setCareerType([]);
+    setCareerYears([]);
+  }
+
+  // 학력 선택 초기화
+  function resetEducation() {
+    setEducationType(null);
+    setEducationExclude(false);
+  }
+
+  // 검색 실행
   function handleSearch() {
-    const ids = Object.keys(selected);
-    if (onSearch) onSearch(ids);
-    else console.log("검색:", ids);
+    const filters = {
+      regions: Object.keys(selectedDistricts).filter((key) => selectedDistricts[key]),
+      careerType,
+      careerYears,
+      education: educationType,
+      educationExclude,
+    };
+    
+    if (onFilterChange) {
+      onFilterChange(filters);
+    }
+    console.log("검색 필터:", filters);
   }
 
   return (
-    <div className="rf-wrapper" role="region" aria-label="지역 필터">
-      <div className="rf-top">
-        <div className="rf-left-title">
-          {/* 핀 삭제됨 */}
-          <strong>지역</strong>
-        </div>
-
-        {/* rf-searchbox를 일반적인 flex 아이템으로 배치 (절대 위치 제거) */}
-        <div className="rf-searchbox">
-          <input
-            type="text"
-            placeholder="지역명 입력"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            aria-label="지역 검색"
-          />
-          {query && (
-            <button className="clear-input" onClick={() => setQuery("")} aria-label="입력 지우기">
-              ×
-            </button>
-          )}
-
-          {/* 검색 버튼을 searchbox 바깥으로 빼내어 rf-top의 마지막 flex 아이템으로 배치 */}
-          {/* 이미지와 같이 버튼을 검색창 오른쪽에 붙이기 위해, 이 div를 rf-top 내부의 마지막 아이템으로 배치하는 것이 더 깔끔합니다. */}
-        </div>
-        
-        {/* 검색 버튼을 rf-top의 직접적인 자식으로 배치하여, rf-left-title, rf-searchbox와 함께 flex 정렬되도록 수정 */}
-        {/* rf-search-actions 대신 버튼만 직접 배치하여 HTML 구조 단순화 및 CSS flex 활용 */}
-        <button className="rf-search-btn" onClick={handleSearch}>
-          검색하기
+    <div className="job-search-filter">
+      {/* 필터 버튼 영역 */}
+      <div className="filter-buttons">
+        <button
+          className={`filter-btn ${showRegionPanel ? "active" : ""}`}
+          onClick={() => {
+            setShowRegionPanel(!showRegionPanel);
+            setShowCareerPanel(false);
+            setShowEducationPanel(false);
+            setShowAdvancedPanel(false);
+          }}
+        >
+          📍 지역 선택 {showRegionPanel ? "▲" : "▼"}
         </button>
+
+        <button
+          className={`filter-btn ${showCareerPanel ? "active" : ""}`}
+          onClick={() => {
+            setShowCareerPanel(!showCareerPanel);
+            setShowRegionPanel(false);
+            setShowEducationPanel(false);
+            setShowAdvancedPanel(false);
+          }}
+        >
+          💼 경력 선택 {showCareerPanel ? "▲" : "▼"}
+        </button>
+
+        <button
+          className={`filter-btn ${showEducationPanel ? "active" : ""}`}
+          onClick={() => {
+            setShowEducationPanel(!showEducationPanel);
+            setShowRegionPanel(false);
+            setShowCareerPanel(false);
+            setShowAdvancedPanel(false);
+          }}
+        >
+          🎓 학력 선택 {showEducationPanel ? "▲" : "▼"}
+        </button>
+
+        <button
+          className={`filter-btn ${showAdvancedPanel ? "active" : ""}`}
+          onClick={() => {
+            setShowAdvancedPanel(!showAdvancedPanel);
+            setShowRegionPanel(false);
+            setShowCareerPanel(false);
+            setShowEducationPanel(false);
+          }}
+        >
+          ⚙️ 상세조건 {showAdvancedPanel ? "▲" : "▼"}
+        </button>
+
+        <div className="filter-right">
+          <button className="search-btn" onClick={handleSearch}>
+            검색하기
+          </button>
+        </div>
       </div>
 
-      <div className="rf-main">
-        <div className="rf-col rf-col-left" role="list">
-          {regions.map((r) => (
-            <button key={r.id} className={`rf-region-btn ${r.id === activeRegionId ? "active" : ""}`} onClick={() => setActiveRegionId(r.id)}>
-              <span>{r.name}</span>
-            </button>
-          ))}
-        </div>
+      {/* 지역 선택 패널 */}
+      {showRegionPanel && (
+        <div className="filter-panel region-panel">
+          <div className="region-layout">
+            {/* 좌측: 광역시 리스트 */}
+            <div className="region-list">
+              {regions.map((region) => (
+                <button
+                  key={region.id}
+                  className={`region-item ${selectedRegionId === region.id ? "active" : ""}`}
+                  onClick={() => setSelectedRegionId(region.id)}
+                >
+                  <span className="region-name">{region.name}</span>
+                  <span className="region-count">(0)</span>
+                </button>
+              ))}
+            </div>
 
-        <div className="rf-col rf-col-center">
-          <div className="rf-center-header">
-            <label className="rf-checkbox-row">
+            {/* 우측: 하위 지역 선택 */}
+            <div className="district-area">
+              <div className="district-header">
+                <label className="district-all">
+                  <input
+                    type="checkbox"
+                    checked={isAllSelected}
+                    onChange={toggleAllDistricts}
+                  />
+                  <strong>{selectedRegion.name} 전체</strong>
+                </label>
+                <button className="district-reset" onClick={resetRegion}>
+                  지역 초기화
+                </button>
+              </div>
+
+              {/* 지역 검색 입력 */}
+              <div className="district-search">
+                <input
+                  type="text"
+                  placeholder="지역명 검색..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="district-search-input"
+                />
+              </div>
+
+              <div className="district-grid">
+                {filteredDistricts.length > 0 ? (
+                  filteredDistricts.map((district) => (
+                    <label key={district.id} className="district-item">
+                      <input
+                        type="checkbox"
+                        checked={!!selectedDistricts[district.id]}
+                        onChange={() => toggleDistrict(district.id)}
+                      />
+                      <span>{district.name}</span>
+                    </label>
+                  ))
+                ) : (
+                  <p className="no-results">검색 결과가 없습니다.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 경력 선택 패널 */}
+      {showCareerPanel && (
+        <div className="filter-panel career-panel">
+          <h3>경력 전체</h3>
+
+          <div className="career-type-row">
+            <label>
               <input
                 type="checkbox"
-                checked={(activeRegion.children || []).length > 0 && (activeRegion.children || []).every((c) => selected[c.id])}
-                onChange={() => toggleRegionAll(activeRegion)}
+                checked={careerType.includes("신입")}
+                onChange={() => toggleCareerType("신입")}
               />
-              <strong>{activeRegion.name} 전체</strong>
+              <span>신입</span>
             </label>
-
-            <div className="muted small">지역 펼쳐보기 · 지역 초기화</div>
+            <label>
+              <input
+                type="checkbox"
+                checked={careerType.includes("경력")}
+                onChange={() => toggleCareerType("경력")}
+              />
+              <span>경력</span>
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={careerType.includes("경력무관")}
+                onChange={() => toggleCareerType("경력무관")}
+              />
+              <span>경력무관</span>
+            </label>
           </div>
 
-          <div className="rf-children">
-            {filteredChildren.length === 0 ? (
-              <div className="rf-empty">검색 결과가 없습니다.</div>
-            ) : (
-              filteredChildren.map((child) => (
-                <label key={child.id} className="rf-child">
-                  <input type="checkbox" checked={!!selected[child.id]} onChange={() => toggleChild(child.id)} />
-                  <span className="rf-child-name">{child.name}</span>
-                  {counts[child.id] !== undefined && <span className="rf-count">({counts[child.id].toLocaleString()})</span>}
-                </label>
-              ))
-            )}
+          <div className="career-years-grid">
+            {[
+              "~1년", "1년", "2년", "3년", "4년",
+              "5년", "6년", "7년", "8년", "9년",
+              "10년", "11년", "12년", "13년", "14년",
+              "15년", "16년", "17년", "18년", "19년",
+              "20년", "20년~"
+            ].map((year) => (
+              <button
+                key={year}
+                className={`career-year-btn ${careerYears.includes(year) ? "active" : ""}`}
+                onClick={() => toggleCareerYear(year)}
+              >
+                {year}
+              </button>
+            ))}
+          </div>
+
+          <div className="panel-footer">
+            <button className="reset-btn" onClick={resetCareer}>
+              선택 초기화 ↻
+            </button>
+            <button className="close-btn" onClick={() => setShowCareerPanel(false)}>
+              닫기
+            </button>
           </div>
         </div>
+      )}
 
-        <div className="rf-col rf-col-right">
-          <div className="rf-help">
-            <div>
-              <strong>팁</strong>
-            </div>
-            <div className="muted small">검색창에 지역명을 입력하면 실시간으로 필터됩니다.</div>
-            <div className="muted small">전체 선택을 클릭하면 해당 광역의 모든 하위 지역을 토글합니다.</div>
+      {/* 학력 선택 패널 */}
+      {showEducationPanel && (
+        <div className="filter-panel education-panel">
+          <h3>학력 전체</h3>
+
+          <div className="education-exclude">
+            <label>
+              <input
+                type="checkbox"
+                checked={educationExclude}
+                onChange={(e) => setEducationExclude(e.target.checked)}
+              />
+              <span>학력무관</span>
+            </label>
           </div>
+
+          <div className="education-grid">
+            {[
+              { id: "high_below", label: "고교 졸업\n이하" },
+              { id: "high", label: "고등학교\n졸업" },
+              { id: "college_2_3", label: "대학 졸업\n(2,3년제)" },
+              { id: "university", label: "대학교 졸업\n(4년제)" },
+              { id: "master", label: "대학원 석사\n졸업" },
+              { id: "doctor", label: "대학원 박사\n졸업" },
+              { id: "doctor_above", label: "박사 졸업\n이상" }
+            ].map((edu) => (
+              <button
+                key={edu.id}
+                className={`education-btn ${educationType === edu.id ? "active" : ""}`}
+                onClick={() => setEducationType(educationType === edu.id ? null : edu.id)}
+              >
+                {edu.label.split("\n").map((line, i) => (
+                  <React.Fragment key={i}>
+                    {line}
+                    {i < edu.label.split("\n").length - 1 && <br />}
+                  </React.Fragment>
+                ))}
+              </button>
+            ))}
+          </div>
+
+          <div className="panel-footer">
+            <button className="reset-btn" onClick={resetEducation}>
+              선택 초기화 ↻
+            </button>
+            <button className="close-btn" onClick={() => setShowEducationPanel(false)}>
+              닫기
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 상세조건 패널 */}
+      {showAdvancedPanel && (
+        <div className="filter-panel advanced-panel">
+          <p>상세조건 패널 (추후 구현)</p>
+        </div>
+      )}
+
+      {/* 하단 선택 카운트 */}
+      <div className="filter-footer">
+        <span className="selected-count">선택된 {selectedCount}건</span>
+      </div>
+    </div>
+  );
+}
+
+/* JobCard 컴포넌트 */
+function JobCard({ job }) {
+  return (
+    <div className="job-card">
+      <div className="job-card-header">
+        {job.company_logo && (
+          <img src={job.company_logo} alt={job.company_name} className="company-logo" />
+        )}
+        <div className="company-info">
+          <h4>{job.title}</h4>
+          <p className="company-name">{job.company_name}</p>
         </div>
       </div>
 
-      <div className="rf-bottom">
-        <div className="rf-bottom-left">
-          {selectedList.length === 0 ? (
-            <span className="muted">선택된 지역 없음</span>
-          ) : (
-            selectedList.map((s) => (
-              <span key={s.id} className="rf-bottom-tag">
-                {s.parentName} &gt; {s.name}
-                <button className="tag-x" onClick={() => removeTag(s.id)}>
-                  ✕
-                </button>
-              </span>
-            ))
-          )}
-
-          <div className="rf-bottom-actions">
-            {/* 숫자만 표시 (선택된 텍스트 제거) */}
-            <div className="rf-summary rf-summary-bottom">
-              <div className="selected-count">{selectedCount.toLocaleString()}</div>
-            </div>
-
-            {/* 초기화 버튼 - 선택이 있을 때만 렌더 */}
-            {selectedCount > 0 && (
-              <button
-                type="button"
-                className="rf-reset-btn rf-reset-btn-bottom"
-                onClick={clearAll}
-                aria-label="선택 초기화"
-              >
-                초기화
-              </button>
-            )}
-          </div>
+      <div className="job-card-body">
+        <div className="job-meta">
+          <span className="job-location">📍 {job.location}</span>
+          <span className="job-career">{job.career}</span>
+          <span className="job-education">{job.education}</span>
         </div>
+        <div className="job-salary">
+          💰 {job.salary}
+        </div>
+      </div>
 
-        <div className="rf-bottom-right" />
+      <div className="job-card-footer">
+        <span className="job-deadline">{job.deadline}</span>
+        <button className="job-bookmark">⭐</button>
+      </div>
+    </div>
+  );
+}
+
+/* JobList 컴포넌트 */
+function JobList({ filters }) {
+  // 실제로는 API 호출하여 필터링된 데이터를 가져옴
+  const mockJobs = [
+    {
+      id: 1,
+      title: "ULTRAFIT 헬디자인 신입",
+      company_name: "(주)이노그루우",
+      company_logo: null,
+      location: "서울전체",
+      career: "신입",
+      education: "대졸",
+      salary: "면접 시 50만원",
+      deadline: "~01.01(목)",
+    },
+    {
+      id: 2,
+      title: "(주)올비메디텍 구매 담당 채용",
+      company_name: "(주)올비메디텍",
+      company_logo: null,
+      location: "서울전체",
+      career: "5년",
+      education: "초대졸",
+      salary: "면접 시 50만원",
+      deadline: "~01.09(금)",
+    },
+    {
+      id: 3,
+      title: "편집디자이너 경력 채용",
+      company_name: "(주)유니온뷰",
+      company_logo: null,
+      location: "서울전체",
+      career: "경력",
+      education: "고졸",
+      salary: "면접 시 50만원",
+      deadline: "~01.03(토)",
+    },
+  ];
+
+  // filters를 활용한 필터링 로직 (실제로는 서버에서 처리)
+  useEffect(() => {
+    if (filters) {
+      console.log("현재 적용된 필터:", filters);
+      // 여기서 실제 API 호출
+      // fetchJobs(filters).then(setJobs);
+    }
+  }, [filters]);
+
+  return (
+    <div className="job-list">
+      <h3 className="job-list-title">이 공고, 놓치지 마세요!</h3>
+      {filters && (
+        <div className="applied-filters">
+          {filters.regions?.length > 0 && (
+            <span>지역: {filters.regions.length}개</span>
+          )}
+          {filters.careerType?.length > 0 && (
+            <span>경력: {filters.careerType.join(", ")}</span>
+          )}
+          {filters.education && (
+            <span>학력: {filters.education}</span>
+          )}
+        </div>
+      )}
+      <div className="job-grid">
+        {mockJobs.map((job) => (
+          <JobCard key={job.id} job={job} />
+        ))}
       </div>
     </div>
   );
@@ -243,22 +512,19 @@ function RegionFilter({ onSearch }) {
 
 /* BoardJobPage 최상위 컴포넌트 */
 function BoardJobPage() {
-  function handleSearch(selectedIds) {
-    // 여기에서 서버 호출 또는 라우팅 처리
-    console.log("BoardJobPage - 선택된 지역들:", selectedIds);
+  const [filters, setFilters] = useState(null);
+
+  function handleFilterChange(newFilters) {
+    setFilters(newFilters);
+    console.log("필터 변경:", newFilters);
+    // 여기서 API 호출하여 채용 공고 목록 새로 불러오기
   }
 
   return (
     <div className="board-job-page">
-      <div style={{ marginBottom: 10 }}>
-        <h2>채용 공고 검색</h2>
-      </div>
-
-      <RegionFilter onSearch={handleSearch} />
-
-      <div style={{ marginTop: 10 }}>
-        {/* TODO: 검색 결과 영역 */}
-      </div>
+      <h1 className="page-title">채용 공고 검색</h1>
+      <JobSearchFilter onFilterChange={handleFilterChange} />
+      <JobList filters={filters} />
     </div>
   );
 }
