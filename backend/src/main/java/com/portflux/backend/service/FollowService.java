@@ -22,9 +22,7 @@ public class FollowService {
 
     private final FollowRepository followRepository;
 
-    /**
-     * 팔로우 처리
-     */
+    //팔로우 처리
     @Transactional
     public void follow(Long followerId, Long followingId) {
 
@@ -55,49 +53,37 @@ public class FollowService {
         followRepository.save(follow);
     }
 
-    /**
-     * 언팔로우 처리
-     */
+    //언팔로우 처리
     @Transactional
     public void unfollow(Long followerId, Long followingId) {
         followRepository.deleteByFollowerIdAndFollowingId(followerId, followingId);
     }
 
-    /**
-     * 팔로우 여부 확인
-     */
+    //팔로우 여부 확인
     @Transactional(readOnly = true)
     public boolean isFollowing(Long followerId, Long followingId) {
         return followRepository.existsByFollowerIdAndFollowingId(followerId, followingId);
     }
 
-    /**
-     * 팔로잉 수 조회
-     */
+    //팔로잉 수 조회
     @Transactional(readOnly = true)
     public long countFollowing(Long userNum) {
         return followRepository.countByFollowerId(userNum);
     }
 
-    /**
-     * 팔로워 수 조회
-     */
+    //팔로워 수 조회
     @Transactional(readOnly = true)
     public long countFollowers(Long userNum) {
         return followRepository.countByFollowingId(userNum);
     }
 
-    /**
-     * 팔로잉 목록 조회
-     */
+    //팔로잉 목록 조회
     @Transactional(readOnly = true)
     public List<FollowBean> getFollowingList(Long userNum) {
         return followRepository.findByFollowerIdOrderByCreatedAtDesc(userNum);
     }
 
-    /**
-     * 팔로워 목록 조회
-     */
+    //팔로워 목록 조회
     @Transactional(readOnly = true)
     public List<FollowBean> getFollowerList(Long userNum) {
         return followRepository.findByFollowingIdOrderByCreatedAtDesc(userNum);
