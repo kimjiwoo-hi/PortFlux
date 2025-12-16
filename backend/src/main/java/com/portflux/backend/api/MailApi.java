@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/mail")
 @RequiredArgsConstructor
+
 public class MailApi {
 
     private final MailService mailService;
