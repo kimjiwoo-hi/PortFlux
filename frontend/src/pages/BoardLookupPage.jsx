@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // useNavigate 추가
 import { tagData, tagSearchMap } from '../database/taglist';
 
-// 예시 더미 데이터 (isLiked 상태 추가)
 const initialPosts = [
   { id: 1, title: '모던한 스타일의 포트폴리오', author: '김디자인', imageUrl: 'https://cdn.dribbble.com/userupload/12461999/file/original-251950a7c4585c49086113b190f7f224.png?resize=1024x768', likes: 125, views: 2400, isLiked: false },
   { id: 2, title: '미니멀리즘 웹사이트 디자인', author: '이개발', imageUrl: 'https://cdn.dribbble.com/userupload/12159483/file/original-958e42103d1f4ce4f3f15c7a56111a43.png?resize=1024x768', likes: 99, views: 1800, isLiked: false },
@@ -19,10 +18,10 @@ const initialPosts = [
 function BoardLookupPage() {
   const [selectedTags, setSelectedTags] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
-  const [posts, setPosts] = useState(initialPosts);
+  const [posts, /*setPosts*/] = useState(initialPosts);
   
   // 로그인 상태를 관리하는 state (기능 확인을 위해 우선 true로 설정)
-  const [isLoggedIn, setIsLoggedIn] = useState(true); 
+  const [isLoggedIn, /*setIsLoggedIn*/] = useState(true); 
   const navigate = useNavigate(); // 페이지 이동을 위한 hook
 
   const lowerCaseQuery = searchQuery.toLowerCase().trim();
@@ -76,17 +75,13 @@ function BoardLookupPage() {
 
   // '게시물 추가' 버튼 클릭 시 호출될 핸들러
   const handleAddPostClick = () => {
-    navigate('/upload-post'); // 게시물 작성 페이지로 이동 (경로는 예시)
+    navigate('/board/write'); // 게시물 작성 페이지로 이동
   };
 
   // 로그인 상태에 따라 렌더링할 게시물 목록을 동적으로 생성
   let postsToRender = [...posts];
   if (isLoggedIn) {
-    // 로그인 상태이면, '게시물 추가' 아이템을 배열 맨 앞에 추가
-    postsToRender.unshift({
-      id: 'add-new-post', // 고유한 key 값
-      type: 'add-new' // 타입을 지정하여 일반 게시물과 구분
-    });
+    postsToRender.unshift({ id: 'add-new-post', type: 'add-new' });
   }
 
   return (
@@ -127,9 +122,8 @@ function BoardLookupPage() {
       </div>
 
       <main className="board-grid">
-        {postsToRender.map(post => (
+        {postsToRender.map(post =>
           post.type === 'add-new' ? (
-            // '게시물 추가' 아이템일 경우
             <div
               key={post.id}
               className="board-item add-new-item"
@@ -138,9 +132,12 @@ function BoardLookupPage() {
               <div className="add-new-plus">+</div>
             </div>
           ) : (
-            // 일반 게시물일 경우
             <div key={post.id} className="board-item">
-              <img src={post.imageUrl} alt={post.title} className="board-item-thumbnail" />
+              <img
+                src={post.imageUrl}
+                alt={post.title}
+                className="board-item-thumbnail"
+              />
               <div className="board-item-info">
                 <h4 className="info-title">{post.title}</h4>
                 <a href={`/profile/${post.author}`} className="info-author">
@@ -158,7 +155,7 @@ function BoardLookupPage() {
               </div>
             </div>
           )
-        ))}
+        )}
       </main>
     </div>
   );
