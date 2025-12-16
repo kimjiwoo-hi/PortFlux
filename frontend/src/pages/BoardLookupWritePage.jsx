@@ -4,7 +4,7 @@ import './BoardLookupWritePage.css';
 import { tagData } from '../database/taglist.js'; // tagData import 추가
 
 // 모든 태그를 하나의 배열로 만듭니다 (자동완성용)
-const allTags = Object.values(tagData).flat();
+// const allTags = Object.values(tagData).flat(); // 이 라인은 이제 삭제됩니다.
 
 export default function BoardLookupWritePage() {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -19,16 +19,21 @@ export default function BoardLookupWritePage() {
   // 카테고리 펼침 상태
   const [expandedCategories, setExpandedCategories] = useState({});
 
+  // allTags는 이제 useMemo를 사용하여 컴포넌트 내부에서 한 번만 계산됩니다.
+  const allTags = useMemo(() => {
+    return Object.values(tagData).flat();
+  }, []);
+
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
+      reader.onloadend = () => { 
         setSelectedImage(reader.result);
       };
       reader.readAsDataURL(file);
     }
-  };
+  };6
 
   // 태그 입력창 변경 핸들러 (자동완성 기능 추가)
   const handleTagInputChange = (e) => {
