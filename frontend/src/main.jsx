@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 import BoardFree from "./pages/BoardFreePage";
 import BoardJob from "./pages/BoardJobPage.jsx";
 import BoardLookup from "./pages/BoardLookupPage.jsx";
+import BoardLookupWrite from "./pages/BoardLookupWritePage.jsx";
 import Cart from "./pages/CartPage.jsx";
 import MyPage from "./pages/MyPage.jsx";
 import OrderResultPage from "./pages/OrderResultPage.jsx";
@@ -33,8 +34,12 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <BoardLookup />
+        element: <BoardLookup />,
       },
+      {
+        path: "/board/write",
+        element: <BoardLookupWrite />
+      }
     ],
   },
   {
@@ -42,15 +47,15 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/boardfree",
-        element: <BoardFree />
+        element: <BoardFree />,
       },
       {
         path: "/boardjob",
-        element: <BoardJob />
+        element: <BoardJob />,
       },
       {
         path: "/cart",
-        element: <Cart />
+        element: <Cart />,
       },
       {
         path: "/mypage",
@@ -76,36 +81,36 @@ const router = createBrowserRouter([
       },
       {
         path: "/order-result",
-        element: <OrderResultPage />
+        element: <OrderResultPage />,
       },
       {
         path: "/login",
-        element: <LoginPage />
+        element: <LoginPage />,
       },
       {
         path: "/register",
-        element: <RegisterPage />
+        element: <RegisterPage />,
       },
       {
         path: "/findid",
-        element: <FindIdPage />
+        element: <FindIdPage />,
       },
       {
         path: "/findpassword",
-        element: <FindPasswordPage />
+        element: <FindPasswordPage />,
       },
       {
         path: "/success",
-        element: <SuccessPage />
+        element: <SuccessPage />,
       },
       {
         path: "/etc",
-        element: <NotFound />
+        element: <NotFound />,
       },
       {
         path: "*",
-        element: <NotFound />
-      }
+        element: <NotFound />,
+      },
     ],
   },
 ]);
