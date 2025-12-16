@@ -160,6 +160,12 @@ public class UserService {
         if (updateUser.getUserEmail() != null) {
             user.setUserEmail(updateUser.getUserEmail());
         }
+        if (updateUser.getUserImage() != null) {
+            user.setUserImage(updateUser.getUserImage());
+        }
+        if (updateUser.getUserBanner() != null) {
+            user.setUserBanner(updateUser.getUserBanner());
+        }
 
         userRepository.save(user);
     }
