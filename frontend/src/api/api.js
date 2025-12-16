@@ -1,38 +1,41 @@
 import axios from "axios";
 
+import axios from "axios";
+
 const api = axios.create({
-  baseURL: "/api",
+  baseURL: "/", // baseURL을 루트로 변경
   headers: { "Content-Type": "application/json" },
 });
 
 // --- Cart APIs ---
 export async function getCart(userId) {
   // TODO: userId는 추후 인증 로직을 통해 자동으로 처리되도록 변경해야 합니다.
-  return api.get(`/cart/${userId}`);
+  return api.get(`/api/cart/${userId}`);
 }
 
 export async function addToCart(userId, item) {
-  return api.post(`/cart/${userId}/items`, item);
+  return api.post(`/api/cart/${userId}/items`, item);
 }
 
 export async function updateCartQuantity(cartId, qty) {
-  return api.patch(`/cart/items/${cartId}`, { qty });
+  return api.patch(`/api/cart/items/${cartId}`, { qty });
 }
 
 export async function removeFromCart(cartId) {
-  return api.delete(`/cart/items/${cartId}`);
+  return api.delete(`/api/cart/items/${cartId}`);
 }
 
 
 // --- Order & Payment APIs ---
 export async function createOrder(payload) {
-  return api.post("/orders", payload);
+  return api.post("/api/orders", payload);
 }
 
 export async function confirmPayment(payload) {
-  return api.post("/payments/confirm", payload);
+  return api.post("/api/payments/confirm", payload);
 }
 
+// --- Follow APIs ---
 // --- Follow APIs ---
 export async function getFollowing(userId) {
   return api.get(`/users/${userId}/following`);
@@ -43,7 +46,7 @@ export async function getFollowers(userId) {
 }
 
 export async function follow(followerId, followingId) {
-  return api.post("/follow", { followerId, followingId });
+  return api.post("/api/follow", { followerId, followingId });
 }
 
 export async function unfollow(followerId, followingId) {
@@ -65,4 +68,5 @@ export async function getOrCreateChatRoom(payload) {
 }
 
 export default api;
+
 
