@@ -23,6 +23,10 @@ import RegisterPage from "./pages/RegisterPage.jsx";
 import FindIdPage from "./pages/FindIdPage.jsx";
 import FindPasswordPage from "./pages/FindPasswordPage.jsx";
 import SuccessPage from "./pages/SuccessPage.jsx";
+import MyInfo from "./pages/MyInfo.jsx"
+import MyPosts from "./pages/MyPosts.jsx";
+import MyComments from "./pages/MyComments.jsx";
+import SavedPosts from "./pages/SavedPosts.jsx";
 
 const router = createBrowserRouter([
   {
@@ -97,7 +101,25 @@ const router = createBrowserRouter([
       },
       {
         path: "/mypage",
-        element: <MyPage />
+        element: <MyPage />,
+        children: [
+          {
+            path: "myinfo",
+            element: <MyInfo />,
+          },
+          {
+            path: "myposts",
+            element: <MyPosts />
+          },
+          {
+            path: "mycomments",
+            element: <MyComments />
+          },
+          {
+            path: "savedposts",
+            element: <SavedPosts />
+          }
+        ]
       },
       {
         path: "/order-result",

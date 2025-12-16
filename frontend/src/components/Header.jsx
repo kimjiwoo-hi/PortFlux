@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import "./Header.css";
 import PortFluxLogo from "../assets/PortFlux.png";
 import { Link, useLocation, useNavigate } from "react-router-dom"; // useNavigate 추가
@@ -9,25 +9,21 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate(); // 추가
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  
-  // [추가] 로그인 상태 관리 state
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const popoverRef = useRef(null);
   const profileRef = useRef(null);
 
-  // [추가] 페이지 이동할 때마다 로그인 상태 확인
- useEffect(() => {
-    const checkLoginStatus = () => {
-      // 로컬 스토리지 확인
-      const localLogin = localStorage.getItem("isLoggedIn");
-      // 세션 스토리지 확인
-      const sessionLogin = sessionStorage.getItem("isLoggedIn");
+  // [추가] 로그인 상태를 useMemo로 계산 (localStorage/sessionStorage 읽기)
+  const isLoggedIn = useMemo(() => {
+    const localLogin = localStorage.getItem("isLoggedIn");
+    const sessionLogin = sessionStorage.getItem("isLoggedIn");
+    return localLogin === "true" || sessionLogin === "true";
+  }, []);
 
-      // 둘 중 하나라도 "true"면 로그인 상태로 인정
-      setIsLoggedIn(localLogin === "true" || sessionLogin === "true");
-    };
-    checkLoginStatus();
+  // [추가] 페이지 이동 시 팝오버 닫기
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsPopoverOpen(false);
   }, [location.pathname]);
 
   const getLinkClass = (path) => {
@@ -42,14 +38,13 @@ const Header = () => {
     // 로컬 스토리지 삭제
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("userId");
-    
+
     // 세션 스토리지 삭제
     sessionStorage.removeItem("isLoggedIn");
     sessionStorage.removeItem("userId");
-    
-    setIsLoggedIn(false);
+
     setIsPopoverOpen(false);
-    navigate("/"); 
+    navigate("/");
   };
 
   // ... (ESC 키, 외부 클릭 닫기 로직은 기존과 동일) ...
