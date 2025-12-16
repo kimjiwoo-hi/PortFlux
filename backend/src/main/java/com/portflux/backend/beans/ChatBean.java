@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 public class ChatBean {
 
+
     private Long roomId;
     private Long user1Num;
     private Long user2Num;
