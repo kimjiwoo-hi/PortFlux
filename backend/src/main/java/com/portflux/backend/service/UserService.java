@@ -118,7 +118,7 @@ public class UserService {
     @Transactional
     public void updatePassword(String userId, String newPassword) {
         UserBean user = userRepository.findByUserId(userId);
-        
+
         if (user == null) {
             throw new RuntimeException("사용자를 찾을 수 없습니다.");
         }
@@ -126,6 +126,61 @@ public class UserService {
         // 이전 비밀번호와 일치하는지 확인
         if (passwordEncoder.matches(newPassword, user.getUserPassword())) {
             throw new RuntimeException("이전 비밀번호로는 변경할 수 없습니다.");
+        }
+
+        // 새 비밀번호 암호화 후 저장
+        user.setUserPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    // 9. 사용자 정보 조회 (userId로)
+    public UserBean getUserByUserId(String userId) {
+        return userRepository.findByUserId(userId);
+    }
+
+    // 10. 사용자 정보 수정
+    @Transactional
+    public void updateUserInfo(String userId, UserBean updateUser) {
+        UserBean user = userRepository.findByUserId(userId);
+
+        if (user == null) {
+            throw new RuntimeException("사용자를 찾을 수 없습니다.");
+        }
+
+        // 수정 가능한 필드만 업데이트
+        if (updateUser.getUserName() != null) {
+            user.setUserName(updateUser.getUserName());
+        }
+        if (updateUser.getUserNickname() != null) {
+            user.setUserNickname(updateUser.getUserNickname());
+        }
+        if (updateUser.getUserPhone() != null) {
+            user.setUserPhone(updateUser.getUserPhone());
+        }
+        if (updateUser.getUserEmail() != null) {
+            user.setUserEmail(updateUser.getUserEmail());
+        }
+
+        userRepository.save(user);
+    }
+
+    // 11. 비밀번호 변경 (현재 비밀번호 확인 포함)
+    @Transactional
+    public void updatePasswordWithVerification(String userId, String currentPassword, String newPassword) {
+        UserBean user = userRepository.findByUserId(userId);
+
+        if (user == null) {
+            throw new RuntimeException("사용자를 찾을 수 없습니다.");
+        }
+
+        // 현재 비밀번호 확인
+        if (!passwordEncoder.matches(currentPassword, user.getUserPassword())) {
+            throw new RuntimeException("현재 비밀번호가 일치하지 않습니다.");
+        }
+
+        // 새 비밀번호가 현재 비밀번호와 같은지 확인
+        if (passwordEncoder.matches(newPassword, user.getUserPassword())) {
+            throw new RuntimeException("새 비밀번호는 현재 비밀번호와 달라야 합니다.");
         }
 
         // 새 비밀번호 암호화 후 저장
