@@ -1,6 +1,10 @@
 import "./BoardLookupPage.css";
 import SearchIcon from '../assets/search.png';
 import { useState } from 'react';
+<<<<<<< HEAD
+=======
+import { useNavigate } from 'react-router-dom'; // useNavigate 추가
+>>>>>>> f12d1f3c3c9e3d84a0e283391f05cb00dc9e64b4
 import { tagData, tagSearchMap } from '../database/taglist';
 
 // 예시 더미 데이터 (isLiked 상태 추가)
@@ -18,7 +22,15 @@ const initialPosts = [
 function BoardLookupPage() {
   const [selectedTags, setSelectedTags] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
+<<<<<<< HEAD
   const [posts, /*setPosts*/] = useState(initialPosts); // 게시물 목록 상태 관리
+=======
+  const [posts, setPosts] = useState(initialPosts);
+  
+  // 로그인 상태를 관리하는 state (기능 확인을 위해 우선 true로 설정)
+  const [isLoggedIn, setIsLoggedIn] = useState(true); 
+  const navigate = useNavigate(); // 페이지 이동을 위한 hook
+>>>>>>> f12d1f3c3c9e3d84a0e283391f05cb00dc9e64b4
 
   const lowerCaseQuery = searchQuery.toLowerCase().trim();
   const filteredTagData = !lowerCaseQuery
@@ -69,6 +81,24 @@ function BoardLookupPage() {
   };
   */
 
+<<<<<<< HEAD
+=======
+  // '게시물 추가' 버튼 클릭 시 호출될 핸들러
+  const handleAddPostClick = () => {
+    navigate('/upload-post'); // 게시물 작성 페이지로 이동 (경로는 예시)
+  };
+
+  // 로그인 상태에 따라 렌더링할 게시물 목록을 동적으로 생성
+  let postsToRender = [...posts];
+  if (isLoggedIn) {
+    // 로그인 상태이면, '게시물 추가' 아이템을 배열 맨 앞에 추가
+    postsToRender.unshift({
+      id: 'add-new-post', // 고유한 key 값
+      type: 'add-new' // 타입을 지정하여 일반 게시물과 구분
+    });
+  }
+
+>>>>>>> f12d1f3c3c9e3d84a0e283391f05cb00dc9e64b4
   return (
     <div className="board-lookup-page">
       <div className="tag-box">
@@ -107,6 +137,7 @@ function BoardLookupPage() {
       </div>
 
       <main className="board-grid">
+<<<<<<< HEAD
         {posts.map(post => (
           <div key={post.id} className="board-item">
             <img src={post.imageUrl} alt={post.title} className="board-item-thumbnail" />
@@ -126,6 +157,39 @@ function BoardLookupPage() {
               */}
             </div>
           </div>
+=======
+        {postsToRender.map(post => (
+          post.type === 'add-new' ? (
+            // '게시물 추가' 아이템일 경우
+            <div
+              key={post.id}
+              className="board-item add-new-item"
+              onClick={handleAddPostClick}
+            >
+              <div className="add-new-plus">+</div>
+            </div>
+          ) : (
+            // 일반 게시물일 경우
+            <div key={post.id} className="board-item">
+              <img src={post.imageUrl} alt={post.title} className="board-item-thumbnail" />
+              <div className="board-item-info">
+                <h4 className="info-title">{post.title}</h4>
+                <a href={`/profile/${post.author}`} className="info-author">
+                  {post.author}
+                </a>
+                {/* 
+                  좋아요와 조횟수 부분 (현재 기능 구현 미완료로 인해 주석 처리됨 - 나중에 다시 작업할 예정)
+                  <div className="item-stats">
+                    <span className="stat-item" onClick={() => handleLikeClick(post.id)} style={{cursor: 'pointer'}}>
+                      {post.isLiked ? '❤️' : '🤍'} {post.likes}
+                    </span>
+                    <span className="stat-item">👁️ {post.views}</span>
+                  </div>
+                */}
+              </div>
+            </div>
+          )
+>>>>>>> f12d1f3c3c9e3d84a0e283391f05cb00dc9e64b4
         ))}
       </main>
     </div>
