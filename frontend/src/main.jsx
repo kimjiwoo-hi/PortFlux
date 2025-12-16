@@ -14,6 +14,7 @@ import BoardFree from "./pages/BoardFreePage";
 import BoardJob from "./pages/BoardJobPage.jsx";
 import BoardLookup from "./pages/BoardLookupPage.jsx";
 import BoardLookupWrite from "./pages/BoardLookupWritePage.jsx";
+import BoardLookupRead from "./pages/BoardLookupRead.jsx";
 import Cart from "./pages/CartPage.jsx";
 import MyPage from "./pages/MyPage.jsx";
 import OrderResultPage from "./pages/OrderResultPage.jsx";
@@ -35,6 +36,10 @@ const router = createBrowserRouter([
       {
         path: "/board/write",
         element: <BoardLookupWrite />
+      },
+      {
+        path: "/board/lookup/:postId",
+        element: <BoardLookupRead />
       }
     ],
   },

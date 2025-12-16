@@ -63,6 +63,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/mail/**").permitAll()
                         .requestMatchers("/user/login/**").permitAll()
 
+                        // ★★★ 게시판 API 허용 (추가) ★★★
+        .requestMatchers("/api/boardlookup/**").permitAll()
+        
+        // ★★★ 업로드된 파일 접근 허용 (추가) ★★★
+        .requestMatchers("/uploads/**").permitAll()
+
                         // 정적 리소스 허용
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         // 컨트롤러 매핑 오류(404) 시 시큐리티가 403으로 막지 않도록 에러 경로 허용
