@@ -14,6 +14,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 @Component
+
 public class GoogleApi {
 
     @Value("${google.client.id}")

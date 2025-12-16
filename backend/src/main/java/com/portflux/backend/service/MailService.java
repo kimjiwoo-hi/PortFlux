@@ -4,6 +4,8 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -15,6 +17,8 @@ import java.util.Map;
 import java.util.Random;
 
 @Service
+@ConditionalOnProperty(name = "spring.mail.host")
+
 @RequiredArgsConstructor
 public class MailService {
 
