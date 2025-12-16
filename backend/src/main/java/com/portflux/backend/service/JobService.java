@@ -1,14 +1,14 @@
 package com.portflux.backend.service;
 
-import com.portflux.backend.beans.JobDto;
-import com.portflux.backend.beans.JobFilterDto;
-import com.portflux.backend.mapper.JobRepository;
-import com.portflux.backend.beans.JobCreateRequest;
-
+import com.portflux.backend.dto.JobCreateRequest;
+import com.portflux.backend.dto.JobDto;
+import com.portflux.backend.dto.JobFilterDto;
+import com.portflux.backend.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
@@ -19,241 +19,300 @@ import java.util.Map;
  * 채용공고 서비스
  */
 @Service
+@Transactional
 public class JobService {
-    
+
     @Autowired
     private JobRepository jobRepository;
-    
+
     /**
-     * 채용공고 목록 조회
-     * @param filter 필터 조건
-     * @param userNum 현재 로그인한 사용자 ID (null 가능)
-     * @return Map { content: List<JobDto>, totalElements: int, totalPages: int }
+     * 채용공고 목록 조회 (필터링, 페이징)
      */
-    public Map<String, Object> getJobs(JobFilterDto filter, Long userNum) {
-        List<JobDto> jobs = jobRepository.findJobs(filter, userNum);
-        int totalElements = jobRepository.countJobs(filter);
-        int totalPages = (int) Math.ceil((double) totalElements / filter.getLimit());
+    @Transactional(readOnly = true)
+    public Map<String, Object> getJobs(JobFilterDto filter) {
+        List<JobDto> jobs = jobRepository.findJobs(filter);
+        int totalCount = jobRepository.countJobs(filter);
         
-        // 추가 정보 계산 (신규, 마감임박, 남은일수)
+        // 계산된 필드 설정
         LocalDateTime now = LocalDateTime.now();
+        LocalDate today = LocalDate.now();
+        
         for (JobDto job : jobs) {
-            // 신규 공고 (3일 이내)
-            long daysFromCreated = ChronoUnit.DAYS.between(job.getCreatedAt(), now);
-            job.setIsNew(daysFromCreated <= 3);
+            // isNew: 7일 이내 등록
+            if (job.getCreatedAt() != null) {
+                long daysSinceCreated = ChronoUnit.DAYS.between(job.getCreatedAt().toLocalDate(), today);
+                job.setIsNew(daysSinceCreated <= 7);
+            }
             
-            // 마감 임박 (3일 이내)
+            // isDeadlineSoon, daysLeft: 마감 3일 이내
             if (job.getJobDeadline() != null) {
-                long daysLeft = ChronoUnit.DAYS.between(now, job.getJobDeadline());
-                job.setDaysLeft(daysLeft);
+                long daysLeft = ChronoUnit.DAYS.between(today, job.getJobDeadline());
+                job.setDaysLeft((int) daysLeft);
                 job.setIsDeadlineSoon(daysLeft >= 0 && daysLeft <= 3);
+            }
+            
+            // 북마크 여부 확인
+            if (filter.getUserNum() != null) {
+                job.setIsBookmarked(jobRepository.existsBookmark(filter.getUserNum(), job.getPostId()));
+            } else {
+                job.setIsBookmarked(false);
             }
         }
         
         Map<String, Object> result = new HashMap<>();
         result.put("content", jobs);
-        result.put("totalElements", totalElements);
-        result.put("totalPages", totalPages);
-        result.put("currentPage", filter.getPage());
-        result.put("size", filter.getLimit());
+        result.put("totalElements", totalCount);
+        result.put("totalPages", (int) Math.ceil((double) totalCount / filter.getSize()));
+        result.put("page", filter.getPage());
+        result.put("size", filter.getSize());
+        result.put("hasNext", (filter.getPage() + 1) * filter.getSize() < totalCount);
+        result.put("hasPrevious", filter.getPage() > 0);
         
         return result;
     }
-    
+
     /**
-     * 채용공고 상세 조회 (조회수 증가)
-     * @param postId 게시글 ID
-     * @param userNum 현재 로그인한 사용자 ID (null 가능)
-     * @return 채용공고 상세
+     * 채용공고 상세 조회
      */
     @Transactional
     public JobDto getJobDetail(Long postId, Long userNum) {
         // 조회수 증가
         jobRepository.incrementViewCount(postId);
         
-        JobDto job = jobRepository.findJobById(postId, userNum);
+        JobDto job = jobRepository.findJobById(postId);
+        if (job == null) {
+            return null;
+        }
         
-        if (job != null && job.getJobDeadline() != null) {
-            LocalDateTime now = LocalDateTime.now();
-            long daysLeft = ChronoUnit.DAYS.between(now, job.getJobDeadline());
-            job.setDaysLeft(daysLeft);
+        // 계산된 필드 설정
+        LocalDate today = LocalDate.now();
+        
+        if (job.getCreatedAt() != null) {
+            long daysSinceCreated = ChronoUnit.DAYS.between(job.getCreatedAt().toLocalDate(), today);
+            job.setIsNew(daysSinceCreated <= 7);
+        }
+        
+        if (job.getJobDeadline() != null) {
+            long daysLeft = ChronoUnit.DAYS.between(today, job.getJobDeadline());
+            job.setDaysLeft((int) daysLeft);
             job.setIsDeadlineSoon(daysLeft >= 0 && daysLeft <= 3);
-            
-            long daysFromCreated = ChronoUnit.DAYS.between(job.getCreatedAt(), now);
-            job.setIsNew(daysFromCreated <= 3);
+        }
+        
+        // 북마크 여부
+        if (userNum != null) {
+            job.setIsBookmarked(jobRepository.existsBookmark(userNum, postId));
+        } else {
+            job.setIsBookmarked(false);
         }
         
         return job;
     }
-    
+
     /**
      * 채용공고 생성 (기업 전용)
-     * @param request 채용공고 데이터
-     * @param companyNum 기업 ID
-     * @return 생성 성공 여부
      */
-    @Transactional
-    public boolean createJob(JobCreateRequest request, Long companyNum) {
-        return jobRepository.insertJob(request, companyNum) > 0;
+    public JobDto createJob(Long companyNum, JobCreateRequest request) {
+        JobDto job = new JobDto();
+        job.setCompanyNum(companyNum);
+        job.setTitle(request.getTitle());
+        job.setContent(request.getContent());
+        job.setJobRegion(request.getJobRegion());
+        job.setJobCareerType(request.getJobCareerType());
+        job.setJobCareerYears(request.getJobCareerYears());
+        job.setJobEducation(request.getJobEducation());
+        job.setJobEducationExclude(request.getJobEducationExclude());
+        job.setJobSalaryMin(request.getJobSalaryMin());
+        job.setJobSalaryMax(request.getJobSalaryMax());
+        job.setJobDeadline(request.getJobDeadline());
+        job.setJobStatus(request.getJobStatus() != null ? request.getJobStatus() : "ACTIVE");
+        job.setJobIndustries(request.getJobIndustries());
+        job.setJobCompanyTypes(request.getJobCompanyTypes());
+        job.setJobWorkTypes(request.getJobWorkTypes());
+        job.setJobWorkDays(request.getJobWorkDays());
+        
+        jobRepository.insertJob(job);
+        
+        return jobRepository.findJobById(job.getPostId());
     }
-    
+
     /**
      * 채용공고 수정 (작성 기업 전용)
-     * @param postId 게시글 ID
-     * @param request 수정할 데이터
-     * @param companyNum 기업 ID
-     * @return 수정 성공 여부
-     * @throws IllegalAccessException 권한 없음
      */
-    @Transactional
-    public boolean updateJob(Long postId, JobCreateRequest request, Long companyNum) throws IllegalAccessException {
-        // 작성자 확인
-        if (jobRepository.isJobOwner(postId, companyNum) == 0) {
-            throw new IllegalAccessException("해당 채용공고를 수정할 권한이 없습니다.");
+    public JobDto updateJob(Long postId, Long companyNum, JobCreateRequest request) {
+        // 소유자 확인
+        if (!jobRepository.isJobOwner(postId, companyNum)) {
+            throw new RuntimeException("수정 권한이 없습니다.");
         }
         
-        return jobRepository.updateJob(postId, request) > 0;
+        JobDto job = new JobDto();
+        job.setPostId(postId);
+        job.setTitle(request.getTitle());
+        job.setContent(request.getContent());
+        job.setJobRegion(request.getJobRegion());
+        job.setJobCareerType(request.getJobCareerType());
+        job.setJobCareerYears(request.getJobCareerYears());
+        job.setJobEducation(request.getJobEducation());
+        job.setJobEducationExclude(request.getJobEducationExclude());
+        job.setJobSalaryMin(request.getJobSalaryMin());
+        job.setJobSalaryMax(request.getJobSalaryMax());
+        job.setJobDeadline(request.getJobDeadline());
+        job.setJobStatus(request.getJobStatus());
+        job.setJobIndustries(request.getJobIndustries());
+        job.setJobCompanyTypes(request.getJobCompanyTypes());
+        job.setJobWorkTypes(request.getJobWorkTypes());
+        job.setJobWorkDays(request.getJobWorkDays());
+        
+        jobRepository.updateJob(job);
+        
+        return jobRepository.findJobById(postId);
     }
-    
+
     /**
      * 채용공고 삭제 (작성 기업 전용)
-     * @param postId 게시글 ID
-     * @param companyNum 기업 ID
-     * @return 삭제 성공 여부
-     * @throws IllegalAccessException 권한 없음
      */
-    @Transactional
-    public boolean deleteJob(Long postId, Long companyNum) throws IllegalAccessException {
-        // 작성자 확인
-        if (jobRepository.isJobOwner(postId, companyNum) == 0) {
-            throw new IllegalAccessException("해당 채용공고를 삭제할 권한이 없습니다.");
+    public void deleteJob(Long postId, Long companyNum) {
+        // 소유자 확인
+        if (!jobRepository.isJobOwner(postId, companyNum)) {
+            throw new RuntimeException("삭제 권한이 없습니다.");
         }
         
-        return jobRepository.deleteJob(postId) > 0;
+        jobRepository.deleteJob(postId);
     }
-    
+
     /**
-     * 채용공고 상태 변경 (작성 기업 전용)
-     * @param postId 게시글 ID
-     * @param status 변경할 상태 (ACTIVE/CLOSED)
-     * @param companyNum 기업 ID
-     * @return 변경 성공 여부
-     * @throws IllegalAccessException 권한 없음
+     * 채용공고 상태 변경
      */
-    @Transactional
-    public boolean updateJobStatus(Long postId, String status, Long companyNum) throws IllegalAccessException {
-        // 작성자 확인
-        if (jobRepository.isJobOwner(postId, companyNum) == 0) {
-            throw new IllegalAccessException("해당 채용공고를 수정할 권한이 없습니다.");
+    public void updateJobStatus(Long postId, Long companyNum, String status) {
+        // 소유자 확인
+        if (!jobRepository.isJobOwner(postId, companyNum)) {
+            throw new RuntimeException("상태 변경 권한이 없습니다.");
         }
         
-        return jobRepository.updateJobStatus(postId, status) > 0;
+        jobRepository.updateJobStatus(postId, status);
     }
-    
+
     /**
-     * 북마크 토글 (로그인한 사용자만)
-     * @param postId 게시글 ID
-     * @param userNum 사용자 ID
-     * @return Map { bookmarked: boolean }
+     * 북마크 토글
      */
-    @Transactional
-    public Map<String, Boolean> toggleBookmark(Long postId, Long userNum) {
-        boolean exists = jobRepository.existsBookmark(postId, userNum) > 0;
-        
-        if (exists) {
-            jobRepository.deleteBookmark(postId, userNum);
+    public boolean toggleBookmark(Long userNum, Long postId) {
+        if (jobRepository.existsBookmark(userNum, postId)) {
+            jobRepository.deleteBookmark(userNum, postId);
+            return false;
         } else {
-            jobRepository.insertBookmark(postId, userNum);
+            jobRepository.insertBookmark(userNum, postId);
+            return true;
         }
-        
-        Map<String, Boolean> result = new HashMap<>();
-        result.put("bookmarked", !exists);
-        return result;
     }
-    
+
     /**
-     * 북마크 여부 확인
-     * @param postId 게시글 ID
-     * @param userNum 사용자 ID
-     * @return Map { bookmarked: boolean }
+     * 북마크 상태 확인
      */
-    public Map<String, Boolean> checkBookmarkStatus(Long postId, Long userNum) {
-        boolean exists = jobRepository.existsBookmark(postId, userNum) > 0;
-        
-        Map<String, Boolean> result = new HashMap<>();
-        result.put("bookmarked", exists);
-        return result;
+    @Transactional(readOnly = true)
+    public boolean checkBookmarkStatus(Long userNum, Long postId) {
+        return jobRepository.existsBookmark(userNum, postId);
     }
-    
+
     /**
      * 북마크 목록 조회
-     * @param userNum 사용자 ID
-     * @param page 페이지 번호
-     * @param size 페이지 크기
-     * @return Map { content: List<JobDto>, totalElements: int, totalPages: int }
      */
+    @Transactional(readOnly = true)
     public Map<String, Object> getBookmarks(Long userNum, int page, int size) {
         int offset = page * size;
-        List<JobDto> bookmarks = jobRepository.findBookmarks(userNum, offset, size);
-        int totalElements = jobRepository.countBookmarks(userNum);
-        int totalPages = (int) Math.ceil((double) totalElements / size);
+        List<JobDto> jobs = jobRepository.findBookmarks(userNum, offset, size);
+        int totalCount = jobRepository.countBookmarks(userNum);
         
-        Map<String, Object> result = new HashMap<>();
-        result.put("content", bookmarks);
-        result.put("totalElements", totalElements);
-        result.put("totalPages", totalPages);
-        result.put("currentPage", page);
-        result.put("size", size);
-        
-        return result;
-    }
-    
-    /**
-     * 지역별 채용공고 개수
-     * @return Map<지역ID, 개수>
-     */
-    public Map<String, Integer> getJobCountByRegion() {
-        List<Map<String, Object>> list = jobRepository.countJobsByRegion();
-        
-        Map<String, Integer> result = new HashMap<>();
-        for (Map<String, Object> item : list) {
-            String region = (String) item.get("job_region");
-            Number count = (Number) item.get("job_count");
-            result.put(region, count.intValue());
+        // 계산된 필드 설정
+        LocalDate today = LocalDate.now();
+        for (JobDto job : jobs) {
+            if (job.getCreatedAt() != null) {
+                long daysSinceCreated = ChronoUnit.DAYS.between(job.getCreatedAt().toLocalDate(), today);
+                job.setIsNew(daysSinceCreated <= 7);
+            }
+            if (job.getJobDeadline() != null) {
+                long daysLeft = ChronoUnit.DAYS.between(today, job.getJobDeadline());
+                job.setDaysLeft((int) daysLeft);
+                job.setIsDeadlineSoon(daysLeft >= 0 && daysLeft <= 3);
+            }
+            job.setIsBookmarked(true);
         }
-        
-        return result;
-    }
-    
-    /**
-     * 내가 작성한 채용공고 목록
-     * @param companyNum 기업 ID
-     * @param page 페이지 번호
-     * @param size 페이지 크기
-     * @return Map { content: List<JobDto>, totalElements: int, totalPages: int }
-     */
-    public Map<String, Object> getMyJobs(Long companyNum, int page, int size) {
-        int offset = page * size;
-        List<JobDto> jobs = jobRepository.findMyJobs(companyNum, offset, size);
-        int totalElements = jobRepository.countMyJobs(companyNum);
-        int totalPages = (int) Math.ceil((double) totalElements / size);
         
         Map<String, Object> result = new HashMap<>();
         result.put("content", jobs);
-        result.put("totalElements", totalElements);
-        result.put("totalPages", totalPages);
-        result.put("currentPage", page);
+        result.put("totalElements", totalCount);
+        result.put("totalPages", (int) Math.ceil((double) totalCount / size));
+        result.put("page", page);
         result.put("size", size);
         
         return result;
     }
-    
+
     /**
-     * 마감일 지난 공고 자동 만료 처리
-     * @return 만료 처리된 개수
+     * 지역별 채용공고 개수 조회
      */
-    @Transactional
+    @Transactional(readOnly = true)
+    public Map<String, Integer> getJobCountByRegion() {
+        List<Map<String, Object>> regionCounts = jobRepository.countJobsByRegion();
+        Map<String, Integer> result = new HashMap<>();
+        
+        for (Map<String, Object> row : regionCounts) {
+            String region = (String) row.get("JOB_REGION");
+            Number count = (Number) row.get("JOB_COUNT");
+            if (region != null && count != null) {
+                result.put(region, count.intValue());
+            }
+        }
+        
+        return result;
+    }
+
+    /**
+     * 내 채용공고 목록 (기업용)
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Object> getMyJobs(Long companyNum, int page, int size) {
+        int offset = page * size;
+        List<JobDto> jobs = jobRepository.findMyJobs(companyNum, offset, size);
+        int totalCount = jobRepository.countMyJobs(companyNum);
+        
+        // 계산된 필드 설정
+        LocalDate today = LocalDate.now();
+        for (JobDto job : jobs) {
+            if (job.getCreatedAt() != null) {
+                long daysSinceCreated = ChronoUnit.DAYS.between(job.getCreatedAt().toLocalDate(), today);
+                job.setIsNew(daysSinceCreated <= 7);
+            }
+            if (job.getJobDeadline() != null) {
+                long daysLeft = ChronoUnit.DAYS.between(today, job.getJobDeadline());
+                job.setDaysLeft((int) daysLeft);
+                job.setIsDeadlineSoon(daysLeft >= 0 && daysLeft <= 3);
+            }
+        }
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("content", jobs);
+        result.put("totalElements", totalCount);
+        result.put("totalPages", (int) Math.ceil((double) totalCount / size));
+        result.put("page", page);
+        result.put("size", size);
+        
+        return result;
+    }
+
+    /**
+     * 만료된 공고 상태 변경 (스케줄러 호출)
+     */
     public int expireJobs() {
         return jobRepository.expireJobs();
+    }
+
+    /**
+     * 소유자 확인
+     */
+    @Transactional(readOnly = true)
+    public boolean isOwner(Long postId, Long companyNum) {
+        if (companyNum == null) {
+            return false;
+        }
+        return jobRepository.isJobOwner(postId, companyNum);
     }
 }

@@ -1,532 +1,428 @@
-import React, { useState, useMemo, useEffect } from "react";
-import regions from "../database/regions";
-import "./BoardJobPage.css";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { getJobs } from "../api/jobApi";
+import { careerTypes } from "../database/careerOptions";
+import { educationLevels } from "../database/educationOptions";
+import {
+  industries,
+  companyTypes,
+  workTypes,
+  workDays,
+} from "../database/jobFilterOptions";
+import "../pages/BoardJobPage.css";
 
-/* Debounce 훅 */
-function useDebounce(value, delay = 300) {
-  const [v, setV] = useState(value);
+const BoardJobPage = () => {
+  const navigate = useNavigate();
+
+  // 채용공고 목록
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [totalElements, setTotalElements] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
+  // 페이징
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize] = useState(20);
+
+  // 필터
+  const [filters, setFilters] = useState({
+    regions: [],
+    careerType: [],
+    careerYears: [],
+    education: "",
+    educationExclude: false,
+    industries: [],
+    companyTypes: [],
+    workTypes: [],
+    workDays: [],
+    salaryMin: "",
+    keyword: "",
+  });
+
+  // 정렬
+  const [sortType, setSortType] = useState("latest"); // latest, views, deadline
+
+  // 필터 패널 표시 여부
+  const [showFilters, setShowFilters] = useState(false);
+
+  // 지역 목록
+  const regions = [
+    "서울",
+    "경기",
+    "인천",
+    "부산",
+    "대구",
+    "광주",
+    "대전",
+    "울산",
+    "세종",
+    "강원",
+    "충북",
+    "충남",
+    "전북",
+    "전남",
+    "경북",
+    "경남",
+    "제주",
+  ];
+
+  // 채용공고 목록 로드
   useEffect(() => {
-    const t = setTimeout(() => setV(value), delay);
-    return () => clearTimeout(t);
-  }, [value, delay]);
-  return v;
-}
+    fetchJobs();
+  }, [currentPage, sortType]);
 
-/* JobSearchFilter 컴포넌트 */
-function JobSearchFilter({ onFilterChange }) {
-  // 지역 선택
-  const [showRegionPanel, setShowRegionPanel] = useState(true);
-  const [selectedRegionId, setSelectedRegionId] = useState("seoul");
-  const [selectedDistricts, setSelectedDistricts] = useState({});
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // 경력 선택
-  const [showCareerPanel, setShowCareerPanel] = useState(false);
-  const [careerType, setCareerType] = useState([]); // ['신입', '경력', '경력무관']
-  const [careerYears, setCareerYears] = useState([]);
-
-  // 학력 선택
-  const [showEducationPanel, setShowEducationPanel] = useState(false);
-  const [educationType, setEducationType] = useState(null);
-  const [educationExclude, setEducationExclude] = useState(false);
-
-  // 상세조건
-  const [showAdvancedPanel, setShowAdvancedPanel] = useState(false);
-
-  const debouncedQuery = useDebounce(searchQuery, 300);
-
-  // 현재 선택된 지역 객체
-  const selectedRegion = useMemo(
-    () => regions.find((r) => r.id === selectedRegionId) || regions[0],
-    [selectedRegionId]
-  );
-
-  // 필터링된 하위 지역
-  const filteredDistricts = useMemo(() => {
-    const districts = selectedRegion?.children || [];
-    if (!debouncedQuery) return districts;
-    const q = debouncedQuery.toLowerCase();
-    return districts.filter((d) => d.name.toLowerCase().includes(q));
-  }, [selectedRegion, debouncedQuery]);
-
-  // 전체 선택 체크 여부
-  const isAllSelected = useMemo(() => {
-    const districtIds = (selectedRegion?.children || []).map((d) => d.id);
-    return districtIds.length > 0 && districtIds.every((id) => selectedDistricts[id]);
-  }, [selectedRegion, selectedDistricts]);
-
-  // 선택된 지역 개수
-  const selectedCount = useMemo(() => {
-    return Object.keys(selectedDistricts).filter((key) => selectedDistricts[key]).length;
-  }, [selectedDistricts]);
-
-  // 지역 전체 선택/해제
-  function toggleAllDistricts() {
-    const districtIds = (selectedRegion?.children || []).map((d) => d.id);
-    if (isAllSelected) {
-      setSelectedDistricts((prev) => {
-        const next = { ...prev };
-        districtIds.forEach((id) => delete next[id]);
-        return next;
-      });
-    } else {
-      setSelectedDistricts((prev) => {
-        const next = { ...prev };
-        districtIds.forEach((id) => (next[id] = true));
-        return next;
-      });
+  const fetchJobs = async () => {
+    try {
+      setLoading(true);
+      const data = await getJobs(filters, currentPage, pageSize, sortType);
+      setJobs(data.content || []);
+      setTotalElements(data.totalElements || 0);
+      setTotalPages(data.totalPages || 0);
+    } catch (error) {
+      console.error("채용공고 로드 실패:", error);
+      setJobs([]);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  // 개별 지역 선택/해제
-  function toggleDistrict(districtId) {
-    setSelectedDistricts((prev) => {
-      const next = { ...prev };
-      if (next[districtId]) {
-        delete next[districtId];
+  // 필터 변경
+  const handleFilterChange = (filterName, value) => {
+    setFilters((prev) => {
+      const currentValues = prev[filterName] || [];
+
+      if (Array.isArray(currentValues)) {
+        const newValues = currentValues.includes(value)
+          ? currentValues.filter((v) => v !== value)
+          : [...currentValues, value];
+
+        return { ...prev, [filterName]: newValues };
       } else {
-        next[districtId] = true;
-      }
-      return next;
-    });
-  }
-
-  // 지역 초기화
-  function resetRegion() {
-    const districtIds = (selectedRegion?.children || []).map((d) => d.id);
-    setSelectedDistricts((prev) => {
-      const next = { ...prev };
-      districtIds.forEach((id) => delete next[id]);
-      return next;
-    });
-  }
-
-  // 경력 타입 토글
-  function toggleCareerType(type) {
-    setCareerType((prev) => {
-      if (prev.includes(type)) {
-        return prev.filter((t) => t !== type);
-      } else {
-        return [...prev, type];
+        return { ...prev, [filterName]: value };
       }
     });
-  }
+  };
 
-  // 경력 연차 토글
-  function toggleCareerYear(year) {
-    setCareerYears((prev) => {
-      if (prev.includes(year)) {
-        return prev.filter((y) => y !== year);
-      } else {
-        return [...prev, year];
-      }
+  // 검색어 변경
+  const handleKeywordChange = (e) => {
+    setFilters((prev) => ({ ...prev, keyword: e.target.value }));
+  };
+
+  // 필터 적용
+  const handleApplyFilters = () => {
+    setCurrentPage(0);
+    fetchJobs();
+  };
+
+  // 필터 초기화
+  const handleResetFilters = () => {
+    setFilters({
+      regions: [],
+      careerType: [],
+      careerYears: [],
+      education: "",
+      educationExclude: false,
+      industries: [],
+      companyTypes: [],
+      workTypes: [],
+      workDays: [],
+      salaryMin: "",
+      keyword: "",
     });
-  }
+    setCurrentPage(0);
+  };
 
-  // 경력 선택 초기화
-  function resetCareer() {
-    setCareerType([]);
-    setCareerYears([]);
-  }
+  // 정렬 변경
+  const handleSortChange = (newSort) => {
+    setSortType(newSort);
+    setCurrentPage(0);
+  };
 
-  // 학력 선택 초기화
-  function resetEducation() {
-    setEducationType(null);
-    setEducationExclude(false);
-  }
+  // 페이지 변경
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    window.scrollTo(0, 0);
+  };
 
-  // 검색 실행
-  function handleSearch() {
-    const filters = {
-      regions: Object.keys(selectedDistricts).filter((key) => selectedDistricts[key]),
-      careerType,
-      careerYears,
-      education: educationType,
-      educationExclude,
-    };
-    
-    if (onFilterChange) {
-      onFilterChange(filters);
-    }
-    console.log("검색 필터:", filters);
+  // 채용공고 카드 클릭
+  const handleJobClick = (postId) => {
+    navigate(`/boardjob/${postId}`);
+  };
+
+  // 작성 페이지로 이동
+  const handleCreate = () => {
+    navigate("/boardjob/create");
+  };
+
+  // 로딩 중
+  if (loading && currentPage === 0) {
+    return (
+      <div className="board-job-container">
+        <div className="loading">로딩 중...</div>
+      </div>
+    );
   }
 
   return (
-    <div className="job-search-filter">
-      {/* 필터 버튼 영역 */}
-      <div className="filter-buttons">
-        <button
-          className={`filter-btn ${showRegionPanel ? "active" : ""}`}
-          onClick={() => {
-            setShowRegionPanel(!showRegionPanel);
-            setShowCareerPanel(false);
-            setShowEducationPanel(false);
-            setShowAdvancedPanel(false);
-          }}
-        >
-          📍 지역 선택 {showRegionPanel ? "▲" : "▼"}
+    <div className="board-job-container">
+      {/* 헤더 */}
+      <div className="board-job-header">
+        <h1>채용공고</h1>
+        <button onClick={handleCreate} className="btn-create">
+          채용공고 등록
         </button>
+      </div>
 
+      {/* 검색 & 필터 토글 */}
+      <div className="search-section">
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="제목, 기업명으로 검색"
+            value={filters.keyword}
+            onChange={handleKeywordChange}
+            onKeyPress={(e) => e.key === "Enter" && handleApplyFilters()}
+          />
+          <button onClick={handleApplyFilters} className="btn-search">
+            검색
+          </button>
+        </div>
         <button
-          className={`filter-btn ${showCareerPanel ? "active" : ""}`}
-          onClick={() => {
-            setShowCareerPanel(!showCareerPanel);
-            setShowRegionPanel(false);
-            setShowEducationPanel(false);
-            setShowAdvancedPanel(false);
-          }}
+          onClick={() => setShowFilters(!showFilters)}
+          className="btn-filter-toggle"
         >
-          💼 경력 선택 {showCareerPanel ? "▲" : "▼"}
+          {showFilters ? "필터 숨기기" : "필터 보기"}
         </button>
+      </div>
 
-        <button
-          className={`filter-btn ${showEducationPanel ? "active" : ""}`}
-          onClick={() => {
-            setShowEducationPanel(!showEducationPanel);
-            setShowRegionPanel(false);
-            setShowCareerPanel(false);
-            setShowAdvancedPanel(false);
-          }}
-        >
-          🎓 학력 선택 {showEducationPanel ? "▲" : "▼"}
-        </button>
+      {/* 필터 패널 */}
+      {showFilters && (
+        <div className="filter-panel">
+          {/* 지역 */}
+          <div className="filter-group">
+            <h3>지역</h3>
+            <div className="filter-items">
+              {regions.map((region) => (
+                <label key={region} className="filter-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={filters.regions.includes(region)}
+                    onChange={() => handleFilterChange("regions", region)}
+                  />
+                  {region}
+                </label>
+              ))}
+            </div>
+          </div>
 
-        <button
-          className={`filter-btn ${showAdvancedPanel ? "active" : ""}`}
-          onClick={() => {
-            setShowAdvancedPanel(!showAdvancedPanel);
-            setShowRegionPanel(false);
-            setShowCareerPanel(false);
-            setShowEducationPanel(false);
-          }}
-        >
-          ⚙️ 상세조건 {showAdvancedPanel ? "▲" : "▼"}
-        </button>
+          {/* 경력 타입 */}
+          <div className="filter-group">
+            <h3>경력</h3>
+            <div className="filter-items">
+              {careerTypes.map((type) => (
+                <label key={type.value} className="filter-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={filters.careerType.includes(type.value)}
+                    onChange={() =>
+                      handleFilterChange("careerType", type.value)
+                    }
+                  />
+                  {type.label}
+                </label>
+              ))}
+            </div>
+          </div>
 
-        <div className="filter-right">
-          <button className="search-btn" onClick={handleSearch}>
-            검색하기
+          {/* 학력 */}
+          <div className="filter-group">
+            <h3>학력</h3>
+            <select
+              value={filters.education}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, education: e.target.value }))
+              }
+              disabled={filters.educationExclude}
+            >
+              <option value="">전체</option>
+              {educationLevels.map((level) => (
+                <option key={level.value} value={level.value}>
+                  {level.label}
+                </option>
+              ))}
+            </select>
+            <label className="filter-checkbox">
+              <input
+                type="checkbox"
+                checked={filters.educationExclude}
+                onChange={(e) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    educationExclude: e.target.checked,
+                    education: e.target.checked ? "" : prev.education,
+                  }))
+                }
+              />
+              학력무관
+            </label>
+          </div>
+
+          {/* 급여 */}
+          <div className="filter-group">
+            <h3>급여 (만원)</h3>
+            <input
+              type="number"
+              placeholder="최소 급여"
+              value={filters.salaryMin}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, salaryMin: e.target.value }))
+              }
+              min="0"
+            />
+          </div>
+
+          {/* 필터 버튼 */}
+          <div className="filter-actions">
+            <button onClick={handleResetFilters} className="btn-reset">
+              초기화
+            </button>
+            <button onClick={handleApplyFilters} className="btn-apply">
+              적용
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 정렬 & 결과 개수 */}
+      <div className="result-header">
+        <div className="result-count">
+          총 <strong>{totalElements}</strong>개의 채용공고
+        </div>
+        <div className="sort-buttons">
+          <button
+            className={sortType === "latest" ? "active" : ""}
+            onClick={() => handleSortChange("latest")}
+          >
+            최신순
+          </button>
+          <button
+            className={sortType === "views" ? "active" : ""}
+            onClick={() => handleSortChange("views")}
+          >
+            조회순
+          </button>
+          <button
+            className={sortType === "deadline" ? "active" : ""}
+            onClick={() => handleSortChange("deadline")}
+          >
+            마감순
           </button>
         </div>
       </div>
 
-      {/* 지역 선택 패널 */}
-      {showRegionPanel && (
-        <div className="filter-panel region-panel">
-          <div className="region-layout">
-            {/* 좌측: 광역시 리스트 */}
-            <div className="region-list">
-              {regions.map((region) => (
-                <button
-                  key={region.id}
-                  className={`region-item ${selectedRegionId === region.id ? "active" : ""}`}
-                  onClick={() => setSelectedRegionId(region.id)}
-                >
-                  <span className="region-name">{region.name}</span>
-                  <span className="region-count">(0)</span>
-                </button>
-              ))}
-            </div>
-
-            {/* 우측: 하위 지역 선택 */}
-            <div className="district-area">
-              <div className="district-header">
-                <label className="district-all">
-                  <input
-                    type="checkbox"
-                    checked={isAllSelected}
-                    onChange={toggleAllDistricts}
-                  />
-                  <strong>{selectedRegion.name} 전체</strong>
-                </label>
-                <button className="district-reset" onClick={resetRegion}>
-                  지역 초기화
-                </button>
-              </div>
-
-              {/* 지역 검색 입력 */}
-              <div className="district-search">
-                <input
-                  type="text"
-                  placeholder="지역명 검색..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="district-search-input"
-                />
-              </div>
-
-              <div className="district-grid">
-                {filteredDistricts.length > 0 ? (
-                  filteredDistricts.map((district) => (
-                    <label key={district.id} className="district-item">
-                      <input
-                        type="checkbox"
-                        checked={!!selectedDistricts[district.id]}
-                        onChange={() => toggleDistrict(district.id)}
-                      />
-                      <span>{district.name}</span>
-                    </label>
-                  ))
+      {/* 채용공고 목록 */}
+      {loading ? (
+        <div className="loading">로딩 중...</div>
+      ) : jobs.length === 0 ? (
+        <div className="no-results">
+          <p>검색 결과가 없습니다.</p>
+        </div>
+      ) : (
+        <div className="job-list">
+          {jobs.map((job) => (
+            <div
+              key={job.postId}
+              className="job-card"
+              onClick={() => handleJobClick(job.postId)}
+            >
+              {/* 기업 이미지 */}
+              <div className="job-card-image">
+                {job.companyImage ? (
+                  <img src={job.companyImage} alt={job.companyName} />
                 ) : (
-                  <p className="no-results">검색 결과가 없습니다.</p>
+                  <div className="no-image">이미지 없음</div>
                 )}
               </div>
+
+              {/* 채용공고 정보 */}
+              <div className="job-card-content">
+                <div className="job-card-header">
+                  <h3 className="job-title">{job.title}</h3>
+                  <div className="job-badges">
+                    {job.isNew && <span className="badge badge-new">NEW</span>}
+                    {job.isDeadlineSoon && (
+                      <span className="badge badge-deadline">마감임박</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="company-name">{job.companyName}</div>
+
+                <div className="job-info">
+                  <span className="info-item">📍 {job.jobRegion}</span>
+                  <span className="info-item">
+                    💼{" "}
+                    {job.jobCareerType && job.jobCareerType.length > 0
+                      ? job.jobCareerType.join(", ")
+                      : "경력무관"}
+                  </span>
+                  {job.jobSalaryMin && (
+                    <span className="info-item">
+                      💰 {job.jobSalaryMin.toLocaleString()}만원 이상
+                    </span>
+                  )}
+                </div>
+
+                <div className="job-footer">
+                  <span className="view-count">👁️ {job.viewCnt}</span>
+                  <span className="created-date">
+                    {new Date(job.createdAt).toLocaleDateString()}
+                  </span>
+                  {job.jobDeadline && (
+                    <span className="deadline">마감 D-{job.daysLeft}</span>
+                  )}
+                </div>
+              </div>
+
+              {/* 북마크 */}
+              {job.isBookmarked && <div className="bookmark-icon">★</div>}
             </div>
-          </div>
+          ))}
         </div>
       )}
 
-      {/* 경력 선택 패널 */}
-      {showCareerPanel && (
-        <div className="filter-panel career-panel">
-          <h3>경력 전체</h3>
+      {/* 페이징 */}
+      {totalPages > 1 && (
+        <div className="pagination">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 0}
+            className="btn-page"
+          >
+            이전
+          </button>
 
-          <div className="career-type-row">
-            <label>
-              <input
-                type="checkbox"
-                checked={careerType.includes("신입")}
-                onChange={() => toggleCareerType("신입")}
-              />
-              <span>신입</span>
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={careerType.includes("경력")}
-                onChange={() => toggleCareerType("경력")}
-              />
-              <span>경력</span>
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={careerType.includes("경력무관")}
-                onChange={() => toggleCareerType("경력무관")}
-              />
-              <span>경력무관</span>
-            </label>
-          </div>
-
-          <div className="career-years-grid">
-            {[
-              "~1년", "1년", "2년", "3년", "4년",
-              "5년", "6년", "7년", "8년", "9년",
-              "10년", "11년", "12년", "13년", "14년",
-              "15년", "16년", "17년", "18년", "19년",
-              "20년", "20년~"
-            ].map((year) => (
-              <button
-                key={year}
-                className={`career-year-btn ${careerYears.includes(year) ? "active" : ""}`}
-                onClick={() => toggleCareerYear(year)}
-              >
-                {year}
-              </button>
-            ))}
-          </div>
-
-          <div className="panel-footer">
-            <button className="reset-btn" onClick={resetCareer}>
-              선택 초기화 ↻
+          {[...Array(totalPages)].map((_, index) => (
+            <button
+              key={index}
+              onClick={() => handlePageChange(index)}
+              className={`btn-page ${currentPage === index ? "active" : ""}`}
+            >
+              {index + 1}
             </button>
-            <button className="close-btn" onClick={() => setShowCareerPanel(false)}>
-              닫기
-            </button>
-          </div>
+          ))}
+
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages - 1}
+            className="btn-page"
+          >
+            다음
+          </button>
         </div>
       )}
-
-      {/* 학력 선택 패널 */}
-      {showEducationPanel && (
-        <div className="filter-panel education-panel">
-          <h3>학력 전체</h3>
-
-          <div className="education-exclude">
-            <label>
-              <input
-                type="checkbox"
-                checked={educationExclude}
-                onChange={(e) => setEducationExclude(e.target.checked)}
-              />
-              <span>학력무관</span>
-            </label>
-          </div>
-
-          <div className="education-grid">
-            {[
-              { id: "high_below", label: "고교 졸업\n이하" },
-              { id: "high", label: "고등학교\n졸업" },
-              { id: "college_2_3", label: "대학 졸업\n(2,3년제)" },
-              { id: "university", label: "대학교 졸업\n(4년제)" },
-              { id: "master", label: "대학원 석사\n졸업" },
-              { id: "doctor", label: "대학원 박사\n졸업" },
-              { id: "doctor_above", label: "박사 졸업\n이상" }
-            ].map((edu) => (
-              <button
-                key={edu.id}
-                className={`education-btn ${educationType === edu.id ? "active" : ""}`}
-                onClick={() => setEducationType(educationType === edu.id ? null : edu.id)}
-              >
-                {edu.label.split("\n").map((line, i) => (
-                  <React.Fragment key={i}>
-                    {line}
-                    {i < edu.label.split("\n").length - 1 && <br />}
-                  </React.Fragment>
-                ))}
-              </button>
-            ))}
-          </div>
-
-          <div className="panel-footer">
-            <button className="reset-btn" onClick={resetEducation}>
-              선택 초기화 ↻
-            </button>
-            <button className="close-btn" onClick={() => setShowEducationPanel(false)}>
-              닫기
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* 상세조건 패널 */}
-      {showAdvancedPanel && (
-        <div className="filter-panel advanced-panel">
-          <p>상세조건 패널 (추후 구현)</p>
-        </div>
-      )}
-
-      {/* 하단 선택 카운트 */}
-      <div className="filter-footer">
-        <span className="selected-count">선택된 {selectedCount}건</span>
-      </div>
     </div>
   );
-}
-
-/* JobCard 컴포넌트 */
-function JobCard({ job }) {
-  return (
-    <div className="job-card">
-      <div className="job-card-header">
-        {job.company_logo && (
-          <img src={job.company_logo} alt={job.company_name} className="company-logo" />
-        )}
-        <div className="company-info">
-          <h4>{job.title}</h4>
-          <p className="company-name">{job.company_name}</p>
-        </div>
-      </div>
-
-      <div className="job-card-body">
-        <div className="job-meta">
-          <span className="job-location">📍 {job.location}</span>
-          <span className="job-career">{job.career}</span>
-          <span className="job-education">{job.education}</span>
-        </div>
-        <div className="job-salary">
-          💰 {job.salary}
-        </div>
-      </div>
-
-      <div className="job-card-footer">
-        <span className="job-deadline">{job.deadline}</span>
-        <button className="job-bookmark">⭐</button>
-      </div>
-    </div>
-  );
-}
-
-/* JobList 컴포넌트 */
-function JobList({ filters }) {
-  // 실제로는 API 호출하여 필터링된 데이터를 가져옴
-  const mockJobs = [
-    {
-      id: 1,
-      title: "ULTRAFIT 헬디자인 신입",
-      company_name: "(주)이노그루우",
-      company_logo: null,
-      location: "서울전체",
-      career: "신입",
-      education: "대졸",
-      salary: "면접 시 50만원",
-      deadline: "~01.01(목)",
-    },
-    {
-      id: 2,
-      title: "(주)올비메디텍 구매 담당 채용",
-      company_name: "(주)올비메디텍",
-      company_logo: null,
-      location: "서울전체",
-      career: "5년",
-      education: "초대졸",
-      salary: "면접 시 50만원",
-      deadline: "~01.09(금)",
-    },
-    {
-      id: 3,
-      title: "편집디자이너 경력 채용",
-      company_name: "(주)유니온뷰",
-      company_logo: null,
-      location: "서울전체",
-      career: "경력",
-      education: "고졸",
-      salary: "면접 시 50만원",
-      deadline: "~01.03(토)",
-    },
-  ];
-
-  // filters를 활용한 필터링 로직 (실제로는 서버에서 처리)
-  useEffect(() => {
-    if (filters) {
-      console.log("현재 적용된 필터:", filters);
-      // 여기서 실제 API 호출
-      // fetchJobs(filters).then(setJobs);
-    }
-  }, [filters]);
-
-  return (
-    <div className="job-list">
-      <h3 className="job-list-title">이 공고, 놓치지 마세요!</h3>
-      {filters && (
-        <div className="applied-filters">
-          {filters.regions?.length > 0 && (
-            <span>지역: {filters.regions.length}개</span>
-          )}
-          {filters.careerType?.length > 0 && (
-            <span>경력: {filters.careerType.join(", ")}</span>
-          )}
-          {filters.education && (
-            <span>학력: {filters.education}</span>
-          )}
-        </div>
-      )}
-      <div className="job-grid">
-        {mockJobs.map((job) => (
-          <JobCard key={job.id} job={job} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* BoardJobPage 최상위 컴포넌트 */
-function BoardJobPage() {
-  const [filters, setFilters] = useState(null);
-
-  function handleFilterChange(newFilters) {
-    setFilters(newFilters);
-    console.log("필터 변경:", newFilters);
-    // 여기서 API 호출하여 채용 공고 목록 새로 불러오기
-  }
-
-  return (
-    <div className="board-job-page">
-      <h1 className="page-title"></h1>
-      <JobSearchFilter onFilterChange={handleFilterChange} />
-      <JobList filters={filters} />
-    </div>
-  );
-}
+};
 
 export default BoardJobPage;

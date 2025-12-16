@@ -1,38 +1,39 @@
 package com.portflux.backend.controller;
 
-import com.portflux.backend.beans.JobDto;
-import com.portflux.backend.beans.JobFilterDto;
-import com.portflux.backend.beans.JobCreateRequest;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.portflux.backend.dto.JobCreateRequest;
+import com.portflux.backend.dto.JobDto;
+import com.portflux.backend.dto.JobFilterDto;
 import com.portflux.backend.service.JobService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
- * 채용공고 컨트롤러
+ * 채용공고 REST Controller
  */
 @RestController
 @RequestMapping("/api/jobs")
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class JobController {
-    
+
     @Autowired
     private JobService jobService;
-    
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     /**
      * 채용공고 목록 조회
-     * GET /api/jobs?page=0&size=20&sort=latest&regions=[...]&keyword=...
      */
     @GetMapping
-    public ResponseEntity<?> getJobs(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "latest") String sort,
+    public ResponseEntity<Map<String, Object>> getJobs(
             @RequestParam(required = false) String regions,
             @RequestParam(required = false) String careerType,
             @RequestParam(required = false) String careerYears,
@@ -44,67 +45,93 @@ public class JobController {
             @RequestParam(required = false) String workDays,
             @RequestParam(required = false) Integer salaryMin,
             @RequestParam(required = false) String keyword,
-            HttpSession session
-    ) {
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "20") Integer size,
+            @RequestParam(defaultValue = "latest") String sort,
+            HttpSession session) {
+        
         try {
-            // 현재 로그인한 사용자 ID (북마크 여부 확인용)
-            Long userNum = (Long) session.getAttribute("userNum");
-            
-            // 필터 DTO 생성
             JobFilterDto filter = new JobFilterDto();
             filter.setPage(page);
             filter.setSize(size);
             filter.setSort(sort);
-            filter.setRegions(parseJsonArray(regions));
-            filter.setCareerType(parseJsonArray(careerType));
-            filter.setCareerYears(parseJsonArray(careerYears));
+            
+            // JSON 배열 파라미터 파싱
+            if (regions != null && !regions.isEmpty()) {
+                filter.setRegions(objectMapper.readValue(regions, new TypeReference<List<String>>() {}));
+            }
+            if (careerType != null && !careerType.isEmpty()) {
+                filter.setCareerType(objectMapper.readValue(careerType, new TypeReference<List<String>>() {}));
+            }
+            if (careerYears != null && !careerYears.isEmpty()) {
+                filter.setCareerYears(objectMapper.readValue(careerYears, new TypeReference<List<String>>() {}));
+            }
+            if (industries != null && !industries.isEmpty()) {
+                filter.setIndustries(objectMapper.readValue(industries, new TypeReference<List<String>>() {}));
+            }
+            if (companyTypes != null && !companyTypes.isEmpty()) {
+                filter.setCompanyTypes(objectMapper.readValue(companyTypes, new TypeReference<List<String>>() {}));
+            }
+            if (workTypes != null && !workTypes.isEmpty()) {
+                filter.setWorkTypes(objectMapper.readValue(workTypes, new TypeReference<List<String>>() {}));
+            }
+            if (workDays != null && !workDays.isEmpty()) {
+                filter.setWorkDays(objectMapper.readValue(workDays, new TypeReference<List<String>>() {}));
+            }
+            
             filter.setEducation(education);
             filter.setEducationExclude(educationExclude);
-            filter.setIndustries(parseJsonArray(industries));
-            filter.setCompanyTypes(parseJsonArray(companyTypes));
-            filter.setWorkTypes(parseJsonArray(workTypes));
-            filter.setWorkDays(parseJsonArray(workDays));
             filter.setSalaryMin(salaryMin);
             filter.setKeyword(keyword);
             
-            Map<String, Object> result = jobService.getJobs(filter, userNum);
+            // 세션에서 사용자 정보 가져오기
+            Long userNum = (Long) session.getAttribute("userNum");
+            filter.setUserNum(userNum);
+            
+            Map<String, Object> result = jobService.getJobs(filter);
             return ResponseEntity.ok(result);
+            
         } catch (Exception e) {
-            e.printStackTrace();
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "채용공고 목록 조회 중 오류가 발생했습니다.");
+            Map<String, Object> error = new HashMap<>();
+            error.put("message", "목록 조회 중 오류가 발생했습니다: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    
+
     /**
      * 채용공고 상세 조회
-     * GET /api/jobs/{id}
      */
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getJobDetail(@PathVariable Long id, HttpSession session) {
+    @GetMapping("/{postId}")
+    public ResponseEntity<?> getJobDetail(@PathVariable Long postId, HttpSession session) {
         try {
             Long userNum = (Long) session.getAttribute("userNum");
-            JobDto job = jobService.getJobDetail(id, userNum);
+            JobDto job = jobService.getJobDetail(postId, userNum);
             
             if (job == null) {
-                Map<String, String> error = new HashMap<>();
+                Map<String, Object> error = new HashMap<>();
                 error.put("message", "채용공고를 찾을 수 없습니다.");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
             }
             
-            return ResponseEntity.ok(job);
+            // 소유자 여부 추가
+            Long companyNum = (Long) session.getAttribute("companyNum");
+            boolean isOwner = jobService.isOwner(postId, companyNum);
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("job", job);
+            result.put("isOwner", isOwner);
+            
+            return ResponseEntity.ok(result);
+            
         } catch (Exception e) {
-            e.printStackTrace();
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "채용공고 조회 중 오류가 발생했습니다.");
+            Map<String, Object> error = new HashMap<>();
+            error.put("message", "상세 조회 중 오류가 발생했습니다: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    
+
     /**
      * 채용공고 생성 (기업 전용)
-     * POST /api/jobs
      */
     @PostMapping
     public ResponseEntity<?> createJob(@RequestBody JobCreateRequest request, HttpSession session) {
@@ -112,235 +139,209 @@ public class JobController {
             Long companyNum = (Long) session.getAttribute("companyNum");
             
             if (companyNum == null) {
-                Map<String, String> error = new HashMap<>();
+                Map<String, Object> error = new HashMap<>();
                 error.put("message", "기업 로그인이 필요합니다.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
             }
             
-            boolean success = jobService.createJob(request, companyNum);
+            JobDto created = jobService.createJob(companyNum, request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
             
-            if (success) {
-                Map<String, String> result = new HashMap<>();
-                result.put("message", "채용공고가 생성되었습니다.");
-                return ResponseEntity.status(HttpStatus.CREATED).body(result);
-            } else {
-                Map<String, String> error = new HashMap<>();
-                error.put("message", "채용공고 생성에 실패했습니다.");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-            }
         } catch (Exception e) {
-            e.printStackTrace();
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "채용공고 생성 중 오류가 발생했습니다.");
+            Map<String, Object> error = new HashMap<>();
+            error.put("message", "채용공고 생성 중 오류가 발생했습니다: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    
+
     /**
      * 채용공고 수정 (작성 기업 전용)
-     * PUT /api/jobs/{id}
      */
-    @PutMapping("/{id}")
+    @PutMapping("/{postId}")
     public ResponseEntity<?> updateJob(
-            @PathVariable Long id,
+            @PathVariable Long postId,
             @RequestBody JobCreateRequest request,
-            HttpSession session
-    ) {
+            HttpSession session) {
         try {
             Long companyNum = (Long) session.getAttribute("companyNum");
             
             if (companyNum == null) {
-                Map<String, String> error = new HashMap<>();
+                Map<String, Object> error = new HashMap<>();
                 error.put("message", "기업 로그인이 필요합니다.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
             }
             
-            boolean success = jobService.updateJob(id, request, companyNum);
+            JobDto updated = jobService.updateJob(postId, companyNum, request);
+            return ResponseEntity.ok(updated);
             
-            if (success) {
-                Map<String, String> result = new HashMap<>();
-                result.put("message", "채용공고가 수정되었습니다.");
-                return ResponseEntity.ok(result);
-            } else {
-                Map<String, String> error = new HashMap<>();
-                error.put("message", "채용공고 수정에 실패했습니다.");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-            }
-        } catch (IllegalAccessException e) {
-            Map<String, String> error = new HashMap<>();
+        } catch (RuntimeException e) {
+            Map<String, Object> error = new HashMap<>();
             error.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
         } catch (Exception e) {
-            e.printStackTrace();
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "채용공고 수정 중 오류가 발생했습니다.");
+            Map<String, Object> error = new HashMap<>();
+            error.put("message", "채용공고 수정 중 오류가 발생했습니다: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    
+
     /**
      * 채용공고 삭제 (작성 기업 전용)
-     * DELETE /api/jobs/{id}
      */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteJob(@PathVariable Long id, HttpSession session) {
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<?> deleteJob(@PathVariable Long postId, HttpSession session) {
         try {
             Long companyNum = (Long) session.getAttribute("companyNum");
             
             if (companyNum == null) {
-                Map<String, String> error = new HashMap<>();
+                Map<String, Object> error = new HashMap<>();
                 error.put("message", "기업 로그인이 필요합니다.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
             }
             
-            boolean success = jobService.deleteJob(id, companyNum);
+            jobService.deleteJob(postId, companyNum);
             
-            if (success) {
-                Map<String, String> result = new HashMap<>();
-                result.put("message", "채용공고가 삭제되었습니다.");
-                return ResponseEntity.ok(result);
-            } else {
-                Map<String, String> error = new HashMap<>();
-                error.put("message", "채용공고 삭제에 실패했습니다.");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-            }
-        } catch (IllegalAccessException e) {
-            Map<String, String> error = new HashMap<>();
+            Map<String, Object> result = new HashMap<>();
+            result.put("message", "삭제되었습니다.");
+            return ResponseEntity.ok(result);
+            
+        } catch (RuntimeException e) {
+            Map<String, Object> error = new HashMap<>();
             error.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
         } catch (Exception e) {
-            e.printStackTrace();
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "채용공고 삭제 중 오류가 발생했습니다.");
+            Map<String, Object> error = new HashMap<>();
+            error.put("message", "채용공고 삭제 중 오류가 발생했습니다: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    
+
     /**
-     * 채용공고 상태 변경 (작성 기업 전용)
-     * PATCH /api/jobs/{id}/status
+     * 채용공고 상태 변경
      */
-    @PatchMapping("/{id}/status")
+    @PatchMapping("/{postId}/status")
     public ResponseEntity<?> updateJobStatus(
-            @PathVariable Long id,
-            @RequestBody Map<String, String> request,
-            HttpSession session
-    ) {
+            @PathVariable Long postId,
+            @RequestBody Map<String, String> body,
+            HttpSession session) {
         try {
             Long companyNum = (Long) session.getAttribute("companyNum");
             
             if (companyNum == null) {
-                Map<String, String> error = new HashMap<>();
+                Map<String, Object> error = new HashMap<>();
                 error.put("message", "기업 로그인이 필요합니다.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
             }
             
-            String status = request.get("status");
-            boolean success = jobService.updateJobStatus(id, status, companyNum);
-            
-            if (success) {
-                Map<String, String> result = new HashMap<>();
-                result.put("message", "채용공고 상태가 변경되었습니다.");
-                return ResponseEntity.ok(result);
-            } else {
-                Map<String, String> error = new HashMap<>();
-                error.put("message", "채용공고 상태 변경에 실패했습니다.");
+            String status = body.get("status");
+            if (status == null || (!status.equals("ACTIVE") && !status.equals("CLOSED"))) {
+                Map<String, Object> error = new HashMap<>();
+                error.put("message", "유효하지 않은 상태값입니다.");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
             }
-        } catch (IllegalAccessException e) {
-            Map<String, String> error = new HashMap<>();
+            
+            jobService.updateJobStatus(postId, companyNum, status);
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("message", "상태가 변경되었습니다.");
+            result.put("status", status);
+            return ResponseEntity.ok(result);
+            
+        } catch (RuntimeException e) {
+            Map<String, Object> error = new HashMap<>();
             error.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
         } catch (Exception e) {
-            e.printStackTrace();
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "채용공고 상태 변경 중 오류가 발생했습니다.");
+            Map<String, Object> error = new HashMap<>();
+            error.put("message", "상태 변경 중 오류가 발생했습니다: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    
+
     /**
      * 북마크 토글
-     * POST /api/jobs/{id}/bookmark
      */
-    @PostMapping("/{id}/bookmark")
-    public ResponseEntity<?> toggleBookmark(@PathVariable Long id, HttpSession session) {
+    @PostMapping("/{postId}/bookmark")
+    public ResponseEntity<?> toggleBookmark(@PathVariable Long postId, HttpSession session) {
         try {
             Long userNum = (Long) session.getAttribute("userNum");
             
             if (userNum == null) {
-                Map<String, String> error = new HashMap<>();
-                error.put("message", "사용자 로그인이 필요합니다.");
+                Map<String, Object> error = new HashMap<>();
+                error.put("message", "로그인이 필요합니다.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
             }
             
-            Map<String, Boolean> result = jobService.toggleBookmark(id, userNum);
+            boolean bookmarked = jobService.toggleBookmark(userNum, postId);
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("bookmarked", bookmarked);
+            result.put("message", bookmarked ? "북마크에 추가되었습니다." : "북마크가 해제되었습니다.");
             return ResponseEntity.ok(result);
+            
         } catch (Exception e) {
-            e.printStackTrace();
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "북마크 처리 중 오류가 발생했습니다.");
+            Map<String, Object> error = new HashMap<>();
+            error.put("message", "북마크 처리 중 오류가 발생했습니다: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    
+
     /**
-     * 북마크 여부 확인
-     * GET /api/jobs/{id}/bookmark/status
+     * 북마크 상태 확인
      */
-    @GetMapping("/{id}/bookmark/status")
-    public ResponseEntity<?> checkBookmarkStatus(@PathVariable Long id, HttpSession session) {
+    @GetMapping("/{postId}/bookmark/status")
+    public ResponseEntity<?> checkBookmarkStatus(@PathVariable Long postId, HttpSession session) {
         try {
             Long userNum = (Long) session.getAttribute("userNum");
             
             if (userNum == null) {
-                Map<String, Boolean> result = new HashMap<>();
+                Map<String, Object> result = new HashMap<>();
                 result.put("bookmarked", false);
                 return ResponseEntity.ok(result);
             }
             
-            Map<String, Boolean> result = jobService.checkBookmarkStatus(id, userNum);
+            boolean bookmarked = jobService.checkBookmarkStatus(userNum, postId);
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("bookmarked", bookmarked);
             return ResponseEntity.ok(result);
+            
         } catch (Exception e) {
-            e.printStackTrace();
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "북마크 상태 확인 중 오류가 발생했습니다.");
+            Map<String, Object> error = new HashMap<>();
+            error.put("message", "북마크 확인 중 오류가 발생했습니다.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    
+
     /**
      * 북마크 목록 조회
-     * GET /api/jobs/bookmarks?page=0&size=20
      */
     @GetMapping("/bookmarks")
     public ResponseEntity<?> getBookmarks(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            HttpSession session
-    ) {
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "20") Integer size,
+            HttpSession session) {
         try {
             Long userNum = (Long) session.getAttribute("userNum");
             
             if (userNum == null) {
-                Map<String, String> error = new HashMap<>();
-                error.put("message", "사용자 로그인이 필요합니다.");
+                Map<String, Object> error = new HashMap<>();
+                error.put("message", "로그인이 필요합니다.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
             }
             
             Map<String, Object> result = jobService.getBookmarks(userNum, page, size);
             return ResponseEntity.ok(result);
+            
         } catch (Exception e) {
-            e.printStackTrace();
-            Map<String, String> error = new HashMap<>();
+            Map<String, Object> error = new HashMap<>();
             error.put("message", "북마크 목록 조회 중 오류가 발생했습니다.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    
+
     /**
-     * 지역별 채용공고 개수
-     * GET /api/jobs/count-by-region
+     * 지역별 채용공고 개수 조회
      */
     @GetMapping("/count-by-region")
     public ResponseEntity<?> getJobCountByRegion() {
@@ -348,72 +349,36 @@ public class JobController {
             Map<String, Integer> result = jobService.getJobCountByRegion();
             return ResponseEntity.ok(result);
         } catch (Exception e) {
-            e.printStackTrace();
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "지역별 채용공고 개수 조회 중 오류가 발생했습니다.");
+            Map<String, Object> error = new HashMap<>();
+            error.put("message", "지역별 개수 조회 중 오류가 발생했습니다.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    
+
     /**
-     * 내가 작성한 채용공고 목록
-     * GET /api/jobs/my?page=0&size=20
+     * 내 채용공고 목록 (기업 전용)
      */
     @GetMapping("/my")
     public ResponseEntity<?> getMyJobs(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            HttpSession session
-    ) {
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "20") Integer size,
+            HttpSession session) {
         try {
             Long companyNum = (Long) session.getAttribute("companyNum");
             
             if (companyNum == null) {
-                Map<String, String> error = new HashMap<>();
+                Map<String, Object> error = new HashMap<>();
                 error.put("message", "기업 로그인이 필요합니다.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
             }
             
             Map<String, Object> result = jobService.getMyJobs(companyNum, page, size);
             return ResponseEntity.ok(result);
+            
         } catch (Exception e) {
-            e.printStackTrace();
-            Map<String, String> error = new HashMap<>();
+            Map<String, Object> error = new HashMap<>();
             error.put("message", "내 채용공고 목록 조회 중 오류가 발생했습니다.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
-    }
-    
-    /**
-     * JSON 배열 문자열을 List로 파싱
-     * @param jsonArray JSON 배열 문자열 (예: "[\"서울\", \"부산\"]")
-     * @return List<String>
-     */
-    private java.util.List<String> parseJsonArray(String jsonArray) {
-        if (jsonArray == null || jsonArray.trim().isEmpty()) {
-            return null;
-        }
-        
-        try {
-            // 간단한 JSON 배열 파싱 (Jackson 사용 시 ObjectMapper 활용 가능)
-            jsonArray = jsonArray.trim();
-            if (jsonArray.startsWith("[") && jsonArray.endsWith("]")) {
-                jsonArray = jsonArray.substring(1, jsonArray.length() - 1);
-                String[] items = jsonArray.split(",");
-                java.util.List<String> result = new java.util.ArrayList<>();
-                for (String item : items) {
-                    item = item.trim();
-                    if (item.startsWith("\"") && item.endsWith("\"")) {
-                        item = item.substring(1, item.length() - 1);
-                    }
-                    result.add(item);
-                }
-                return result;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
-        return null;
     }
 }

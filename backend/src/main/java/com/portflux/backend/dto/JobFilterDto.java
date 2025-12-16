@@ -1,28 +1,36 @@
-package com.portflux.backend.beans;
+package com.portflux.backend.dto;
 
 import java.util.List;
 
 /**
  * 채용공고 필터 DTO
+ * 검색 및 필터링 조건을 담는 객체
  */
 public class JobFilterDto {
-    private List<String> regions;           // 지역 필터
-    private List<String> careerType;        // 경력 타입 필터
-    private List<String> careerYears;       // 경력 연차 필터
-    private String education;               // 학력 필터
-    private Boolean educationExclude;       // 학력무관 필터
-    private List<String> industries;        // 업종 필터
-    private List<String> companyTypes;      // 기업형태 필터
-    private List<String> workTypes;         // 근무형태 필터
-    private List<String> workDays;          // 근무요일 필터
-    private Integer salaryMin;              // 최소 급여
-    private String keyword;                 // 검색 키워드 (제목, 기업명)
     
-    private Integer page;                   // 페이지 번호 (0부터 시작)
-    private Integer size;                   // 페이지 크기
-    private String sort;                    // 정렬 (latest, views, deadline)
-
-    // Getter & Setter
+    // 필터 조건
+    private List<String> regions;
+    private List<String> careerType;
+    private List<String> careerYears;
+    private String education;
+    private Boolean educationExclude;
+    private List<String> industries;
+    private List<String> companyTypes;
+    private List<String> workTypes;
+    private List<String> workDays;
+    private Integer salaryMin;
+    private String keyword;
+    
+    // 페이징
+    private Integer page = 0;
+    private Integer size = 20;
+    private String sort = "latest";  // latest, views, deadline
+    
+    // 사용자 정보 (북마크 조회용)
+    private Long userNum;
+    private Long companyNum;
+    
+    // Getters and Setters
     public List<String> getRegions() {
         return regions;
     }
@@ -134,13 +142,29 @@ public class JobFilterDto {
     public void setSort(String sort) {
         this.sort = sort;
     }
-    
-    // 페이징을 위한 offset 계산
-    public int getOffset() {
-        return (page != null && size != null) ? page * size : 0;
+
+    public Long getUserNum() {
+        return userNum;
     }
-    
+
+    public void setUserNum(Long userNum) {
+        this.userNum = userNum;
+    }
+
+    public Long getCompanyNum() {
+        return companyNum;
+    }
+
+    public void setCompanyNum(Long companyNum) {
+        this.companyNum = companyNum;
+    }
+
+    // Helper methods for pagination
+    public int getOffset() {
+        return page * size;
+    }
+
     public int getLimit() {
-        return (size != null) ? size : 20;
+        return size;
     }
 }

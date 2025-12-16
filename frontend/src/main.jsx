@@ -12,6 +12,9 @@ import NoFooterLayout from "./layouts/NoFooterLayout";
 import NotFound from "./pages/NotFound";
 import BoardFree from "./pages/BoardFreePage";
 import BoardJob from "./pages/BoardJobPage.jsx";
+import BoardJobDetailPage from "./pages/BoardJobDetailPage.jsx";
+import BoardJobCreatePage from "./pages/BoardJobCreatePage.jsx";
+import BoardJobEditPage from "./pages/BoardJobEditPage.jsx";
 import BoardLookup from "./pages/BoardLookupPage.jsx";
 import Cart from "./pages/CartPage.jsx";
 import MyPage from "./pages/MyPage.jsx";
@@ -30,44 +33,56 @@ const router = createBrowserRouter([
     children: [
       {
         path: "boardfree",
-        element: <BoardFree />
+        element: <BoardFree />,
       },
       {
         path: "boardjob",
-        element: <BoardJob />
+        element: <BoardJob />,
+      },
+      {
+        path: "boardjob/:postId",
+        element: <BoardJobDetailPage />,
+      },
+      {
+        path: "boardjob/create",
+        element: <BoardJobCreatePage />,
+      },
+      {
+        path: "boardjob/edit/:postId",
+        element: <BoardJobEditPage />,
       },
       {
         path: "cart",
-        element: <Cart />
+        element: <Cart />,
       },
       {
         path: "mypage",
-        element: <MyPage />
+        element: <MyPage />,
       },
       {
         path: "order-result",
-        element: <OrderResultPage />
+        element: <OrderResultPage />,
       },
-           {
+      {
         path: "login",
-        element: <LoginPage />
+        element: <LoginPage />,
       },
       {
         path: "register",
-        element: <RegisterPage />
+        element: <RegisterPage />,
       },
       {
         path: "findid",
-        element: <FindIdPage /> 
+        element: <FindIdPage />,
       },
       {
         path: "findpassword",
-        element: <FindPasswordPage /> 
+        element: <FindPasswordPage />,
       },
       {
         path: "success",
-        element: <SuccessPage />
-      }
+        element: <SuccessPage />,
+      },
     ],
   },
   {
@@ -76,7 +91,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "boardlookup",
-        element: <BoardLookup />
+        element: <BoardLookup />,
       },
     ],
   },
