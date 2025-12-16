@@ -1,58 +1,58 @@
 .chatting-page {
-    display: flex;
-    flex-direction: column;
-    height: 80vh;
-    width: 60%;
-    margin: 2rem auto;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+  width: 60%;
+  margin: 2rem auto;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .message-list {
-    flex-grow: 1;
-    padding: 1rem;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
+  flex-grow: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .message {
-    margin-bottom: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 1rem;
-    max-width: 70%;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  max-width: 70%;
 }
 
 .message.sent {
-    background-color: #dcf8c6;
-    align-self: flex-end;
+  background-color: #dcf8c6;
+  align-self: flex-end;
 }
 
 .message.received {
-    background-color: #f1f0f0;
-    align-self: flex-start;
+  background-color: #f1f0f0;
+  align-self: flex-start;
 }
 
 .message-input {
-    display: flex;
-    padding: 1rem;
-    border-top: 1px solid #ccc;
+  display: flex;
+  padding: 1rem;
+  border-top: 1px solid #ccc;
 }
 
 .message-input input {
-    flex-grow: 1;
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+  flex-grow: 1;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .message-input button {
-    margin-left: 1rem;
-    padding: 0.5rem 1rem;
-    border: none;
-    background-color: #007bff;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
+  margin-left: 1rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
 }
