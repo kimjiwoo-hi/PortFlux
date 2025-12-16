@@ -18,14 +18,19 @@ import MyPage from "./pages/MyPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
 import OrderResultPage from "./pages/OrderResultPage.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
+import RegisterPage from "./pages/RegisterPage.jsx";
+import FindIdPage from "./pages/FindIdPage.jsx";
+import FindPasswordPage from "./pages/FindPasswordPage.jsx";
+import SuccessPage from "./pages/SuccessPage.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <MainLayout />,
-    errorElement: <NotFound />,
+    element: <NoFooterLayout />,
     children: [
       {
+<<<<<<< HEAD
         path: "boardfree",
         element: <BoardFree />,
       },
@@ -48,14 +53,18 @@ const router = createBrowserRouter([
       {
         path: "order-result",
         element: <OrderResultPage />,
+=======
+        index: true,
+        element: <BoardLookup />
+>>>>>>> f12d1f3c3c9e3d84a0e283391f05cb00dc9e64b4
       },
     ],
   },
   {
-    element: <NoFooterLayout />,
-    errorElement: <NotFound />,
+    element: <MainLayout />,
     children: [
       {
+<<<<<<< HEAD
         path: "boardlookup",
         element: <BoardLookup />,
       },
@@ -74,6 +83,54 @@ const router = createBrowserRouter([
       {
         path: "findpassword",
         element: <FindPasswordPage /> 
+=======
+        path: "/boardfree",
+        element: <BoardFree />
+      },
+      {
+        path: "/boardjob",
+        element: <BoardJob />
+      },
+      {
+        path: "/cart",
+        element: <Cart />
+      },
+      {
+        path: "/mypage",
+        element: <MyPage />
+      },
+      {
+        path: "/order-result",
+        element: <OrderResultPage />
+      },
+      {
+        path: "/login",
+        element: <LoginPage />
+      },
+      {
+        path: "/register",
+        element: <RegisterPage />
+      },
+      {
+        path: "/findid",
+        element: <FindIdPage />
+      },
+      {
+        path: "/findpassword",
+        element: <FindPasswordPage />
+      },
+      {
+        path: "/success",
+        element: <SuccessPage />
+      },
+      {
+        path: "/etc",
+        element: <NotFound />
+      },
+      {
+        path: "*",
+        element: <NotFound />
+>>>>>>> f12d1f3c3c9e3d84a0e283391f05cb00dc9e64b4
       }
     ],
   },
