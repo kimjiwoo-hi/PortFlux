@@ -1,20 +1,21 @@
-import React from 'react';
-import './UserProfilePopover.css';
+import React from "react";
+import "./UserProfilePopover.css";
+import { Link } from "react-router-dom";
 
 const UserProfilePopover = ({ isOpen, onLogout }) => {
   return (
-    <div className={`profile-popover ${isOpen ? 'active' : ''}`}>
+    <div className={`profile-popover ${isOpen ? "active" : ""}`}>
       <div className="popover-header">
         <div className="header-bg"></div>
-        <img 
-            src="https://i.pravatar.cc/150?img=33" 
-            alt="프로필" 
-            className="popover-avatar"
+        <img
+          src="https://i.pravatar.cc/150?img=33"
+          alt="프로필"
+          className="popover-avatar"
         />
         <div className="popover-name">솔데스크</div>
         <div className="popover-email">soldesk@soldesk.com</div>
       </div>
-      
+
       <div className="stats-container">
         <div className="stat-item">
           <div className="stat-number">3</div>
@@ -33,13 +34,22 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
       </div>
 
       <div className="menu-list">
-        <button className="menu-item">내 정보 보기</button>
-        <button className="menu-item">장바구니</button>
-        <button className="menu-item">채팅방</button>
+        <Link to="/mypage/myinfo">
+          <button className="menu-item">내 정보 보기</button>
+        </Link>
+        <Link to="/cart">
+          <button className="menu-item">장바구니</button>
+        </Link>
+
+        <Link to="/chat">
+          <button className="menu-item">채팅방</button>
+        </Link>
       </div>
 
       <div className="popover-footer">
-        <button className="btn-logout" onClick={onLogout}>로그아웃</button>
+        <button className="btn-logout" onClick={onLogout}>
+          로그아웃
+        </button>
       </div>
     </div>
   );
