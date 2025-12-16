@@ -10,7 +10,9 @@ const MyInfo = () => {
     userEmail: "",
     userPhone: "",
     userCreateAt: "",
-    userLevel: 0
+    userLevel: 0,
+    userImage: "",
+    userBanner: ""
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -18,6 +20,10 @@ const MyInfo = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+
+  // 이미지 미리보기
+  const [profilePreview, setProfilePreview] = useState(null);
+  const [bannerPreview, setBannerPreview] = useState(null);
 
   // 비밀번호 변경 모달
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -87,6 +93,38 @@ const MyInfo = () => {
     });
   };
 
+  // 프로필 이미지 변경
+  const handleProfileImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePreview(reader.result);
+        setEditedInfo({
+          ...editedInfo,
+          userImage: reader.result
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // 배너 이미지 변경
+  const handleBannerImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBannerPreview(reader.result);
+        setEditedInfo({
+          ...editedInfo,
+          userBanner: reader.result
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handlePasswordChange = async () => {
     if (passwords.newPassword !== passwords.confirmPassword) {
       setError("새 비밀번호가 일치하지 않습니다.");
@@ -143,6 +181,54 @@ const MyInfo = () => {
       {successMessage && <div className="alert alert-success">{successMessage}</div>}
 
       <div className="info-section">
+        {/* 이미지 섹션 */}
+        <div className="image-section">
+          {/* 배너 이미지 */}
+          <div className="banner-container">
+            <img
+              src={bannerPreview || editedInfo.userBanner || userInfo.userBanner || ""}
+              alt="배너"
+              className="banner-image"
+            />
+            {isEditing && (
+              <label className="image-upload-label banner-upload">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleBannerImageChange}
+                  style={{ display: 'none' }}
+                />
+                배너 변경
+              </label>
+            )}
+          </div>
+
+          {/* 프로필 이미지 */}
+          <div className="myinfo-profile-container">
+            <img
+              src={
+                profilePreview ||
+                (editedInfo.userImage && editedInfo.userImage.trim() !== "" ? editedInfo.userImage : null) ||
+                (userInfo.userImage && userInfo.userImage.trim() !== "" ? userInfo.userImage : null) ||
+                "/assets/user_default_icon.png"
+              }
+              alt="프로필"
+              className="myinfo-profile-image"
+            />
+            {isEditing && (
+              <label className="image-upload-label myinfo-profile-upload">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfileImageChange}
+                  style={{ display: 'none' }}
+                />
+                프로필 변경
+              </label>
+            )}
+          </div>
+        </div>
+
         <div className="info-grid">
           {/* 아이디 (수정 불가) */}
           <div className="info-item">
