@@ -1,16 +1,15 @@
-package com.portflux.backend.beans;
+package com.portflux.backend.dto;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
  * 채용공고 생성/수정 요청 DTO
  */
 public class JobCreateRequest {
+    
     private String title;
     private String content;
-    
-    // 채용공고 필수 필드
     private String jobRegion;
     private List<String> jobCareerType;
     private List<String> jobCareerYears;
@@ -18,13 +17,14 @@ public class JobCreateRequest {
     private Boolean jobEducationExclude;
     private Integer jobSalaryMin;
     private Integer jobSalaryMax;
-    private LocalDateTime jobDeadline;
+    private LocalDate jobDeadline;
+    private String jobStatus;
     private List<String> jobIndustries;
     private List<String> jobCompanyTypes;
     private List<String> jobWorkTypes;
     private List<String> jobWorkDays;
-
-    // Getter & Setter
+    
+    // Getters and Setters
     public String getTitle() {
         return title;
     }
@@ -97,12 +97,20 @@ public class JobCreateRequest {
         this.jobSalaryMax = jobSalaryMax;
     }
 
-    public LocalDateTime getJobDeadline() {
+    public LocalDate getJobDeadline() {
         return jobDeadline;
     }
 
-    public void setJobDeadline(LocalDateTime jobDeadline) {
+    public void setJobDeadline(LocalDate jobDeadline) {
         this.jobDeadline = jobDeadline;
+    }
+
+    public String getJobStatus() {
+        return jobStatus;
+    }
+
+    public void setJobStatus(String jobStatus) {
+        this.jobStatus = jobStatus;
     }
 
     public List<String> getJobIndustries() {

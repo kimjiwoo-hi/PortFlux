@@ -1,16 +1,21 @@
-package com.portflux.backend.beans;
+package com.portflux.backend.dto;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 채용공고 응답 DTO
+ * 채용공고 DTO
+ * POST 테이블의 job 타입 데이터 표현
  */
 public class JobDto {
+    
     private Long postId;
     private Long companyNum;
     private String companyName;
     private String companyImage;
+    
+    // 공통 필드
     private String title;
     private String content;
     private LocalDateTime createdAt;
@@ -19,26 +24,28 @@ public class JobDto {
     
     // 채용공고 전용 필드
     private String jobRegion;
-    private List<String> jobCareerType;      // JSON 파싱 후 List
-    private List<String> jobCareerYears;     // JSON 파싱 후 List
+    private List<String> jobCareerType;
+    private List<String> jobCareerYears;
     private String jobEducation;
     private Boolean jobEducationExclude;
     private Integer jobSalaryMin;
     private Integer jobSalaryMax;
-    private LocalDateTime jobDeadline;
+    private LocalDate jobDeadline;
     private String jobStatus;
-    private List<String> jobIndustries;      // JSON 파싱 후 List
-    private List<String> jobCompanyTypes;    // JSON 파싱 후 List
-    private List<String> jobWorkTypes;       // JSON 파싱 후 List
-    private List<String> jobWorkDays;        // JSON 파싱 후 List
     
-    // 추가 정보
-    private Boolean isBookmarked;            // 북마크 여부
-    private Boolean isNew;                   // 신규 공고 (3일 이내)
-    private Boolean isDeadlineSoon;          // 마감 임박 (3일 이내)
-    private Long daysLeft;                   // 남은 일수
-
-    // Getter & Setter
+    // 추가 필터 필드
+    private List<String> jobIndustries;
+    private List<String> jobCompanyTypes;
+    private List<String> jobWorkTypes;
+    private List<String> jobWorkDays;
+    
+    // 계산된 필드 (서비스에서 설정)
+    private Boolean isBookmarked;
+    private Boolean isNew;
+    private Boolean isDeadlineSoon;
+    private Integer daysLeft;
+    
+    // Getters and Setters
     public Long getPostId() {
         return postId;
     }
@@ -167,11 +174,11 @@ public class JobDto {
         this.jobSalaryMax = jobSalaryMax;
     }
 
-    public LocalDateTime getJobDeadline() {
+    public LocalDate getJobDeadline() {
         return jobDeadline;
     }
 
-    public void setJobDeadline(LocalDateTime jobDeadline) {
+    public void setJobDeadline(LocalDate jobDeadline) {
         this.jobDeadline = jobDeadline;
     }
 
@@ -239,11 +246,11 @@ public class JobDto {
         this.isDeadlineSoon = isDeadlineSoon;
     }
 
-    public Long getDaysLeft() {
+    public Integer getDaysLeft() {
         return daysLeft;
     }
 
-    public void setDaysLeft(Long daysLeft) {
+    public void setDaysLeft(Integer daysLeft) {
         this.daysLeft = daysLeft;
     }
 }
