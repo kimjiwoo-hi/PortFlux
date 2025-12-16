@@ -9,14 +9,7 @@ import com.portflux.backend.service.FollowService;
 
 import lombok.RequiredArgsConstructor;
 
-/**
- * [팔로우 컨트롤러]
- * - 로그인한 유저 기준 팔로우/언팔로우 처리
- *
- * ※ 현재는 개발 단계이므로
- *    로그인 유저 user_num을 Request Header로 전달받음
- *    (추후 JWT/Spring Security 적용 시 자동 주입으로 교체 가능)
- */
+//로그인한 유저 기준 팔로우/언팔로우 처리
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/follow")
@@ -24,10 +17,7 @@ public class FollowController {
 
     private final FollowService followService;
 
-    /**
-     * 팔로우
-     * Header : X-USER-NUM (로그인 유저 번호)
-     */
+    //팔로우
     @PostMapping("/{targetUserNum}")
     public ResponseEntity<?> follow(
             @RequestHeader("X-USER-NUM") Long loginUserNum,
@@ -37,9 +27,7 @@ public class FollowController {
         return ResponseEntity.ok("팔로우 성공");
     }
 
-    /**
-     * 언팔로우
-     */
+    //언팔로우
     @DeleteMapping("/{targetUserNum}")
     public ResponseEntity<?> unfollow(
             @RequestHeader("X-USER-NUM") Long loginUserNum,
@@ -49,9 +37,7 @@ public class FollowController {
         return ResponseEntity.ok("언팔로우 성공");
     }
 
-    /**
-     * 팔로우 여부 확인
-     */
+    //팔로우 여부 확인
     @GetMapping("/is-following/{targetUserNum}")
     public ResponseEntity<?> isFollowing(
             @RequestHeader("X-USER-NUM") Long loginUserNum,
@@ -61,9 +47,7 @@ public class FollowController {
         return ResponseEntity.ok(Map.of("following", following));
     }
 
-    /**
-     * 팔로잉 목록 조회
-     */
+    //팔로잉 목록 조회
     @GetMapping("/following/{userNum}")
     public ResponseEntity<?> following(@PathVariable Long userNum) {
         return ResponseEntity.ok(Map.of(
@@ -72,9 +56,7 @@ public class FollowController {
         ));
     }
 
-    /**
-     * 팔로워 목록 조회
-     */
+    //팔로워 목록 조회
     @GetMapping("/followers/{userNum}")
     public ResponseEntity<?> followers(@PathVariable Long userNum) {
         return ResponseEntity.ok(Map.of(
