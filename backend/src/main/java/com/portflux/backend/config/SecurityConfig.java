@@ -63,11 +63,16 @@ public class SecurityConfig {
                         .requestMatchers("/api/mail/**").permitAll()
                         .requestMatchers("/user/login/**").permitAll()
 
+<<<<<<< HEAD
                         // ★★★ 게시판 API 허용 (추가) ★★★
         .requestMatchers("/api/boardlookup/**").permitAll()
         
         // ★★★ 업로드된 파일 접근 허용 (추가) ★★★
         .requestMatchers("/uploads/**").permitAll()
+=======
+                        // [추가] 사용자 정보 조회/수정 API 허용
+                        .requestMatchers("/user/info/**").permitAll()
+>>>>>>> 7ef3ba0457016eb69aa4af34c1f681535e3d5596
 
                         // 정적 리소스 허용
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
