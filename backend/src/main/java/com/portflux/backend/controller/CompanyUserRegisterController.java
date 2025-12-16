@@ -1,13 +1,9 @@
 package com.portflux.backend.controller;
 
 import java.util.Map;
-<<<<<<< HEAD
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-=======
-import org.springframework.http.ResponseEntity;
->>>>>>> f12d1f3c3c9e3d84a0e283391f05cb00dc9e64b4
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,7 +56,6 @@ public class CompanyUserRegisterController {
             return ResponseEntity.internalServerError().body("서버 에러: " + e.getMessage());
         }
     }
-<<<<<<< HEAD
 }
 
     private final CompanyUserService companyUserService;
@@ -100,6 +95,4 @@ public class CompanyUserRegisterController {
             return ResponseEntity.internalServerError().body("서버 에러: " + e.getMessage());
         }
     }
-=======
->>>>>>> f12d1f3c3c9e3d84a0e283391f05cb00dc9e64b4
 }
