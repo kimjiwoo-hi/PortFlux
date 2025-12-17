@@ -105,6 +105,28 @@ BEGIN
 END;
 /
 
+-----------------------------------------------------------
+-- POST tags 컬럼 
+------------------------------------------------------------
+ALTER TABLE POST ADD tags VARCHAR2(2000);
+
+-- 기존 데이터 기본값 설정
+UPDATE POST SET tags = '[]' WHERE tags IS NULL;
+
+COMMIT;
+
+-- 인덱스 생성
+CREATE INDEX idx_post_tags ON POST(tags);
+
+-- POST 테이블 구조 확인
+DESC POST;
+
+-- tags 컬럼 상세 확인
+SELECT column_name, data_type, data_length 
+FROM user_tab_columns 
+WHERE table_name = 'POST' 
+  AND column_name = 'TAGS';
+
 ------------------------------------------------------------
 -- POST 외래키
 ------------------------------------------------------------

@@ -34,6 +34,14 @@ const Header = () => {
     return classes;
   };
 
+  const handleLinkClick = (path) => (e) => {
+    // 현재 페이지와 같은 경로를 클릭한 경우 새로고침
+    if (location.pathname === path) {
+      e.preventDefault();
+      window.location.reload();
+    }
+  };
+
   const handleLogout = () => {
     // 로컬 스토리지 삭제
     localStorage.removeItem("isLoggedIn");
@@ -44,7 +52,10 @@ const Header = () => {
     sessionStorage.removeItem("userId");
 
     setIsPopoverOpen(false);
+
+    // 홈으로 이동 후 페이지 새로고침
     navigate("/");
+    window.location.reload();
   };
 
   // ... (ESC 키, 외부 클릭 닫기 로직은 기존과 동일) ...
@@ -78,10 +89,10 @@ const Header = () => {
             </Link>
           </div>
           <div className="link-container">
-            <Link to="/"><div className={getLinkClass("/")}>둘러보기</div></Link>
-            <Link to="/boardjob"><div className={getLinkClass("/boardjob")}>채용</div></Link>
-            <Link to="/boardfree"><div className={getLinkClass("/boardfree")}>커뮤니티</div></Link>
-            <Link to="/etc"><div className={getLinkClass("/etc")}>기타</div></Link>
+            <Link to="/" onClick={handleLinkClick("/")}><div className={getLinkClass("/")}>둘러보기</div></Link>
+            <Link to="/boardjob" onClick={handleLinkClick("/boardjob")}><div className={getLinkClass("/boardjob")}>채용</div></Link>
+            <Link to="/boardfree" onClick={handleLinkClick("/boardfree")}><div className={getLinkClass("/boardfree")}>커뮤니티</div></Link>
+            <Link to="/etc" onClick={handleLinkClick("/etc")}><div className={getLinkClass("/etc")}>기타</div></Link>
           </div>
         </div>
 
