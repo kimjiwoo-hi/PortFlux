@@ -33,8 +33,8 @@ public class UserRegisterController {
     @PostMapping("/check-nickname")
     public ResponseEntity<Boolean> checkNickname(@RequestBody Map<String, String> request) {
         String nickname = request.get("nickname");
-        boolean isAvailable = userService.isNicknameAvailable(nickname);
-        return ResponseEntity.ok(isAvailable);
+        boolean isDuplicate = userService.isNicknameDuplicate(nickname);
+        return ResponseEntity.ok(!isDuplicate);
     }
     
     // 3. 이메일 중복 확인

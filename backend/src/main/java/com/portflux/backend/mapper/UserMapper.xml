@@ -27,9 +27,8 @@
     <select id="checkNicknameCount" parameterType="String" resultType="int">
         SELECT COUNT(*) 
         FROM USERS 
-        WHERE user_nickname = #{nickname}
+        WHERE user_nickname = #{value}
     </select>
-
     <select id="findUserByEmail" parameterType="String" resultType="com.portflux.backend.beans.UserBean">
         SELECT 
             user_num AS userNum,
