@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.portflux.backend.mapper.BoardLookupMapper">
+
+    <select id="findPostById" parameterType="int" resultType="com.portflux.backend.beans.BoardLookupPostDto">
+        SELECT 
+            p.post_id as postId,
+            p.title,
+            p.content,
+            p.price,
+            p.post_file as postFile,
+            p.user_num as userNum,
+            u.user_nickname as userNickname,
+            u.user_image as userImage,
+            p.tags,
+            p.view_cnt as viewCnt,
+            p.created_at as createdAt,
+            p.ai_summary as aiSummary,
+            p.download_cnt as downloadCnt
+        FROM POST p
+        JOIN USERS u ON p.user_num = u.user_num
+        WHERE p.post_id = #{postId} AND p.board_type = 'lookup'
+    </select>
+
+    <update id="incrementViewCount" parameterType="int">
+        UPDATE POST SET view_cnt = view_cnt + 1 WHERE post_id = #{postId}
+    </update>
+
+    <insert id="insertPost" parameterType="com.portflux.backend.beans.BoardLookupPostDto">
+        <selectKey keyProperty="postId" resultType="int" order="BEFORE">
+            SELECT NVL(MAX(post_id), 0) + 1 FROM POST
+        </selectKey>
+
+        INSERT INTO POST (
+            post_id,
+            board_type,
+            user_num,
+            title,
+            content,
+            price,
+            tags,
+            post_file,
+            ai_summary,
+            download_cnt,
+            view_cnt,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{postId},
+            'lookup',
+            #{userNum},
+            #{title},
+            #{content},
+            #{price},
+            #{tags, jdbcType=VARCHAR},
+            #{postFile},
+            #{aiSummary},
+            #{downloadCnt},
+            0,
+            SYSDATE,
+            SYSDATE
+        )
+    </insert>
+
+    <select id="findAllLookupPosts" resultType="com.portflux.backend.beans.BoardLookupPostDto">
+        SELECT 
+            post_id as postId,
+            title,
+            content,
+            price,
+            post_file as postFile,
+            user_num as userNum,
+            tags,
+            view_cnt as viewCnt,
+            created_at as createdAt
+        FROM POST
+        WHERE board_type = 'lookup'
+        ORDER BY created_at DESC
+    </select>
+
+    <update id="updatePost" parameterType="com.portflux.backend.beans.BoardLookupPostDto">
+        UPDATE POST SET
+            title = #{title},
+            content = #{content},
+            price = #{price},
+            tags = #{tags, jdbcType=VARCHAR},
+            post_file = #{postFile},
+            ai_summary = #{aiSummary},
+            updated_at = SYSDATE
+        WHERE post_id = #{postId}
+    </update>
+
+    <delete id="deletePost" parameterType="int">
+        DELETE FROM POST WHERE post_id = #{postId}
+    </delete>
+
+    <update id="incrementDownloadCount" parameterType="int">
+        UPDATE POST SET download_cnt = download_cnt + 1 WHERE post_id = #{postId}
+    </update>
+
+    <select id="findPostsByUserNum" parameterType="int" resultType="com.portflux.backend.beans.BoardLookupPostDto">
+        SELECT * FROM POST 
+        WHERE user_num = #{userNum} AND board_type = 'lookup'
+        ORDER BY created_at DESC
+    </select>
+
+</mapper>
