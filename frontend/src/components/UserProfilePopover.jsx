@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import "./UserProfilePopover.css";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const UserProfilePopover = ({ isOpen, onLogout }) => {
+  const location = useLocation();
   const [userInfo, setUserInfo] = useState({
     userName: "",
     userNickname: "",
@@ -51,6 +52,14 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
     return {};
   };
 
+  const handleMenuClick = (path) => (e) => {
+    // 현재 페이지와 같은 경로를 클릭한 경우 새로고침
+    if (location.pathname === path) {
+      e.preventDefault();
+      window.location.reload();
+    }
+  };
+
   return (
     <div className={`profile-popover ${isOpen ? "active" : ""}`}>
       <div className="popover-header">
@@ -82,14 +91,14 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
       </div>
 
       <div className="menu-list">
-        <Link to="/mypage/myinfo">
+        <Link to="/mypage/myinfo" onClick={handleMenuClick("/mypage/myinfo")}>
           <button className="menu-item">내 정보 보기</button>
         </Link>
-        <Link to="/cart">
+        <Link to="/cart" onClick={handleMenuClick("/cart")}>
           <button className="menu-item">장바구니</button>
         </Link>
 
-        <Link to="/chat">
+        <Link to="/chat" onClick={handleMenuClick("/chat")}>
           <button className="menu-item">채팅방</button>
         </Link>
       </div>
