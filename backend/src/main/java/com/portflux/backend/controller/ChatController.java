@@ -37,15 +37,14 @@ public class ChatController {
     }
 
     //특정 방 메세지 목록
-    @GetMapping("/{roomId}/messages")
-    public ResponseEntity<List<ChatMessageBean>> getChatMessages(
-        @RequestHeader("X-USER-NUM") Long loginUserNum,
-        @PathVariable Long roomId
-    ){
-        chatService.assertRoomMember(roomId, loginUserNum);
-        return ResponseEntity.ok(chatService.getMessages(roomId));
-    }
-
+@GetMapping("/{roomId}/messages")
+public ResponseEntity<List<ChatMessageBean>> getChatMessages(
+    @RequestHeader("X-USER-NUM") Long loginUserNum,
+    @PathVariable Long roomId
+){
+    chatService.assertRoomMember(roomId, loginUserNum);
+return ResponseEntity.ok(chatService.getMessagesForUser(roomId, loginUserNum));
+}
     //채팅방 생성/조회
     @PostMapping("/room")
     public ResponseEntity<ChatBean> getOrCreateChatRoom(
@@ -53,7 +52,7 @@ public class ChatController {
         @RequestBody Map<String, Long> payload
     ){
         Long targetUserNum = payload.get("targetUserNum");
-        ChatBean room = chatService.getOnCreateChatRoom(loginUserNum, targetUserNum);
+        ChatBean room = chatService.getOrCreateChatRoom(loginUserNum, targetUserNum);
         return ResponseEntity.ok(room);
     }
 
