@@ -162,6 +162,8 @@
 .input-error {
   border-color: #fa5252 !important;
 }
+<<<<<<< HEAD
+=======
 
 /* [추가] 안내 문구 스타일 (완료 화면 등에서 사용) */
 .info-text {
@@ -169,3 +171,4 @@
   color: #555;
   line-height: 1.5;
 }
+>>>>>>> f12d1f3c3c9e3d84a0e283391f05cb00dc9e64b4

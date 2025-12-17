@@ -1,5 +1,7 @@
 import axios from "axios";
 
+import axios from "axios";
+
 const api = axios.create({
   baseURL: "/", // baseURL을 루트로 변경
   headers: { "Content-Type": "application/json" },
@@ -34,12 +36,22 @@ export async function confirmPayment(payload) {
 }
 
 // --- Follow APIs ---
+<<<<<<< HEAD
+// --- Follow APIs ---
+export async function getFollowing(userId) {
+  return api.get(`/users/${userId}/following`);
+}
+
+export async function getFollowers(userId) {
+  return api.get(`/users/${userId}/followers`);
+=======
 export async function getFollowing(userId) {
   return api.get(`/api/${userId}/following`);
 }
 
 export async function getFollowers(userId) {
   return api.get(`/api/${userId}/followers`);
+>>>>>>> 4116ad0c9e15aa010d7c3ded9b8e061e5f0000e9
 }
 
 export async function follow(followerId, followingId) {
@@ -47,8 +59,30 @@ export async function follow(followerId, followingId) {
 }
 
 export async function unfollow(followerId, followingId) {
+<<<<<<< HEAD
+  // axios.delete에서 body를 사용하려면 data 속성으로 감싸야 합니다.
+  return api.delete("/unfollow", { data: { followerId, followingId } });
+=======
   return api.delete("/api/unfollow", { data: { followerId, followingId } });
+>>>>>>> 4116ad0c9e15aa010d7c3ded9b8e061e5f0000e9
+}
+
+// --- Chat APIs ---
+export async function getChatRooms(userId) {
+  return api.get(`/chats?userId=${userId}`);
+}
+
+export async function getChatMessages(roomId) {
+  return api.get(`/chats/${roomId}/messages`);
+}
+
+export async function getOrCreateChatRoom(payload) {
+  return api.post("/chats", payload);
 }
 
 export default api;
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> 4116ad0c9e15aa010d7c3ded9b8e061e5f0000e9

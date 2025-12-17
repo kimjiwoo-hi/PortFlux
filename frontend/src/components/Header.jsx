@@ -86,6 +86,16 @@ const Header = () => {
         </div>
 
         <div className="user">
+<<<<<<< HEAD
+          <Link to="/login" state={{ from: location.pathname }}>
+            <button className="login">로그인</button>
+          </Link>
+          <Link to="/register">
+            <button className="join">회원가입</button>
+          </Link>
+          <div className="profile-container" ref={profileRef}>
+            <img 
+=======
           {/* ▼▼▼ [핵심 변경] 로그인 상태에 따라 다른 UI 보여주기 ▼▼▼ */}
           {!isLoggedIn ? (
             // 1. 로그인이 안 된 경우: 로그인/회원가입 버튼 표시
@@ -101,6 +111,7 @@ const Header = () => {
             // 2. 로그인이 된 경우: 프로필 아이콘만 표시
             <div className="profile-container" ref={profileRef}>
               <img 
+>>>>>>> f12d1f3c3c9e3d84a0e283391f05cb00dc9e64b4
                 src={UserDefaultIcon} 
                 alt="프로필" 
                 className="profile-pic"

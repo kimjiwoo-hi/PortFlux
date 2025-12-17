@@ -20,7 +20,7 @@ public class ChatService {
     //채팅방 조회 및 생성
 
     @Transactional
-    public ChatBean getOrCreateChatRoom(Long user1Num, Long user2Num){
+    public ChatBean getOnCreateChatRoom(Long user1Num, Long user2Num){
 
         if(user1Num == null || user2Num == null){
             throw new IllegalArgumentException("user1Num/user2Num은 필수 입니다.");
@@ -37,7 +37,7 @@ public class ChatService {
             chatRoom = new ChatBean();
             chatRoom.setUser1Num(a);
             chatRoom.setUser2Num(b);
-            chatMapper.insertChatRoom(chatRoom);
+            chatMapper.insertChatMessage(chatRoom);
         }
         return chatRoom;
     }
@@ -45,7 +45,7 @@ public class ChatService {
     //메세지 저장 + 마지막 메세지 시간 갱신
     @Transactional
     public void saveMessage(ChatMessageBean chatMessage){
-        chatMapper.insertChatMessage(chatMessage);
+        chatMapper.insertChatRoom(chatMessage);
         chatMapper.touchLastMessageAt(chatMessage.getRoomId());
     }
 
