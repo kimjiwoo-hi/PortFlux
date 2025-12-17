@@ -32,8 +32,7 @@ public class SecurityConfig {
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration config = new CorsConfiguration();
 
-                        // ★★★ [수정 핵심] 와일드카드 대신 프론트엔드 URL 명시 ★★★
-                        // 프론트엔드가 5173 포트를 사용하므로 명시합니다.
+                        // 프론트엔드 URL 명시
                         config.setAllowedOriginPatterns(Collections.singletonList("http://localhost:5173"));
 
                         config.setAllowedMethods(Collections.singletonList("*"));
@@ -46,28 +45,35 @@ public class SecurityConfig {
                 // 2. CSRF 비활성화
                 .csrf(csrf -> csrf.disable())
 
-                // 3. 세션 설정
+                // 3. 세션 설정 (Stateless)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // 4. URL 권한 설정 (가장 중요)
+                // 4. URL 권한 설정
                 .authorizeHttpRequests(auth -> auth
+                        // 회원가입 관련
                         .requestMatchers("/user/register/check-id").permitAll()
-                    
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/user/register/**").permitAll()
                         .requestMatchers("/user/register/**").permitAll()
                         .requestMatchers("/company/register/**").permitAll()
-                        // [추가] 아이디 찾기 API 허용
+                        
+                        // 아이디/비밀번호 찾기
                         .requestMatchers("/user/find/**").permitAll()
 
-                        // API 및 로그인 관련 경로 허용
+                        // 로그인 및 메일 인증
                         .requestMatchers("/api/mail/**").permitAll()
                         .requestMatchers("/user/login/**").permitAll()
 
-                        // 정적 리소스 허용
+                        // [추가] 게시판 API 관련 경로 허용 (이 부분이 없어서 403 발생)
+                        .requestMatchers("/api/board/**").permitAll()
+
+                        // [추가] 사용자 정보 조회(헤더 팝오버) 허용
+                        .requestMatchers("/user/info/**").permitAll()
+
+                        // 정적 리소스 및 에러 페이지
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
-                        // 컨트롤러 매핑 오류(404) 시 시큐리티가 403으로 막지 않도록 에러 경로 허용
                         .requestMatchers("/error").permitAll()
-                        // ★★★ [최하위 우선순위] 그 외 모든 요청은 인증 필요 ★★★
+
+                        // 그 외 모든 요청은 인증 필요
                         .anyRequest().authenticated());
 
         return http.build();

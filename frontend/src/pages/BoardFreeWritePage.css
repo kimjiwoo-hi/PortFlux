@@ -1,0 +1,25 @@
+.write-container { width: 100%; max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+
+.write-header-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; border-bottom: 2px solid #111; padding-bottom: 16px; }
+.write-header-title { font-size: 24px; font-weight: 700; color: #111; margin: 0; }
+
+.notice-checkbox { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.notice-checkbox input { width: 16px; height: 16px; cursor: pointer; accent-color: #111; }
+
+.form-group { margin-bottom: 16px; }
+.write-input { width: 100%; padding: 14px 16px; font-size: 15px; border: 1px solid #d0d0d0; border-radius: 4px; outline: none; transition: border-color 0.2s; }
+.write-input:focus { border-color: #111; }
+.title-input { font-weight: 600; }
+
+.editor-toolbar { display: flex; align-items: center; background-color: #f8f9fa; border: 1px solid #d0d0d0; border-bottom: none; border-radius: 4px 4px 0 0; padding: 8px 12px; gap: 12px; }
+.toolbar-group { display: flex; gap: 4px; }
+.toolbar-divider { width: 1px; height: 20px; background-color: #d0d0d0; margin: 0 4px; }
+.tool-btn { background: none; border: none; display: flex; align-items: center; gap: 6px; padding: 6px 10px; font-size: 13px; color: #555; cursor: pointer; border-radius: 4px; transition: background-color 0.2s; }
+.tool-btn:hover { background-color: #e9ecef; color: #111; }
+
+.editor-area { border: 1px solid #d0d0d0; border-radius: 0 0 4px 4px; min-height: 500px; display: flex; }
+.write-textarea { width: 100%; min-height: 500px; border: none; resize: vertical; padding: 20px; font-size: 15px; line-height: 1.6; outline: none; font-family: inherit; }
+
+.write-footer { display: flex; justify-content: flex-end; margin-top: 20px; }
+.btn-submit { padding: 10px 40px; background-color: #111; border: 1px solid #111; color: white; font-size: 14px; font-weight: 600; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+.btn-submit:hover { background-color: #333; border-color: #333; }
