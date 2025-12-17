@@ -92,6 +92,8 @@ CREATE TABLE POST (
     )
 );
 
+
+
 ------------------------------------------------------------
 -- POST updated_at 자동 업데이트 트리거
 ------------------------------------------------------------
@@ -566,6 +568,223 @@ INSERT INTO COMMENT_LIKE (user_num, comment_id) VALUES (1, 12);
 -- COMMIT
 ------------------------------------------------------------
 COMMIT;
+
+-- ============================================================
+-- 채용공고 기능을 위한 POST 테이블 컬럼 추가
+-- ============================================================
+
+-- 1단계: 채용공고 전용 컬럼 추가 (제약조건 없이)
+ALTER TABLE POST ADD (
+    job_region VARCHAR2(100),           -- 근무 지역 (regions.js의 ID)
+    job_career_type VARCHAR2(500),      -- 경력 타입 (JSON 배열: ["신입", "경력"])
+    job_career_years VARCHAR2(500),     -- 경력 연차 (JSON 배열: ["1년", "3년"])
+    job_education VARCHAR2(50),         -- 학력 (high_below, high, college_2_3, university, master, doctor, doctor_above)
+    job_education_exclude CHAR(1) DEFAULT 'N', -- 학력무관 여부 (Y/N)
+    job_salary_min NUMBER(10),          -- 최소 급여
+    job_salary_max NUMBER(10),          -- 최대 급여
+    job_deadline DATE,                  -- 채용 마감일
+    job_status VARCHAR2(20) DEFAULT 'ACTIVE', -- 공고 상태 (ACTIVE/EXPIRED/CLOSED)
+    job_industries VARCHAR2(500),       -- 업종 (JSON 배열)
+    job_company_types VARCHAR2(500),    -- 기업형태 (JSON 배열)
+    job_work_types VARCHAR2(500),       -- 근무형태 (JSON 배열)
+    job_work_days VARCHAR2(500)         -- 근무요일 (JSON 배열)
+);
+
+-- 2단계: 기존 job 게시글에 필수 값 채우기 (제약조건 위반 방지)
+UPDATE POST 
+SET 
+    job_region = 'seoul_gangnam',
+    job_career_type = '["경력무관"]',
+    job_career_years = '[]',
+    job_education = NULL,
+    job_education_exclude = 'Y',
+    job_deadline = SYSDATE + 30,
+    job_status = 'ACTIVE',
+    job_industries = '["IT·웹·통신"]',
+    job_company_types = '["중소기업"]',
+    job_work_types = '["정규직"]',
+    job_work_days = '["주 5일(월~금)"]'
+WHERE board_type = 'job' AND job_region IS NULL;
+
+COMMIT;
+
+-- 3단계: 제약조건 추가 (이제 기존 데이터가 제약조건을 만족함)
+ALTER TABLE POST ADD CONSTRAINT ck_job_required_fields CHECK (
+    (board_type = 'job' AND job_region IS NOT NULL AND job_deadline IS NOT NULL AND job_status IS NOT NULL)
+    OR board_type IN ('lookup', 'free')
+);
+
+-- 채용공고 상태 체크 제약조건
+ALTER TABLE POST ADD CONSTRAINT ck_job_status CHECK (
+    job_status IN ('ACTIVE', 'EXPIRED', 'CLOSED') OR job_status IS NULL
+);
+
+-- 4단계: 인덱스 생성
+-- 채용공고 마감일 인덱스
+CREATE INDEX idx_post_job_deadline ON POST(job_deadline);
+
+-- 채용공고 지역 인덱스
+CREATE INDEX idx_post_job_region ON POST(job_region);
+
+-- 채용공고 상태 인덱스
+CREATE INDEX idx_post_job_status ON POST(job_status);
+
+-- 복합 인덱스: board_type + job_status + job_deadline
+CREATE INDEX idx_post_job_search ON POST(board_type, job_status, job_deadline);
+
+COMMIT;
+
+------------------------------------------------------------
+-- 채용공고 샘플 데이터 (테스트용) - 3개 추가
+------------------------------------------------------------
+INSERT INTO POST (
+    board_type, company_num, title, content, 
+    job_region, job_career_type, job_career_years, 
+    job_education, job_education_exclude,
+    job_salary_min, job_salary_max, job_deadline, job_status,
+    job_industries, job_company_types, job_work_types, job_work_days
+) VALUES (
+    'job', 1, 'ULTRAFIT 웹 디자이너 신입 채용',
+    '웹 디자이너 신입 채용합니다. 성장 가능성이 높은 회사입니다.
+
+주요 업무:
+- 웹사이트 및 모바일 앱 UI/UX 디자인
+- 브랜딩 및 그래픽 디자인
+- 디자인 시스템 구축 및 관리
+
+지원 자격:
+- 신입 또는 경력 1년 미만
+- Figma, Photoshop, Illustrator 능숙
+- 포트폴리오 필수 제출
+
+우대 사항:
+- 디자인 관련 전공자
+- HTML/CSS 이해도가 있는 분',
+    'seoul_gangnam', '["신입"]', '[]',
+    'university', 'N',
+    NULL, NULL, SYSDATE + 30, 'ACTIVE',
+    '["IT·웹·통신"]', '["스타트업"]', '["정규직"]', '["주 5일(월~금)"]'
+);
+
+INSERT INTO POST (
+    board_type, company_num, title, content,
+    job_region, job_career_type, job_career_years,
+    job_education, job_education_exclude,
+    job_salary_min, job_salary_max, job_deadline, job_status,
+    job_industries, job_company_types, job_work_types, job_work_days
+) VALUES (
+    'job', 1, '구매 담당 경력직 채용',
+    '글로벌 유통회사에서 구매 담당자를 모집합니다.
+
+담당 업무:
+- 원자재 및 부자재 구매 업무
+- 협력업체 발굴 및 관리
+- 구매 단가 협상 및 계약 관리
+
+지원 자격:
+- 구매 분야 경력 5년 이상
+- MS Office 능숙 (특히 Excel)
+- 원활한 커뮤니케이션 능력
+
+우대 사항:
+- ERP 시스템 사용 경험
+- 영어 가능자
+- 관련 자격증 소지자
+
+복리후생:
+- 연봉 3000~5000만원 (경력에 따라 협의)
+- 4대 보험, 퇴직금
+- 중식 제공, 야근수당',
+    'seoul_gangnam', '["경력"]', '["5년", "6년", "7년"]',
+    'college_2_3', 'N',
+    3000, 5000, SYSDATE + 7, 'ACTIVE',
+    '["유통·무역"]', '["중견기업"]', '["정규직"]', '["주 5일(월~금)"]'
+);
+
+INSERT INTO POST (
+    board_type, company_num, title, content,
+    job_region, job_career_type, job_career_years,
+    job_education, job_education_exclude,
+    job_salary_min, job_salary_max, job_deadline, job_status,
+    job_industries, job_company_types, job_work_types, job_work_days
+) VALUES (
+    'job', 2, '편집디자이너 경력 채용',
+    '광고 대행사에서 편집디자이너를 채용합니다.
+
+주요 업무:
+- 광고 및 홍보물 편집 디자인
+- 브로슈어, 카탈로그 제작
+- SNS 콘텐츠 디자인
+
+지원 자격:
+- 편집디자인 경력 3년 이상
+- InDesign, Photoshop, Illustrator 능숙
+- 포트폴리오 필수 제출
+
+우대 사항:
+- 광고대행사 경험자
+- 영상 편집 가능자
+- 4년제 대학 디자인 전공자
+
+근무 조건:
+- 연봉 2500~4000만원
+- 정규직 또는 계약직 가능
+- 주 5일 근무
+- 마포구 소재',
+    'seoul_mapo', '["경력"]', '["3년", "4년", "5년"]',
+    'high', 'N',
+    2500, 4000, SYSDATE + 14, 'ACTIVE',
+    '["미디어·광고"]', '["중소기업"]', '["정규직", "계약직"]', '["주 5일(월~금)"]'
+);
+
+COMMIT;
+
+------------------------------------------------------------
+-- 채용공고 조회 쿼리 샘플
+------------------------------------------------------------
+-- 활성 채용공고 목록 조회 (최신순)
+SELECT 
+    p.post_id,
+    p.title,
+    c.company_name,
+    p.job_region,
+    p.job_career_type,
+    p.job_salary_min,
+    p.job_salary_max,
+    p.job_deadline,
+    p.view_cnt,
+    p.created_at
+FROM POST p
+JOIN COMPANY c ON p.company_num = c.company_num
+WHERE p.board_type = 'job'
+  AND p.job_status = 'ACTIVE'
+  AND p.job_deadline >= SYSDATE
+ORDER BY p.created_at DESC;
+
+-- 지역별 채용공고 개수
+SELECT 
+    job_region,
+    COUNT(*) as job_count
+FROM POST
+WHERE board_type = 'job'
+  AND job_status = 'ACTIVE'
+  AND job_deadline >= SYSDATE
+GROUP BY job_region
+ORDER BY job_count DESC;
+
+-- 마감 임박 공고 (3일 이내)
+SELECT 
+    p.post_id,
+    p.title,
+    c.company_name,
+    p.job_deadline,
+    TRUNC(p.job_deadline - SYSDATE) as days_left
+FROM POST p
+JOIN COMPANY c ON p.company_num = c.company_num
+WHERE p.board_type = 'job'
+  AND p.job_status = 'ACTIVE'
+  AND p.job_deadline BETWEEN SYSDATE AND SYSDATE + 3
+ORDER BY p.job_deadline ASC;
 
 
 ------------------------------------------------------------
