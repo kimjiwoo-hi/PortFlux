@@ -1,4 +1,5 @@
 import "./BoardLookupPage.css";
+<<<<<<< HEAD
 import SearchIcon from "../assets/search.png";
 import { useState } from "react";
 import { tagData, tagSearchMap } from "../database/taglist";
@@ -90,6 +91,68 @@ function BoardLookupPage() {
   const [selectedTags, setSelectedTags] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
   const [posts /*setPosts*/] = useState(initialPosts); // 게시물 목록 상태 관리
+=======
+import SearchIcon from '../assets/search.png';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { tagData, tagSearchMap } from '../database/taglist';
+import axios from 'axios';
+
+function BoardLookupPage() {
+  const [selectedTags, setSelectedTags] = useState({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isLoggedIn, /*setIsLoggedIn*/] = useState(true); 
+  const navigate = useNavigate();
+
+  // 게시글 목록 로드
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get('http://localhost:8080/api/boardlookup/posts', {
+          withCredentials: true
+        });
+        
+        // API 응답 데이터를 프론트엔드 형식으로 변환
+        const transformedPosts = response.data.map(post => {
+          // 태그 파싱
+          let tagsArray = [];
+          try {
+            tagsArray = typeof post.tags === 'string' ? JSON.parse(post.tags) : post.tags || [];
+          } catch (e) {
+            console.error('태그 파싱 실패:', e);
+          }
+
+          // 이미지 URL 생성 (postFile을 썸네일로 사용)
+          const imageUrl = post.postFile 
+            ? `http://localhost:8080/uploads/${post.postFile}`
+            : 'https://cdn.dribbble.com/userupload/12461999/file/original-251950a7c4585c49086113b190f7f224.png?resize=1024x768';
+
+          return {
+            id: post.postId,
+            title: post.title,
+            author: post.userNickname,
+            imageUrl: imageUrl,
+            likes: 0, // TODO: 좋아요 기능 추가 시 구현
+            views: post.viewCnt,
+            isLiked: false,
+            tags: tagsArray
+          };
+        });
+
+        setPosts(transformedPosts);
+        setLoading(false);
+      } catch (err) {
+        console.error('게시글 로드 실패:', err);
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+>>>>>>> 4116ad0c9e15aa010d7c3ded9b8e061e5f0000e9
 
   const lowerCaseQuery = searchQuery.toLowerCase().trim();
   const filteredTagData = !lowerCaseQuery
@@ -116,12 +179,17 @@ function BoardLookupPage() {
       }, {});
 
   const handleTagChange = (category, tag) => {
+<<<<<<< HEAD
     setSelectedTags((prev) => {
+=======
+    setSelectedTags(prev => {
+>>>>>>> 4116ad0c9e15aa010d7c3ded9b8e061e5f0000e9
       const newCategoryTags = new Set(prev[category] || []);
       if (newCategoryTags.has(tag)) {
         newCategoryTags.delete(tag);
       } else {
         newCategoryTags.add(tag);
+<<<<<<< HEAD
       }
       return {
         ...prev,
@@ -136,12 +204,51 @@ function BoardLookupPage() {
       if (post.id === postId) {
         const newLikes = post.isLiked ? post.likes - 1 : post.likes + 1;
         return { ...post, isLiked: !post.isLiked, likes: newLikes };
+=======
+>>>>>>> 4116ad0c9e15aa010d7c3ded9b8e061e5f0000e9
       }
-      return post;
-    }));
+      return {
+        ...prev,
+        [category]: Array.from(newCategoryTags),
+      };
+    });
   };
-  */
 
+<<<<<<< HEAD
+=======
+  const handleAddPostClick = () => {
+    navigate('/board/write');
+  };
+
+  // 게시글 클릭 핸들러
+  const handlePostClick = (postId) => {
+    navigate(`/board/lookup/${postId}`);
+  };
+
+  // 선택된 태그로 필터링
+  const filteredPosts = posts.filter(post => {
+    const selectedTagsList = Object.values(selectedTags).flat();
+    if (selectedTagsList.length === 0) return true;
+    
+    return selectedTagsList.some(tag => post.tags.includes(tag));
+  });
+
+  let postsToRender = [...filteredPosts];
+  if (isLoggedIn) {
+    postsToRender.unshift({ id: 'add-new-post', type: 'add-new' });
+  }
+
+  if (loading) {
+    return (
+      <div className="board-lookup-page">
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+          <p>게시글을 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+>>>>>>> 4116ad0c9e15aa010d7c3ded9b8e061e5f0000e9
   return (
     <div className="board-lookup-page">
       <div className="tag-box">
@@ -190,7 +297,11 @@ function BoardLookupPage() {
               <div className="add-new-plus">+</div>
             </div>
           ) : (
-            <div key={post.id} className="board-item">
+            <div 
+              key={post.id} 
+              className="board-item"
+              onClick={() => handlePostClick(post.id)}
+            >
               <img
                 src={post.imageUrl}
                 alt={post.title}
@@ -198,18 +309,13 @@ function BoardLookupPage() {
               />
               <div className="board-item-info">
                 <h4 className="info-title">{post.title}</h4>
-                <a href={`/profile/${post.author}`} className="info-author">
+                <a 
+                  href={`/profile/${post.author}`} 
+                  className="info-author"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   {post.author}
                 </a>
-                {/* 
-                  좋아요와 조횟수 부분 (현재 기능 구현 미완료로 인해 주석 처리됨 - 나중에 다시 작업할 예정)
-                  <div className="item-stats">
-                    <span className="stat-item" onClick={() => handleLikeClick(post.id)} style={{cursor: 'pointer'}}>
-                      {post.isLiked ? '❤️' : '🤍'} {post.likes}
-                    </span>
-                    <span className="stat-item">👁️ {post.views}</span>
-                  </div>
-                */}
               </div>
             </div>
           )
