@@ -11,6 +11,7 @@ import com.portflux.backend.api.GoogleApi;
 import com.portflux.backend.beans.UserBean;
 import com.portflux.backend.beans.UserLoginBean;
 import com.portflux.backend.beans.UserRegisterBean;
+import com.portflux.backend.mapper.CompanyUserMapper;
 import com.portflux.backend.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final GoogleApi googleApi;
+    private final CompanyUserMapper companyUserMapper;
 
     // 1. 회원가입
     @Transactional
@@ -48,10 +50,10 @@ public class UserService {
     }
 
     // 2. 닉네임 중복 확인
-    public boolean isNicknameAvailable(String nickname) {
-        // 닉네임 중복 체크 로직 (Repository에 메서드가 없으면 추가 필요)
-        // 임시로 true 반환 (실제 구현 시: !userRepository.existsByUserNickname(nickname))
-        return true; 
+    public boolean isNicknameDuplicate(String nickname) {
+        boolean userExists = userRepository.existsByUserNicknameIgnoreCase(nickname);
+        boolean companyExists = companyUserMapper.existsByCompanyName(nickname) > 0;
+        return userExists || companyExists;
     }
 
     // 3. 로그인 (아이디로 로그인)

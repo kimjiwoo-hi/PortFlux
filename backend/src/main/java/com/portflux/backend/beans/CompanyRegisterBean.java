@@ -11,6 +11,7 @@ public class CompanyRegisterBean {
     private String authCode;
     private String password;
     private String passwordCheck;
+    private String name;
     private String nickname;
     private String phoneNumber;
 }
