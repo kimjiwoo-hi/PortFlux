@@ -31,7 +31,7 @@ public interface ChatMapper {
         VALUES (#{user1Num}, #{user2Num}, SYSDATE, SYSDATE, 'ACTIVE')
     """)
     @Options(useGeneratedKeys = true, keyProperty = "roomId", keyColumn = "room_id")
-    void insertChatRoom(ChatBean chatBean);
+    void insertChatRoom(ChatMessageBean chatMessage);
 
     //유저가 있는 채팅방 목록
     @Select("""
@@ -56,7 +56,7 @@ public interface ChatMapper {
             (#{roomId}, #{userNum}, #{senderNum}, #{content}, #{hasFile}, SYSDATE, #{readYn}, #{deletedYn})
     """)
     @Options(useGeneratedKeys = true, keyProperty = "messageId", keyColumn = "message_id")
-    void insertChatMessage(ChatMessageBean chatMessageBean);
+    void insertChatMessage(ChatBean chatRoom);
 
     //메세지 목록
     @Select("""

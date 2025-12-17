@@ -12,6 +12,9 @@ import NoFooterLayout from "./layouts/NoFooterLayout";
 import NotFound from "./pages/NotFound";
 import BoardFree from "./pages/BoardFreePage";
 import BoardJob from "./pages/BoardJobPage.jsx";
+import BoardJobDetailPage from "./pages/BoardJobDetailPage.jsx";
+import BoardJobCreatePage from "./pages/BoardJobCreatePage.jsx";
+import BoardJobEditPage from "./pages/BoardJobEditPage.jsx";
 import BoardLookup from "./pages/BoardLookupPage.jsx";
 import BoardLookupWrite from "./pages/BoardLookupWritePage.jsx";
 import BoardLookupRead from "./pages/BoardLookupRead.jsx";
@@ -61,28 +64,69 @@ const router = createBrowserRouter([
       },
       {
         path: "/board/write",
-<<<<<<< HEAD
         element: <BoardLookupWrite />,
-      },
-=======
-        element: <BoardLookupWrite />
       },
       {
         path: "/board/lookup/:postId",
-        element: <BoardLookupRead />
-      }
->>>>>>> 4116ad0c9e15aa010d7c3ded9b8e061e5f0000e9
+        element: <BoardLookupRead />,
+      },
     ],
   },
   {
     element: <MainLayout />,
     children: [
       {
-        path: "boardlookup",
-        element: <BoardLookup />,
+        path: "/boardfree",
+        element: <BoardFree />,
       },
       {
-        path: "login",
+        path: "boardjob",
+        element: <BoardJob />,
+      },
+      {
+        path: "boardjob/:postId",
+        element: <BoardJobDetailPage />,
+      },
+      {
+        path: "boardjob/create",
+        element: <BoardJobCreatePage />,
+      },
+      {
+        path: "boardjob/edit/:postId",
+        element: <BoardJobEditPage />,
+      },
+      {
+        path: "/cart",
+        element: <Cart />,
+      },
+      {
+        path: "/mypage",
+        element: <MyPage />,
+        children: [
+          {
+            path: "myinfo",
+            element: <MyInfo />,
+          },
+          {
+            path: "myposts",
+            element: <MyPosts />,
+          },
+          {
+            path: "mycomments",
+            element: <MyComments />,
+          },
+          {
+            path: "savedposts",
+            element: <SavedPosts />,
+          },
+        ],
+      },
+      {
+        path: "/order-result",
+        element: <OrderResultPage />,
+      },
+      {
+        path: "/login",
         element: <LoginPage />,
       },
       {
