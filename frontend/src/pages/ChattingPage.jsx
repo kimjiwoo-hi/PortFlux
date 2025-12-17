@@ -1,91 +1,92 @@
-import React, { useState, useEffect } from "react";
-import { io } from "socket.io-client";
-import "./ChattingPage.css";
-import { getChatMessages, getOrCreateChatRoom } from "../api/api";
+import { useEffect, useState } from "react";
+import { getChatRooms } from "../api/chatRest";
+import { useChatSocket } from "../hooks/useChatSocket";
 
-const ChattingPage = () => {
-  const [socket, setSocket] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState("");
-  const [roomId, setRoomId] = useState(null);
-  const currentUserId = 1; // Hardcoded user ID
-  const otherUserId = 2; // Hardcoded other user ID
+/**
+ * 최소 예시:
+ * - 왼쪽: 방 목록
+ * - 오른쪽: 메시지 목록 + 전송
+ */
+export default function ChatPage({ loginUserNum }) {
+  const [rooms, setRooms] = useState([]);
+  const [activeRoomId, setActiveRoomId] = useState(null);
+  const [input, setInput] = useState("");
+
+  const { messages, joinRoom, loadMessages, sendMessage, markRead } = useChatSocket(loginUserNum);
 
   useEffect(() => {
-    // Fetch or create chat room
-    const fetchRoom = async () => {
-      try {
-        const response = await getOrCreateChatRoom({
-          user1Num: currentUserId,
-          user2Num: otherUserId,
-        });
-        const fetchedRoomId = response.data.roomId;
-        setRoomId(fetchedRoomId);
+    (async () => {
+      const list = await getChatRooms(loginUserNum);
+      setRooms(list);
+    })();
+  }, [loginUserNum]);
 
-        const messagesResponse = await getChatMessages(fetchedRoomId);
-        setMessages(messagesResponse.data);
+  useEffect(() => {
+    if (!activeRoomId) return;
 
-        // Establish socket connection
-        const newSocket = io("http://localhost:8080"); // Assuming backend runs on 8080
-        setSocket(newSocket);
+    // 방 조인 + 메시지 로드 + 읽음 처리
+    joinRoom(activeRoomId);
+    loadMessages(activeRoomId);
+    markRead(activeRoomId);
+  }, [activeRoomId, joinRoom, loadMessages, markRead]);
 
-        newSocket.emit("joinRoom", fetchedRoomId.toString());
-
-        newSocket.on("chatMessage", (message) => {
-          setMessages((prevMessages) => [...prevMessages, message]);
-        });
-      } catch (error) {
-        console.error("Error setting up chat:", error);
-      }
-    };
-
-    fetchRoom();
-
-    return () => {
-      if (socket) {
-        socket.disconnect();
-      }
-    };
-  }, []);
-
-  const handleSendMessage = () => {
-    if (socket && newMessage.trim() !== "") {
-      const messagePayload = {
-        roomId: roomId,
-        senderNum: currentUserId,
-        content: newMessage,
-        // other fields as needed by ChatMessageBean
-      };
-      socket.emit("chatMessage", messagePayload);
-      setNewMessage("");
-    }
+  const onSend = () => {
+    if (!activeRoomId) return;
+    if (!input.trim()) return;
+    sendMessage(activeRoomId, input.trim());
+    setInput("");
   };
 
   return (
-    <div className="chatting-page">
-      <div className="message-list">
-        {messages.map((msg, index) => (
+    <div style={{ display: "flex", height: "100vh" }}>
+      <aside style={{ width: 300, borderRight: "1px solid #ddd", padding: 12 }}>
+        <h3>채팅방</h3>
+        {rooms.map((r) => (
           <div
-            key={index}
-            className={`message ${
-              msg.senderNum === currentUserId ? "sent" : "received"
-            }`}
+            key={r.roomId}
+            onClick={() => setActiveRoomId(r.roomId)}
+            style={{
+              padding: 10,
+              cursor: "pointer",
+              background: activeRoomId === r.roomId ? "#f5f5f5" : "transparent",
+              borderRadius: 8,
+            }}
           >
-            <p>{msg.content}</p>
+            <div>Room #{r.roomId}</div>
+            <small>last: {String(r.lastMessageAt || "")}</small>
           </div>
         ))}
-      </div>
-      <div className="message-input">
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-        />
-        <button onClick={handleSendMessage}>Send</button>
-      </div>
+      </aside>
+
+      <main style={{ flex: 1, padding: 12, display: "flex", flexDirection: "column" }}>
+        <h3>메시지</h3>
+
+        <div style={{ flex: 1, overflow: "auto", border: "1px solid #ddd", borderRadius: 8, padding: 12 }}>
+          {messages.map((m) => (
+            <div key={m.messageId} style={{ marginBottom: 10 }}>
+              <b>{m.senderNum}</b>: {m.content}
+              <div style={{ fontSize: 12, color: "#666" }}>
+                {String(m.sentAt || "")} / read={m.readYn}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="메시지 입력"
+            style={{ flex: 1, padding: 10, borderRadius: 8, border: "1px solid #ddd" }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") onSend();
+            }}
+          />
+          <button onClick={onSend} style={{ padding: "10px 16px" }}>
+            전송
+          </button>
+        </div>
+      </main>
     </div>
   );
-};
-
-export default ChattingPage;
+}
