@@ -35,15 +35,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.ai:spring-ai-starter-model-openai'
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
-<<<<<<< HEAD
-
-<<<<<<< HEAD
-=======
-=======
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
->>>>>>> 4116ad0c9e15aa010d7c3ded9b8e061e5f0000e9
-
->>>>>>> f12d1f3c3c9e3d84a0e283391f05cb00dc9e64b4
     implementation 'org.springframework.boot:spring-boot-starter-security'// 로그인, 암호화 기능
 
     compileOnly 'org.projectlombok:lombok'
