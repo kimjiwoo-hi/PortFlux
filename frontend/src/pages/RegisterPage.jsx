@@ -316,7 +316,7 @@ function RegisterPage() {
               <label className="form-label">사업자등록번호</label>
               <input type="text" className={`reg-input ${isBizNumValid === false ? "input-error" : ""}`} 
                      placeholder="사업자 등록번호 10자리" value={businessNumber} onChange={handleBusinessNumberChange} maxLength={12} />
-              {isBizNumValid === true && <span className="valid-msg">확인 완료</span>}
+              {isBizNumValid === true && <span className="valid-msg">사업자등록번호 확인완료</span>}
               {isBizNumValid === false && <span className="error-msg">유효하지 않은 번호입니다</span>}
             </div>
           )}
