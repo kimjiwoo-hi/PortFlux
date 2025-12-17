@@ -1,42 +1,67 @@
 package com.portflux.backend.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.portflux.backend.beans.ChatBean;
 import com.portflux.backend.beans.ChatMessageBean;
 import com.portflux.backend.mapper.ChatMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class ChatService {
+    
+    private final ChatMapper chatMapper;
 
-    @Autowired
-    private ChatMapper chatMapper;
+    //채팅방 조회 및 생성
 
     @Transactional
-    public ChatBean getOrCreateChatRoom(Long user1Num, Long user2Num) {
-        ChatBean chatRoom = chatMapper.findChatRoomByUserIds(user1Num, user2Num);
-        if (chatRoom == null) {
+    public ChatBean getOnCreateChatRoom(Long user1Num, Long user2Num){
+
+        if(user1Num == null || user2Num == null){
+            throw new IllegalArgumentException("user1Num/user2Num은 필수 입니다.");
+        }
+        if(user1Num.equals(user2Num)){
+            throw new IllegalArgumentException("자기 자신과 채팅은 생성할 수 없습니다.");
+        }
+
+        long a = Math.min(user1Num, user2Num);
+        long b = Math.max(user1Num, user2Num);
+
+        ChatBean chatRoom = chatMapper.findChatRoomByUserIds(a, b);
+        if(chatRoom == null){
             chatRoom = new ChatBean();
-            chatRoom.setUser1Num(user1Num);
-            chatRoom.setUser2Num(user2Num);
-            chatMapper.insertChatRoom(chatRoom);
+            chatRoom.setUser1Num(a);
+            chatRoom.setUser2Num(b);
+            chatMapper.insertChatMessage(chatRoom);
         }
         return chatRoom;
     }
 
+    //메세지 저장 + 마지막 메세지 시간 갱신
     @Transactional
-    public void saveMessage(ChatMessageBean chatMessage) {
+    public void saveMessage(ChatMessageBean chatMessage){
         chatMapper.insertChatMessage(chatMessage);
+        chatMapper.touchLastMessageAt(chatMessage.getRoomId());
     }
 
-    public List<ChatMessageBean> getMessages(Long roomId) {
+    public List<ChatMessageBean> getMessages(Long roomId){
         return chatMapper.findChatMessagesByRoomId(roomId);
     }
 
-    public List<ChatBean> getChatRooms(Long userId) {
-        return chatMapper.findChatRoomsByUserId(userId);
+    public List<ChatBean> getChatRooms(Long userNum){
+        return chatMapper.findChatRoomsByUserNum(userNum);
+    }
+
+    //방 참여자 검증
+    public void assertRoomMember(Long roomId, Long userNum){
+        int cnt = chatMapper.isRoomMember(roomId, userNum);
+        if(cnt<=0){
+            throw new RuntimeException("채팅방 접근 권한이 없습니다.");
+        }
     }
 }
