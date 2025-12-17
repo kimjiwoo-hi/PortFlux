@@ -45,7 +45,7 @@ public class ChatService {
     //메세지 저장 + 마지막 메세지 시간 갱신
     @Transactional
     public void saveMessage(ChatMessageBean chatMessage){
-        chatMapper.insertChatMessage(chatMessage);
+        chatMapper.insertChatRoom(chatMessage);
         chatMapper.touchLastMessageAt(chatMessage.getRoomId());
     }
 
