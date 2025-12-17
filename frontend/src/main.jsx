@@ -12,6 +12,9 @@ import NoFooterLayout from "./layouts/NoFooterLayout";
 import NotFound from "./pages/NotFound";
 import BoardFree from "./pages/BoardFreePage";
 import BoardJob from "./pages/BoardJobPage.jsx";
+import BoardJobDetailPage from "./pages/BoardJobDetailPage.jsx";
+import BoardJobCreatePage from "./pages/BoardJobCreatePage.jsx";
+import BoardJobEditPage from "./pages/BoardJobEditPage.jsx";
 import BoardLookup from "./pages/BoardLookupPage.jsx";
 import BoardLookupWrite from "./pages/BoardLookupWritePage.jsx";
 import BoardLookupRead from "./pages/BoardLookupRead.jsx";
@@ -23,7 +26,7 @@ import RegisterPage from "./pages/RegisterPage.jsx";
 import FindIdPage from "./pages/FindIdPage.jsx";
 import FindPasswordPage from "./pages/FindPasswordPage.jsx";
 import SuccessPage from "./pages/SuccessPage.jsx";
-import MyInfo from "./pages/MyInfo.jsx"
+import MyInfo from "./pages/MyInfo.jsx";
 import MyPosts from "./pages/MyPosts.jsx";
 import MyComments from "./pages/MyComments.jsx";
 import SavedPosts from "./pages/SavedPosts.jsx";
@@ -39,12 +42,12 @@ const router = createBrowserRouter([
       },
       {
         path: "/board/write",
-        element: <BoardLookupWrite />
+        element: <BoardLookupWrite />,
       },
       {
         path: "/board/lookup/:postId",
-        element: <BoardLookupRead />
-      }
+        element: <BoardLookupRead />,
+      },
     ],
   },
   {
@@ -55,8 +58,20 @@ const router = createBrowserRouter([
         element: <BoardFree />,
       },
       {
-        path: "/boardjob",
+        path: "boardjob",
         element: <BoardJob />,
+      },
+      {
+        path: "boardjob/:postId",
+        element: <BoardJobDetailPage />,
+      },
+      {
+        path: "boardjob/create",
+        element: <BoardJobCreatePage />,
+      },
+      {
+        path: "boardjob/edit/:postId",
+        element: <BoardJobEditPage />,
       },
       {
         path: "/cart",
@@ -72,17 +87,17 @@ const router = createBrowserRouter([
           },
           {
             path: "myposts",
-            element: <MyPosts />
+            element: <MyPosts />,
           },
           {
             path: "mycomments",
-            element: <MyComments />
+            element: <MyComments />,
           },
           {
             path: "savedposts",
-            element: <SavedPosts />
-          }
-        ]
+            element: <SavedPosts />,
+          },
+        ],
       },
       {
         path: "/order-result",
