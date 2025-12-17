@@ -23,10 +23,10 @@ public class IamportClient {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    @Value("${iamport.key:${IAMPORT_KEY:imp_test_key}}")
+    @Value("${iamport.key:imp_test_key}")
     private String iamportKey;
 
-    @Value("${iamport.secret:${IAMPORT_SECRET:imp_test_secret}}")
+    @Value("${iamport.secret:imp_test_secret}")
     private String iamportSecret;
 
     private static final String IAMPORT_API_BASE = "https://api.iamport.kr";
@@ -38,6 +38,7 @@ public class IamportClient {
 
     /**
      * 아임포트 액세스 토큰 발급
+     * 
      * @return 액세스 토큰
      */
     public String getAccessToken() {
@@ -52,8 +53,7 @@ public class IamportClient {
 
             String requestBody = String.format(
                     "{\"imp_key\":\"%s\",\"imp_secret\":\"%s\"}",
-                    iamportKey, iamportSecret
-            );
+                    iamportKey, iamportSecret);
 
             HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
 
@@ -88,6 +88,7 @@ public class IamportClient {
 
     /**
      * 결제 정보 조회 (아임포트 서버에서 검증)
+     * 
      * @param impUid 아임포트 결제 ID
      * @return 결제 정보 (amount, status 포함)
      */
@@ -124,7 +125,7 @@ public class IamportClient {
             paymentResponse.setStatus(paymentNode.get("status").asText());
             paymentResponse.setPaidAt(paymentNode.get("paid_at").asLong(0));
 
-            log.info("Payment info retrieved: impUid={}, amount={}, status={}", 
+            log.info("Payment info retrieved: impUid={}, amount={}, status={}",
                     paymentResponse.getImpUid(), paymentResponse.getAmount(), paymentResponse.getStatus());
 
             return paymentResponse;
@@ -145,19 +146,44 @@ public class IamportClient {
         private String status; // paid, ready, cancelled, failed, refunded 등
         private long paidAt;
 
-        public String getImpUid() { return impUid; }
-        public void setImpUid(String impUid) { this.impUid = impUid; }
+        public String getImpUid() {
+            return impUid;
+        }
 
-        public String getMerchantUid() { return merchantUid; }
-        public void setMerchantUid(String merchantUid) { this.merchantUid = merchantUid; }
+        public void setImpUid(String impUid) {
+            this.impUid = impUid;
+        }
 
-        public BigDecimal getAmount() { return amount; }
-        public void setAmount(BigDecimal amount) { this.amount = amount; }
+        public String getMerchantUid() {
+            return merchantUid;
+        }
 
-        public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; }
+        public void setMerchantUid(String merchantUid) {
+            this.merchantUid = merchantUid;
+        }
 
-        public long getPaidAt() { return paidAt; }
-        public void setPaidAt(long paidAt) { this.paidAt = paidAt; }
+        public BigDecimal getAmount() {
+            return amount;
+        }
+
+        public void setAmount(BigDecimal amount) {
+            this.amount = amount;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public long getPaidAt() {
+            return paidAt;
+        }
+
+        public void setPaidAt(long paidAt) {
+            this.paidAt = paidAt;
+        }
     }
 }
