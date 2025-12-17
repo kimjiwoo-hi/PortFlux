@@ -14,8 +14,8 @@ public class ChatMessageBean {
     private Long userNum;
     private Long senderNum;
     private String content;
-    private boolean hasFile;
+    private String hasFile;
     private Date sentAt;
-    private boolean readYn;
-    private boolean deleteYn;
+    private String readYn;
+    private String deletedYn;
 }

@@ -20,23 +20,23 @@ public class ChatService {
     //채팅방 조회 및 생성
 
     @Transactional
-    public ChatBean getOrCreateChatRoom(Long userNum, Long senderNum){
+    public ChatBean getOrCreateChatRoom(Long user1Num, Long user2Num){
 
-        if(userNum == null || senderNum == null){
+        if(user1Num == null || user2Num == null){
             throw new IllegalArgumentException("user1Num/user2Num은 필수 입니다.");
         }
-        if(userNum.equals(senderNum)){
+        if(user1Num.equals(user2Num)){
             throw new IllegalArgumentException("자기 자신과 채팅은 생성할 수 없습니다.");
         }
 
-        long a = Math.min(userNum, senderNum);
-        long b = Math.max(userNum, senderNum);
+        long a = Math.min(user1Num, user2Num);
+        long b = Math.max(user1Num, user2Num);
 
         ChatBean chatRoom = chatMapper.findChatRoomByUserIds(a, b);
         if(chatRoom == null){
             chatRoom = new ChatBean();
-            chatRoom.setUserNum(a);
-            chatRoom.setSenderNum(b);
+            chatRoom.setUser1Num(a);
+            chatRoom.setUser2Num(b);
             chatMapper.insertChatRoom(chatRoom);
         }
         return chatRoom;
