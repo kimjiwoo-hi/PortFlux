@@ -20,6 +20,8 @@ import BoardLookupWrite from "./pages/BoardLookupWritePage.jsx";
 import BoardLookupRead from "./pages/BoardLookupRead.jsx";
 import Cart from "./pages/CartPage.jsx";
 import MyPage from "./pages/MyPage.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
+import RegisterPage from "./pages/RegisterPage.jsx";
 import OrderResultPage from "./pages/OrderResultPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
@@ -37,8 +39,28 @@ const router = createBrowserRouter([
     element: <NoFooterLayout />,
     children: [
       {
-        index: true,
-        element: <BoardLookup />,
+        path: "boardfree",
+        element: <BoardFree />,
+      },
+      {
+        path: "boardjob",
+        element: <BoardJob />,
+      },
+      {
+        path: "cart",
+        element: <Cart />,
+      },
+      {
+        path: "mypage",
+        element: <MyPage />,
+      },
+      {
+        path: "chat",
+        element: <Chat />,
+      },
+      {
+        path: "order-result",
+        element: <OrderResultPage />,
       },
       {
         path: "/board/write",
@@ -108,28 +130,16 @@ const router = createBrowserRouter([
         element: <LoginPage />,
       },
       {
-        path: "/register",
+        path: "register",
         element: <RegisterPage />,
       },
       {
-        path: "/findid",
+        path: "findid",
         element: <FindIdPage />,
       },
       {
-        path: "/findpassword",
+        path: "findpassword",
         element: <FindPasswordPage />,
-      },
-      {
-        path: "/success",
-        element: <SuccessPage />,
-      },
-      {
-        path: "/etc",
-        element: <NotFound />,
-      },
-      {
-        path: "*",
-        element: <NotFound />,
       },
     ],
   },

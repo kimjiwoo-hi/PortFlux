@@ -140,6 +140,8 @@
   font-size: 14px;
   line-height: 1.5;
 }
+<<<<<<< HEAD
+=======
 
 /* 1. 체크 아이콘 애니메이션 */
 .success-icon-wrapper {
@@ -263,3 +265,4 @@
   border-color: #ccc;
   color: #333;
 }
+>>>>>>> f12d1f3c3c9e3d84a0e283391f05cb00dc9e64b4

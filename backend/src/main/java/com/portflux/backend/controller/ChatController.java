@@ -53,7 +53,7 @@ public class ChatController {
         @RequestBody Map<String, Long> payload
     ){
         Long targetUserNum = payload.get("targetUserNum");
-        ChatBean room = chatService.getOrCreateChatRoom(loginUserNum, targetUserNum);
+        ChatBean room = chatService.getOnCreateChatRoom(loginUserNum, targetUserNum);
         return ResponseEntity.ok(room);
     }
 
@@ -66,8 +66,6 @@ public class ChatController {
         chatService.assertRoomMember(roomId, loginUserNum);
         return ResponseEntity.ok().build();
     }
-    
-
     
 }
     
