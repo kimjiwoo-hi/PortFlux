@@ -1,7 +1,5 @@
 import axios from "axios";
 
-import axios from "axios";
-
 const api = axios.create({
   baseURL: "/", // baseURL을 루트로 변경
   headers: { "Content-Type": "application/json" },
