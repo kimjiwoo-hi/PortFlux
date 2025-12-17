@@ -1,7 +1,5 @@
 import axios from "axios";
 
-import axios from "axios";
-
 const api = axios.create({
   baseURL: "/", // baseURL을 루트로 변경
   headers: { "Content-Type": "application/json" },
@@ -25,7 +23,6 @@ export async function removeFromCart(cartId) {
   return api.delete(`/api/cart/items/${cartId}`);
 }
 
-
 // --- Order & Payment APIs ---
 export async function createOrder(payload) {
   return api.post("/api/orders", payload);
@@ -36,7 +33,6 @@ export async function confirmPayment(payload) {
 }
 
 // --- Follow APIs ---
-<<<<<<< HEAD
 // --- Follow APIs ---
 export async function getFollowing(userId) {
   return api.get(`/users/${userId}/following`);
@@ -44,14 +40,6 @@ export async function getFollowing(userId) {
 
 export async function getFollowers(userId) {
   return api.get(`/users/${userId}/followers`);
-=======
-export async function getFollowing(userId) {
-  return api.get(`/api/${userId}/following`);
-}
-
-export async function getFollowers(userId) {
-  return api.get(`/api/${userId}/followers`);
->>>>>>> 4116ad0c9e15aa010d7c3ded9b8e061e5f0000e9
 }
 
 export async function follow(followerId, followingId) {
@@ -59,12 +47,8 @@ export async function follow(followerId, followingId) {
 }
 
 export async function unfollow(followerId, followingId) {
-<<<<<<< HEAD
   // axios.delete에서 body를 사용하려면 data 속성으로 감싸야 합니다.
   return api.delete("/unfollow", { data: { followerId, followingId } });
-=======
-  return api.delete("/api/unfollow", { data: { followerId, followingId } });
->>>>>>> 4116ad0c9e15aa010d7c3ded9b8e061e5f0000e9
 }
 
 // --- Chat APIs ---
@@ -81,8 +65,3 @@ export async function getOrCreateChatRoom(payload) {
 }
 
 export default api;
-
-<<<<<<< HEAD
-
-=======
->>>>>>> 4116ad0c9e15aa010d7c3ded9b8e061e5f0000e9

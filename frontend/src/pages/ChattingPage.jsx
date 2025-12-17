@@ -1,10 +1,5 @@
-<<<<<<< HEAD
 import React, { useState, useEffect } from "react";
 import { io } from "socket.io-client";
-=======
-import React, { useState, useEffect, userRef } from "react";
-import {io} from "socket.io-client";
->>>>>>> 4116ad0c9e15aa010d7c3ded9b8e061e5f0000e9
 import "./ChattingPage.css";
 import { getChatMessages, getOrCreateChatRoom } from "../api/api";
 
@@ -12,7 +7,6 @@ const ChattingPage = () => {
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-<<<<<<< HEAD
   const [roomId, setRoomId] = useState(null);
   const currentUserId = 1; // Hardcoded user ID
   const otherUserId = 2; // Hardcoded other user ID
@@ -67,10 +61,6 @@ const ChattingPage = () => {
     }
   };
 
-=======
-
-  
->>>>>>> 4116ad0c9e15aa010d7c3ded9b8e061e5f0000e9
   return (
     <div className="chatting-page">
       <div className="message-list">
