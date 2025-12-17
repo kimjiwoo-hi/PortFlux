@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @RestController
@@ -102,8 +103,12 @@ public ResponseEntity<Map<String, Object>> createPost(
         @RequestParam(value = "file", required = false) MultipartFile file
 ) {
     try {
-        // 1. 파일 저장 로직
+        // 1. 파일 유효성 검사 및 저장
         if (file != null && !file.isEmpty()) {
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null || !isValidFileExtension(originalFilename)) {
+                return ResponseEntity.badRequest().body(Map.of("success", false, "message", "허용되지 않는 파일 형식입니다. PDF, PPT, PPTX 파일만 업로드할 수 있습니다."));
+            }
             String fileName = saveFile(file);
             postDto.setPostFile(fileName);
         } else {
@@ -116,12 +121,11 @@ public ResponseEntity<Map<String, Object>> createPost(
         postDto.setViewCnt(0);
 
         // 3. DB 저장
-        // insertPost가 실행되면 selectKey에 의해 postDto의 postId가 채워집니다.
         boardLookupService.createPost(postDto);
         
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("postId", postDto.getPostId()); // 저장된 ID 반환
+        response.put("postId", postDto.getPostId());
         response.put("message", "게시글이 등록되었습니다.");
 
         return ResponseEntity.ok(response);
@@ -130,6 +134,11 @@ public ResponseEntity<Map<String, Object>> createPost(
         return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
     }
 }
+
+    private boolean isValidFileExtension(String filename) {
+        String lowerCaseFilename = filename.toLowerCase();
+        return lowerCaseFilename.endsWith(".pdf") || lowerCaseFilename.endsWith(".ppt") || lowerCaseFilename.endsWith(".pptx");
+    }
 
     /**
      * 파일 저장 메서드
@@ -151,5 +160,54 @@ public ResponseEntity<Map<String, Object>> createPost(
         Files.write(filePath, file.getBytes());
 
         return uniqueFilename;
+    }
+
+    /**
+     * 게시글 수정 API
+     */
+    @PutMapping("/posts/{postId}")
+    public ResponseEntity<Map<String, Object>> updatePost(
+            @PathVariable int postId,
+            @ModelAttribute BoardLookupPostDto postDto,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam Long userNum
+    ) {
+        try {
+            postDto.setPostId(postId);
+
+            if (file != null && !file.isEmpty()) {
+                String fileName = saveFile(file);
+                postDto.setPostFile(fileName);
+            }
+
+            BoardLookupPostDto updatedPost = boardLookupService.updatePost(postDto, userNum);
+            return ResponseEntity.ok(Map.of("success", true, "post", updatedPost));
+
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(404).body(Map.of("success", false, "message", e.getMessage()));
+        } catch (IllegalAccessException e) {
+            return ResponseEntity.status(403).body(Map.of("success", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    /**
+     * 게시글 삭제 API
+     */
+    @DeleteMapping("/posts/{postId}")
+    public ResponseEntity<Map<String, Object>> deletePost(@PathVariable int postId, @RequestParam Long userNum) {
+        try {
+            boardLookupService.deletePost(postId, userNum);
+            return ResponseEntity.ok(Map.of("success", true, "message", "게시글이 삭제되었습니다."));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(404).body(Map.of("success", false, "message", e.getMessage()));
+        } catch (IllegalAccessException e) {
+            return ResponseEntity.status(403).body(Map.of("success", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
     }
 }

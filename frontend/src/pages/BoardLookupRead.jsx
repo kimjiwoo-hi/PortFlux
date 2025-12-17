@@ -1,19 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './BoardLookupRead.css';
 
 const BoardLookupRead = () => {
-  const { postId } = useParams(); // URL에서 postId 추출
+  const { postId } = useParams();
+  const navigate = useNavigate();
   const [postData, setPostData] = useState(null);
   const [isLiked, setIsLiked] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const [showAISummary, setShowAISummary] = useState(false);
+  const [showCartToast, setShowCartToast] = useState(false);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const [sidebarVisible, setSidebarVisible] = useState(true);
+  const lastScrollY = useRef(0);
 
   // 게시글 데이터 로드
   useEffect(() => {
@@ -24,7 +30,6 @@ const BoardLookupRead = () => {
           withCredentials: true
         });
         
-        // response.data가 직접 post와 comments를 포함하고 있는지 확인
         if (response.data) {
           setPostData(response.data.post || response.data);
           setComments(response.data.comments || []);
@@ -42,6 +47,32 @@ const BoardLookupRead = () => {
     }
   }, [postId]);
 
+  // 스크롤 이벤트 - Behance 스타일
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // 스크롤 방향에 따라 헤더/사이드바 표시/숨김
+      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+        // 아래로 스크롤
+        setHeaderVisible(false);
+        setSidebarVisible(false);
+      } else {
+        // 위로 스크롤
+        setHeaderVisible(true);
+        setSidebarVisible(true);
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   // 좋아요 토글
   const handleLikeToggle = () => {
     setIsLiked(!isLiked);
@@ -57,11 +88,21 @@ const BoardLookupRead = () => {
   // 댓글창 토글
   const handleCommentToggle = () => {
     setShowComments(!showComments);
+    setShowAISummary(false);
+  };
+
+  // AI 요약 토글
+  const handleAISummaryToggle = () => {
+    setShowAISummary(!showAISummary);
+    setShowComments(false);
   };
 
   // 장바구니 추가
   const handleAddToCart = () => {
-    alert('장바구니에 담겼습니다.');
+    setShowCartToast(true);
+    setTimeout(() => {
+      setShowCartToast(false);
+    }, 3000);
     // TODO: 장바구니 API 연동
   };
 
@@ -78,7 +119,6 @@ const BoardLookupRead = () => {
           { withCredentials: true }
         );
 
-        // 댓글 목록 새로고침
         const updatedResponse = await axios.get(`http://localhost:8080/api/boardlookup/${postId}`);
         if (updatedResponse.data) {
           setComments(updatedResponse.data.comments || []);
@@ -99,11 +139,24 @@ const BoardLookupRead = () => {
     }
   };
 
+  // 오버레이 클릭 시 팝업 닫기 및 페이지 이동
+  const handleOverlayClick = () => {
+    setShowComments(false);
+    setShowAISummary(false);
+  };
+
+  // 배경 클릭 시 페이지 이동
+  const handleBackgroundClick = (e) => {
+    if (e.target === e.currentTarget) {
+      navigate('/');
+    }
+  };
+
   // 로딩 중
   if (loading) {
     return (
-      <div className="board-lookup-read" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <p style={{ color: '#fff', fontSize: '18px' }}>로딩 중...</p>
+      <div className="board-lookup-read" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <p style={{ color: '#191919', fontSize: '18px' }}>로딩 중...</p>
       </div>
     );
   }
@@ -111,13 +164,13 @@ const BoardLookupRead = () => {
   // 에러 발생
   if (error || !postData) {
     return (
-      <div className="board-lookup-read" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <p style={{ color: '#fff', fontSize: '18px' }}>{error || '게시글을 찾을 수 없습니다.'}</p>
+      <div className="board-lookup-read" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <p style={{ color: '#191919', fontSize: '18px' }}>{error || '게시글을 찾을 수 없습니다.'}</p>
       </div>
     );
   }
 
-  // 태그 배열 처리 (JSON 문자열일 경우 파싱)
+  // 태그 배열 처리
   let tagsArray = [];
   try {
     tagsArray = typeof postData.tags === 'string' ? JSON.parse(postData.tags) : postData.tags || [];
@@ -125,80 +178,138 @@ const BoardLookupRead = () => {
     console.error('태그 파싱 실패:', e);
   }
 
-  // 사용자 이미지 처리 (BLOB 데이터)
+  // 사용자 이미지 처리
   const userImageSrc = postData.userImage 
     ? `data:image/jpeg;base64,${btoa(String.fromCharCode(...new Uint8Array(postData.userImage)))}`
     : null;
 
   return (
-    <div className="board-lookup-read">
-      <div className="main-content">
-        {/* 헤더 영역 */}
-        <div className="post-header">
-          <div className="author-info">
-            <div className="profile-wrapper">
-              <div className="profile-image">
-                {userImageSrc ? (
-                  <img src={userImageSrc} alt="profile" />
-                ) : (
-                  <div className="default-profile">👤</div>
-                )}
-                <button 
-                  className={`follow-btn ${isFollowing ? 'following' : ''}`}
-                  onClick={handleFollowToggle}
-                >
-                  {isFollowing ? '✓' : '+'}
-                </button>
+    <div className="board-lookup-read" onClick={handleBackgroundClick}>
+      {/* 오버레이 배경 */}
+      <div 
+        className={`overlay-background ${showComments || showAISummary ? 'active' : ''}`}
+        onClick={handleOverlayClick}
+      />
+
+      {/* 상단 헤더 - Behance 스타일 */}
+      <div className={`post-header ${!headerVisible ? 'hidden' : ''}`}>
+        <div className="author-info">
+          <div className="profile-wrapper">
+            <div className="profile-left">
+              <div className="profile-top">
+                <div className="profile-image">
+                  {userImageSrc ? (
+                    <img src={userImageSrc} alt="profile" />
+                  ) : (
+                    <div className="default-profile">👤</div>
+                  )}
+                  <button 
+                    className={`follow-btn ${isFollowing ? 'following' : ''}`}
+                    onClick={handleFollowToggle}
+                  >
+                    {isFollowing ? '✓' : '+'}
+                  </button>
+                </div>
+                
+                <div className="profile-info">
+                  <div className="nickname">
+                    {postData.userNickname}
+                    
+                    {/* 프로필 호버 카드 */}
+                    <div className="profile-card">
+                      <div className="profile-card-header">
+                        {userImageSrc ? (
+                          <img src={userImageSrc} alt="profile" className="profile-card-avatar" />
+                        ) : (
+                          <div className="profile-card-avatar">👤</div>
+                        )}
+                        <div className="profile-card-info">
+                          <h3>{postData.userNickname}</h3>
+                          <div className="profile-card-location">
+                            📍 Berlin, Germany
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="profile-card-stats">
+                        <div className="profile-card-stat">
+                          <span className="profile-card-stat-value">3.8천</span>
+                          <span className="profile-card-stat-label">평가</span>
+                        </div>
+                        <div className="profile-card-stat">
+                          <span className="profile-card-stat-value">804</span>
+                          <span className="profile-card-stat-label">팔로워</span>
+                        </div>
+                        <div className="profile-card-stat">
+                          <span className="profile-card-stat-value">1.3만</span>
+                          <span className="profile-card-stat-label">조회수</span>
+                        </div>
+                      </div>
+                      
+                      <div className="profile-card-actions">
+                        <button className="profile-card-btn profile-card-btn-primary">
+                          팔로우
+                        </button>
+                        <button className="profile-card-btn profile-card-btn-secondary">
+                          채용
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="tags-section">
+                    {tagsArray.map((tag, index) => (
+                      <span key={index} className="tag">{tag}</span>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <span className="nickname">{postData.userNickname}</span>
             </div>
           </div>
 
-          {/* 태그 영역 */}
-          <div className="tags-section">
-            {tagsArray.map((tag, index) => (
-              <span key={index} className="tag">{tag}</span>
-            ))}
+          <div className="header-right">
+            <h1 className="post-title">{postData.title}</h1>
           </div>
         </div>
+      </div>
 
-        {/* 제목 및 가격 */}
-        <div className="title-section">
-          <h1 className="post-title">{postData.title}</h1>
-          <div className="price-section">
-            <span className="price-label">가격</span>
-            <span className="price-value">{postData.price.toLocaleString()}₩</span>
-          </div>
-        </div>
-
-        {/* PDF/PPT 뷰어 영역 */}
+      {/* 메인 컨텐츠 */}
+      <div className="main-content">
+        {/* PDF/PPT 뷰어 영역 - 전체 화면 */}
         <div className="pdf-viewer" onScroll={handleScroll}>
           <div className="pdf-page">
             <div className="pdf-content">
-              <p style={{ fontSize: '48px', fontWeight: '300', color: '#fff' }}>
-                {postData.title}
-              </p>
-              <p style={{ marginTop: '20px', color: '#ccc' }}>
-                조회수: {postData.viewCnt} | 다운로드: {postData.downloadCnt}
-              </p>
-              {postData.aiSummary && (
-                <div style={{ marginTop: '40px', padding: '20px', backgroundColor: '#2a2a2a', borderRadius: '8px' }}>
-                  <h3 style={{ color: '#1e90ff', marginBottom: '10px' }}>AI 요약</h3>
-                  <p style={{ color: '#ccc', lineHeight: '1.6' }}>{postData.aiSummary}</p>
-                </div>
+              {/* 실제 이미지가 있다면 여기에 표시 */}
+              {postData.images && postData.images.map((image, index) => (
+                <img 
+                  key={index} 
+                  src={image} 
+                  alt={`${postData.title} - ${index + 1}`}
+                  style={{ marginBottom: '40px' }}
+                />
+              ))}
+              
+              {/* 이미지가 없을 때만 기본 콘텐츠 표시 */}
+              {(!postData.images || postData.images.length === 0) && (
+                <>
+                  <p style={{ fontSize: '48px', fontWeight: '300', color: '#191919', marginBottom: '20px' }}>
+                    {postData.title}
+                  </p>
+                  <p style={{ color: '#666', fontSize: '15px' }}>
+                    조회수: {postData.viewCnt} | 다운로드: {postData.downloadCnt}
+                  </p>
+                </>
               )}
-              <p style={{ marginTop: '40px', color: '#999', fontSize: '14px' }}>
-                ⬇ 스크롤하여 다음 페이지 보기
-              </p>
             </div>
           </div>
+          
           {currentPage > 1 && (
             <div className="pdf-page">
               <div className="pdf-content">
-                <p style={{ fontSize: '36px', color: '#fff' }}>
+                <p style={{ fontSize: '36px', color: '#191919', marginBottom: '20px' }}>
                   페이지 {currentPage}
                 </p>
-                <p style={{ marginTop: '20px', color: '#ccc' }}>
+                <p style={{ color: '#333', fontSize: '15px', lineHeight: '1.8' }}>
                   {postData.content}
                 </p>
               </div>
@@ -207,78 +318,119 @@ const BoardLookupRead = () => {
         </div>
       </div>
 
-      {/* 우측 사이드바 */}
-      <div className="sidebar">
+      {/* 플로팅 사이드바 - Behance 스타일 */}
+      <div className={`sidebar ${!sidebarVisible ? 'hidden' : ''}`}>
         <div className="sidebar-icon profile-icon">
-          <div className="icon-circle">👤</div>
+          {userImageSrc ? (
+            <img src={userImageSrc} alt="프로필" className="profile-mini-image" />
+          ) : (
+            <div className="default-profile-mini">👤</div>
+          )}
         </div>
 
         <div 
           className={`sidebar-icon heart-icon ${isLiked ? 'liked' : ''}`}
           onClick={handleLikeToggle}
         >
-          <div className="icon-circle">{isLiked ? '❤️' : '🤍'}</div>
+          <img 
+            src={isLiked ? "/hart.png" : "/binhart.png"} 
+            alt="좋아요" 
+            className="icon-image" 
+          />
         </div>
 
         <div 
           className="sidebar-icon comment-icon"
           onClick={handleCommentToggle}
         >
-          <div className="icon-circle">💬</div>
+          <img src="/comment.png" alt="댓글" className="icon-image" />
         </div>
 
         <div 
           className="sidebar-icon cart-icon"
           onClick={handleAddToCart}
         >
-          <div className="icon-circle">🛒</div>
+          <img src="/cartIcon.png" alt="장바구니" className="icon-image" />
         </div>
 
-        <div className="sidebar-icon ai-icon">
-          <div className="icon-circle">P</div>
-          <span className="ai-label">요약 AI</span>
+        <div 
+          className="sidebar-icon ai-icon"
+          onClick={handleAISummaryToggle}
+        >
+          <img src="/summary_AI.svg" alt="AI 요약" className="icon-image" />
         </div>
       </div>
 
-      {/* 댓글 팝업 */}
-      {showComments && (
-        <div className="comments-popup">
-          <div className="comments-header">
-            <h3>댓글</h3>
-            <button className="close-btn" onClick={handleCommentToggle}>✕</button>
-          </div>
-          
-          <div className="comments-list">
-            {comments.length === 0 ? (
-              <p style={{ textAlign: 'center', color: '#888' }}>댓글이 없습니다.</p>
-            ) : (
-              comments.map((comment) => (
-                <div key={comment.commentId} className="comment-item">
-                  <div className="comment-author">
-                    <span className="comment-nickname">{comment.userNickname}</span>
-                    <span className="comment-date">
-                      {new Date(comment.commentCreatedAt).toLocaleDateString('ko-KR')}
-                    </span>
-                  </div>
-                  <p className="comment-text">{comment.commentContent}</p>
-                </div>
-              ))
-            )}
-          </div>
+      {/* 가격 배지 - 플로팅 */}
+      <div className="price-badge">
+        <span className="price-label">가격</span>
+        <span className="price-value">{postData.price.toLocaleString()}₩</span>
+      </div>
 
-          <div className="comment-input-section">
-            <textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="댓글을 입력하세요..."
-              rows="3"
-            />
-            <button className="submit-btn" onClick={handleCommentSubmit}>
-              작성
-            </button>
-          </div>
+      {/* 장바구니 토스트 알림 */}
+      <div className={`cart-toast ${showCartToast ? 'show' : ''}`}>
+        장바구니에 담겼습니다! 🛒
+      </div>
+
+      {/* 댓글 팝업 */}
+      <div className={`comments-popup ${showComments ? 'active' : ''}`}>
+        <div className="comments-header">
+          <h3>댓글 {comments.length > 0 && `(${comments.length})`}</h3>
+          <button className="close-btn" onClick={handleCommentToggle}>✕</button>
         </div>
-      )}
+        
+        <div className="comments-list">
+          {comments.length === 0 ? (
+            <p style={{ textAlign: 'center', color: '#999', padding: '40px 0' }}>
+              첫 댓글을 남겨보세요!
+            </p>
+          ) : (
+            comments.map((comment) => (
+              <div key={comment.commentId} className="comment-item">
+                <div className="comment-author">
+                  <span className="comment-nickname">{comment.userNickname}</span>
+                  <span className="comment-date">
+                    {new Date(comment.commentCreatedAt).toLocaleDateString('ko-KR')}
+                  </span>
+                </div>
+                <p className="comment-text">{comment.commentContent}</p>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="comment-input-section">
+          <textarea
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            placeholder="댓글을 입력하세요..."
+            rows="3"
+          />
+          <button className="submit-btn" onClick={handleCommentSubmit}>
+            댓글 작성
+          </button>
+        </div>
+      </div>
+
+      {/* AI 요약 팝업 */}
+      <div className={`ai-summary-popup ${showAISummary ? 'active' : ''}`}>
+        <div className="ai-summary-header">
+          <h3>
+            <span>🤖</span> AI 요약
+          </h3>
+          <button className="close-btn" onClick={handleAISummaryToggle}>✕</button>
+        </div>
+        
+        <div className="ai-summary-content">
+          {postData.aiSummary ? (
+            <p className="ai-summary-text">{postData.aiSummary}</p>
+          ) : (
+            <p style={{ textAlign: 'center', color: '#999', padding: '40px 0' }}>
+              AI 요약이 아직 생성되지 않았습니다.
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

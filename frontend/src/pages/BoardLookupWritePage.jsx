@@ -7,7 +7,6 @@ import { tagData } from '../database/taglist.js';
 
 export default function BoardLookupWritePage() {
   const navigate = useNavigate();
-  const [selectedImage, setSelectedImage] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -25,12 +24,16 @@ export default function BoardLookupWritePage() {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setSelectedFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => { 
-        setSelectedImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+      const allowedExtensions = ['.pdf', '.ppt', '.pptx'];
+      const fileExtension = `.${file.name.split('.').pop()}`;
+
+      if (allowedExtensions.includes(fileExtension.toLowerCase())) {
+        setSelectedFile(file);
+      } else {
+        alert('PDF, PPT, PPTX 파일만 업로드할 수 있습니다.');
+        e.target.value = null;
+        setSelectedFile(null);
+      }
     }
   };
 
@@ -137,19 +140,19 @@ export default function BoardLookupWritePage() {
         <div className="content-grid">
           <div className="upload-section">
             <div className="image-upload-area">
-              {!selectedImage ? (
+              {!selectedFile ? (
                 <div className="upload-placeholder">
                   <Upload className="upload-icon" />
-                  <p className="upload-text">파일 업로드 (PDF, PPT, 이미지 등)</p>
+                  <p className="upload-text">파일 업로드 (PDF, PPT)</p>
                   <label className="file-select-button">
                     파일 선택
-                    <input type="file" accept="*/*" onChange={handleImageUpload} className="file-input" />
+                    <input type="file" accept=".pdf,.ppt,.pptx" onChange={handleImageUpload} className="file-input" />
                   </label>
                 </div>
               ) : (
                 <div className="image-preview">
-                  <img src={selectedImage} alt="업로드된 파일 미리보기" className="preview-image" />
-                  <button onClick={() => { setSelectedImage(null); setSelectedFile(null); }} className="remove-image-button">
+                  <p className="preview-filename">{selectedFile.name}</p>
+                  <button onClick={() => setSelectedFile(null)} className="remove-image-button">
                     <X className="remove-icon" />
                   </button>
                 </div>
@@ -157,7 +160,7 @@ export default function BoardLookupWritePage() {
             </div>
             <div className="feature-description">
               <p>• 파일 업로드 후 게시글을 작성하세요</p>
-              <p>• PDF, PPT, 이미지 파일 지원</p>
+              <p>• PDF, PPT 파일 지원</p>
               <p>• 태그를 추가하여 검색 최적화</p>
             </div>
           </div>
