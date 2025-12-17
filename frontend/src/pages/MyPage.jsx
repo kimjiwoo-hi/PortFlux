@@ -19,7 +19,12 @@ function MyPage() {
               isActive || isRootMyPage ? "nav-item active" : "nav-item"
             }
           >
+<<<<<<< HEAD
             <span className="nav-icon">👤</span>내 정보
+=======
+            <span className="nav-icon">•</span>
+            내 정보
+>>>>>>> 4116ad0c9e15aa010d7c3ded9b8e061e5f0000e9
           </NavLink>
           <NavLink
             to="/mypage/myposts"
@@ -27,7 +32,7 @@ function MyPage() {
               isActive ? "nav-item active" : "nav-item"
             }
           >
-            <span className="nav-icon">📝</span>
+            <span className="nav-icon">•</span>
             작성한 게시글
           </NavLink>
           <NavLink
@@ -36,7 +41,7 @@ function MyPage() {
               isActive ? "nav-item active" : "nav-item"
             }
           >
-            <span className="nav-icon">💬</span>
+            <span className="nav-icon">•</span>
             작성한 댓글
           </NavLink>
           <NavLink
@@ -191,7 +196,7 @@ function MyPage() {
               isActive ? "nav-item active" : "nav-item"
             }
           >
-            <span className="nav-icon">⭐</span>
+            <span className="nav-icon">•</span>
             저장한 게시글
           </NavLink>
         </nav>

@@ -12,7 +12,7 @@ public class SocketIOConfig {
     @Value("${socket-server.host:localhost}")// Socket.IO 서버 호스트
     private String host;
 
-    @Value("${socket-server.port:8080}")// Socket.IO 임시 서버 포트
+    @Value("${socket-server.port:3000}")// Socket.IO 임시 서버 포트
     private int port;
 
     @Bean
