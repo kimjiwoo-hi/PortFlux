@@ -53,7 +53,77 @@
 .info-section {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 30px;
+}
+
+/* 이미지 섹션 */
+.image-section {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+/* 배너 이미지 */
+.banner-container {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #f8f9fa;
+  margin-bottom: -60px;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.banner-upload {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+/* 프로필 이미지 */
+.myinfo-profile-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-left: 20px;
+  z-index: 1;
+}
+
+.myinfo-profile-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  object-fit: cover;
+  background: #f8f9fa;
+}
+
+.myinfo-profile-upload {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+/* 이미지 업로드 버튼 */
+.image-upload-label {
+  display: inline-block;
+  padding: 8px 16px;
+  background: #3b5bdb;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.image-upload-label:hover {
+  background: #2f49b0;
 }
 
 .info-grid {
