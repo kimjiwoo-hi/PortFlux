@@ -36,7 +36,6 @@ function RegisterPage() {
   const [isPwdValid, setIsPwdValid] = useState(null);
   const [isPwdMatch, setIsPwdMatch] = useState(null);
   
-  // [수정] 닉네임 유효성 상태
   const [isNicknameAvailable, setIsNicknameAvailable] = useState(null);
   const [isAuthVerified, setIsAuthVerified] = useState(isGoogle); 
 
@@ -157,8 +156,6 @@ function RegisterPage() {
   const handleCheckNickname = async () => {
     if (!nickname) return;
     try {
-      console.log("보내는 닉네임:", nickname);
-
       const res = await fetch("http://localhost:8080/user/register/check-nickname", {
         method: "POST", 
         headers: { "Content-Type": "application/json" }, 
@@ -166,14 +163,7 @@ function RegisterPage() {
       });
       
       if (res.ok) {
-          // 백엔드(Controller)에서 보낸 변수명이 'isAvailable' 입니다.
-          // 즉, true가 오면 "사용 가능"하다는 뜻입니다.
           const isAvailable = await res.json(); 
-          console.log("서버 응답값(사용가능여부):", isAvailable);
-
-          // [수정 포인트]
-          // 아이디 체크할 때는 !isDuplicate 였지만,
-          // 닉네임 체크는 isAvailable 이므로 뒤집지 말고 그대로 넣어야 합니다.
           setIsNicknameAvailable(isAvailable); 
       } else {
           console.error("서버 에러");
@@ -272,7 +262,6 @@ function RegisterPage() {
     if (isPwdValid === false) return;
     if (isPwdMatch === false) return;
     
-    // [확인] 닉네임 유효성 검사 통과 여부 확인
     if (isNicknameAvailable !== true) return;
     
     if (!isIndividual && isBizNumValid !== true) return;
@@ -290,6 +279,11 @@ function RegisterPage() {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data),
       });
       if (res.ok) { 
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("userId", userId);
+        localStorage.setItem("userNickname", nickname);
+        localStorage.setItem("userEmail", email);
+
         navigate("/success", { 
             state: { 
                 title: "회원가입 완료", 
@@ -306,8 +300,8 @@ function RegisterPage() {
         <h2 className="register-title">회원가입</h2>
 
         <div className="register-tabs">
-          <button className={`tab-btn ${isIndividual ? "active" : ""}`} onClick={() => { setIsIndividual(true); resetForm(); }}>개인회원</button>
-          <button className={`tab-btn ${!isIndividual ? "active" : ""}`} onClick={() => { setIsIndividual(false); resetForm(); }}>기업회원</button>
+          <button className={`reg-tab-btn ${isIndividual ? "active" : ""}`} onClick={() => { setIsIndividual(true); resetForm(); }}>개인회원</button>
+          <button className={`reg-tab-btn ${!isIndividual ? "active" : ""}`} onClick={() => { setIsIndividual(false); resetForm(); }}>기업회원</button>
         </div>
 
         <div className="form-container">
@@ -315,7 +309,7 @@ function RegisterPage() {
             <div className="form-group">
               <label className="form-label">사업자등록번호</label>
               <input type="text" className={`reg-input ${isBizNumValid === false ? "input-error" : ""}`} 
-                     placeholder="사업자 등록번호 10자리" value={businessNumber} onChange={handleBusinessNumberChange} maxLength={12} />
+                   placeholder="사업자 등록번호 10자리" value={businessNumber} onChange={handleBusinessNumberChange} maxLength={12} />
               {isBizNumValid === true && <span className="valid-msg">사업자등록번호 확인완료</span>}
               {isBizNumValid === false && <span className="error-msg">유효하지 않은 번호입니다</span>}
             </div>
@@ -325,7 +319,7 @@ function RegisterPage() {
             <label className="form-label">아이디</label>
             <div className="input-with-btn">
               <input type="text" className={`reg-input ${isIdAvailable === false ? "input-error" : ""}`} 
-                     placeholder="영문 소문자/숫자 4~12자" value={userId} onChange={handleIdChange} />
+                   placeholder="영문 소문자/숫자 4~12자" value={userId} onChange={handleIdChange} />
               <button className="btn-small" onClick={handleCheckId}>중복확인</button>
             </div>
             {isIdAvailable === true && <span className="valid-msg">사용 가능한 아이디입니다.</span>}
@@ -349,23 +343,21 @@ function RegisterPage() {
               </button>
             </div>
             
-            {/* 이메일 메시지 */}
             {isEmailValid === false && <span className="error-msg">{emailMsg}</span>}
             {isEmailValid === true && <span className="valid-msg">{emailMsg}</span>}
             
             <div className="input-with-btn" style={{marginTop: '10px'}}>
               <input type="text" className="reg-input" placeholder="인증코드 6자리" 
-                     value={authCode} onChange={(e) => setAuthCode(e.target.value)} 
-                     readOnly={isAuthVerified} 
-                     disabled={isAuthVerified} 
-                     style={isAuthVerified ? { backgroundColor: "#e9ecef" } : {}}
+                   value={authCode} onChange={(e) => setAuthCode(e.target.value)} 
+                   readOnly={isAuthVerified} 
+                   disabled={isAuthVerified} 
+                   style={isAuthVerified ? { backgroundColor: "#e9ecef" } : {}}
               />
               <button className="btn-small" onClick={handleVerifyAuthCode} disabled={isAuthVerified}>
                 {isAuthVerified ? "확인완료" : "인증하기"}
               </button>
             </div>
             
-            {/* 인증 완료 메시지 */}
             {codeMsg && (
                 <span className={isAuthVerified ? "valid-msg" : "error-msg"}>
                     {codeMsg}
@@ -402,10 +394,7 @@ function RegisterPage() {
                 />
                 <button className="btn-small" onClick={handleCheckNickname}>중복확인</button>
             </div>
-            {/* 사용 가능할 때 (초록/파란색) */}
             {isNicknameAvailable === true && <span className="valid-msg">사용 가능한 닉네임입니다</span>}
-            
-            {/* 사용 불가능할 때 (빨간색) */}
             {isNicknameAvailable === false && <span className="error-msg">이미 사용중인 닉네임입니다</span>}
             </div>
 

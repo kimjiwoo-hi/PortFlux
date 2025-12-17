@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
-@MapperScan("com.portflux.backend.mapper")
+@MapperScan({"com.portflux.backend.mapper", "com.portflux.backend.dao"})
 @EnableAsync
 
 public class BackendApplication {

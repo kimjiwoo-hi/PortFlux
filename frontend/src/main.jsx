@@ -11,6 +11,8 @@ import NoFooterLayout from "./layouts/NoFooterLayout";
 // Pages
 import NotFound from "./pages/NotFound";
 import BoardFree from "./pages/BoardFreePage";
+import BoardFreeWritePage from "./pages/BoardFreeWritePage";
+import BoardFreeDetailPage from "./pages/BoardFreeDetailPage";
 import BoardJob from "./pages/BoardJobPage.jsx";
 import BoardLookup from "./pages/BoardLookupPage.jsx";
 import Cart from "./pages/CartPage.jsx";
@@ -77,6 +79,14 @@ const router = createBrowserRouter([
       {
         path: "boardlookup",
         element: <BoardLookup />
+      },
+      {
+        path: "boardfree/write",
+        element: <BoardFreeWritePage />
+      },
+      {
+        path: "boardfree/:id", // 상세 페이지 라우트
+        element: <BoardFreeDetailPage />
       },
     ],
   },
