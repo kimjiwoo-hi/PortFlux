@@ -28,6 +28,7 @@ export default function CheckoutModal({ merchantUid, amount, orderId, onClose })
   }, []);
 
   const handlePayment = async () => {
+
     try {
       const PortOne = await loadPortOneScript();
       

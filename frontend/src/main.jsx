@@ -37,7 +37,11 @@ const router = createBrowserRouter([
         element: <BoardLookup />,
       },
       {
-        path: "/board/write",
+        path: "board/lookup",
+        element: <BoardLookup />
+      },
+      {
+        path: "board/write",
         element: <BoardLookupWrite />
       }
     ],

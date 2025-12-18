@@ -66,6 +66,11 @@ public class SecurityConfig {
                         // [추가] 사용자 정보 조회/수정 API 허용
                         .requestMatchers("/user/info/**").permitAll()
 
+                        // [추가] 장바구니, 주문, 결제 API 허용
+                        .requestMatchers("/api/cart/**").permitAll()
+                        .requestMatchers("/api/orders/**").permitAll()
+                        .requestMatchers("/api/payments/**").permitAll()
+
                         // 정적 리소스 허용
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         // 컨트롤러 매핑 오류(404) 시 시큐리티가 403으로 막지 않도록 에러 경로 허용

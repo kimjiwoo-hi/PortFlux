@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/cart")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class CartController {
 
     private final CartService cartService;
@@ -28,13 +29,19 @@ public class CartController {
         List<Cart> cartItems = cartService.getCartItems(userNum);
 
         List<CartItemResponse> items = cartItems.stream()
-                .map(item -> new CartItemResponse(
-                        item.getId(),
-                        item.getPostId(),
-                        item.getProductName(),
-                        item.getUnitPrice(),
-                        item.getQty(),
-                        item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQty()))))
+                .map(item -> {
+                    BigDecimal unitPrice = item.getUnitPrice() != null ? item.getUnitPrice() : BigDecimal.ZERO;
+                    Integer qty = item.getQty() != null ? item.getQty() : 0;
+                    BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(qty));
+
+                    return new CartItemResponse(
+                            item.getId(),
+                            item.getPostId(),
+                            item.getProductName(),
+                            unitPrice,
+                            qty,
+                            subtotal);
+                })
                 .collect(Collectors.toList());
 
         BigDecimal totalAmount = items.stream()

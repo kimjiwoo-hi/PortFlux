@@ -1,6 +1,7 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { getCart, createOrder, removeFromCart, updateCartQuantity } from "../api/api";
 import CheckoutModal from "../components/CheckoutModal";
+import "./CartPage.css";
 
 // TODO: 임시 사용자 ID. 실제 프로덕션에서는 로그인 및 인증을 통해 동적으로 받아와야 합니다.
 const TEMP_USER_ID = 1;
@@ -9,12 +10,32 @@ export default function CartPage() {
   const [cart, setCart] = useState({ items: [], total: 0 });
   const [checkoutInfo, setCheckoutInfo] = useState(null);
   const [error, setError] = useState(null);
+  const [selectedItems, setSelectedItems] = useState(new Set());
 
-  const fetchCart = useCallback(async () => {
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        setError(null);
+        const res = await getCart(TEMP_USER_ID);
+        // 백엔드에서 { items: [...], totalAmount: ... } 형식으로 반환
+        const data = res && res.data ? res.data : { items: [], totalAmount: 0 };
+        setCart({ 
+          items: data.items || [], 
+          total: data.totalAmount ?? 0 
+        });
+      } catch (e) {
+        console.error(e);
+        setError("장바구니 정보를 불러오는데 실패했습니다.");
+      }
+    };
+
+    fetchCart();
+  }, []);
+
+  const refetchCart = async () => {
     try {
       setError(null);
       const res = await getCart(TEMP_USER_ID);
-      // 백엔드에서 { items: [...], totalAmount: ... } 형식으로 반환
       const data = res && res.data ? res.data : { items: [], totalAmount: 0 };
       setCart({ 
         items: data.items || [], 
@@ -24,11 +45,7 @@ export default function CartPage() {
       console.error(e);
       setError("장바구니 정보를 불러오는데 실패했습니다.");
     }
-  }, []);
-
-  useEffect(() => {
-    fetchCart();
-  }, [fetchCart]);
+  };
 
   const handleUpdateQuantity = async (cartId, newQty) => {
     const originalQty = cart.items.find(item => item.cartId === cartId)?.qty;
@@ -44,7 +61,7 @@ export default function CartPage() {
     try {
       await updateCartQuantity(cartId, newQty);
       // 성공 시 장바구니 정보 다시 로드
-      await fetchCart();
+      await refetchCart();
     } catch (e) {
       console.error(e);
       alert("수량 변경에 실패했습니다.");
@@ -56,15 +73,44 @@ export default function CartPage() {
 
     try {
       await removeFromCart(cartId);
+      setSelectedItems((prev) => {
+        const updated = new Set(prev);
+        updated.delete(cartId);
+        return updated;
+      });
       // 성공 시 장바구니 정보 다시 로드
-      await fetchCart();
+      await refetchCart();
     } catch (e) {
       console.error(e);
       alert("상품 삭제에 실패했습니다.");
     }
   };
 
+  const toggleSelectItem = (cartId) => {
+    setSelectedItems((prev) => {
+      const updated = new Set(prev);
+      if (updated.has(cartId)) {
+        updated.delete(cartId);
+      } else {
+        updated.add(cartId);
+      }
+      return updated;
+    });
+  };
+
+  const calculateSelectedTotal = () => {
+    return cart.items
+      .filter((item) => selectedItems.has(item.cartId))
+      .reduce((sum, item) => sum + item.unitPrice * item.qty, 0);
+  };
+
   const handleCheckout = async () => {
+    if (selectedItems.size === 0) {
+      alert("선택된 상품이 없습니다.");
+      return;
+    }
+
+    const selectedItemsArray = cart.items.filter((item) => selectedItems.has(item.cartId));
     const payload = {
       userId: TEMP_USER_ID,
       items: cart.items.map((it) => ({
@@ -94,7 +140,7 @@ export default function CartPage() {
         {cart.items && cart.items.length > 0 ? (
           cart.items.map((it) => (
             <li key={it.cartId}>
-              <span>{it.productName} (단가: {it.unitPrice.toLocaleString()}원)</span>
+              <span>{it.productName} (단가: {Number(it.unitPrice).toLocaleString()}원)</span>
               <div>
                 <input
                   type="number"
@@ -111,7 +157,7 @@ export default function CartPage() {
           <li>장바구니가 비어있습니다.</li>
         )}
       </ul>
-      <div className="summary">총 합계: {cart.total.toLocaleString()}원</div>
+      <div className="summary">총 합계: {Number(cart.total).toLocaleString()}원</div>
       <button onClick={handleCheckout} disabled={!cart.items || cart.items.length === 0}>
         결제하러 가기
       </button>

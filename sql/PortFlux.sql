@@ -92,6 +92,8 @@ CREATE TABLE POST (
     )
 );
 
+
+
 ------------------------------------------------------------
 -- POST updated_at 자동 업데이트 트리거
 ------------------------------------------------------------
@@ -102,6 +104,28 @@ BEGIN
     :NEW.updated_at := SYSDATE;
 END;
 /
+
+-----------------------------------------------------------
+-- POST tags 컬럼 
+------------------------------------------------------------
+ALTER TABLE POST ADD tags VARCHAR2(2000);
+
+-- 기존 데이터 기본값 설정
+UPDATE POST SET tags = '[]' WHERE tags IS NULL;
+
+COMMIT;
+
+-- 인덱스 생성
+CREATE INDEX idx_post_tags ON POST(tags);
+
+-- POST 테이블 구조 확인
+DESC POST;
+
+-- tags 컬럼 상세 확인
+SELECT column_name, data_type, data_length 
+FROM user_tab_columns 
+WHERE table_name = 'POST' 
+  AND column_name = 'TAGS';
 
 ------------------------------------------------------------
 -- POST 외래키
@@ -567,6 +591,223 @@ INSERT INTO COMMENT_LIKE (user_num, comment_id) VALUES (1, 12);
 ------------------------------------------------------------
 COMMIT;
 
+-- ============================================================
+-- 채용공고 기능을 위한 POST 테이블 컬럼 추가
+-- ============================================================
+
+-- 1단계: 채용공고 전용 컬럼 추가 (제약조건 없이)
+ALTER TABLE POST ADD (
+    job_region VARCHAR2(100),           -- 근무 지역 (regions.js의 ID)
+    job_career_type VARCHAR2(500),      -- 경력 타입 (JSON 배열: ["신입", "경력"])
+    job_career_years VARCHAR2(500),     -- 경력 연차 (JSON 배열: ["1년", "3년"])
+    job_education VARCHAR2(50),         -- 학력 (high_below, high, college_2_3, university, master, doctor, doctor_above)
+    job_education_exclude CHAR(1) DEFAULT 'N', -- 학력무관 여부 (Y/N)
+    job_salary_min NUMBER(10),          -- 최소 급여
+    job_salary_max NUMBER(10),          -- 최대 급여
+    job_deadline DATE,                  -- 채용 마감일
+    job_status VARCHAR2(20) DEFAULT 'ACTIVE', -- 공고 상태 (ACTIVE/EXPIRED/CLOSED)
+    job_industries VARCHAR2(500),       -- 업종 (JSON 배열)
+    job_company_types VARCHAR2(500),    -- 기업형태 (JSON 배열)
+    job_work_types VARCHAR2(500),       -- 근무형태 (JSON 배열)
+    job_work_days VARCHAR2(500)         -- 근무요일 (JSON 배열)
+);
+
+-- 2단계: 기존 job 게시글에 필수 값 채우기 (제약조건 위반 방지)
+UPDATE POST 
+SET 
+    job_region = 'seoul_gangnam',
+    job_career_type = '["경력무관"]',
+    job_career_years = '[]',
+    job_education = NULL,
+    job_education_exclude = 'Y',
+    job_deadline = SYSDATE + 30,
+    job_status = 'ACTIVE',
+    job_industries = '["IT·웹·통신"]',
+    job_company_types = '["중소기업"]',
+    job_work_types = '["정규직"]',
+    job_work_days = '["주 5일(월~금)"]'
+WHERE board_type = 'job' AND job_region IS NULL;
+
+COMMIT;
+
+-- 3단계: 제약조건 추가 (이제 기존 데이터가 제약조건을 만족함)
+ALTER TABLE POST ADD CONSTRAINT ck_job_required_fields CHECK (
+    (board_type = 'job' AND job_region IS NOT NULL AND job_deadline IS NOT NULL AND job_status IS NOT NULL)
+    OR board_type IN ('lookup', 'free')
+);
+
+-- 채용공고 상태 체크 제약조건
+ALTER TABLE POST ADD CONSTRAINT ck_job_status CHECK (
+    job_status IN ('ACTIVE', 'EXPIRED', 'CLOSED') OR job_status IS NULL
+);
+
+-- 4단계: 인덱스 생성
+-- 채용공고 마감일 인덱스
+CREATE INDEX idx_post_job_deadline ON POST(job_deadline);
+
+-- 채용공고 지역 인덱스
+CREATE INDEX idx_post_job_region ON POST(job_region);
+
+-- 채용공고 상태 인덱스
+CREATE INDEX idx_post_job_status ON POST(job_status);
+
+-- 복합 인덱스: board_type + job_status + job_deadline
+CREATE INDEX idx_post_job_search ON POST(board_type, job_status, job_deadline);
+
+COMMIT;
+
+------------------------------------------------------------
+-- 채용공고 샘플 데이터 (테스트용) - 3개 추가
+------------------------------------------------------------
+INSERT INTO POST (
+    board_type, company_num, title, content, 
+    job_region, job_career_type, job_career_years, 
+    job_education, job_education_exclude,
+    job_salary_min, job_salary_max, job_deadline, job_status,
+    job_industries, job_company_types, job_work_types, job_work_days
+) VALUES (
+    'job', 1, 'ULTRAFIT 웹 디자이너 신입 채용',
+    '웹 디자이너 신입 채용합니다. 성장 가능성이 높은 회사입니다.
+
+주요 업무:
+- 웹사이트 및 모바일 앱 UI/UX 디자인
+- 브랜딩 및 그래픽 디자인
+- 디자인 시스템 구축 및 관리
+
+지원 자격:
+- 신입 또는 경력 1년 미만
+- Figma, Photoshop, Illustrator 능숙
+- 포트폴리오 필수 제출
+
+우대 사항:
+- 디자인 관련 전공자
+- HTML/CSS 이해도가 있는 분',
+    'seoul_gangnam', '["신입"]', '[]',
+    'university', 'N',
+    NULL, NULL, SYSDATE + 30, 'ACTIVE',
+    '["IT·웹·통신"]', '["스타트업"]', '["정규직"]', '["주 5일(월~금)"]'
+);
+
+INSERT INTO POST (
+    board_type, company_num, title, content,
+    job_region, job_career_type, job_career_years,
+    job_education, job_education_exclude,
+    job_salary_min, job_salary_max, job_deadline, job_status,
+    job_industries, job_company_types, job_work_types, job_work_days
+) VALUES (
+    'job', 1, '구매 담당 경력직 채용',
+    '글로벌 유통회사에서 구매 담당자를 모집합니다.
+
+담당 업무:
+- 원자재 및 부자재 구매 업무
+- 협력업체 발굴 및 관리
+- 구매 단가 협상 및 계약 관리
+
+지원 자격:
+- 구매 분야 경력 5년 이상
+- MS Office 능숙 (특히 Excel)
+- 원활한 커뮤니케이션 능력
+
+우대 사항:
+- ERP 시스템 사용 경험
+- 영어 가능자
+- 관련 자격증 소지자
+
+복리후생:
+- 연봉 3000~5000만원 (경력에 따라 협의)
+- 4대 보험, 퇴직금
+- 중식 제공, 야근수당',
+    'seoul_gangnam', '["경력"]', '["5년", "6년", "7년"]',
+    'college_2_3', 'N',
+    3000, 5000, SYSDATE + 7, 'ACTIVE',
+    '["유통·무역"]', '["중견기업"]', '["정규직"]', '["주 5일(월~금)"]'
+);
+
+INSERT INTO POST (
+    board_type, company_num, title, content,
+    job_region, job_career_type, job_career_years,
+    job_education, job_education_exclude,
+    job_salary_min, job_salary_max, job_deadline, job_status,
+    job_industries, job_company_types, job_work_types, job_work_days
+) VALUES (
+    'job', 2, '편집디자이너 경력 채용',
+    '광고 대행사에서 편집디자이너를 채용합니다.
+
+주요 업무:
+- 광고 및 홍보물 편집 디자인
+- 브로슈어, 카탈로그 제작
+- SNS 콘텐츠 디자인
+
+지원 자격:
+- 편집디자인 경력 3년 이상
+- InDesign, Photoshop, Illustrator 능숙
+- 포트폴리오 필수 제출
+
+우대 사항:
+- 광고대행사 경험자
+- 영상 편집 가능자
+- 4년제 대학 디자인 전공자
+
+근무 조건:
+- 연봉 2500~4000만원
+- 정규직 또는 계약직 가능
+- 주 5일 근무
+- 마포구 소재',
+    'seoul_mapo', '["경력"]', '["3년", "4년", "5년"]',
+    'high', 'N',
+    2500, 4000, SYSDATE + 14, 'ACTIVE',
+    '["미디어·광고"]', '["중소기업"]', '["정규직", "계약직"]', '["주 5일(월~금)"]'
+);
+
+COMMIT;
+
+------------------------------------------------------------
+-- 채용공고 조회 쿼리 샘플
+------------------------------------------------------------
+-- 활성 채용공고 목록 조회 (최신순)
+SELECT 
+    p.post_id,
+    p.title,
+    c.company_name,
+    p.job_region,
+    p.job_career_type,
+    p.job_salary_min,
+    p.job_salary_max,
+    p.job_deadline,
+    p.view_cnt,
+    p.created_at
+FROM POST p
+JOIN COMPANY c ON p.company_num = c.company_num
+WHERE p.board_type = 'job'
+  AND p.job_status = 'ACTIVE'
+  AND p.job_deadline >= SYSDATE
+ORDER BY p.created_at DESC;
+
+-- 지역별 채용공고 개수
+SELECT 
+    job_region,
+    COUNT(*) as job_count
+FROM POST
+WHERE board_type = 'job'
+  AND job_status = 'ACTIVE'
+  AND job_deadline >= SYSDATE
+GROUP BY job_region
+ORDER BY job_count DESC;
+
+-- 마감 임박 공고 (3일 이내)
+SELECT 
+    p.post_id,
+    p.title,
+    c.company_name,
+    p.job_deadline,
+    TRUNC(p.job_deadline - SYSDATE) as days_left
+FROM POST p
+JOIN COMPANY c ON p.company_num = c.company_num
+WHERE p.board_type = 'job'
+  AND p.job_status = 'ACTIVE'
+  AND p.job_deadline BETWEEN SYSDATE AND SYSDATE + 3
+ORDER BY p.job_deadline ASC;
+
 
 ------------------------------------------------------------
 -- 모든 테이블의 전체 데이터 조회
@@ -682,3 +923,210 @@ UNION ALL
 SELECT 'POST_LIKE', COUNT(*) FROM POST_LIKE
 UNION ALL
 SELECT 'COMMENT_LIKE', COUNT(*) FROM COMMENT_LIKE;
+
+
+-- ============================================================
+-- 장바구니 및 결제 관련 테이블 수정/추가 SQL
+-- ============================================================
+
+------------------------------------------------------------
+-- 1) CART 테이블 수정 (필드 추가)
+------------------------------------------------------------
+-- 기존 테이블 백업 및 재생성 (또는 ALTER로 필드 추가)
+ALTER TABLE CART ADD (
+    product_name VARCHAR2(255) NOT NULL DEFAULT 'Unknown',
+    unit_price NUMBER(10) NOT NULL DEFAULT 0,
+    qty NUMBER(5) DEFAULT 1 NOT NULL,
+    cart_status VARCHAR2(20) DEFAULT 'ACTIVE' NOT NULL  -- ACTIVE/DELETED
+);
+
+-- 인덱스
+CREATE INDEX idx_cart_user_status ON CART(user_num, cart_status);
+CREATE INDEX idx_cart_created ON CART(created_at DESC);
+
+COMMIT;
+
+------------------------------------------------------------
+-- 2) ORDERS 테이블 생성 (주문 정보)
+------------------------------------------------------------
+CREATE TABLE ORDERS (
+    order_id NUMBER(20) GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+    user_num NUMBER(20) NOT NULL,
+    merchant_uid VARCHAR2(100) UNIQUE NOT NULL,
+    total_amount NUMBER(10) NOT NULL,
+    order_status VARCHAR2(20) DEFAULT 'PENDING' NOT NULL,  -- PENDING/CONFIRMED/CANCELLED
+    created_at DATE DEFAULT SYSDATE NOT NULL,
+    updated_at DATE DEFAULT SYSDATE NOT NULL,
+    
+    CONSTRAINT fk_order_user FOREIGN KEY (user_num) REFERENCES USERS(user_num),
+    CONSTRAINT ck_order_status CHECK (order_status IN ('PENDING', 'CONFIRMED', 'CANCELLED'))
+);
+
+-- 인덱스
+CREATE INDEX idx_order_user ON ORDERS(user_num);
+CREATE INDEX idx_order_merchant ON ORDERS(merchant_uid);
+CREATE INDEX idx_order_status ON ORDERS(order_status);
+CREATE INDEX idx_order_created ON ORDERS(created_at DESC);
+
+-- UPDATE 트리거
+CREATE OR REPLACE TRIGGER trg_order_update
+BEFORE UPDATE ON ORDERS
+FOR EACH ROW
+BEGIN
+    :NEW.updated_at := SYSDATE;
+END;
+/
+
+COMMIT;
+
+------------------------------------------------------------
+-- 3) ORDER_ITEM 테이블 생성 (주문 항목)
+------------------------------------------------------------
+CREATE TABLE ORDER_ITEM (
+    order_item_id NUMBER(20) GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+    order_id NUMBER(20) NOT NULL,
+    post_id NUMBER(20) NOT NULL,
+    product_name VARCHAR2(255) NOT NULL,
+    unit_price NUMBER(10) NOT NULL,
+    qty NUMBER(5) NOT NULL,
+    subtotal NUMBER(10) NOT NULL,  -- unit_price * qty
+    
+    CONSTRAINT fk_orderitem_order FOREIGN KEY (order_id) REFERENCES ORDERS(order_id),
+    CONSTRAINT fk_orderitem_post FOREIGN KEY (post_id) REFERENCES POST(post_id)
+);
+
+-- 인덱스
+CREATE INDEX idx_orderitem_order ON ORDER_ITEM(order_id);
+CREATE INDEX idx_orderitem_post ON ORDER_ITEM(post_id);
+
+COMMIT;
+
+------------------------------------------------------------
+-- 4) PAYMENT 테이블 생성 (결제 정보 상세)
+------------------------------------------------------------
+CREATE TABLE PAYMENT (
+    payment_id NUMBER(20) GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+    order_id NUMBER(20) NOT NULL,
+    imp_uid VARCHAR2(100) UNIQUE,  -- PortOne 결제 ID
+    merchant_uid VARCHAR2(100),     -- 주문번호
+    amount NUMBER(10) NOT NULL,
+    payment_method VARCHAR2(50),    -- CARD/BANK/PHONE 등
+    payment_status VARCHAR2(20) DEFAULT 'PENDING' NOT NULL,  -- PENDING/SUCCESS/FAILED
+    paid_at DATE,
+    created_at DATE DEFAULT SYSDATE NOT NULL,
+    
+    CONSTRAINT fk_payment_order FOREIGN KEY (order_id) REFERENCES ORDERS(order_id),
+    CONSTRAINT ck_payment_status CHECK (payment_status IN ('PENDING', 'SUCCESS', 'FAILED'))
+);
+
+-- 인덱스
+CREATE INDEX idx_payment_order ON PAYMENT(order_id);
+CREATE INDEX idx_payment_imp_uid ON PAYMENT(imp_uid);
+CREATE INDEX idx_payment_merchant ON PAYMENT(merchant_uid);
+CREATE INDEX idx_payment_status ON PAYMENT(payment_status);
+
+COMMIT;
+
+------------------------------------------------------------
+-- 5) 기존 PAY 테이블 수정 또는 주석처리
+-- (새로운 ORDERS/PAYMENT 구조로 대체됨)
+------------------------------------------------------------
+-- 기존 PAY 테이블은 deprecated됨. 필요시 아래 주석 참고:
+-- 기존 데이터 마이그레이션이 필요하면 INSERT INTO ORDERS ... SELECT FROM PAY 실행
+
+------------------------------------------------------------
+-- 6) 샘플 데이터 (테스트용)
+------------------------------------------------------------
+
+-- ORDERS 샘플
+INSERT INTO ORDERS (user_num, merchant_uid, total_amount, order_status)
+VALUES (1, 'ORD-20251217-001', 35000, 'PENDING');
+
+INSERT INTO ORDERS (user_num, merchant_uid, total_amount, order_status)
+VALUES (2, 'ORD-20251217-002', 20000, 'CONFIRMED');
+
+COMMIT;
+
+-- ORDER_ITEM 샘플
+INSERT INTO ORDER_ITEM (order_id, post_id, product_name, unit_price, qty, subtotal)
+VALUES (1, 1, 'Python 머신러닝 완벽 가이드', 15000, 1, 15000);
+
+INSERT INTO ORDER_ITEM (order_id, post_id, product_name, unit_price, qty, subtotal)
+VALUES (1, 2, 'React 프로젝트 템플릿 모음', 20000, 1, 20000);
+
+INSERT INTO ORDER_ITEM (order_id, post_id, product_name, unit_price, qty, subtotal)
+VALUES (2, 1, 'Python 머신러닝 완벽 가이드', 15000, 1, 15000);
+
+INSERT INTO ORDER_ITEM (order_id, post_id, product_name, unit_price, qty, subtotal)
+VALUES (2, 2, 'React 프로젝트 템플릿 모음', 20000, 1, 20000);
+
+COMMIT;
+
+-- PAYMENT 샘플
+INSERT INTO PAYMENT (order_id, imp_uid, merchant_uid, amount, payment_method, payment_status, paid_at)
+VALUES (1, 'imp_123456789', 'ORD-20251217-001', 35000, 'CARD', 'SUCCESS', SYSDATE - 1);
+
+INSERT INTO PAYMENT (order_id, imp_uid, merchant_uid, amount, payment_method, payment_status)
+VALUES (2, NULL, 'ORD-20251217-002', 20000, 'BANK', 'PENDING');
+
+COMMIT;
+
+------------------------------------------------------------
+-- 7) 조회 쿼리 예제
+------------------------------------------------------------
+
+-- 사용자별 주문 목록 조회
+SELECT 
+    o.order_id,
+    o.merchant_uid,
+    o.total_amount,
+    o.order_status,
+    o.created_at,
+    p.payment_status
+FROM ORDERS o
+LEFT JOIN PAYMENT p ON o.order_id = p.order_id
+WHERE o.user_num = 1
+ORDER BY o.created_at DESC;
+
+-- 주문 상세 (모든 아이템 포함)
+SELECT 
+    o.order_id,
+    o.merchant_uid,
+    o.total_amount,
+    o.order_status,
+    oi.product_name,
+    oi.unit_price,
+    oi.qty,
+    oi.subtotal,
+    p.payment_status,
+    p.imp_uid
+FROM ORDERS o
+LEFT JOIN ORDER_ITEM oi ON o.order_id = oi.order_id
+LEFT JOIN PAYMENT p ON o.order_id = p.order_id
+WHERE o.order_id = 1
+ORDER BY oi.order_item_id;
+
+-- 결제 대기 중인 주문
+SELECT 
+    o.order_id,
+    o.merchant_uid,
+    o.total_amount,
+    o.created_at
+FROM ORDERS o
+LEFT JOIN PAYMENT p ON o.order_id = p.order_id
+WHERE o.order_status = 'PENDING'
+  AND (p.payment_status = 'PENDING' OR p.payment_status IS NULL)
+ORDER BY o.created_at DESC;
+
+------------------------------------------------------------
+-- 데이터 개수 확인
+------------------------------------------------------------
+SELECT 'ORDERS' AS 테이블, COUNT(*) AS 개수 FROM ORDERS
+UNION ALL
+SELECT 'ORDER_ITEM', COUNT(*) FROM ORDER_ITEM
+UNION ALL
+SELECT 'PAYMENT', COUNT(*) FROM PAYMENT
+UNION ALL
+SELECT 'CART', COUNT(*) FROM CART;
+
+COMMIT;

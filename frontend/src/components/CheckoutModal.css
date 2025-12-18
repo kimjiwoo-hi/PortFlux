@@ -144,6 +144,7 @@
   .checkout-modal {
     width: 95%;
     padding: 20px;
+    max-width: 100%;
   }
 
   .checkout-modal h2 {
@@ -157,5 +158,13 @@
 
   .info-row {
     padding: 10px 0;
+  }
+
+  .checkout-actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
   }
 }
