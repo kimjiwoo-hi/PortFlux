@@ -62,9 +62,7 @@ public class CartController {
         Cart cart = cartService.addOrUpdateItem(
                 userNum,
                 request.getPostId(),
-                request.getQty(),
-                request.getProductName(),
-                request.getUnitPrice());
+                request.getQty());
 
         CartItemResponse response = new CartItemResponse(
                 cart.getId(),
@@ -124,8 +122,6 @@ public class CartController {
     public static class AddItemRequest {
         private Long postId;
         private Integer qty;
-        private String productName;
-        private BigDecimal unitPrice;
     }
 
     /** 수량 변경 요청 */

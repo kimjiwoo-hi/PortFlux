@@ -1,7 +1,8 @@
 package com.portflux.backend.service;
 
 import com.portflux.backend.model.Cart;
-import com.portflux.backend.repository.CartRepository;
+import com.portflux.backend.model.Post;
+import com.portflux.backend.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ public class CartService {
     private static final String STATUS_DELETED = "DELETED";
 
     private final CartRepository cartRepository;
+    private final PostRepository postRepository; // PostRepository 주입
 
     /** 유저 장바구니 조회 (ACTIVE만) */
     public List<Cart> getCartItems(Long userNum) {
@@ -28,21 +30,28 @@ public class CartService {
 
     /**
      * 장바구니 담기/수량 증가
-     * - 클라이언트에서 productName, unitPrice를 전달받음
-     * - 서버가 Cart에 저장
+     * - 서버에서 직접 Post 정보를 조회하여 이름과 가격을 사용 (보안 강화)
      */
     @Transactional
-    public Cart addOrUpdateItem(Long userNum, Long postId, int qty, String productName, BigDecimal unitPrice) {
+    public Cart addOrUpdateItem(Long userNum, Long postId, int qty) {
         if (userNum == null)
             throw new IllegalArgumentException("userNum is required");
         if (postId == null)
             throw new IllegalArgumentException("postId is required");
         if (qty <= 0)
             throw new IllegalArgumentException("qty must be > 0");
-        if (productName == null || productName.isEmpty())
-            throw new IllegalArgumentException("productName is required");
-        if (unitPrice == null || unitPrice.signum() < 0)
-            throw new IllegalArgumentException("unitPrice must be non-negative");
+
+        // 1. DB에서 Post 정보 조회 (보안: 클라이언트 가격을 믿지 않음)
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found with id: " + postId));
+
+        // 2. 가격이 없는 상품은 장바구니에 담을 수 없음 (예: 'job', 'free' 게시물)
+        if (post.getPrice() == null) {
+            throw new IllegalArgumentException("This item cannot be added to the cart because it does not have a price.");
+        }
+        
+        String productName = post.getTitle();
+        BigDecimal unitPrice = post.getPrice();
 
         Optional<Cart> existingItem = cartRepository.findByUserNumAndPostIdAndCartStatus(userNum, postId,
                 STATUS_ACTIVE);
@@ -53,12 +62,10 @@ public class CartService {
         if (existingItem.isPresent()) {
             cartItem = existingItem.get();
             cartItem.setQty(cartItem.getQty() + qty);
-
-            // 필요 시 가격 스냅샷을 최신 가격으로 갱신할지 정책 선택:
-            // 1) 담은 시점 가격 유지(보통 권장) => 아래 두 줄 주석 유지
-            // 2) 항상 최신 가격 반영 => 주석 해제
-            // cartItem.setUnitPrice(unitPrice);
-            // cartItem.setProductName(productName);
+            
+            // 항상 최신 가격과 이름으로 업데이트
+            cartItem.setUnitPrice(unitPrice);
+            cartItem.setProductName(productName);
 
             cartItem.setUpdatedAt(now);
         } else {
