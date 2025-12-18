@@ -19,7 +19,7 @@ function MyPage() {
               isActive || isRootMyPage ? "nav-item active" : "nav-item"
             }
           >
-            <span className="nav-icon">👤</span>내 정보
+            <span className="nav-icon">•</span>내 정보
           </NavLink>
           <NavLink
             to="/mypage/myposts"
@@ -45,7 +45,7 @@ function MyPage() {
               isActive ? "nav-item active" : "nav-item"
             }
           >
-            <span className="nav-icon">⭐</span>
+            <span className="nav-icon">•</span>
             저장한 게시글
           </NavLink>
         </nav>

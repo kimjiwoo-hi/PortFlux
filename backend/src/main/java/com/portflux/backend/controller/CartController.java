@@ -31,6 +31,7 @@ public class CartController {
                         item.getUnitPrice(),
                         item.getQty()))
                 .collect(Collectors.toList());
+
         BigDecimal total = itemResponses.stream()
                 .map(item -> item.getUnitPrice().multiply(new BigDecimal(item.getQty())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);

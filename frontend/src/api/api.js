@@ -23,6 +23,7 @@ export async function removeFromCart(cartId) {
   return api.delete(`/api/cart/items/${cartId}`);
 }
 
+
 // --- Order & Payment APIs ---
 export async function createOrder(payload) {
   return api.post("/api/orders", payload);
@@ -33,13 +34,12 @@ export async function confirmPayment(payload) {
 }
 
 // --- Follow APIs ---
-// --- Follow APIs ---
 export async function getFollowing(userId) {
-  return api.get(`/users/${userId}/following`);
+  return api.get(`/api/${userId}/following`);
 }
 
 export async function getFollowers(userId) {
-  return api.get(`/users/${userId}/followers`);
+  return api.get(`/api/${userId}/followers`);
 }
 
 export async function follow(followerId, followingId) {
@@ -47,21 +47,7 @@ export async function follow(followerId, followingId) {
 }
 
 export async function unfollow(followerId, followingId) {
-  // axios.delete에서 body를 사용하려면 data 속성으로 감싸야 합니다.
-  return api.delete("/unfollow", { data: { followerId, followingId } });
-}
-
-// --- Chat APIs ---
-export async function getChatRooms(userId) {
-  return api.get(`/chats?userId=${userId}`);
-}
-
-export async function getChatMessages(roomId) {
-  return api.get(`/chats/${roomId}/messages`);
-}
-
-export async function getOrCreateChatRoom(payload) {
-  return api.post("/chats", payload);
+  return api.delete("/api/unfollow", { data: { followerId, followingId } });
 }
 
 export default api;
