@@ -3,6 +3,7 @@ package com.portflux.backend.service;
 import com.portflux.backend.beans.BoardLookupPostDto;
 import com.portflux.backend.mapper.BoardLookupMapper;
 import com.portflux.backend.mapper.UserMapper;
+import com.portflux.backend.model.Cart;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -105,5 +106,15 @@ public void createPost(BoardLookupPostDto postDto, String userId) {
     postDto.setUserNum(userNum);
     boardLookupMapper.insertPost(postDto);
 }
+/* 
+@Transactional
+public void addToCart(Long userId, Long postId) {
+    if (cartRepository.existsByUserIdAndPostId(userId, postId)) {
+        throw new IllegalStateException("이미 장바구니에 담긴 항목입니다.");
+    }
 
+    Cart cart = new Cart(userId, postId);
+    cartRepository.save(cart);
+}
+*/
 }

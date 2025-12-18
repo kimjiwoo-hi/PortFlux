@@ -19,11 +19,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import com.portflux.backend.service.CartService;
+
 
 @RestController
 @RequestMapping("/api/boardlookup")
@@ -252,4 +255,13 @@ public class BoardLookupController {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
     }
+
+    @PostMapping("/cart")
+public ResponseEntity<?> addToCart(
+     //   @AuthenticationPrincipal UserPrincipal user,
+     //   @RequestBody CartRequest request
+) {
+    //cartService.addToCart(user.getId(), request.getPostId());
+    return ResponseEntity.ok().build();
+}
 }
