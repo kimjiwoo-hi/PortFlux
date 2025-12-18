@@ -40,7 +40,7 @@ public class UserLoginController {
             String authCode = body.get("code");
             
             // Service가 Map을 리턴합니다 (isMember, user, email, name 포함)
-            Map<String, Object> result = (Map<String, Object>) userService.processGoogleLogin(authCode);
+            Map<String, Object> result = userService.processGoogleLogin(authCode);
 
             boolean isMember = (boolean) result.get("isMember");
 

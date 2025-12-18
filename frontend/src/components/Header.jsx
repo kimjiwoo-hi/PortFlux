@@ -97,36 +97,51 @@ const Header = () => {
             </Link>
           </div>
           <div className="link-container">
-            <Link to="/" onClick={handleLinkClick("/")}><div className={getLinkClass("/")}>둘러보기</div></Link>
-            <Link to="/boardjob" onClick={handleLinkClick("/boardjob")}><div className={getLinkClass("/boardjob")}>채용</div></Link>
-            <Link to="/boardfree" onClick={handleLinkClick("/boardfree")}><div className={getLinkClass("/boardfree")}>커뮤니티</div></Link>
-            <Link to="/etc" onClick={handleLinkClick("/etc")}><div className={getLinkClass("/etc")}>기타</div></Link>
+            <Link to="/" onClick={handleLinkClick("/")}>
+              <div className={getLinkClass("/")}>둘러보기</div>
+            </Link>
+            <Link to="/boardjob" onClick={handleLinkClick("/boardjob")}>
+              <div className={getLinkClass("/boardjob")}>채용</div>
+            </Link>
+            <Link to="/boardfree" onClick={handleLinkClick("/boardfree")}>
+              <div className={getLinkClass("/boardfree")}>커뮤니티</div>
+            </Link>
+            <Link to="/etc" onClick={handleLinkClick("/etc")}>
+              <div className={getLinkClass("/etc")}>기타</div>
+            </Link>
           </div>
         </div>
 
         <div className="user">
-          <Link to="/login" state={{ from: location.pathname }}>
-            <button className="login">로그인</button>
-          </Link>
-          <Link to="/register">
-            <button className="join">회원가입</button>
-          </Link>
-          <div className="profile-container" ref={profileRef}>
-            <img
-              src={UserDefaultIcon}
-              alt="프로필"
-              className="profile-pic"
-              onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-              style={{ cursor: "pointer" }} // 마우스 올리면 손가락 모양
-            />
-            <div ref={popoverRef}>
-              {/* 팝오버에 로그아웃 함수 전달 */}
-              <UserProfilePopover
-                isOpen={isPopoverOpen}
-                onLogout={handleLogout}
+          {/* ▼▼▼ [핵심 변경] 로그인 상태에 따라 다른 UI 보여주기 ▼▼▼ */}
+          {!isLoggedIn ? (
+            // 1. 로그인이 안 된 경우: 로그인/회원가입 버튼 표시
+            <>
+              <Link to="/login" state={{ from: location.pathname }}>
+                <button className="login">로그인</button>
+              </Link>
+              <Link to="/register">
+                <button className="join">회원가입</button>
+              </Link>
+            </>
+          ) : (
+            // 2. 로그인이 된 경우: 프로필 아이콘만 표시
+            <div className="profile-container" ref={profileRef}>
+              <img
+                src={UserDefaultIcon}
+                alt="프로필"
+                className="profile-pic"
+                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                style={{ cursor: "pointer" }} // 마우스 올리면 손가락 모양
               />
+              <div ref={popoverRef}>
+                {/* 팝오버에 로그아웃 함수 전달 */}
+                <UserProfilePopover
+                  isOpen={isPopoverOpen}
+                  onLogout={handleLogout}
+                />
+              </div>
             </div>
-          </div>
           )}
           {/* ▲▲▲ 변경 끝 ▲▲▲ */}
         </div>

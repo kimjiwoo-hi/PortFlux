@@ -21,9 +21,9 @@ import BoardLookupRead from "./pages/BoardLookupRead.jsx";
 import Cart from "./pages/CartPage.jsx";
 import Chat from "./pages/ChattingPage.jsx";
 import MyPage from "./pages/MyPage.jsx";
+import OrderResultPage from "./pages/OrderResultPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
-import OrderResultPage from "./pages/OrderResultPage.jsx";
 import FindIdPage from "./pages/FindIdPage.jsx";
 import FindPasswordPage from "./pages/FindPasswordPage.jsx";
 import SuccessPage from "./pages/SuccessPage.jsx";
@@ -38,28 +38,8 @@ const router = createBrowserRouter([
     element: <NoFooterLayout />,
     children: [
       {
-        path: "boardfree",
-        element: <BoardFree />,
-      },
-      {
-        path: "boardjob",
-        element: <BoardJob />,
-      },
-      {
-        path: "cart",
-        element: <Cart />,
-      },
-      {
-        path: "mypage",
-        element: <MyPage />,
-      },
-      {
-        path: "chat",
-        element: <Chat />,
-      },
-      {
-        path: "order-result",
-        element: <OrderResultPage />,
+        index: true,
+        element: <BoardLookup />,
       },
       {
         path: "/board/write",
@@ -99,6 +79,10 @@ const router = createBrowserRouter([
         element: <Cart />,
       },
       {
+        path: "/chat",
+        element: <Chat />,
+      },
+      {
         path: "/mypage",
         element: <MyPage />,
         children: [
@@ -129,16 +113,28 @@ const router = createBrowserRouter([
         element: <LoginPage />,
       },
       {
-        path: "register",
+        path: "/register",
         element: <RegisterPage />,
       },
       {
-        path: "findid",
+        path: "/findid",
         element: <FindIdPage />,
       },
       {
-        path: "findpassword",
+        path: "/findpassword",
         element: <FindPasswordPage />,
+      },
+      {
+        path: "/success",
+        element: <SuccessPage />,
+      },
+      {
+        path: "/etc",
+        element: <NotFound />,
+      },
+      {
+        path: "*",
+        element: <NotFound />,
       },
     ],
   },
