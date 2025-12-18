@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import './BoardLookupRead.css';
+import React, { useState, useEffect, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
+import "./BoardLookupRead.css";
 
 const BoardLookupRead = () => {
   const { postId } = useParams();
@@ -13,7 +13,7 @@ const BoardLookupRead = () => {
   const [showAISummary, setShowAISummary] = useState(false);
   const [showCartToast, setShowCartToast] = useState(false);
   const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState('');
+  const [newComment, setNewComment] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -26,18 +26,21 @@ const BoardLookupRead = () => {
     const fetchPostData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://localhost:8080/api/boardlookup/${postId}`, {
-          withCredentials: true
-        });
-        
+        const response = await axios.get(
+          `http://localhost:8080/api/boardlookup/${postId}`,
+          {
+            withCredentials: true,
+          }
+        );
+
         if (response.data) {
           setPostData(response.data.post || response.data);
           setComments(response.data.comments || []);
         }
         setLoading(false);
       } catch (err) {
-        console.error('게시글 로드 실패:', err);
-        setError('게시글을 불러오는데 실패했습니다.');
+        console.error("게시글 로드 실패:", err);
+        setError("게시글을 불러오는데 실패했습니다.");
         setLoading(false);
       }
     };
@@ -51,7 +54,7 @@ const BoardLookupRead = () => {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
+
       // 스크롤 방향에 따라 헤더/사이드바 표시/숨김
       if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
         // 아래로 스크롤
@@ -62,14 +65,14 @@ const BoardLookupRead = () => {
         setHeaderVisible(true);
         setSidebarVisible(true);
       }
-      
+
       lastScrollY.current = currentScrollY;
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -114,19 +117,21 @@ const BoardLookupRead = () => {
           `http://localhost:8080/api/boardlookup/${postId}/comments`,
           {
             userNum: 1, // TODO: 실제 로그인한 사용자 번호로 변경
-            content: newComment
+            content: newComment,
           },
           { withCredentials: true }
         );
 
-        const updatedResponse = await axios.get(`http://localhost:8080/api/boardlookup/${postId}`);
+        const updatedResponse = await axios.get(
+          `http://localhost:8080/api/boardlookup/${postId}`
+        );
         if (updatedResponse.data) {
           setComments(updatedResponse.data.comments || []);
         }
-        setNewComment('');
+        setNewComment("");
       } catch (err) {
-        console.error('댓글 작성 실패:', err);
-        alert('댓글 작성에 실패했습니다.');
+        console.error("댓글 작성 실패:", err);
+        alert("댓글 작성에 실패했습니다.");
       }
     }
   };
@@ -135,7 +140,7 @@ const BoardLookupRead = () => {
   const handleScroll = (e) => {
     const { scrollTop, scrollHeight, clientHeight } = e.target;
     if (scrollTop + clientHeight >= scrollHeight - 10) {
-      setCurrentPage(prev => prev + 1);
+      setCurrentPage((prev) => prev + 1);
     }
   };
 
@@ -148,15 +153,23 @@ const BoardLookupRead = () => {
   // 배경 클릭 시 페이지 이동
   const handleBackgroundClick = (e) => {
     if (e.target === e.currentTarget) {
-      navigate('/');
+      navigate("/");
     }
   };
 
   // 로딩 중
   if (loading) {
     return (
-      <div className="board-lookup-read" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <p style={{ color: '#191919', fontSize: '18px' }}>로딩 중...</p>
+      <div
+        className="board-lookup-read"
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+        }}
+      >
+        <p style={{ color: "#191919", fontSize: "18px" }}>로딩 중...</p>
       </div>
     );
   }
@@ -164,8 +177,18 @@ const BoardLookupRead = () => {
   // 에러 발생
   if (error || !postData) {
     return (
-      <div className="board-lookup-read" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <p style={{ color: '#191919', fontSize: '18px' }}>{error || '게시글을 찾을 수 없습니다.'}</p>
+      <div
+        className="board-lookup-read"
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+        }}
+      >
+        <p style={{ color: "#191919", fontSize: "18px" }}>
+          {error || "게시글을 찾을 수 없습니다."}
+        </p>
       </div>
     );
   }
@@ -173,26 +196,33 @@ const BoardLookupRead = () => {
   // 태그 배열 처리
   let tagsArray = [];
   try {
-    tagsArray = typeof postData.tags === 'string' ? JSON.parse(postData.tags) : postData.tags || [];
+    tagsArray =
+      typeof postData.tags === "string"
+        ? JSON.parse(postData.tags)
+        : postData.tags || [];
   } catch (e) {
-    console.error('태그 파싱 실패:', e);
+    console.error("태그 파싱 실패:", e);
   }
 
   // 사용자 이미지 처리
-  const userImageSrc = postData.userImage 
-    ? `data:image/jpeg;base64,${btoa(String.fromCharCode(...new Uint8Array(postData.userImage)))}`
+  const userImageSrc = postData.userImage
+    ? `data:image/jpeg;base64,${btoa(
+        String.fromCharCode(...new Uint8Array(postData.userImage))
+      )}`
     : null;
 
   return (
     <div className="board-lookup-read" onClick={handleBackgroundClick}>
       {/* 오버레이 배경 */}
-      <div 
-        className={`overlay-background ${showComments || showAISummary ? 'active' : ''}`}
+      <div
+        className={`overlay-background ${
+          showComments || showAISummary ? "active" : ""
+        }`}
         onClick={handleOverlayClick}
       />
 
       {/* 상단 헤더 - Behance 스타일 */}
-      <div className={`post-header ${!headerVisible ? 'hidden' : ''}`}>
+      <div className={`post-header ${!headerVisible ? "hidden" : ""}`}>
         <div className="author-info">
           <div className="profile-wrapper">
             <div className="profile-left">
@@ -203,23 +233,27 @@ const BoardLookupRead = () => {
                   ) : (
                     <div className="default-profile">👤</div>
                   )}
-                  <button 
-                    className={`follow-btn ${isFollowing ? 'following' : ''}`}
+                  <button
+                    className={`follow-btn ${isFollowing ? "following" : ""}`}
                     onClick={handleFollowToggle}
                   >
-                    {isFollowing ? '✓' : '+'}
+                    {isFollowing ? "✓" : "+"}
                   </button>
                 </div>
-                
+
                 <div className="profile-info">
                   <div className="nickname">
                     {postData.userNickname}
-                    
+
                     {/* 프로필 호버 카드 */}
                     <div className="profile-card">
                       <div className="profile-card-header">
                         {userImageSrc ? (
-                          <img src={userImageSrc} alt="profile" className="profile-card-avatar" />
+                          <img
+                            src={userImageSrc}
+                            alt="profile"
+                            className="profile-card-avatar"
+                          />
                         ) : (
                           <div className="profile-card-avatar">👤</div>
                         )}
@@ -230,7 +264,7 @@ const BoardLookupRead = () => {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="profile-card-stats">
                         <div className="profile-card-stat">
                           <span className="profile-card-stat-value">3.8천</span>
@@ -238,14 +272,18 @@ const BoardLookupRead = () => {
                         </div>
                         <div className="profile-card-stat">
                           <span className="profile-card-stat-value">804</span>
-                          <span className="profile-card-stat-label">팔로워</span>
+                          <span className="profile-card-stat-label">
+                            팔로워
+                          </span>
                         </div>
                         <div className="profile-card-stat">
                           <span className="profile-card-stat-value">1.3만</span>
-                          <span className="profile-card-stat-label">조회수</span>
+                          <span className="profile-card-stat-label">
+                            조회수
+                          </span>
                         </div>
                       </div>
-                      
+
                       <div className="profile-card-actions">
                         <button className="profile-card-btn profile-card-btn-primary">
                           팔로우
@@ -256,10 +294,12 @@ const BoardLookupRead = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="tags-section">
                     {tagsArray.map((tag, index) => (
-                      <span key={index} className="tag">{tag}</span>
+                      <span key={index} className="tag">
+                        {tag}
+                      </span>
                     ))}
                   </div>
                 </div>
@@ -279,37 +319,90 @@ const BoardLookupRead = () => {
         <div className="pdf-viewer" onScroll={handleScroll}>
           <div className="pdf-page">
             <div className="pdf-content">
-              {/* 실제 이미지가 있다면 여기에 표시 */}
-              {postData.images && postData.images.map((image, index) => (
-                <img 
-                  key={index} 
-                  src={image} 
-                  alt={`${postData.title} - ${index + 1}`}
-                  style={{ marginBottom: '40px' }}
-                />
-              ))}
-              
-              {/* 이미지가 없을 때만 기본 콘텐츠 표시 */}
-              {(!postData.images || postData.images.length === 0) && (
+              {/* PDF/PPT 파일 렌더링 로직 */}
+              {postData.postFile ? (
+                (() => {
+                  const isPdf = /\.pdf$/i.test(postData.postFile);
+                  const isPpt = /\.(ppt|pptx)$/i.test(postData.postFile);
+                  const fileUrl = `http://localhost:8080/uploads/${postData.postFile}`;
+
+                  if (isPdf && Array.isArray(postData.pdfImages)) {
+                    return (
+                      <div className="pdf-image-wrapper">
+                        {postData.pdfImages.map((imgUrl, index) => (
+                          <img
+                            key={index}
+                            src={`http://localhost:8080${imgUrl}`}
+                            alt={`pdf-page-${index + 1}`}
+                            className="pdf-page-image"
+                            loading="lazy"
+                          />
+                        ))}
+                      </div>
+                    );
+                  } else if (isPpt) {
+                    // PPT 파일일 경우, 다운로드 버튼 제공
+                    return (
+                      <div style={{ textAlign: "center", padding: "50px" }}>
+                        <h3 style={{ color: "#191919", marginBottom: "20px" }}>
+                          이 파일은 미리보기를 지원하지 않습니다.
+                        </h3>
+                        <p style={{ color: "#666", marginBottom: "30px" }}>
+                          아래 버튼을 클릭하여 파일을 다운로드하세요.
+                        </p>
+                        <a href={fileUrl} download className="download-button">
+                          {postData.postFile} 다운로드
+                        </a>
+                      </div>
+                    );
+                  } else {
+                    // 기타 파일 또는 알 수 없는 형식
+                    return (
+                      <div style={{ textAlign: "center", padding: "50px" }}>
+                        <h3 style={{ color: "#191919" }}>
+                          지원하지 않는 파일 형식입니다.
+                        </h3>
+                      </div>
+                    );
+                  }
+                })()
+              ) : (
+                // postFile이 없는 경우 (기본 콘텐츠)
                 <>
-                  <p style={{ fontSize: '48px', fontWeight: '300', color: '#191919', marginBottom: '20px' }}>
+                  <p
+                    style={{
+                      fontSize: "48px",
+                      fontWeight: "300",
+                      color: "#191919",
+                      marginBottom: "20px",
+                    }}
+                  >
                     {postData.title}
                   </p>
-                  <p style={{ color: '#666', fontSize: '15px' }}>
-                    조회수: {postData.viewCnt} | 다운로드: {postData.downloadCnt}
+                  <p style={{ color: "#666", fontSize: "15px" }}>
+                    조회수: {postData.viewCnt} | 다운로드:{" "}
+                    {postData.downloadCnt}
                   </p>
                 </>
               )}
             </div>
           </div>
-          
+
           {currentPage > 1 && (
             <div className="pdf-page">
               <div className="pdf-content">
-                <p style={{ fontSize: '36px', color: '#191919', marginBottom: '20px' }}>
+                <p
+                  style={{
+                    fontSize: "36px",
+                    color: "#191919",
+                    marginBottom: "20px",
+                  }}
+                >
                   페이지 {currentPage}
                 </p>
-                <p style={{ color: '#333', fontSize: '15px', lineHeight: '1.8' }}>
+                <p
+                  style={{ color: "#333", fontSize: "15px", lineHeight: "1.8" }}
+                >
                   {postData.content}
                 </p>
               </div>
@@ -319,44 +412,42 @@ const BoardLookupRead = () => {
       </div>
 
       {/* 플로팅 사이드바 - Behance 스타일 */}
-      <div className={`sidebar ${!sidebarVisible ? 'hidden' : ''}`}>
+      <div className={`sidebar ${!sidebarVisible ? "hidden" : ""}`}>
         <div className="sidebar-icon profile-icon">
           {userImageSrc ? (
-            <img src={userImageSrc} alt="프로필" className="profile-mini-image" />
+            <img
+              src={userImageSrc}
+              alt="프로필"
+              className="profile-mini-image"
+            />
           ) : (
             <div className="default-profile-mini">👤</div>
           )}
         </div>
 
-        <div 
-          className={`sidebar-icon heart-icon ${isLiked ? 'liked' : ''}`}
+        <div
+          className={`sidebar-icon heart-icon ${isLiked ? "liked" : ""}`}
           onClick={handleLikeToggle}
         >
-          <img 
-            src={isLiked ? "/hart.png" : "/binhart.png"} 
-            alt="좋아요" 
-            className="icon-image" 
+          <img
+            src={isLiked ? "/hart.png" : "/binhart.png"}
+            alt="좋아요"
+            className="icon-image"
           />
         </div>
 
-        <div 
+        <div
           className="sidebar-icon comment-icon"
           onClick={handleCommentToggle}
         >
           <img src="/comment.png" alt="댓글" className="icon-image" />
         </div>
 
-        <div 
-          className="sidebar-icon cart-icon"
-          onClick={handleAddToCart}
-        >
+        <div className="sidebar-icon cart-icon" onClick={handleAddToCart}>
           <img src="/cartIcon.png" alt="장바구니" className="icon-image" />
         </div>
 
-        <div 
-          className="sidebar-icon ai-icon"
-          onClick={handleAISummaryToggle}
-        >
+        <div className="sidebar-icon ai-icon" onClick={handleAISummaryToggle}>
           <img src="/summary_AI.svg" alt="AI 요약" className="icon-image" />
         </div>
       </div>
@@ -368,29 +459,37 @@ const BoardLookupRead = () => {
       </div>
 
       {/* 장바구니 토스트 알림 */}
-      <div className={`cart-toast ${showCartToast ? 'show' : ''}`}>
+      <div className={`cart-toast ${showCartToast ? "show" : ""}`}>
         장바구니에 담겼습니다! 🛒
       </div>
 
       {/* 댓글 팝업 */}
-      <div className={`comments-popup ${showComments ? 'active' : ''}`}>
+      <div className={`comments-popup ${showComments ? "active" : ""}`}>
         <div className="comments-header">
           <h3>댓글 {comments.length > 0 && `(${comments.length})`}</h3>
-          <button className="close-btn" onClick={handleCommentToggle}>✕</button>
+          <button className="close-btn" onClick={handleCommentToggle}>
+            ✕
+          </button>
         </div>
-        
+
         <div className="comments-list">
           {comments.length === 0 ? (
-            <p style={{ textAlign: 'center', color: '#999', padding: '40px 0' }}>
+            <p
+              style={{ textAlign: "center", color: "#999", padding: "40px 0" }}
+            >
               첫 댓글을 남겨보세요!
             </p>
           ) : (
             comments.map((comment) => (
               <div key={comment.commentId} className="comment-item">
                 <div className="comment-author">
-                  <span className="comment-nickname">{comment.userNickname}</span>
+                  <span className="comment-nickname">
+                    {comment.userNickname}
+                  </span>
                   <span className="comment-date">
-                    {new Date(comment.commentCreatedAt).toLocaleDateString('ko-KR')}
+                    {new Date(comment.commentCreatedAt).toLocaleDateString(
+                      "ko-KR"
+                    )}
                   </span>
                 </div>
                 <p className="comment-text">{comment.commentContent}</p>
@@ -413,19 +512,23 @@ const BoardLookupRead = () => {
       </div>
 
       {/* AI 요약 팝업 */}
-      <div className={`ai-summary-popup ${showAISummary ? 'active' : ''}`}>
+      <div className={`ai-summary-popup ${showAISummary ? "active" : ""}`}>
         <div className="ai-summary-header">
           <h3>
             <span>🤖</span> AI 요약
           </h3>
-          <button className="close-btn" onClick={handleAISummaryToggle}>✕</button>
+          <button className="close-btn" onClick={handleAISummaryToggle}>
+            ✕
+          </button>
         </div>
-        
+
         <div className="ai-summary-content">
           {postData.aiSummary ? (
             <p className="ai-summary-text">{postData.aiSummary}</p>
           ) : (
-            <p style={{ textAlign: 'center', color: '#999', padding: '40px 0' }}>
+            <p
+              style={{ textAlign: "center", color: "#999", padding: "40px 0" }}
+            >
               AI 요약이 아직 생성되지 않았습니다.
             </p>
           )}

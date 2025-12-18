@@ -17,4 +17,6 @@ public interface UserMapper {
     
     // 4. 이메일 중복체크
     int checkEmailExist(String email);
+
+    Integer findUserNumByUserId(String userId);
 }
