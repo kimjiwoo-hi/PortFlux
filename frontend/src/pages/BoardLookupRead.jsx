@@ -1,6 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import { X } from "lucide-react"; // X 아이콘 추가
+import heartIcon from '../assets/heart.png'; // Import heart icon
+import binheartIcon from '../assets/binheart.png'; // Import binheart icon
+import commentIcon from '../assets/comment.png'; // Import comment icon
+import cartIcon from '../assets/cartIcon.png'; // Import cart icon
+import summaryAIIcon from '../assets/summary_AI.svg'; // Import summary AI icon
 import "./BoardLookupRead.css";
 
 const BoardLookupRead = () => {
@@ -21,6 +27,7 @@ const BoardLookupRead = () => {
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const lastScrollY = useRef(0);
 
+  
   // 게시글 데이터 로드
   useEffect(() => {
     const fetchPostData = async () => {
@@ -101,13 +108,26 @@ const BoardLookupRead = () => {
   };
 
   // 장바구니 추가
-  const handleAddToCart = () => {
+  // 장바구니 추가
+const handleAddToCart = async () => {
+  try {
+    await axios.post(
+      "http://localhost:8080/api/cart",
+      { postId },
+      { withCredentials: true }
+    );
+
     setShowCartToast(true);
-    setTimeout(() => {
-      setShowCartToast(false);
-    }, 3000);
-    // TODO: 장바구니 API 연동
-  };
+    setTimeout(() => setShowCartToast(false), 3000);
+  } catch (err) {
+    if (err.response?.status === 409) {
+      alert("이미 장바구니에 담긴 항목입니다.");
+    } else {
+      alert("장바구니 추가에 실패했습니다.");
+    }
+  }
+};
+
 
   // 댓글 작성
   const handleCommentSubmit = async () => {
@@ -155,6 +175,11 @@ const BoardLookupRead = () => {
     if (e.target === e.currentTarget) {
       navigate("/");
     }
+  };
+
+  // 닫기 버튼 클릭 시 둘러보기 페이지로 이동
+  const handleCloseClick = () => {
+    navigate("/");
   };
 
   // 로딩 중
@@ -294,14 +319,6 @@ const BoardLookupRead = () => {
                       </div>
                     </div>
                   </div>
-
-                  <div className="tags-section">
-                    {tagsArray.map((tag, index) => (
-                      <span key={index} className="tag">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
                 </div>
               </div>
             </div>
@@ -311,6 +328,16 @@ const BoardLookupRead = () => {
             <h1 className="post-title">{postData.title}</h1>
           </div>
         </div>
+        <div className="tags-section">
+          {tagsArray.map((tag, index) => (
+            <span key={index} className="tag">
+              {tag}
+            </span>
+          ))}
+        </div>
+        <button className="close-post-button" onClick={handleCloseClick}>
+          <X size={24} />
+        </button>
       </div>
 
       {/* 메인 컨텐츠 */}
@@ -430,7 +457,7 @@ const BoardLookupRead = () => {
           onClick={handleLikeToggle}
         >
           <img
-            src={isLiked ? "/hart.png" : "/binhart.png"}
+            src={isLiked ? heartIcon : binheartIcon}
             alt="좋아요"
             className="icon-image"
           />
@@ -440,15 +467,15 @@ const BoardLookupRead = () => {
           className="sidebar-icon comment-icon"
           onClick={handleCommentToggle}
         >
-          <img src="/comment.png" alt="댓글" className="icon-image" />
+          <img src={commentIcon} alt="댓글" className="icon-image" />
         </div>
 
         <div className="sidebar-icon cart-icon" onClick={handleAddToCart}>
-          <img src="/cartIcon.png" alt="장바구니" className="icon-image" />
+          <img src={cartIcon} alt="장바구니" className="icon-image" />
         </div>
 
         <div className="sidebar-icon ai-icon" onClick={handleAISummaryToggle}>
-          <img src="/summary_AI.svg" alt="AI 요약" className="icon-image" />
+          <img src={summaryAIIcon} alt="AI 요약" className="icon-image" />
         </div>
       </div>
 
