@@ -21,4 +21,7 @@ public class BoardLookupPostDto {
     private Date createdAt;
     private String aiSummary;
     private int downloadCnt;
+    private List<String> pdfImages;
+    
+
 }
