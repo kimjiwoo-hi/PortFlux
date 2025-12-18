@@ -2,6 +2,8 @@ package com.portflux.backend.service;
 
 import com.portflux.backend.beans.BoardLookupPostDto;
 import com.portflux.backend.mapper.BoardLookupMapper;
+import com.portflux.backend.mapper.UserMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,4 +90,20 @@ public class BoardLookupService {
         }
         boardLookupMapper.deletePost(postId);
     }
+
+
+   @Autowired
+private UserMapper userMapper;
+
+public void createPost(BoardLookupPostDto postDto, String userId) {
+    Integer userNum = userMapper.findUserNumByUserId(userId);
+
+    if (userNum == null) {
+        throw new RuntimeException("존재하지 않는 사용자입니다.");
+    }
+
+    postDto.setUserNum(userNum);
+    boardLookupMapper.insertPost(postDto);
+}
+
 }
