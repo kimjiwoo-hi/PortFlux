@@ -38,7 +38,6 @@ dependencies {
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 	implementation 'com.corundumstudio.socketio:netty-socketio:2.0.3'
     implementation 'org.springframework.boot:spring-boot-starter-security'// 로그인, 암호화 기능
- 	implementation "com.corundumstudio.socketio:netty-socketio:2.0.13"
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -54,9 +53,8 @@ dependencies {
 
 	implementation 'org.apache.pdfbox:pdfbox:2.0.30'
 
-	
+	implementation 'com.corundumstudio.socketio:netty-socketio:2.0.3'
 
-	
 }
 
 dependencyManagement {
