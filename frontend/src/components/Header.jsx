@@ -15,10 +15,10 @@ const Header = () => {
 
   // [추가] 로그인 상태를 useMemo로 계산 (localStorage/sessionStorage 읽기)
   const isLoggedIn = useMemo(() => {
-    const localLogin = localStorage.getItem("isLoggedIn");
-    const sessionLogin = sessionStorage.getItem("isLoggedIn");
-    return localLogin === "true" || sessionLogin === "true";
-  }, []);
+    const localUser = localStorage.getItem("user");
+    const sessionUser = sessionStorage.getItem("user");
+    return !!localUser || !!sessionUser;
+  }, [location.pathname]); // Re-check on path change
 
   // [추가] 페이지 이동 시 팝오버 닫기
   useEffect(() => {
@@ -44,18 +44,15 @@ const Header = () => {
 
   const handleLogout = () => {
     // 로컬 스토리지 삭제
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("userId");
-
+    localStorage.removeItem("user");
     // 세션 스토리지 삭제
-    sessionStorage.removeItem("isLoggedIn");
-    sessionStorage.removeItem("userId");
+    sessionStorage.removeItem("user");
 
     setIsPopoverOpen(false);
 
     // 홈으로 이동 후 페이지 새로고침
     navigate("/");
-    window.location.reload();
+    window.location.reload(); // 상태 업데이트를 위해 페이지 새로고침
   };
 
   // ... (ESC 키, 외부 클릭 닫기 로직은 기존과 동일) ...
