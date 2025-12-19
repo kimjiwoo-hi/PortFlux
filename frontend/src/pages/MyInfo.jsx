@@ -35,16 +35,17 @@ const MyInfo = () => {
 
   const fetchUserInfo = async () => {
     try {
-      // localStorage 또는 sessionStorage에서 userId 가져오기
-      const userId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
+      // localStorage 또는 sessionStorage에서 user 객체 가져오기
+      const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
 
-      if (!userId) {
+      if (!storedUser) {
         setError("로그인 정보를 찾을 수 없습니다.");
         setLoading(false);
         return;
       }
 
-      const response = await axios.get(`http://localhost:8080/user/info/${userId}`);
+      const user = JSON.parse(storedUser);
+      const response = await axios.get(`http://localhost:8080/user/info/${user.userId}`);
       setUserInfo(response.data);
       setEditedInfo(response.data);
       setLoading(false);

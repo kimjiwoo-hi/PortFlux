@@ -73,6 +73,10 @@ function LoginPage() {
         } else {
           // 기존 회원: 로그인 성공
           console.log("구글 로그인 성공:", json);
+          
+          // ▼▼▼ [추가] 로그인 성공 상태 저장 (Header 감지용) ▼▼▼
+          localStorage.setItem("user", JSON.stringify(json));
+          // ▲▲▲ 추가 끝 ▲▲▲
 
           // 원래 있던 페이지로 이동
           const targetPath = getPreviousPage();
@@ -110,6 +114,11 @@ function LoginPage() {
         setLoginError("");
         const json = await res.json();
         console.log("로그인 성공:", json);
+        
+        // ▼▼▼ [수정] 로그인 유지 체크 여부에 따라 저장소 분기 ▼▼▼
+        const storage = autoLogin ? localStorage : sessionStorage;
+        storage.setItem("user", JSON.stringify(json));
+        // ▲▲▲ 수정 끝 ▲▲▲
 
         // 로그인 성공 시 이전 페이지로 이동
         // 일반 로그인은 페이지 새로고침이 없었으므로 location.state가 살아있음
