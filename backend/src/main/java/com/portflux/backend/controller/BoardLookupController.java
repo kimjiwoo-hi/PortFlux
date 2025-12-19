@@ -3,10 +3,9 @@ package com.portflux.backend.controller;
 import com.portflux.backend.beans.BoardLookupPostDto;
 import com.portflux.backend.beans.CommentDto;
 import com.portflux.backend.service.BoardLookupService;
+import com.portflux.backend.service.LikeService;  // ✅ 수정: 별도 클래스로
 import com.portflux.backend.service.CommentService;
-import com.portflux.backend.service.PdfImageService; // ✅ [추가 1] import
-
-import jakarta.persistence.criteria.CriteriaBuilder.In;
+import com.portflux.backend.service.PdfImageService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,14 +18,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
-import com.portflux.backend.service.CartService;
-
 
 @RestController
 @RequestMapping("/api/boardlookup")
@@ -35,9 +31,8 @@ public class BoardLookupController {
 
     private final BoardLookupService boardLookupService;
     private final CommentService commentService;
-
-    // ✅ [추가 2] PDF → 이미지 변환 서비스
     private final PdfImageService pdfImageService;
+    private final LikeService likeService;  // ✅ 추가
 
     @Value("${file.upload-dir:uploads}")
     private String uploadDir;
@@ -46,11 +41,13 @@ public class BoardLookupController {
     public BoardLookupController(
             BoardLookupService boardLookupService,
             CommentService commentService,
-            PdfImageService pdfImageService   // ✅ [추가 3] 생성자 주입
+            PdfImageService pdfImageService,
+            LikeService likeService
     ) {
         this.boardLookupService = boardLookupService;
         this.commentService = commentService;
-        this.pdfImageService = pdfImageService; // ✅ [추가]
+        this.pdfImageService = pdfImageService;
+        this.likeService = likeService;
     }
 
     /**
@@ -65,7 +62,7 @@ public class BoardLookupController {
                 return ResponseEntity.notFound().build();
             }
 
-            // ✅ [추가 4] PDF 이미지 목록을 post 객체에 세팅
+            // PDF 이미지 목록 세팅
             Path imageDir = Paths.get(uploadDir, "pdf", "post_" + postId);
             if (Files.exists(imageDir)) {
                 List<String> images = Files.list(imageDir)
@@ -85,6 +82,7 @@ public class BoardLookupController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -100,6 +98,7 @@ public class BoardLookupController {
         try {
             int userNum = Integer.parseInt(request.get("userNum"));
             String content = request.get("content");
+            // TODO: 댓글 저장 로직
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
@@ -125,11 +124,10 @@ public class BoardLookupController {
     @PostMapping("/posts")
     public ResponseEntity<Map<String, Object>> createPost(
             @ModelAttribute BoardLookupPostDto postDto,
-            @RequestParam(value = "file", required = false) MultipartFile file,
-            @RequestParam("userNum") Integer userNum
-        ) {
-            try {
-                // 1. 파일 유효성 검사 및 저장
+            @RequestParam(value = "file", required = false) MultipartFile file
+    ) {
+        try {
+            // 1. 파일 유효성 검사 및 저장
             if (file != null && !file.isEmpty()) {
                 String originalFilename = file.getOriginalFilename();
                 if (originalFilename == null || !isValidFileExtension(originalFilename)) {
@@ -139,7 +137,6 @@ public class BoardLookupController {
                 }
                 String fileName = saveFile(file);
                 postDto.setPostFile(fileName);
-                
             } else {
                 return ResponseEntity.badRequest().body(Map.of("message", "파일이 없습니다."));
             }
@@ -148,21 +145,20 @@ public class BoardLookupController {
             postDto.setAiSummary("AI 요약 대기 중...");
             postDto.setDownloadCnt(0);
             postDto.setViewCnt(0);
-            
-            
 
             // 3. DB 저장 (postId 생성)
             boardLookupService.createPost(postDto);
 
             System.out.println("=== PDF 변환 시작 ===");
-        System.out.println("PostId: " + postDto.getPostId());
-        System.out.println("File: " + file.getOriginalFilename());
+            System.out.println("PostId: " + postDto.getPostId());
+            System.out.println("File: " + file.getOriginalFilename());
 
-            // ✅ [추가 5] PDF → 이미지 변환 (기존 로직 삭제 없음)
-            List<String> pdfImages =
-                    pdfImageService.convertPdfToImages(file, postDto.getPostId());
-
+            // 4. PDF → 이미지 변환
+            List<String> pdfImages = pdfImageService.convertPdfToImages(file, postDto.getPostId());
             postDto.setPdfImages(pdfImages);
+
+            System.out.println("=== PDF 변환 완료 ===");
+            System.out.println("이미지 개수: " + pdfImages.size());
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
@@ -176,32 +172,6 @@ public class BoardLookupController {
                     Map.of("success", false, "message", e.getMessage())
             );
         }
-    }
-
-    // ======== 아래는 네 원본 코드 그대로 ========
-
-    private boolean isValidFileExtension(String filename) {
-        String lowerCaseFilename = filename.toLowerCase();
-        return lowerCaseFilename.endsWith(".pdf");
-    }
-
-    private String saveFile(MultipartFile file) throws IOException {
-        File uploadDirectory = new File(uploadDir);
-        if (!uploadDirectory.exists()) {
-            uploadDirectory.mkdirs();
-        }
-
-        String originalFilename = file.getOriginalFilename();
-        String extension = "";
-        if (originalFilename != null && originalFilename.contains(".")) {
-            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-        }
-
-        String uniqueFilename = UUID.randomUUID() + extension;
-        Path filePath = Paths.get(uploadDir, uniqueFilename);
-        Files.write(filePath, file.getBytes());
-
-        return uniqueFilename;
     }
 
     /**
@@ -256,12 +226,60 @@ public class BoardLookupController {
         }
     }
 
+    /**
+     * 좋아요 API
+     */
+    @PostMapping("/{postId}/like")
+    public ResponseEntity<Map<String, Object>> likePost(@PathVariable int postId) {
+        try {
+            int updatedLikeCnt = likeService.increaseLike(postId);
+            return ResponseEntity.ok(Map.of("success", true, "likeCnt", updatedLikeCnt));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(
+                    Map.of("success", false, "message", e.getMessage())
+            );
+        }
+    }
+
+    /**
+     * 장바구니 추가 API (TODO)
+     */
     @PostMapping("/cart")
-public ResponseEntity<?> addToCart(
-     //   @AuthenticationPrincipal UserPrincipal user,
-     //   @RequestBody CartRequest request
-) {
-    //cartService.addToCart(user.getId(), request.getPostId());
-    return ResponseEntity.ok().build();
-}
+    public ResponseEntity<Map<String, Object>> addToCart(@RequestBody Map<String, Integer> request) {
+        try {
+            // TODO: 장바구니 로직 구현
+            return ResponseEntity.ok(Map.of("success", true, "message", "장바구니에 추가되었습니다."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("success", false, "message", e.getMessage())
+            );
+        }
+    }
+
+    // ======== Private Methods ========
+
+    private boolean isValidFileExtension(String filename) {
+        String lowerCaseFilename = filename.toLowerCase();
+        return lowerCaseFilename.endsWith(".pdf");
+    }
+
+    private String saveFile(MultipartFile file) throws IOException {
+        File uploadDirectory = new File(uploadDir);
+        if (!uploadDirectory.exists()) {
+            uploadDirectory.mkdirs();
+        }
+
+        String originalFilename = file.getOriginalFilename();
+        String extension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+
+        String uniqueFilename = UUID.randomUUID() + extension;
+        Path filePath = Paths.get(uploadDir, uniqueFilename);
+        Files.write(filePath, file.getBytes());
+
+        return uniqueFilename;
+    }
 }
