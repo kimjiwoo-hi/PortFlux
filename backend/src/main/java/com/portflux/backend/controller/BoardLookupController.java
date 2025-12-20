@@ -3,7 +3,7 @@ package com.portflux.backend.controller;
 import com.portflux.backend.beans.BoardLookupPostDto;
 import com.portflux.backend.beans.CommentDto;
 import com.portflux.backend.service.BoardLookupService;
-import com.portflux.backend.service.LikeService;  // ✅ 수정: 별도 클래스로
+import com.portflux.backend.service.LikeService;  // ✅ 추가
 import com.portflux.backend.service.CommentService;
 import com.portflux.backend.service.PdfImageService;
 
@@ -42,12 +42,12 @@ public class BoardLookupController {
             BoardLookupService boardLookupService,
             CommentService commentService,
             PdfImageService pdfImageService,
-            LikeService likeService
+            LikeService likeService  // ✅ 추가
     ) {
         this.boardLookupService = boardLookupService;
         this.commentService = commentService;
         this.pdfImageService = pdfImageService;
-        this.likeService = likeService;
+        this.likeService = likeService;  // ✅ 추가
     }
 
     /**
@@ -98,10 +98,32 @@ public class BoardLookupController {
         try {
             int userNum = Integer.parseInt(request.get("userNum"));
             String content = request.get("content");
-            // TODO: 댓글 저장 로직
-            return ResponseEntity.ok().build();
+            CommentDto newComment = commentService.addComment(postId, userNum, content);
+            return ResponseEntity.ok(newComment);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * 댓글 삭제 API
+     */
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<Map<String, Object>> deleteComment(
+            @PathVariable int commentId,
+            @RequestParam Long userNum
+    ) {
+        try {
+            commentService.deleteComment(commentId, userNum);
+            return ResponseEntity.ok(Map.of("success", true, "message", "댓글이 삭제되었습니다."));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(404).body(Map.of("success", false, "message", e.getMessage()));
+        } catch (IllegalAccessException e) {
+            return ResponseEntity.status(403).body(Map.of("success", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "알 수 없는 오류가 발생했습니다."));
         }
     }
 
@@ -227,32 +249,48 @@ public class BoardLookupController {
     }
 
     /**
-     * 좋아요 API
+     * 좋아요 토글 API
      */
     @PostMapping("/{postId}/like")
-    public ResponseEntity<Map<String, Object>> likePost(@PathVariable int postId) {
+    public ResponseEntity<Map<String, Object>> toggleLike(
+            @PathVariable int postId,
+            @RequestParam int userNum  // TODO: 실제로는 세션에서 가져오기
+    ) {
         try {
-            int updatedLikeCnt = likeService.increaseLike(postId);
-            return ResponseEntity.ok(Map.of("success", true, "likeCnt", updatedLikeCnt));
+            Map<String, Object> result = likeService.toggleLike(userNum, postId);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "isLiked", result.get("isLiked"),
+                "totalLikes", result.get("totalLikes")
+            ));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().body(
-                    Map.of("success", false, "message", e.getMessage())
+                Map.of("success", false, "message", e.getMessage())
             );
         }
     }
 
     /**
-     * 장바구니 추가 API (TODO)
+     * 좋아요 상태 확인 API
      */
-    @PostMapping("/cart")
-    public ResponseEntity<Map<String, Object>> addToCart(@RequestBody Map<String, Integer> request) {
+    @GetMapping("/{postId}/like/check")
+    public ResponseEntity<Map<String, Object>> checkLikeStatus(
+            @PathVariable int postId,
+            @RequestParam int userNum
+    ) {
         try {
-            // TODO: 장바구니 로직 구현
-            return ResponseEntity.ok(Map.of("success", true, "message", "장바구니에 추가되었습니다."));
+            boolean isLiked = likeService.isLiked(userNum, postId);
+            int totalLikes = likeService.getLikeCount(postId);
+            
+            return ResponseEntity.ok(Map.of(
+                "isLiked", isLiked,
+                "totalLikes", totalLikes
+            ));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(
-                    Map.of("success", false, "message", e.getMessage())
+                Map.of("success", false, "message", e.getMessage())
             );
         }
     }

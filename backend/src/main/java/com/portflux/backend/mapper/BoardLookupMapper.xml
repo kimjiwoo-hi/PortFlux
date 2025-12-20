@@ -104,18 +104,4 @@
         ORDER BY created_at DESC
     </select>
 
-    <select id="getCartItems" resultType="CartItemDto">
-    SELECT
-        c.cart_id     AS cartId,
-        p.post_id     AS postId,
-        p.title,
-        p.price,
-        p.post_file   AS postFile,
-        p.ai_summary  AS aiSummary,
-        c.created_at  AS createdAt
-    FROM CART c
-    JOIN POST p ON c.post_id = p.post_id
-    WHERE c.user_num = #{userNum}
-    ORDER BY c.created_at DESC
-</select>
 </mapper>
