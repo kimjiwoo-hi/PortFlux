@@ -263,11 +263,23 @@
   position: relative; /* This is crucial for absolute positioning of the child button */
 }
 
-.cart-hover-button {
+.hover-actions-container {
   position: absolute;
   top: 1rem;
   left: 1rem;
   z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.board-item:hover .hover-actions-container {
+  opacity: 1;
+}
+
+.cart-hover-button {
   background-color: rgba(255, 255, 255, 0.9);
   border: none;
   border-radius: 50%;
@@ -279,11 +291,7 @@
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   transition: all 0.2s ease;
-  opacity: 0; /* Initially hidden */
-}
-
-.board-item:hover .cart-hover-button {
-  opacity: 1; /* Show on hover */
+  /* position: absolute; is REMOVED from here */
 }
 
 .cart-hover-button:hover {
@@ -294,5 +302,15 @@
 .cart-hover-button img {
   width: 20px;
   height: 20px;
+}
+
+.post-price-on-hover {
+  background-color: rgba(255, 255, 255, 0.9); /* White background */
+  color: #191919; /* Black text */
+  padding: 0.4rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
