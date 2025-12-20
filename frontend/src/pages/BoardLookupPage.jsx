@@ -220,9 +220,12 @@ function BoardLookupPage() {
               onMouseLeave={() => setHoveredPostId(null)}
             >
               {hoveredPostId === post.id && (
-                <button className="cart-hover-button" onClick={(e) => handleAddToCart(e, post)}>
-                  <img src={cartIcon} alt="Add to cart" />
-                </button>
+                <div className="hover-actions-container">
+                  <span className="post-price-on-hover">{post.price.toLocaleString()}₩</span>
+                  <button className="cart-hover-button" onClick={(e) => handleAddToCart(e, post)}>
+                    <img src={cartIcon} alt="Add to cart" />
+                  </button>
+                </div>
               )}
               <img
                 src={post.imageUrl}
