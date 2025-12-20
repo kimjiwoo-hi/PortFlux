@@ -259,3 +259,40 @@
   font-weight: 200;
   line-height: 1;
 }
+.board-item {
+  position: relative; /* This is crucial for absolute positioning of the child button */
+}
+
+.cart-hover-button {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 10;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: all 0.2s ease;
+  opacity: 0; /* Initially hidden */
+}
+
+.board-item:hover .cart-hover-button {
+  opacity: 1; /* Show on hover */
+}
+
+.cart-hover-button:hover {
+  transform: scale(1.1);
+  background-color: white;
+}
+
+.cart-hover-button img {
+  width: 20px;
+  height: 20px;
+}
+
