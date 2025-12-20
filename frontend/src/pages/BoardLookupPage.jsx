@@ -1,5 +1,5 @@
-import "./BoardLookupPage.css";
 import SearchIcon from '../assets/search.png';
+import cartIcon from '../assets/cartIcon.png';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { tagData, tagSearchMap } from '../database/taglist';
@@ -10,6 +10,7 @@ function BoardLookupPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [hoveredPostId, setHoveredPostId] = useState(null);
   const [isLoggedIn, /*setIsLoggedIn*/] = useState(true); 
   const navigate = useNavigate();
 
@@ -42,6 +43,7 @@ function BoardLookupPage() {
             title: post.title,
             author: post.userNickname,
             imageUrl: imageUrl,
+            price: post.price, // Add price
             likes: 0, // TODO: 좋아요 기능 추가 시 구현
             views: post.viewCnt,
             isLiked: false,
@@ -99,6 +101,39 @@ function BoardLookupPage() {
 
   const handleAddPostClick = () => {
     navigate('/board/write');
+  };
+
+  const handleAddToCart = async (e, post) => {
+    e.stopPropagation(); // 부모의 onClick 이벤트 전파를 막음
+    
+    const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+    if (!storedUser) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+    const loggedInUser = JSON.parse(storedUser);
+    const userId = loggedInUser.userNum;
+
+    try {
+      await axios.post(
+        `http://localhost:8080/api/cart/${userId}/items`,
+        {
+          productId: post.id,
+          productName: post.title,
+          unitPrice: post.price,
+          qty: 1,
+        },
+        { withCredentials: true }
+      );
+      alert("장바구니에 담겼습니다.");
+    } catch (err) {
+      if (err.response?.status === 409) {
+        alert("이미 장바구니에 담긴 항목입니다.");
+      } else {
+        console.error("장바구니 추가 실패:", err);
+        alert("장바구니 추가에 실패했습니다.");
+      }
+    }
   };
 
   // 게시글 클릭 핸들러
@@ -181,7 +216,14 @@ function BoardLookupPage() {
               key={post.id} 
               className="board-item"
               onClick={() => handlePostClick(post.id)}
+              onMouseEnter={() => setHoveredPostId(post.id)}
+              onMouseLeave={() => setHoveredPostId(null)}
             >
+              {hoveredPostId === post.id && (
+                <button className="cart-hover-button" onClick={(e) => handleAddToCart(e, post)}>
+                  <img src={cartIcon} alt="Add to cart" />
+                </button>
+              )}
               <img
                 src={post.imageUrl}
                 alt={post.title}
