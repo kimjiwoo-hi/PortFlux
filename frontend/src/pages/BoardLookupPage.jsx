@@ -1,3 +1,4 @@
+import './BoardLookupPage.css';
 import SearchIcon from '../assets/search.png';
 import cartIcon from '../assets/cartIcon.png';
 import { useState, useEffect } from 'react';
@@ -7,7 +8,7 @@ import axios from 'axios';
 
 function BoardLookupPage() {
   const [selectedTags, setSelectedTags] = useState({});
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hoveredPostId, setHoveredPostId] = useState(null);
@@ -19,30 +20,24 @@ function BoardLookupPage() {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(
-          "http://localhost:8080/api/boardlookup/posts",
-          {
-            withCredentials: true,
-          }
-        );
-
+        const response = await axios.get('http://localhost:8080/api/boardlookup/posts', {
+          withCredentials: true
+        });
+        
         // API 응답 데이터를 프론트엔드 형식으로 변환
-        const transformedPosts = response.data.map((post) => {
+        const transformedPosts = response.data.map(post => {
           // 태그 파싱
           let tagsArray = [];
           try {
-            tagsArray =
-              typeof post.tags === "string"
-                ? JSON.parse(post.tags)
-                : post.tags || [];
+            tagsArray = typeof post.tags === 'string' ? JSON.parse(post.tags) : post.tags || [];
           } catch (e) {
-            console.error("태그 파싱 실패:", e);
+            console.error('태그 파싱 실패:', e);
           }
 
           // 이미지 URL 생성 (postFile을 썸네일로 사용)
-          const imageUrl = post.postFile
+          const imageUrl = post.postFile 
             ? `http://localhost:8080/uploads/${post.postFile}`
-            : "https://cdn.dribbble.com/userupload/12461999/file/original-251950a7c4585c49086113b190f7f224.png?resize=1024x768";
+            : 'https://cdn.dribbble.com/userupload/12461999/file/original-251950a7c4585c49086113b190f7f224.png?resize=1024x768';
 
           return {
             id: post.postId,
@@ -53,14 +48,14 @@ function BoardLookupPage() {
             likes: 0, // TODO: 좋아요 기능 추가 시 구현
             views: post.viewCnt,
             isLiked: false,
-            tags: tagsArray,
+            tags: tagsArray
           };
         });
 
         setPosts(transformedPosts);
         setLoading(false);
       } catch (err) {
-        console.error("게시글 로드 실패:", err);
+        console.error('게시글 로드 실패:', err);
         setLoading(false);
       }
     };
@@ -73,16 +68,14 @@ function BoardLookupPage() {
     ? tagData
     : Object.keys(tagData).reduce((acc, category) => {
         const tags = tagData[category];
-        const matchingTags = tags.filter((tag) => {
+        const matchingTags = tags.filter(tag => {
           const lowerCaseTag = tag.toLowerCase();
           if (lowerCaseTag.includes(lowerCaseQuery)) {
             return true;
           }
           const searchKeywords = tagSearchMap[lowerCaseTag];
           if (searchKeywords) {
-            return searchKeywords.some((keyword) =>
-              keyword.includes(lowerCaseQuery)
-            );
+            return searchKeywords.some(keyword => keyword.includes(lowerCaseQuery));
           }
           return false;
         });
@@ -93,7 +86,7 @@ function BoardLookupPage() {
       }, {});
 
   const handleTagChange = (category, tag) => {
-    setSelectedTags((prev) => {
+    setSelectedTags(prev => {
       const newCategoryTags = new Set(prev[category] || []);
       if (newCategoryTags.has(tag)) {
         newCategoryTags.delete(tag);
@@ -108,7 +101,7 @@ function BoardLookupPage() {
   };
 
   const handleAddPostClick = () => {
-    navigate("/board/write");
+    navigate('/board/write');
   };
 
   const handleAddToCart = async (e, post) => {
@@ -150,29 +143,22 @@ function BoardLookupPage() {
   };
 
   // 선택된 태그로 필터링
-  const filteredPosts = posts.filter((post) => {
+  const filteredPosts = posts.filter(post => {
     const selectedTagsList = Object.values(selectedTags).flat();
     if (selectedTagsList.length === 0) return true;
-
-    return selectedTagsList.some((tag) => post.tags.includes(tag));
+    
+    return selectedTagsList.some(tag => post.tags.includes(tag));
   });
 
   let postsToRender = [...filteredPosts];
   if (isLoggedIn) {
-    postsToRender.unshift({ id: "add-new-post", type: "add-new" });
+    postsToRender.unshift({ id: 'add-new-post', type: 'add-new' });
   }
 
   if (loading) {
     return (
       <div className="board-lookup-page">
-        <div
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-          }}
-        >
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
           <p>게시글을 불러오는 중...</p>
         </div>
       </div>
@@ -199,7 +185,7 @@ function BoardLookupPage() {
             <div key={category} className="tag-category">
               <h3 className="tag-category-title">{category}</h3>
               <div className="tag-list">
-                {tags.map((tag) => (
+                {tags.map(tag => (
                   <label key={tag} className="tag-item">
                     <input
                       type="checkbox"
@@ -217,8 +203,8 @@ function BoardLookupPage() {
       </div>
 
       <main className="board-grid">
-        {postsToRender.map((post) =>
-          post.type === "add-new" ? (
+        {postsToRender.map(post =>
+          post.type === 'add-new' ? (
             <div
               key={post.id}
               className="board-item add-new-item"
@@ -227,8 +213,8 @@ function BoardLookupPage() {
               <div className="add-new-plus">+</div>
             </div>
           ) : (
-            <div
-              key={post.id}
+            <div 
+              key={post.id} 
               className="board-item"
               onClick={() => handlePostClick(post.id)}
               onMouseEnter={() => setHoveredPostId(post.id)}
@@ -249,8 +235,8 @@ function BoardLookupPage() {
               />
               <div className="board-item-info">
                 <h4 className="info-title">{post.title}</h4>
-                <a
-                  href={`/profile/${post.author}`}
+                <a 
+                  href={`/profile/${post.author}`} 
                   className="info-author"
                   onClick={(e) => e.stopPropagation()}
                 >
