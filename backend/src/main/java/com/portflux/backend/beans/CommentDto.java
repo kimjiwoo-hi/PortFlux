@@ -9,6 +9,7 @@ import java.util.Date;
 @Setter
 public class CommentDto {
     private int commentId;
+    private int postId;
     private int userNum;
     private String userNickname;
     private byte[] userImage;
