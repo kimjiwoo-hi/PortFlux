@@ -29,7 +29,7 @@ const BoardLookupRead = () => {
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const lastScrollY = useRef(0);
 
-  // 게시글 데이터 로드 (수정)
+  // 게시글 데이터 로드
   useEffect(() => {
     const fetchPostData = async () => {
       try {
@@ -46,13 +46,13 @@ const BoardLookupRead = () => {
           const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
           if (storedUser) {
             const loggedInUser = JSON.parse(storedUser);
-            setLoggedInUser(loggedInUser); // 로그인한 사용자 정보 상태에 저장
+            setLoggedInUser(loggedInUser);
             
-            // ✅ 초기 좋아요 상태 확인
+            // 초기 좋아요 상태 확인
             const likeCheckResponse = await axios.get(
               `http://localhost:8080/api/boardlookup/${postId}/like/check`,
               {
-                params: { userNum: loggedInUser.userNum }, // 실제 로그인 유저 번호 사용
+                params: { userNum: loggedInUser.userNum },
                 withCredentials: true,
               }
             );
@@ -72,7 +72,7 @@ const BoardLookupRead = () => {
     if (postId) fetchPostData();
   }, [postId]);
 
-  // 스크롤 이벤트 - 헤더/사이드바 표시
+  // 스크롤 이벤트
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -89,7 +89,7 @@ const BoardLookupRead = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 좋아요 토글 (수정)
+  // 좋아요 토글
   const handleLikeToggle = async () => {
     const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
     if (!storedUser) {
@@ -103,7 +103,7 @@ const BoardLookupRead = () => {
         `http://localhost:8080/api/boardlookup/${postId}/like`,
         null,
         {
-          params: { userNum: loggedInUser.userNum }, // 실제 로그인 유저 번호 사용
+          params: { userNum: loggedInUser.userNum },
           withCredentials: true,
         }
       );
@@ -162,19 +162,17 @@ const BoardLookupRead = () => {
     const loggedInUser = JSON.parse(storedUser);
 
     try {
-      // 1. 댓글을 서버에 등록
       await axios.post(
         `http://localhost:8080/api/boardlookup/${postId}/comments`,
         { userNum: loggedInUser.userNum, content: newComment },
         { withCredentials: true }
       );
       
-      // 2. 댓글 목록을 다시 불러와서 화면을 갱신
       const updatedResponse = await axios.get(
         `http://localhost:8080/api/boardlookup/${postId}`
       );
       setComments(updatedResponse.data.comments || []);
-      setNewComment(""); // 입력창 비우기
+      setNewComment("");
     } catch (err) {
       console.error("댓글 작성 실패:", err);
       alert("댓글 작성에 실패했습니다.");
@@ -192,7 +190,6 @@ const BoardLookupRead = () => {
             withCredentials: true,
           }
         );
-        // UI에서 즉시 댓글 제거
         setComments(prevComments => prevComments.filter(comment => comment.commentId !== commentId));
       } catch (err) {
         console.error("댓글 삭제 실패:", err);
@@ -213,9 +210,11 @@ const BoardLookupRead = () => {
     setShowComments(false);
     setShowAISummary(false);
   };
+  
   const handleBackgroundClick = (e) => {
     if (e.target === e.currentTarget) navigate("/");
   };
+  
   const handleCloseClick = () => navigate("/");
 
   if (loading)
@@ -531,22 +530,21 @@ const BoardLookupRead = () => {
       <div className={`ai-summary-popup ${showAISummary ? "active" : ""}`}>
         <div className="ai-summary-header">
           <h3>
-            <span>🤖</span> AI 요약
+            <span>📝</span> 게시물 설명
           </h3>
           <button className="close-btn" onClick={handleAISummaryToggle}>
             ✕
           </button>
         </div>
         <div className="ai-summary-content">
-          {postData.aiSummary ? (
-            <p className="ai-summary-text">{postData.aiSummary}</p>
-          ) : (
-            <p
-              style={{ textAlign: "center", color: "#999", padding: "40px 0" }}
-            >
-              AI 요약이 아직 생성되지 않았습니다.
-            </p>
-          )}
+          <div className="summary-section">
+            <h4 className="summary-section-title">게시물 내용</h4>
+            {postData.content ? (
+              <p className="summary-content-text">{postData.content}</p>
+            ) : (
+              <p className="summary-placeholder-text">작성된 내용이 없습니다.</p>
+            )}
+          </div>
         </div>
       </div>
     </div>

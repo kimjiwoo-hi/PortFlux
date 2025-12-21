@@ -163,8 +163,8 @@ public class BoardLookupController {
                 return ResponseEntity.badRequest().body(Map.of("message", "파일이 없습니다."));
             }
 
-            // 2. 초기값 설정
-            postDto.setAiSummary("AI 요약 대기 중...");
+            // 2. 초기값 설정 (aiSummary는 content에 통합되었으므로 제거)
+            // postDto.setAiSummary("AI 요약 대기 중...");
             postDto.setDownloadCnt(0);
             postDto.setViewCnt(0);
 

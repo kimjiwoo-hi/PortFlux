@@ -957,3 +957,38 @@
   color: #1f2937;
 }
 
+
+.summary-section {
+  margin-bottom: 25px;
+  padding-bottom: 25px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.summary-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.summary-section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #191919;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.summary-content-text {
+  color: #333;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  white-space: pre-wrap; /* Preserve whitespace and line breaks */
+  text-align: left;
+}
+
+.summary-placeholder-text {
+  text-align: center;
+  color: #999;
+  padding: 20px 0;
+}
+
