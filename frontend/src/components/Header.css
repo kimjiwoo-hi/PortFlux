@@ -42,7 +42,7 @@
   left: 0;
   width: 100%;
   height: 2px; /* Same height as the header border */
-  background-color: #2855cf; /* Blue color */
+  background-color: #3b5bdb; /* Blue color */
   transform: scaleX(0);
   transform-origin: center;
   transition: transform 0.3s ease-out;
@@ -66,19 +66,20 @@
   height: 46px;
   padding: 0px 20px;
   font-size: 15px;
-  background-color: #2855cf;
-  border: solid 2px #2855cf;
+  background-color: #3b5bdb;
+  border: solid 2px #3b5bdb;
   border-radius: 10px;
 }
 
 .user .join {
-  color: #2855cf;
+  color: #3b5bdb;
   width: auto;
   height: 46px;
   padding: 0px 20px;
   font-size: 15px;
-  border: solid 2px #2855cf;
+  border: solid 2px #3b5bdb;
   border-radius: 10px;
+  background-color: #ffffff;
 }
 
 button:hover {
