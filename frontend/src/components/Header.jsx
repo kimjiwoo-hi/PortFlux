@@ -3,7 +3,7 @@ import "./Header.css";
 import PortFluxLogo from "../assets/PortFlux.png";
 import { Link, useLocation, useNavigate } from "react-router-dom"; // useNavigate 추가
 import UserProfilePopover from "./UserProfilePopover";
-import UserDefaultIcon from "../assets/user_default_icon.png"
+import UserDefaultIcon from "../assets/user_default_icon.png";
 
 const Header = () => {
   const location = useLocation();
@@ -15,10 +15,10 @@ const Header = () => {
 
   // [추가] 로그인 상태를 useMemo로 계산 (localStorage/sessionStorage 읽기)
   const isLoggedIn = useMemo(() => {
-    const localLogin = localStorage.getItem("isLoggedIn");
-    const sessionLogin = sessionStorage.getItem("isLoggedIn");
-    return localLogin === "true" || sessionLogin === "true";
-  }, []);
+    const localUser = localStorage.getItem("user");
+    const sessionUser = sessionStorage.getItem("user");
+    return !!localUser || !!sessionUser;
+  }, [location.pathname]); // Re-check on path change
 
   // [추가] 페이지 이동 시 팝오버 닫기
   useEffect(() => {
@@ -44,33 +44,35 @@ const Header = () => {
 
   const handleLogout = () => {
     // 로컬 스토리지 삭제
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("userId");
-
+    localStorage.removeItem("user");
     // 세션 스토리지 삭제
-    sessionStorage.removeItem("isLoggedIn");
-    sessionStorage.removeItem("userId");
+    sessionStorage.removeItem("user");
 
     setIsPopoverOpen(false);
 
     // 홈으로 이동 후 페이지 새로고침
     navigate("/");
-    window.location.reload();
+    window.location.reload(); // 상태 업데이트를 위해 페이지 새로고침
   };
 
   // ... (ESC 키, 외부 클릭 닫기 로직은 기존과 동일) ...
   useEffect(() => {
     const handleEsc = (event) => {
-      if (event.key === 'Escape') setIsPopoverOpen(false);
+      if (event.key === "Escape") setIsPopoverOpen(false);
     };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
   }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (profileRef.current && profileRef.current.contains(event.target)) return;
-      if (isPopoverOpen && popoverRef.current && !popoverRef.current.contains(event.target)) {
+      if (profileRef.current && profileRef.current.contains(event.target))
+        return;
+      if (
+        isPopoverOpen &&
+        popoverRef.current &&
+        !popoverRef.current.contains(event.target)
+      ) {
         setIsPopoverOpen(false);
       }
     };
@@ -80,7 +82,10 @@ const Header = () => {
 
   return (
     <>
-      <div className={`overlay ${isPopoverOpen ? 'active' : ''}`} onClick={() => setIsPopoverOpen(false)}></div>
+      <div
+        className={`overlay ${isPopoverOpen ? "active" : ""}`}
+        onClick={() => setIsPopoverOpen(false)}
+      ></div>
       <header className="header">
         <div className="logolink">
           <div className="header-logo">
@@ -89,10 +94,18 @@ const Header = () => {
             </Link>
           </div>
           <div className="link-container">
-            <Link to="/" onClick={handleLinkClick("/")}><div className={getLinkClass("/")}>둘러보기</div></Link>
-            <Link to="/boardjob" onClick={handleLinkClick("/boardjob")}><div className={getLinkClass("/boardjob")}>채용</div></Link>
-            <Link to="/boardfree" onClick={handleLinkClick("/boardfree")}><div className={getLinkClass("/boardfree")}>커뮤니티</div></Link>
-            <Link to="/etc" onClick={handleLinkClick("/etc")}><div className={getLinkClass("/etc")}>기타</div></Link>
+            <Link to="/" onClick={handleLinkClick("/")}>
+              <div className={getLinkClass("/")}>둘러보기</div>
+            </Link>
+            <Link to="/boardjob" onClick={handleLinkClick("/boardjob")}>
+              <div className={getLinkClass("/boardjob")}>채용</div>
+            </Link>
+            <Link to="/boardfree" onClick={handleLinkClick("/boardfree")}>
+              <div className={getLinkClass("/boardfree")}>커뮤니티</div>
+            </Link>
+            <Link to="/etc" onClick={handleLinkClick("/etc")}>
+              <div className={getLinkClass("/etc")}>기타</div>
+            </Link>
           </div>
         </div>
 
@@ -111,16 +124,19 @@ const Header = () => {
           ) : (
             // 2. 로그인이 된 경우: 프로필 아이콘만 표시
             <div className="profile-container" ref={profileRef}>
-              <img 
-                src={UserDefaultIcon} 
-                alt="프로필" 
+              <img
+                src={UserDefaultIcon}
+                alt="프로필"
                 className="profile-pic"
                 onClick={() => setIsPopoverOpen(!isPopoverOpen)}
                 style={{ cursor: "pointer" }} // 마우스 올리면 손가락 모양
               />
               <div ref={popoverRef}>
                 {/* 팝오버에 로그아웃 함수 전달 */}
-                <UserProfilePopover isOpen={isPopoverOpen} onLogout={handleLogout} />
+                <UserProfilePopover
+                  isOpen={isPopoverOpen}
+                  onLogout={handleLogout}
+                />
               </div>
             </div>
           )}

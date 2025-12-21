@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class BoardLookupService {
@@ -20,8 +21,6 @@ public class BoardLookupService {
 
     /**
      * 게시글 상세 조회 + 조회수 증가
-     * @param postId
-     * @return BoardLookupPostDto
      */
     @Transactional
     public BoardLookupPostDto getPostById(int postId) {
@@ -34,7 +33,6 @@ public class BoardLookupService {
 
     /**
      * 전체 게시글 목록 조회
-     * @return List<BoardLookupPostDto>
      */
     public List<BoardLookupPostDto> getAllLookupPosts() {
         return boardLookupMapper.findAllLookupPosts();
@@ -42,11 +40,40 @@ public class BoardLookupService {
 
     /**
      * 게시글 작성
-     * @param post
-     * @return 생성된 게시글 DTO
      */
     public BoardLookupPostDto createPost(BoardLookupPostDto post) {
         boardLookupMapper.insertPost(post);
-        return post; // DTO 객체 자체를 반환
+        return post;
+    }
+
+    /**
+     * 게시글 수정
+     */
+    @Transactional
+    public BoardLookupPostDto updatePost(BoardLookupPostDto postDto, Long userNum) throws IllegalAccessException {
+        BoardLookupPostDto existingPost = boardLookupMapper.findPostById(postDto.getPostId());
+        if (existingPost == null) {
+            throw new NoSuchElementException("게시글을 찾을 수 없습니다.");
+        }
+        if (existingPost.getUserNum() != userNum) {
+            throw new IllegalAccessException("이 게시글을 수정할 권한이 없습니다.");
+        }
+        boardLookupMapper.updatePost(postDto);
+        return boardLookupMapper.findPostById(postDto.getPostId());
+    }
+
+    /**
+     * 게시글 삭제
+     */
+    @Transactional
+    public void deletePost(int postId, Long userNum) throws IllegalAccessException {
+        BoardLookupPostDto post = boardLookupMapper.findPostById(postId);
+        if (post == null) {
+            throw new NoSuchElementException("게시글을 찾을 수 없습니다.");
+        }
+        if (post.getUserNum() != userNum) {
+            throw new IllegalAccessException("이 게시글을 삭제할 권한이 없습니다.");
+        }
+        boardLookupMapper.deletePost(postId);
     }
 }

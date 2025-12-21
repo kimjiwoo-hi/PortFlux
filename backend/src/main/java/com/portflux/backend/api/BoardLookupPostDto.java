@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/mail")
 @RequiredArgsConstructor
 
-public class MailApi {
+public class BoardLookupPostDto {
 
     private final MailService mailService;
 

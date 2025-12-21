@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import "./UserProfilePopover.css";
 import { Link, useLocation } from "react-router-dom";
@@ -14,9 +15,10 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
 
   useEffect(() => {
     if (isOpen) {
-      const userId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
-      if (userId) {
-        fetch(`http://localhost:8080/user/info/${userId}`)
+      const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        fetch(`http://localhost:8080/user/info/${user.userId}`)
           .then(response => response.json())
           .then(data => {
             setUserInfo({

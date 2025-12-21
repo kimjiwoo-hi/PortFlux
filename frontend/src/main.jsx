@@ -19,6 +19,7 @@ import BoardLookup from "./pages/BoardLookupPage.jsx";
 import BoardLookupWrite from "./pages/BoardLookupWritePage.jsx";
 import BoardLookupRead from "./pages/BoardLookupRead.jsx";
 import Cart from "./pages/CartPage.jsx";
+import Chat from "./pages/ChattingPage.jsx";
 import MyPage from "./pages/MyPage.jsx";
 import OrderResultPage from "./pages/OrderResultPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
@@ -76,6 +77,10 @@ const router = createBrowserRouter([
       {
         path: "/cart",
         element: <Cart />,
+      },
+      {
+        path: "/chat",
+        element: <Chat />,
       },
       {
         path: "/mypage",
