@@ -259,3 +259,58 @@
   font-weight: 200;
   line-height: 1;
 }
+.board-item {
+  position: relative; /* This is crucial for absolute positioning of the child button */
+}
+
+.hover-actions-container {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.board-item:hover .hover-actions-container {
+  opacity: 1;
+}
+
+.cart-hover-button {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: all 0.2s ease;
+  /* position: absolute; is REMOVED from here */
+}
+
+.cart-hover-button:hover {
+  transform: scale(1.1);
+  background-color: white;
+}
+
+.cart-hover-button img {
+  width: 20px;
+  height: 20px;
+}
+
+.post-price-on-hover {
+  background-color: rgba(255, 255, 255, 0.9); /* White background */
+  color: #191919; /* Black text */
+  padding: 0.4rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+

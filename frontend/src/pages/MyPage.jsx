@@ -15,28 +15,35 @@ function MyPage() {
         <nav className="sidebar-nav">
           <NavLink
             to="/mypage/myinfo"
-            className={({ isActive }) => isActive || isRootMyPage ? "nav-item active" : "nav-item"}
+            className={({ isActive }) =>
+              isActive || isRootMyPage ? "nav-item active" : "nav-item"
+            }
           >
-            <span className="nav-icon">•</span>
-            내 정보
+            <span className="nav-icon">•</span>내 정보
           </NavLink>
           <NavLink
             to="/mypage/myposts"
-            className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
+            className={({ isActive }) =>
+              isActive ? "nav-item active" : "nav-item"
+            }
           >
             <span className="nav-icon">•</span>
             작성한 게시글
           </NavLink>
           <NavLink
             to="/mypage/mycomments"
-            className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
+            className={({ isActive }) =>
+              isActive ? "nav-item active" : "nav-item"
+            }
           >
             <span className="nav-icon">•</span>
             작성한 댓글
           </NavLink>
           <NavLink
             to="/mypage/savedposts"
-            className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
+            className={({ isActive }) =>
+              isActive ? "nav-item active" : "nav-item"
+            }
           >
             <span className="nav-icon">•</span>
             저장한 게시글

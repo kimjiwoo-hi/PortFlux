@@ -1,46 +1,58 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <title>Socket.IO 예제</title>
-</head>
-<body>
-    <ul id="messages" type="none">
-        <li id="usercount"></li>
-    </ul>
+.chatting-page {
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+  width: 60%;
+  margin: 2rem auto;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+}
 
-    <form id="msgform">
-        <input id="msginput" autocomplete="off" type="text">
-        <button type="submit">전송</button>
-    </form>
+.message-list {
+  flex-grow: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        var socket = io();
-        var msgform = document.getElementById('msgform');
-        // socket.on 함수로 서버에서 전달하는 신호를 수신
-        socket.on('usercount', (count) => {
-            var userCounter = document.getElementById('usercount');
-            userCounter.innerText = "현재 " + count + "명이 서버에 접속해있습니다.";
-        });
+.message {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  max-width: 70%;
+}
 
-        // 메시지 수신시 HTML에 메시지 내용 작성
-        socket.on('message', (msg) => {
-            var messageList = document.getElementById('messages');
-            var messageTag = document.createElement("li");
-            messageTag.innerText = msg;
-            messageList.appendChild(messageTag);
-        });
+.message.sent {
+  background-color: #dcf8c6;
+  align-self: flex-end;
+}
 
-        msgform.onsubmit = (e) => {
-            e.preventDefault();
-            var msginput = document.getElementById('msginput');
+.message.received {
+  background-color: #f1f0f0;
+  align-self: flex-start;
+}
 
-            // socket.emit으로 서버에 신호를 전달
-            socket.emit('message', msginput.value);
+.message-input {
+  display: flex;
+  padding: 1rem;
+  border-top: 1px solid #ccc;
+}
 
-            msginput.value = "";
-        };
-    </script>
-</body>
-</html>
+.message-input input {
+  flex-grow: 1;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.message-input button {
+  margin-left: 1rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}

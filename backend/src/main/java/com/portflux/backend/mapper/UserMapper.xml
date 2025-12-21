@@ -46,4 +46,9 @@
         WHERE user_email = #{email}
     </select>
 
+    <select id="findUserNumByUserId" parameterType="string" resultType="int">
+        SELECT user_num
+            FROM USERS
+        WHERE user_id = #{userId}
+    </select>
 </mapper>

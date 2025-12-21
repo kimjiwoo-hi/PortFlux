@@ -1,39 +1,100 @@
+/* Behance 스타일 - 전체 화면 레이아웃 */
 .board-lookup-read {
-  display: flex;
-  min-height: 100vh;
-  background-color: #1a1a1a;
-  color: #fff;
+  background-color: rgba(255, 255, 255, 0.65) !important;
+  color: #191919;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 1;
 }
 
-/* 메인 컨텐츠 영역 */
+/* PDF 뷰어 - 배경 투명하게 */
+.pdf-viewer {
+  background-color: transparent !important;  /* ← 수정 */
+  margin-top: 80px;
+  min-height: calc(100vh - 80px);
+  padding: 60px 0;
+  width: 100%;
+}
+
+/* PDF 페이지는 흰색 유지 */
+.pdf-page {
+  background-color: #fff;
+  border-radius: 0;
+  box-shadow: 0 1px 3px rgba(255, 255, 255, 0.08);
+  margin: 0 auto 40px;
+  max-width: 1400px;
+  padding: 0;
+  width: 85%;
+}
+
+/* 메인 컨텐츠 - 전체 화면 */
 .main-content {
-  flex: 1;
-  padding: 40px 60px;
-  max-width: 1200px;
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
 }
 
-/* 헤더 영역 */
+/* 상단 헤더 - 스크롤 시 숨김 */
 .post-header {
-  margin-bottom: 30px;
+  background: rgba(255, 255, 255, 0.98);
+  border-bottom: 1px solid #f0f0f0;
+  left: 0;
+  padding: 20px 60px;
+  position: fixed;
+  top: 0;
+  transition: transform 0.3s ease;
+  width: 100%;
+  z-index: 50;
 }
 
+.post-header.hidden {
+  transform: translateY(-100%);
+}
+
+/* 작가 정보 */
 .author-info {
+  align-items: flex-start;
   display: flex;
-  align-items: center;
-  margin-bottom: 15px;
+  justify-content: space-between;
+  position: relative;
 }
 
 .profile-wrapper {
+  align-items: flex-start;
+  display: flex;
+  gap: 15px;
+  position: relative;
+
+}
+
+.profile-left {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profile-top {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 15px;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .profile-image {
   position: relative;
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
 }
 
 .profile-image img,
@@ -41,34 +102,34 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background-color: #333;
+  background-color: #f0f0f0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 20px;
 }
 
 .follow-btn {
   position: absolute;
   bottom: -2px;
   right: -2px;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  background-color: #1e90ff;
+  background-color: #0057ff;
   color: white;
-  border: 2px solid #1a1a1a;
+  border: 2px solid #fff;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: bold;
   transition: all 0.3s ease;
 }
 
 .follow-btn:hover {
-  background-color: #1873cc;
+  background-color: #0046cc;
   transform: scale(1.1);
 }
 
@@ -77,70 +138,179 @@
 }
 
 .nickname {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
+  color: #191919;
+  cursor: pointer;
+  position: relative;
+}
+
+/* 닉네임 호버 시 프로필 카드 */
+.profile-card {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  width: 320px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2);
+  padding: 24px;
+  z-index: 300;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.nickname:hover .profile-card {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.profile-card::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 20px;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  transform: rotate(45deg);
+  box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.profile-card-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.profile-card-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #f0f0f0;
+}
+
+.profile-card-info h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: #191919;
+}
+
+.profile-card-location {
+  font-size: 13px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.profile-card-stats {
+  display: flex;
+  justify-content: space-around;
+  margin: 16px 0;
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.profile-card-stat {
+  text-align: center;
+}
+
+.profile-card-stat-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #191919;
+  display: block;
+}
+
+.profile-card-stat-label {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.profile-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.profile-card-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.profile-card-btn-primary {
+  background: #0057ff;
   color: #fff;
 }
 
-/* 태그 영역 */
+.profile-card-btn-primary:hover {
+  background: #0046cc;
+}
+
+.profile-card-btn-secondary {
+  background: #f0f0f0;
+  color: #191919;
+}
+
+.profile-card-btn-secondary:hover {
+  background: #e8e8e8;
+}
+
+/* 태그 & 제목 영역 */
+.header-right {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  margin-left: 40px;
+  padding-top: 4px;
+}
+
 .tags-section {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .tag {
-  background-color: #2a2a2a;
-  padding: 5px 12px;
-  border-radius: 15px;
-  font-size: 13px;
-  color: #aaa;
-}
-
-/* 제목 및 가격 */
-.title-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 30px 0;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #333;
+  background-color: #f0f0f0;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #666;
 }
 
 .post-title {
-  font-size: 32px;
-  font-weight: 300;
-  color: #fff;
-  margin: 0;
-}
-
-.price-section {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.price-label {
-  font-size: 14px;
-  color: #888;
-  margin-bottom: 5px;
-}
-
-.price-value {
   font-size: 24px;
   font-weight: 600;
-  color: #1e90ff;
+  color: #191919;
+  margin-top: 0;
+  line-height: 1.2;
 }
 
-/* PDF 뷰어 */
+/* PDF 뷰어 - 전체 화면 */
 .pdf-viewer {
-  background-color: #2a2a2a;
-  border-radius: 8px;
-  padding: 40px;
-  min-height: 800px;
-  max-height: 800px;
-  overflow-y: auto;
-  margin-bottom: 40px;
+  background-color: #fafafa;
+  margin-top: 80px;
+  min-height: calc(100vh - 80px);
+  padding: 60px 0;
+  width: 100%;
 }
 
 .pdf-viewer::-webkit-scrollbar {
@@ -148,118 +318,193 @@
 }
 
 .pdf-viewer::-webkit-scrollbar-track {
-  background: #1a1a1a;
-  border-radius: 4px;
+  background: #f0f0f0;
 }
 
 .pdf-viewer::-webkit-scrollbar-thumb {
-  background: #444;
+  background: #ccc;
   border-radius: 4px;
 }
 
 .pdf-viewer::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #999;
 }
 
 .pdf-page {
-  background-color: #3a3a3a;
-  border-radius: 8px;
-  padding: 60px;
-  margin-bottom: 30px;
-  min-height: 600px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  background-color: #fff;
+  border-radius: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  margin: 0 auto 40px;
+  max-width: 1400px;
+  padding: 0;
+  width: 85%;
 }
 
 .pdf-content {
-  text-align: center;
+  padding: 80px 60px;
+  text-align: left;
 }
 
-/* 사이드바 */
+.pdf-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 20px 0;
+}
+
+/* 플로팅 사이드바 - Behance 스타일 */
 .sidebar {
-  width: 100px;
-  background-color: #0f0f0f;
+  position: fixed;
+  right: 30px;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 40px 20px;
-  gap: 30px;
-  border-left: 1px solid #333;
+  gap: 20px;
+  z-index: 200;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar.hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .sidebar-icon {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #e8e8e8;
+  border-radius: 50%;
   cursor: pointer;
-  transition: transform 0.2s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 4px;
+  height: 56px;
+  width: 56px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
-.sidebar-icon:hover {
-  transform: scale(1.1);
-}
-
-.icon-circle {
-  width: 50px;
-  height: 50px;
+.sidebar-icon.profile-icon .profile-mini-image {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background-color: #2a2a2a;
+  object-fit: cover;
+}
+
+.sidebar-icon.profile-icon .default-profile-mini {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f0f0f0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  transition: all 0.3s ease;
+  font-size: 16px;
 }
 
-.sidebar-icon:hover .icon-circle {
-  background-color: #3a3a3a;
+.sidebar-icon:hover {
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: scale(1.05);
+}
+
+.icon-image {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.sidebar-label {
+  font-size: 10px;
+  color: #666;
+  text-align: center;
+  font-weight: 500;
+  display: none;
+}
+
+.sidebar-icon:hover .sidebar-label {
+  display: block;
 }
 
 /* 하트 아이콘 애니메이션 */
-.heart-icon.liked .icon-circle {
-  animation: heartBeat 0.3s ease;
+.heart-icon.liked .icon-image {
+  animation: heartBeat 0.4s ease;
 }
 
 @keyframes heartBeat {
-  0%,
-  100% {
+  0%, 100% {
     transform: scale(1);
   }
   50% {
-    transform: scale(1.3);
+    transform: scale(1.2);
   }
 }
 
-/* AI 아이콘 */
-.ai-icon .icon-circle {
-  background-color: #1e90ff;
+/* 장바구니 토스트 */
+.cart-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(25, 25, 25, 0.95);
   color: white;
-  font-weight: bold;
-  font-size: 20px;
+  padding: 20px 40px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  z-index: 300;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  display: none;
 }
 
-.ai-label {
-  font-size: 11px;
-  color: #aaa;
-  text-align: center;
+.cart-toast.show {
+  display: block;
+  animation: toastFadeIn 0.3s ease, toastFadeOut 0.3s ease 2.7s;
 }
 
-/* 댓글 팝업 */
+@keyframes toastFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes toastFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* 댓글 팝업 - Behance 스타일 */
 .comments-popup {
   position: fixed;
   right: 120px;
   top: 50%;
   transform: translateY(-50%);
-  width: 400px;
-  max-height: 600px;
-  background-color: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-  display: flex;
+  width: 420px;
+  max-height: 70vh;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2);
+  display: none;
   flex-direction: column;
-  z-index: 1000;
+  z-index: 200;
   animation: slideIn 0.3s ease;
+}
+
+.comments-popup.active {
+  display: flex;
 }
 
 @keyframes slideIn {
@@ -277,25 +522,26 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #333;
+  padding: 24px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .comments-header h3 {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
+  color: #191919;
 }
 
 .close-btn {
   background: none;
   border: none;
-  color: #888;
+  color: #666;
   font-size: 24px;
   cursor: pointer;
   padding: 0;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -304,15 +550,15 @@
 }
 
 .close-btn:hover {
-  background-color: #2a2a2a;
-  color: #fff;
+  background-color: #f0f0f0;
+  color: #191919;
 }
 
 .comments-list {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
-  max-height: 350px;
+  padding: 24px;
+  max-height: calc(70vh - 200px);
 }
 
 .comments-list::-webkit-scrollbar {
@@ -320,18 +566,18 @@
 }
 
 .comments-list::-webkit-scrollbar-track {
-  background: #0f0f0f;
+  background: #f9f9f9;
 }
 
 .comments-list::-webkit-scrollbar-thumb {
-  background: #444;
+  background: #ddd;
   border-radius: 3px;
 }
 
 .comment-item {
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #2a2a2a;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .comment-item:last-child {
@@ -347,57 +593,58 @@
 
 .comment-nickname {
   font-weight: 600;
-  color: #fff;
+  color: #191919;
   font-size: 14px;
 }
 
 .comment-date {
   font-size: 12px;
-  color: #666;
+  color: #999;
 }
 
 .comment-text {
   margin: 0;
-  color: #ccc;
+  color: #333;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .comment-input-section {
-  padding: 20px;
-  border-top: 1px solid #333;
-  background-color: #0f0f0f;
+  padding: 20px 24px;
+  border-top: 1px solid #f0f0f0;
+  background-color: #fafafa;
 }
 
 .comment-input-section textarea {
   width: 100%;
-  background-color: #2a2a2a;
-  border: 1px solid #444;
-  border-radius: 8px;
+  background-color: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
   padding: 12px;
-  color: #fff;
+  color: #191919;
   font-size: 14px;
   resize: none;
   font-family: inherit;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  transition: border-color 0.2s ease;
 }
 
 .comment-input-section textarea:focus {
   outline: none;
-  border-color: #1e90ff;
+  border-color: #0057ff;
 }
 
 .comment-input-section textarea::placeholder {
-  color: #666;
+  color: #999;
 }
 
 .submit-btn {
   width: 100%;
-  background-color: #1e90ff;
+  background-color: #0057ff;
   color: white;
   border: none;
-  border-radius: 8px;
-  padding: 10px;
+  border-radius: 6px;
+  padding: 12px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -405,42 +652,308 @@
 }
 
 .submit-btn:hover {
-  background-color: #1873cc;
+  background-color: #0046cc;
 }
 
 .submit-btn:active {
   transform: scale(0.98);
 }
 
+/* AI 요약 팝업 */
+.ai-summary-popup {
+  position: fixed;
+  right: 120px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 420px;
+  max-height: 70vh;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2);
+  display: none;
+  flex-direction: column;
+  z-index: 200;
+  animation: slideIn 0.3s ease;
+}
+
+.ai-summary-popup.active {
+  display: flex;
+}
+
+.ai-summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.ai-summary-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #191919;
+}
+
+.ai-summary-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.ai-summary-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ai-summary-content::-webkit-scrollbar-track {
+  background: #f9f9f9;
+}
+
+.ai-summary-content::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 3px;
+}
+
+.ai-summary-text {
+  color: #333;
+  font-size: 14px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+/* 가격 배지 - 플로팅 */
+.price-badge {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 16px 24px;
+  border-radius: 50px;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s ease;
+}
+
+.price-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.5);
+}
+
+.price-label {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.price-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
 /* 반응형 */
 @media (max-width: 1024px) {
-  .main-content {
-    padding: 30px 40px;
+  .post-header {
+    padding: 15px 30px;
   }
 
-  .comments-popup {
-    right: 100px;
-    width: 350px;
+  .sidebar {
+    right: 20px;
+    gap: 15px;
+  }
+
+  .sidebar-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .icon-image {
+    width: 20px;
+    height: 20px;
+  }
+
+  .comments-popup,
+  .ai-summary-popup {
+    right: 90px;
+    width: 380px;
+  }
+
+  .pdf-page {
+    width: 90%;
+  }
+
+  .pdf-content {
+    padding: 60px 40px;
   }
 }
 
 @media (max-width: 768px) {
-  .board-lookup-read {
-    flex-direction: column;
+  .post-header {
+    padding: 12px 20px;
+  }
+
+  .post-title {
+    font-size: 18px;
   }
 
   .sidebar {
-    width: 100%;
+    position: fixed;
+    right: auto;
+    left: 50%;
+    top: auto;
+    bottom: 20px;
+    transform: translateX(-50%);
     flex-direction: row;
-    padding: 20px;
-    border-left: none;
-    border-top: 1px solid #333;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.98);
+    padding: 12px;
+    border-radius: 50px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
   }
 
-  .comments-popup {
+  .sidebar-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .icon-image {
+    width: 20px;
+    height: 20px;
+  }
+
+  .comments-popup,
+  .ai-summary-popup {
     right: 20px;
     left: 20px;
     width: auto;
-    max-height: 500px;
+    max-height: 60vh;
+  }
+
+  .sidebar-label {
+    display: none !important;
+  }
+
+  .pdf-page {
+    width: 95%;
+  }
+
+  .pdf-content {
+    padding: 40px 20px;
+  }
+
+  .price-badge {
+    bottom: 80px;
+    right: 20px;
+    padding: 12px 20px;
+  }
+
+  .price-value {
+    font-size: 18px;
   }
 }
+.download-button {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: #0057ff;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.download-button:hover {
+  background-color: #0046cc;
+}
+
+.pdf-image-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+}
+
+.pdf-page-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.close-post-button {
+  background: none;
+  border: none;
+  color: #191919;
+  cursor: pointer;
+  padding: 0;
+  position: absolute;
+  top: 20px; /* Match header padding-top */
+  right: 60px; /* Match header padding-right */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+  z-index: 51; /* Ensure it's above other header elements if needed */
+}
+
+.close-post-button:hover {
+  background-color: #f0f0f0;
+}
+
+
+.comment-author {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* This will vertically align the date with the profile info */
+  margin-bottom: 8px;
+}
+
+.comment-author-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Space between picture and nickname */
+}
+
+.comment-profile-pic,
+.comment-default-pic {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+}
+
+.comment-default-pic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+
+.comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.comment-delete-btn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.comment-delete-btn:hover {
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+

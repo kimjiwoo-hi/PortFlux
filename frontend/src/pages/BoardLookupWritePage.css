@@ -206,7 +206,9 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0;
+  padding: 0.125rem; /* Adjust padding for better visual alignment */
+  width: 1.2rem;   /* Explicit width */
+  height: 1.2rem;  /* Explicit height */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -221,6 +223,7 @@
 .tag-remove-icon {
   width: 0.75rem;
   height: 0.75rem;
+  display: block; /* Ensure it behaves as a block element for precise centering */
 }
 
 /* 제출 버튼 */
@@ -356,4 +359,78 @@
   font-size: 0.875rem;
   margin-top: 0.75rem;
   padding: 0.25rem;
+}
+
+/* PDF 미리보기 스타일 */
+.pdf-preview {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+}
+
+.pdf-icon-container {
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.pdf-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: white;
+  text-align: center;
+}
+
+.pdf-success {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.pdf-filename {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pdf-filesize {
+  font-size: 0.875rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.pdf-hint {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  margin: 0.5rem 0 0 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
 }

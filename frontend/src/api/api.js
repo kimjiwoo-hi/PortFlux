@@ -51,4 +51,3 @@ export async function unfollow(followerId, followingId) {
 }
 
 export default api;
-
