@@ -19,7 +19,6 @@ public class BoardLookupPostDto {
     private String tags; // JSON 문자열 형태의 태그
     private int viewCnt;
     private Date createdAt;
-    private String aiSummary;
     private int downloadCnt;
     private List<String> pdfImages;
     
