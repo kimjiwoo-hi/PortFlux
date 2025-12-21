@@ -206,7 +206,9 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0;
+  padding: 0.125rem; /* Adjust padding for better visual alignment */
+  width: 1.2rem;   /* Explicit width */
+  height: 1.2rem;  /* Explicit height */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -221,6 +223,7 @@
 .tag-remove-icon {
   width: 0.75rem;
   height: 0.75rem;
+  display: block; /* Ensure it behaves as a block element for precise centering */
 }
 
 /* 제출 버튼 */
