@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import "./MyInfo.css";
+import UserDefaultIcon from "../assets/user_default_icon.png";
 
 const MyInfo = () => {
   const [userInfo, setUserInfo] = useState({
@@ -163,6 +164,22 @@ const MyInfo = () => {
     });
   };
 
+  // 기본 배너 이미지 (SVG 그라데이션)
+  const getDefaultBanner = () => {
+    const svg = `
+      <svg width="1200" height="300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <rect width="1200" height="300" fill="url(#grad)" />
+      </svg>
+    `;
+    return `data:image/svg+xml;base64,${btoa(svg)}`;
+  };
+
   if (loading) {
     return <div className="loading">로딩 중...</div>;
   }
@@ -187,7 +204,12 @@ const MyInfo = () => {
           {/* 배너 이미지 */}
           <div className="banner-container">
             <img
-              src={bannerPreview || editedInfo.userBanner || userInfo.userBanner || ""}
+              src={
+                bannerPreview ||
+                (editedInfo.userBanner && editedInfo.userBanner.trim() !== "" ? editedInfo.userBanner : null) ||
+                (userInfo.userBanner && userInfo.userBanner.trim() !== "" ? userInfo.userBanner : null) ||
+                getDefaultBanner()
+              }
               alt="배너"
               className="banner-image"
             />
@@ -211,7 +233,7 @@ const MyInfo = () => {
                 profilePreview ||
                 (editedInfo.userImage && editedInfo.userImage.trim() !== "" ? editedInfo.userImage : null) ||
                 (userInfo.userImage && userInfo.userImage.trim() !== "" ? userInfo.userImage : null) ||
-                "/assets/user_default_icon.png"
+                UserDefaultIcon
               }
               alt="프로필"
               className="myinfo-profile-image"
