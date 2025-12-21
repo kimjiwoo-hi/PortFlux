@@ -160,10 +160,12 @@ public class UserService {
         if (updateUser.getUserEmail() != null) {
             user.setUserEmail(updateUser.getUserEmail());
         }
-        if (updateUser.getUserImage() != null) {
+
+        // Base64 이미지 처리 (프론트엔드에서 Base64 문자열로 전송된 경우)
+        if (updateUser.getUserImageBase64() != null && !updateUser.getUserImageBase64().isEmpty()) {
             user.setUserImage(updateUser.getUserImage());
         }
-        if (updateUser.getUserBanner() != null) {
+        if (updateUser.getUserBannerBase64() != null && !updateUser.getUserBannerBase64().isEmpty()) {
             user.setUserBanner(updateUser.getUserBanner());
         }
 
