@@ -46,15 +46,31 @@ public class UserInfoController {
             updateUser.setUserEmail(request.getUserEmail());
             updateUser.setUserPhone(request.getUserPhone());
 
-            // Base64 이미지 처리 (setter에서 자동으로 byte[]로 변환됨)
-            if (request.getUserImage() != null && !request.getUserImage().isEmpty()) {
-                updateUser.setUserImageBase64(request.getUserImage());
+            // 이미지 업데이트 플래그
+            boolean updateImage = false;
+            boolean updateBanner = false;
+
+            // Base64 이미지 처리
+            if (request.getUserImage() != null) {
+                updateImage = true;
+                if (request.getUserImage().isEmpty()) {
+                    // 빈 문자열이면 null로 설정 (기본 이미지로 표시)
+                    updateUser.setUserImage(null);
+                } else {
+                    updateUser.setUserImageBase64(request.getUserImage());
+                }
             }
-            if (request.getUserBanner() != null && !request.getUserBanner().isEmpty()) {
-                updateUser.setUserBannerBase64(request.getUserBanner());
+            if (request.getUserBanner() != null) {
+                updateBanner = true;
+                if (request.getUserBanner().isEmpty()) {
+                    // 빈 문자열이면 null로 설정 (기본 배너로 표시)
+                    updateUser.setUserBanner(null);
+                } else {
+                    updateUser.setUserBannerBase64(request.getUserBanner());
+                }
             }
 
-            userService.updateUserInfo(userId, updateUser);
+            userService.updateUserInfo(userId, updateUser, updateImage, updateBanner);
             return ResponseEntity.ok("정보가 성공적으로 수정되었습니다.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
