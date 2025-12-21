@@ -76,7 +76,14 @@ const MyInfo = () => {
 
   const handleSave = async () => {
     try {
-      await axios.put(`http://localhost:8080/user/info/${userInfo.userId}`, editedInfo);
+      // 기본 이미지인 경우 빈 문자열로 변환하여 서버에 전송
+      const dataToSave = {
+        ...editedInfo,
+        userImage: editedInfo.userImage === UserDefaultIcon ? "" : editedInfo.userImage,
+        userBanner: editedInfo.userBanner === getDefaultBanner() ? "" : editedInfo.userBanner
+      };
+
+      await axios.put(`http://localhost:8080/user/info/${userInfo.userId}`, dataToSave);
       setUserInfo(editedInfo);
       setIsEditing(false);
       setSuccessMessage("정보가 성공적으로 수정되었습니다.");
@@ -111,6 +118,15 @@ const MyInfo = () => {
     }
   };
 
+  // 프로필 이미지 삭제
+  const handleProfileImageDelete = () => {
+    setProfilePreview(UserDefaultIcon);
+    setEditedInfo(prev => ({
+      ...prev,
+      userImage: UserDefaultIcon
+    }));
+  };
+
   // 배너 이미지 변경
   const handleBannerImageChange = (e) => {
     const file = e.target.files[0];
@@ -125,6 +141,16 @@ const MyInfo = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  // 배너 이미지 삭제
+  const handleBannerImageDelete = () => {
+    const defaultBanner = getDefaultBanner();
+    setBannerPreview(defaultBanner);
+    setEditedInfo(prev => ({
+      ...prev,
+      userBanner: defaultBanner
+    }));
   };
 
   const handlePasswordChange = async () => {
@@ -205,24 +231,34 @@ const MyInfo = () => {
           <div className="banner-container">
             <img
               src={
-                bannerPreview ||
-                (editedInfo.userBanner && editedInfo.userBanner.trim() !== "" ? editedInfo.userBanner : null) ||
-                (userInfo.userBanner && userInfo.userBanner.trim() !== "" ? userInfo.userBanner : null) ||
-                getDefaultBanner()
+                bannerPreview
+                  ? bannerPreview
+                  : (editedInfo.userBanner && editedInfo.userBanner.trim() !== "")
+                    ? editedInfo.userBanner
+                    : (userInfo.userBanner && userInfo.userBanner.trim() !== "")
+                      ? userInfo.userBanner
+                      : getDefaultBanner()
               }
               alt="배너"
               className="banner-image"
             />
             {isEditing && (
-              <label className="image-upload-label banner-upload">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleBannerImageChange}
-                  style={{ display: 'none' }}
-                />
-                배너 변경
-              </label>
+              <>
+                <label className="image-upload-label banner-upload">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleBannerImageChange}
+                    style={{ display: 'none' }}
+                  />
+                  배너 변경
+                </label>
+                {(bannerPreview || (editedInfo.userBanner && editedInfo.userBanner.trim() !== "")) && (
+                  <button className="image-delete-btn banner-delete" onClick={handleBannerImageDelete}>
+                    배너 삭제
+                  </button>
+                )}
+              </>
             )}
           </div>
 
@@ -230,24 +266,34 @@ const MyInfo = () => {
           <div className="myinfo-profile-container">
             <img
               src={
-                profilePreview ||
-                (editedInfo.userImage && editedInfo.userImage.trim() !== "" ? editedInfo.userImage : null) ||
-                (userInfo.userImage && userInfo.userImage.trim() !== "" ? userInfo.userImage : null) ||
-                UserDefaultIcon
+                profilePreview
+                  ? profilePreview
+                  : (editedInfo.userImage && editedInfo.userImage.trim() !== "")
+                    ? editedInfo.userImage
+                    : (userInfo.userImage && userInfo.userImage.trim() !== "")
+                      ? userInfo.userImage
+                      : UserDefaultIcon
               }
               alt="프로필"
               className="myinfo-profile-image"
             />
             {isEditing && (
-              <label className="image-upload-label myinfo-profile-upload">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleProfileImageChange}
-                  style={{ display: 'none' }}
-                />
-                프로필 변경
-              </label>
+              <>
+                <label className="image-upload-label myinfo-profile-upload">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleProfileImageChange}
+                    style={{ display: 'none' }}
+                  />
+                  프로필 변경
+                </label>
+                {(profilePreview || (editedInfo.userImage && editedInfo.userImage.trim() !== "")) && (
+                  <button className="image-delete-btn profile-delete" onClick={handleProfileImageDelete}>
+                    프로필 삭제
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -264,20 +310,19 @@ const MyInfo = () => {
             />
           </div>
 
-          {/* 이름 */}
+          {/* 이름 (수정 불가) */}
           <div className="info-item">
             <label>이름</label>
             <input
               type="text"
               name="userName"
-              value={isEditing ? editedInfo.userName : userInfo.userName}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className={isEditing ? "input-editable" : "input-disabled"}
+              value={userInfo.userName}
+              disabled
+              className="input-disabled"
             />
           </div>
 
-          {/* 닉네임 */}
+          {/* 닉네임 (수정 가능) */}
           <div className="info-item">
             <label>닉네임</label>
             <input
@@ -290,29 +335,27 @@ const MyInfo = () => {
             />
           </div>
 
-          {/* 이메일 */}
+          {/* 이메일 (수정 불가) */}
           <div className="info-item">
             <label>이메일</label>
             <input
               type="email"
               name="userEmail"
-              value={isEditing ? editedInfo.userEmail : userInfo.userEmail}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className={isEditing ? "input-editable" : "input-disabled"}
+              value={userInfo.userEmail}
+              disabled
+              className="input-disabled"
             />
           </div>
 
-          {/* 휴대폰 */}
+          {/* 휴대폰 (수정 불가) */}
           <div className="info-item">
             <label>휴대폰</label>
             <input
               type="tel"
               name="userPhone"
-              value={isEditing ? editedInfo.userPhone : userInfo.userPhone}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className={isEditing ? "input-editable" : "input-disabled"}
+              value={userInfo.userPhone}
+              disabled
+              className="input-disabled"
             />
           </div>
 
