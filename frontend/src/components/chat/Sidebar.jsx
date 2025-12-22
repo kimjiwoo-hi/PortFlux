@@ -1,12 +1,5 @@
 import RoomListItem from "./RoomListItem";
 
-/**
- * Sidebar
- * - rooms: 방 목록
- * - activeRoomId: 현재 선택된 방 ID
- * - onSelectRoom: 방 선택 콜백(roomId)
- * - me: 내 표시(이름/상태)
- */
 export default function Sidebar({ rooms, activeRoomId, onSelectRoom, me }) {
   return (
     <aside className="chat-sidebar">
