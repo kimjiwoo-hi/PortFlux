@@ -21,9 +21,14 @@ configurations {
 }
 
 repositories {
+<<<<<<< HEAD
+	mavenCentral()
+	maven { url 'https://jitpack.io' }
+=======
     mavenCentral()
     maven { url 'https://jitpack.io' }
     maven { url 'https://repo.spring.io/milestone' }  // ✅ Spring AI용 추가
+>>>>>>> 16f9fd1d8832b31f24e862d3fb30fb3a49c15e5b
 }
 
 ext {
@@ -35,6 +40,19 @@ dependencies {
     implementation 'com.oracle.database.jdbc:ojdbc11'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+<<<<<<< HEAD
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	implementation 'com.corundumstudio.socketio:netty-socketio:2.0.3'
+    implementation 'org.springframework.boot:spring-boot-starter-security'// 로그인, 암호화 기능
+    // JWT (JSON Web Token) 라이브러리
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+    implementation 'com.github.iamport:iamport-rest-client-java:0.2.23' // Iamport 결제 연동
+
+=======
     implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'  // ✅ 의존성 이름 수정
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
@@ -44,6 +62,7 @@ dependencies {
     implementation 'org.apache.pdfbox:pdfbox:2.0.30'
     implementation 'com.github.iamport:iamport-rest-client-java:0.2.23'
     
+>>>>>>> 16f9fd1d8832b31f24e862d3fb30fb3a49c15e5b
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
