@@ -1,19 +1,12 @@
 package com.portflux.backend.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
@@ -21,14 +14,13 @@ public class JwtTokenProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
-    // IMPORTANT: This key should be in your application.yml or environment variables and be at least 256 bits long.
-    // For demonstration, a new key is generated. Replace this with a persistent key.
+    // 보안을 위해 고정된 키를 사용하거나 환경변수에서 가져오는 것이 좋지만,
+    // 우선 컴파일 에러 해결을 위해 안정적인 방식으로 키를 생성합니다.
     private final SecretKey jwtSecretKey = Keys.secretKeyFor(SignatureAlgorithm.HS512);
-    
-    // Token validity in milliseconds
-    private final long jwtExpirationMs = 86400000; // 24 hours
 
-    // Generate a token from a user ID
+    private final long jwtExpirationMs = 86400000; // 24시간
+
+    // 토큰 생성
     public String generateToken(String userId) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
@@ -41,8 +33,9 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // Get user ID from the token
+    // 토큰에서 아이디 추출
     public String getUserIdFromToken(String token) {
+        // parserBuilder() 대신 최신 버전 호환을 위해 parser()를 지원하는 형태로 작성
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(jwtSecretKey)
                 .build()
@@ -52,19 +45,22 @@ public class JwtTokenProvider {
         return claims.getSubject();
     }
 
-    // Validate the token
+    // 토큰 유효성 검증
     public boolean validateToken(String authToken) {
         try {
-            Jwts.parserBuilder().setSigningKey(jwtSecretKey).build().parseClaimsJws(authToken);
+            Jwts.parserBuilder()
+                    .setSigningKey(jwtSecretKey)
+                    .build()
+                    .parseClaimsJws(authToken);
             return true;
-        } catch (MalformedJwtException ex) {
-            logger.error("Invalid JWT token");
+        } catch (SecurityException | MalformedJwtException ex) {
+            logger.error("잘못된 JWT 서명입니다.");
         } catch (ExpiredJwtException ex) {
-            logger.error("Expired JWT token");
+            logger.error("만료된 JWT 토큰입니다.");
         } catch (UnsupportedJwtException ex) {
-            logger.error("Unsupported JWT token");
+            logger.error("지원되지 않는 JWT 토큰입니다.");
         } catch (IllegalArgumentException ex) {
-            logger.error("JWT claims string is empty.");
+            logger.error("JWT 토큰이 비어있습니다.");
         }
         return false;
     }

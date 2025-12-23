@@ -20,4 +20,39 @@
             c.comment_created_at ASC
     </select>
 
+    <insert id="addComment" parameterType="com.portflux.backend.beans.CommentDto">
+        <selectKey keyProperty="commentId" resultType="int" order="BEFORE">
+            SELECT NVL(MAX(comment_id), 0) + 1 FROM POST_COMMENT
+        </selectKey>
+        INSERT INTO POST_COMMENT (
+            comment_id,
+            post_id,
+            user_num,
+            comment_content,
+            comment_created_at
+        ) VALUES (
+            #{commentId},
+            #{postId},
+            #{userNum},
+            #{commentContent},
+            SYSDATE
+        )
+    </insert>
+
+    <select id="findCommentById" parameterType="int" resultType="com.portflux.backend.beans.CommentDto">
+        SELECT
+            comment_id AS commentId,
+            user_num AS userNum,
+            comment_content AS commentContent,
+            comment_created_at AS commentCreatedAt
+        FROM
+            POST_COMMENT
+        WHERE
+            comment_id = #{commentId}
+    </select>
+
+    <delete id="deleteComment" parameterType="int">
+        DELETE FROM POST_COMMENT WHERE comment_id = #{commentId}
+    </delete>
+
 </mapper>

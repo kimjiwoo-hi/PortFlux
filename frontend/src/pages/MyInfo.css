@@ -126,6 +126,65 @@
   background: #2f49b0;
 }
 
+/* 이미지 기본으로 되돌리기 버튼 */
+.image-reset-button {
+  display: inline-block;
+  padding: 8px 16px;
+  background: #fa5252;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-left: 8px;
+}
+
+.image-reset-button:hover {
+  background: #e03131;
+}
+
+.image-reset-button:active {
+  background: #c92a2a;
+}
+
+/* 이미지 삭제 버튼 */
+.image-delete-btn {
+  display: inline-block;
+  padding: 8px 16px;
+  background: #fa5252;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.image-delete-btn:hover {
+  background: #e03131;
+}
+
+.image-delete-btn:active {
+  background: #c92a2a;
+}
+
+/* 배너 삭제 버튼 위치 */
+.banner-delete {
+  position: absolute;
+  top: 12px;
+  right: 100px;
+}
+
+/* 프로필 삭제 버튼 위치 */
+.profile-delete {
+  position: absolute;
+  bottom: -40px;
+  right: 0;
+}
+
 .info-grid {
   display: flex;
   flex-direction: column;
