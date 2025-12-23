@@ -131,9 +131,6 @@ const Header = () => {
             <Link to="/boardfree" onClick={handleLinkClick("/boardfree")}>
               <div className={getLinkClass("/boardfree")}>커뮤니티</div>
             </Link>
-            <Link to="/etc" onClick={handleLinkClick("/etc")}>
-              <div className={getLinkClass("/etc")}>기타</div>
-            </Link>
           </div>
         </div>
 
