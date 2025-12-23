@@ -1,18 +1,16 @@
 import { useEffect, useState } from "react";
 import { getChatRooms } from "../api/chatRest";
 import { useChatSocket } from "../hooks/useChatSocket";
+import "./ChattingPage.css";
 
-/**
- * 최소 예시:
- * - 왼쪽: 방 목록
- * - 오른쪽: 메시지 목록 + 전송
- */
+
 export default function ChatPage({ loginUserNum }) {
   const [rooms, setRooms] = useState([]);
   const [activeRoomId, setActiveRoomId] = useState(null);
   const [input, setInput] = useState("");
 
-  const { messages, joinRoom, loadMessages, sendMessage, markRead } = useChatSocket(loginUserNum);
+  const { messages, joinRoom, loadMessages, sendMessage, markRead } =
+    useChatSocket(loginUserNum);
 
   useEffect(() => {
     (async () => {
@@ -32,59 +30,60 @@ export default function ChatPage({ loginUserNum }) {
 
   const onSend = () => {
     if (!activeRoomId) return;
-    if (!input.trim()) return;
-    sendMessage(activeRoomId, input.trim());
+    const text = input.trim();
+    if (!text) return;
+
+    sendMessage(activeRoomId, text);
     setInput("");
   };
 
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
-      <aside style={{ width: 300, borderRight: "1px solid #ddd", padding: 12 }}>
+    <div className="chatting-page">
+      {/* 좌측: 방 목록 */}
+      <aside className="chatting-sidebar">
         <h3>채팅방</h3>
+
         {rooms.map((r) => (
           <div
             key={r.roomId}
+            className={`room-item ${activeRoomId === r.roomId ? "active" : ""}`}
             onClick={() => setActiveRoomId(r.roomId)}
-            style={{
-              padding: 10,
-              cursor: "pointer",
-              background: activeRoomId === r.roomId ? "#f5f5f5" : "transparent",
-              borderRadius: 8,
-            }}
           >
-            <div>Room #{r.roomId}</div>
+            <div>
+              <b>Room #{r.roomId}</b>
+            </div>
             <small>last: {String(r.lastMessageAt || "")}</small>
           </div>
         ))}
       </aside>
 
-      <main style={{ flex: 1, padding: 12, display: "flex", flexDirection: "column" }}>
+      {/* 우측: 메시지 */}
+      <main className="chatting-main">
         <h3>메시지</h3>
 
-        <div style={{ flex: 1, overflow: "auto", border: "1px solid #ddd", borderRadius: 8, padding: 12 }}>
+        <div className="message-list">
           {messages.map((m) => (
-            <div key={m.messageId} style={{ marginBottom: 10 }}>
-              <b>{m.senderNum}</b>: {m.content}
-              <div style={{ fontSize: 12, color: "#666" }}>
+            <div key={m.messageId} className="message">
+              <div>
+                <b>{m.senderNum}</b>: {m.content}
+              </div>
+              <div className="message-meta">
                 {String(m.sentAt || "")} / read={m.readYn}
               </div>
             </div>
           ))}
         </div>
 
-        <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+        <div className="message-input">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="메시지 입력"
-            style={{ flex: 1, padding: 10, borderRadius: 8, border: "1px solid #ddd" }}
             onKeyDown={(e) => {
               if (e.key === "Enter") onSend();
             }}
           />
-          <button onClick={onSend} style={{ padding: "10px 16px" }}>
-            전송
-          </button>
+          <button onClick={onSend}>전송</button>
         </div>
       </main>
     </div>

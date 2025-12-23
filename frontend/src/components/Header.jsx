@@ -9,6 +9,7 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate(); // 추가
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [userProfileImage, setUserProfileImage] = useState(UserDefaultIcon);
 
   const popoverRef = useRef(null);
   const profileRef = useRef(null);
@@ -25,6 +26,33 @@ const Header = () => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsPopoverOpen(false);
   }, [location.pathname]);
+
+  // 사용자 프로필 이미지 불러오기
+  useEffect(() => {
+    const fetchUserProfileImage = async () => {
+      const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+      if (storedUser) {
+        try {
+          const user = JSON.parse(storedUser);
+          const response = await fetch(`http://localhost:8080/user/info/${user.userId}`);
+          const data = await response.json();
+
+          if (data.userImage && data.userImage.trim() !== "") {
+            setUserProfileImage(data.userImage);
+          } else {
+            setUserProfileImage(UserDefaultIcon);
+          }
+        } catch (error) {
+          console.error("프로필 이미지 로드 실패:", error);
+          setUserProfileImage(UserDefaultIcon);
+        }
+      }
+    };
+
+    if (isLoggedIn) {
+      fetchUserProfileImage();
+    }
+  }, [isLoggedIn]);
 
   const getLinkClass = (path) => {
     let classes = "link hoverable-link";
@@ -103,9 +131,6 @@ const Header = () => {
             <Link to="/boardfree" onClick={handleLinkClick("/boardfree")}>
               <div className={getLinkClass("/boardfree")}>커뮤니티</div>
             </Link>
-            <Link to="/etc" onClick={handleLinkClick("/etc")}>
-              <div className={getLinkClass("/etc")}>기타</div>
-            </Link>
           </div>
         </div>
 
@@ -125,7 +150,7 @@ const Header = () => {
             // 2. 로그인이 된 경우: 프로필 아이콘만 표시
             <div className="profile-container" ref={profileRef}>
               <img
-                src={UserDefaultIcon}
+                src={userProfileImage}
                 alt="프로필"
                 className="profile-pic"
                 onClick={() => setIsPopoverOpen(!isPopoverOpen)}
