@@ -140,7 +140,7 @@ public class UserService {
 
     // 10. 사용자 정보 수정
     @Transactional
-    public void updateUserInfo(String userId, UserBean updateUser) {
+    public void updateUserInfo(String userId, UserBean updateUser, boolean updateImage, boolean updateBanner) {
         UserBean user = userRepository.findByUserId(userId);
 
         if (user == null) {
@@ -160,10 +160,13 @@ public class UserService {
         if (updateUser.getUserEmail() != null) {
             user.setUserEmail(updateUser.getUserEmail());
         }
-        if (updateUser.getUserImage() != null) {
+
+        // 이미지 처리 (플래그가 true일 때만 업데이트)
+        // null로 설정된 경우도 포함하여 업데이트
+        if (updateImage) {
             user.setUserImage(updateUser.getUserImage());
         }
-        if (updateUser.getUserBanner() != null) {
+        if (updateBanner) {
             user.setUserBanner(updateUser.getUserBanner());
         }
 

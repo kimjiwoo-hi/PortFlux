@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import "./UserProfilePopover.css";
 import { Link, useLocation } from "react-router-dom";
+import UserDefaultIcon from "../assets/user_default_icon.png";
 
 const UserProfilePopover = ({ isOpen, onLogout }) => {
   const location = useLocation();
@@ -37,21 +38,28 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
   }, [isOpen]);
 
   const getProfileImage = () => {
-    if (userInfo.userImage) {
-      return `data:image/jpeg;base64,${userInfo.userImage}`;
+    if (userInfo.userImage && userInfo.userImage.trim() !== "") {
+      // 백엔드에서 이미 "data:image/jpeg;base64," 접두사를 포함해서 보냄
+      return userInfo.userImage;
     }
-    return "https://i.pravatar.cc/150?img=33";
+    return UserDefaultIcon;
   };
 
   const getBannerStyle = () => {
-    if (userInfo.userBanner) {
+    if (userInfo.userBanner && userInfo.userBanner.trim() !== "") {
+      // 백엔드에서 이미 "data:image/jpeg;base64," 접두사를 포함해서 보냄
       return {
-        backgroundImage: `url(data:image/jpeg;base64,${userInfo.userBanner})`,
+        backgroundImage: `url(${userInfo.userBanner})`,
         backgroundSize: "cover",
         backgroundPosition: "center"
       };
     }
-    return {};
+    // 기본 배너 스타일 (그라데이션)
+    return {
+      backgroundImage: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+      backgroundSize: "cover",
+      backgroundPosition: "center"
+    };
   };
 
   const handleMenuClick = (path) => (e) => {
