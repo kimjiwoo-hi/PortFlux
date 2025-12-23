@@ -37,6 +37,9 @@ const BoardJobPage = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [regionCounts, setRegionCounts] = useState({});
 
+  // ★ [추가] 기업회원 여부 상태
+  const [isCompany, setIsCompany] = useState(false);
+
   // 페이징
   const [currentPage, setCurrentPage] = useState(0);
   const pageSize = 20;
@@ -98,6 +101,33 @@ const BoardJobPage = () => {
 
     setSearchParams(params, { replace: true });
   }, [filters.keyword, sortType, currentPage, setSearchParams]);
+
+  // ★ [추가] 기업회원 확인 로직
+  useEffect(() => {
+    const userStr =
+      localStorage.getItem("user") || sessionStorage.getItem("user");
+
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+
+        // 기업회원 판단 로직
+        // 1순위: companyNum 필드가 있으면 기업회원
+        // 2순위: userType이 'COMPANY'이면 기업회원
+        const isCompanyUser =
+          !!user.companyNum ||
+          user.userType === "COMPANY" ||
+          user.userType === "company";
+
+        setIsCompany(isCompanyUser);
+      } catch (e) {
+        console.error("사용자 정보 파싱 실패:", e);
+        setIsCompany(false);
+      }
+    } else {
+      setIsCompany(false);
+    }
+  }, []);
 
   // 지역별 공고 수 조회
   useEffect(() => {
@@ -200,7 +230,7 @@ const BoardJobPage = () => {
     [navigate]
   );
 
-  // 작성 페이지 이동
+  // ★ [수정] 작성 페이지 이동
   const handleCreate = useCallback(() => {
     navigate("/boardjob/create");
   }, [navigate]);
@@ -249,10 +279,18 @@ const BoardJobPage = () => {
       tags.push({ type: "regions", value: v, label: getRegionLabel(v) })
     );
     filters.careerType.forEach((v) =>
-      tags.push({ type: "careerType", value: v, label: v })
+      tags.push({
+        type: "careerType",
+        value: v,
+        label: careerTypes.find((t) => t.value === v)?.label || v,
+      })
     );
     filters.careerYears.forEach((v) =>
-      tags.push({ type: "careerYears", value: v, label: v })
+      tags.push({
+        type: "careerYears",
+        value: v,
+        label: careerYears.find((y) => y.value === v)?.label || v,
+      })
     );
     if (filters.education) {
       tags.push({
@@ -262,26 +300,47 @@ const BoardJobPage = () => {
       });
     }
     if (filters.educationExclude) {
-      tags.push({ type: "educationExclude", value: true, label: "학력무관" });
+      tags.push({
+        type: "educationExclude",
+        value: true,
+        label: "학력무관",
+      });
     }
     filters.industries.forEach((v) =>
-      tags.push({ type: "industries", value: v, label: v })
+      tags.push({
+        type: "industries",
+        value: v,
+        label: industries.find((i) => i.value === v)?.label || v,
+      })
     );
     filters.companyTypes.forEach((v) =>
-      tags.push({ type: "companyTypes", value: v, label: v })
+      tags.push({
+        type: "companyTypes",
+        value: v,
+        label: companyTypes.find((c) => c.value === v)?.label || v,
+      })
     );
     filters.workTypes.forEach((v) =>
-      tags.push({ type: "workTypes", value: v, label: v })
+      tags.push({
+        type: "workTypes",
+        value: v,
+        label: workTypes.find((w) => w.value === v)?.label || v,
+      })
     );
     filters.workDays.forEach((v) =>
-      tags.push({ type: "workDays", value: v, label: v })
+      tags.push({
+        type: "workDays",
+        value: v,
+        label: workDays.find((d) => d.value === v)?.label || v,
+      })
     );
     if (filters.salaryMin) {
-      const range = salaryRanges.find((r) => r.value === filters.salaryMin);
       tags.push({
         type: "salaryMin",
         value: filters.salaryMin,
-        label: range?.label || `${filters.salaryMin}만원 이상`,
+        label:
+          salaryRanges.find((s) => s.value === filters.salaryMin)?.label ||
+          filters.salaryMin,
       });
     }
     return tags;
@@ -291,82 +350,64 @@ const BoardJobPage = () => {
   const renderPagination = () => {
     if (totalPages <= 1) return null;
 
+    const pageNumbers = [];
     const maxVisiblePages = 5;
-    let startPage = Math.max(0, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
+    const startPage = Math.max(
+      0,
+      currentPage - Math.floor(maxVisiblePages / 2)
+    );
+    const endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
 
-    if (endPage - startPage < maxVisiblePages - 1) {
-      startPage = Math.max(0, endPage - maxVisiblePages + 1);
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
     }
 
     return (
       <div className="pagination">
         <button
+          className="btn-page"
           onClick={() => handlePageChange(0)}
           disabled={currentPage === 0}
+        >
+          ««
+        </button>
+        <button
           className="btn-page"
-          title="처음"
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 0}
         >
           «
         </button>
-        <button
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 0}
-          className="btn-page"
-        >
-          ‹ 이전
-        </button>
 
-        {startPage > 0 && (
-          <>
-            <button onClick={() => handlePageChange(0)} className="btn-page">
-              1
-            </button>
-            {startPage > 1 && <span className="pagination-ellipsis">...</span>}
-          </>
-        )}
+        {startPage > 0 && <span className="pagination-ellipsis">...</span>}
 
-        {Array.from(
-          { length: endPage - startPage + 1 },
-          (_, i) => startPage + i
-        ).map((page) => (
+        {pageNumbers.map((page) => (
           <button
             key={page}
-            onClick={() => handlePageChange(page)}
             className={`btn-page ${currentPage === page ? "active" : ""}`}
+            onClick={() => handlePageChange(page)}
           >
             {page + 1}
           </button>
         ))}
 
         {endPage < totalPages - 1 && (
-          <>
-            {endPage < totalPages - 2 && (
-              <span className="pagination-ellipsis">...</span>
-            )}
-            <button
-              onClick={() => handlePageChange(totalPages - 1)}
-              className="btn-page"
-            >
-              {totalPages}
-            </button>
-          </>
+          <span className="pagination-ellipsis">...</span>
         )}
 
         <button
+          className="btn-page"
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages - 1}
-          className="btn-page"
-        >
-          다음 ›
-        </button>
-        <button
-          onClick={() => handlePageChange(totalPages - 1)}
-          disabled={currentPage === totalPages - 1}
-          className="btn-page"
-          title="마지막"
         >
           »
+        </button>
+        <button
+          className="btn-page"
+          onClick={() => handlePageChange(totalPages - 1)}
+          disabled={currentPage === totalPages - 1}
+        >
+          »»
         </button>
       </div>
     );
@@ -378,41 +419,45 @@ const BoardJobPage = () => {
       <div className="job-board-header">
         <div className="header-left">
           <h1>채용공고</h1>
-          <span className="total-count">
-            총 {totalElements.toLocaleString()}건
-          </span>
+          <span className="total-count">총 {totalElements}건</span>
         </div>
-        <button onClick={handleCreate} className="btn-create-job">
-          <span>+</span> 채용공고 등록
-        </button>
+
+        {/* ★ [수정] 기업회원일 때만 버튼 표시 */}
+        {isCompany && (
+          <button className="btn-create-job" onClick={handleCreate}>
+            + 채용공고 등록
+          </button>
+        )}
       </div>
 
-      {/* 검색 바 */}
+      {/* 검색 섹션 */}
       <div className="search-section">
         <div className="search-bar">
           <div className="search-input-wrapper">
             <input
               type="text"
-              placeholder="기업명, 채용 제목으로 검색"
+              placeholder="채용공고 검색..."
               value={filters.keyword}
               onChange={handleKeywordChange}
-              onKeyPress={(e) => e.key === "Enter" && handleApplyFilters()}
+              onKeyDown={(e) => e.key === "Enter" && handleApplyFilters()}
             />
-            <button onClick={handleApplyFilters} className="btn-search">
+            <button className="btn-search" onClick={handleApplyFilters}>
               검색
             </button>
           </div>
         </div>
+
         <div className="search-options">
           <button
-            onClick={() => setShowFilters(!showFilters)}
             className={`btn-filter-toggle ${showFilters ? "active" : ""}`}
+            onClick={() => setShowFilters(!showFilters)}
           >
-            필터{" "}
+            필터
             {selectedFilterCount > 0 && (
               <span className="filter-count">{selectedFilterCount}</span>
             )}
           </button>
+
           <select
             className="sort-select"
             value={sortType}
@@ -431,17 +476,17 @@ const BoardJobPage = () => {
       {selectedFilterTags.length > 0 && (
         <div className="selected-filters">
           {selectedFilterTags.map((tag, index) => (
-            <span
+            <div
               key={`${tag.type}-${tag.value}-${index}`}
               className="filter-tag"
             >
-              {tag.label}
+              <span>{tag.label}</span>
               <button onClick={() => removeFilterTag(tag.type, tag.value)}>
                 ×
               </button>
-            </span>
+            </div>
           ))}
-          <button onClick={handleResetFilters} className="btn-clear-all">
+          <button className="btn-clear-all" onClick={handleResetFilters}>
             전체 초기화
           </button>
         </div>
@@ -466,24 +511,25 @@ const BoardJobPage = () => {
             {expandedSections.region && (
               <div className="filter-section-content">
                 <div className="region-filter-grid">
+                  {/* 상위 지역 */}
                   <div className="main-region-list">
-                    {mainRegions.map((main) => (
+                    {mainRegions.map((region) => (
                       <button
-                        key={main.value}
+                        key={region.value}
                         className={`main-region-item ${
-                          selectedMainRegion === main.value ? "active" : ""
+                          selectedMainRegion === region.value ? "active" : ""
                         }`}
-                        onClick={() => setSelectedMainRegion(main.value)}
+                        onClick={() => setSelectedMainRegion(region.value)}
                       >
-                        {main.label}
-                        {regionCounts[main.value] && (
-                          <span className="count">
-                            ({regionCounts[main.value]})
-                          </span>
-                        )}
+                        <span>{region.label}</span>
+                        <span className="count">
+                          {regionCounts[region.value] || 0}
+                        </span>
                       </button>
                     ))}
                   </div>
+
+                  {/* 하위 지역 */}
                   {selectedMainRegion && (
                     <div className="sub-region-grid">
                       {getSubRegions(selectedMainRegion).map((sub) => (
@@ -510,7 +556,7 @@ const BoardJobPage = () => {
                               ...prev,
                               regions: prev.regions.filter(
                                 (r) =>
-                                  !subRegions.some((sub) => sub.value === r)
+                                  !subRegions.find((sub) => sub.value === r)
                               ),
                             }));
                           } else {
@@ -526,7 +572,14 @@ const BoardJobPage = () => {
                           }
                         }}
                       >
-                        전체선택
+                        전체{" "}
+                        {filters.regions.filter((r) =>
+                          getSubRegions(selectedMainRegion).find(
+                            (sub) => sub.value === r
+                          )
+                        ).length === getSubRegions(selectedMainRegion).length
+                          ? "해제"
+                          : "선택"}
                       </button>
                     </div>
                   )}
@@ -550,6 +603,15 @@ const BoardJobPage = () => {
             </div>
             {expandedSections.career && (
               <div className="filter-section-content">
+                <h4
+                  style={{
+                    fontSize: "14px",
+                    color: "#6b7280",
+                    marginBottom: "12px",
+                  }}
+                >
+                  경력 구분
+                </h4>
                 <div className="checkbox-group">
                   {careerTypes.map((type) => (
                     <label key={type.value} className="checkbox-item">
@@ -564,21 +626,32 @@ const BoardJobPage = () => {
                     </label>
                   ))}
                 </div>
-                {filters.careerType.includes("경력") && (
-                  <div className="checkbox-group" style={{ marginTop: "12px" }}>
-                    {careerYears.map((year) => (
-                      <label key={year.value} className="checkbox-item">
-                        <input
-                          type="checkbox"
-                          checked={filters.careerYears.includes(year.value)}
-                          onChange={() =>
-                            handleFilterChange("careerYears", year.value)
-                          }
-                        />
-                        <span className="checkbox-text">{year.label}</span>
-                      </label>
-                    ))}
-                  </div>
+                {filters.careerType.includes("EXPERIENCED") && (
+                  <>
+                    <h4
+                      style={{
+                        fontSize: "14px",
+                        color: "#6b7280",
+                        margin: "20px 0 12px",
+                      }}
+                    >
+                      경력 연차
+                    </h4>
+                    <div className="checkbox-group">
+                      {careerYears.map((year) => (
+                        <label key={year.value} className="checkbox-item">
+                          <input
+                            type="checkbox"
+                            checked={filters.careerYears.includes(year.value)}
+                            onChange={() =>
+                              handleFilterChange("careerYears", year.value)
+                            }
+                          />
+                          <span className="checkbox-text">{year.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </>
                 )}
               </div>
             )}
@@ -599,38 +672,32 @@ const BoardJobPage = () => {
             </div>
             {expandedSections.education && (
               <div className="filter-section-content">
-                <div className="checkbox-group">
-                  <label className="checkbox-item highlight">
-                    <input
-                      type="checkbox"
-                      checked={filters.educationExclude}
-                      onChange={(e) => {
-                        handleSingleFilterChange(
-                          "educationExclude",
-                          e.target.checked
-                        );
-                        if (e.target.checked) {
-                          handleSingleFilterChange("education", "");
-                        }
-                      }}
-                    />
-                    <span className="checkbox-text">학력무관</span>
-                  </label>
-                </div>
-                <div className="radio-group" style={{ marginTop: "12px" }}>
+                <label className="checkbox-item highlight">
+                  <input
+                    type="checkbox"
+                    checked={filters.educationExclude}
+                    onChange={(e) =>
+                      handleSingleFilterChange(
+                        "educationExclude",
+                        e.target.checked
+                      )
+                    }
+                  />
+                  <span className="checkbox-text">학력무관</span>
+                </label>
+                <div className="radio-group">
                   {educationLevels.map((level) => (
                     <label key={level.value} className="radio-item">
                       <input
                         type="radio"
                         name="education"
-                        value={level.value}
                         checked={filters.education === level.value}
-                        disabled={filters.educationExclude}
-                        onChange={(e) =>
-                          handleSingleFilterChange("education", e.target.value)
+                        onChange={() =>
+                          handleSingleFilterChange("education", level.value)
                         }
+                        disabled={filters.educationExclude}
                       />
-                      <span>{level.label}</span>
+                      <span className="checkbox-text">{level.label}</span>
                     </label>
                   ))}
                 </div>

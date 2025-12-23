@@ -68,6 +68,8 @@ public class SecurityConfig {
 
                         // ★★★ 게시판 API 허용 (추가) ★★★
                         .requestMatchers("/api/boardlookup/**").permitAll()
+                        // PDF AI 분석 API 허용 (추가)
+                        .requestMatchers("/api/pdf/**").permitAll()
         
                         // ★★★ 업로드된 파일 접근 허용 (추가) ★★★
                         .requestMatchers("/uploads/**").permitAll()

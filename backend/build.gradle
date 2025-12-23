@@ -1,7 +1,7 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.5.8'
-	id 'io.spring.dependency-management' version '1.1.7'
+    id 'java'
+    id 'org.springframework.boot' version '3.5.8'
+    id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'com.portflux'
@@ -9,31 +9,38 @@ version = '0.0.1-SNAPSHOT'
 description = 'Demo project for Spring Boot'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 repositories {
+<<<<<<< HEAD
 	mavenCentral()
 	maven { url 'https://jitpack.io' }
+=======
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+    maven { url 'https://repo.spring.io/milestone' }  // ✅ Spring AI용 추가
+>>>>>>> 16f9fd1d8832b31f24e862d3fb30fb3a49c15e5b
 }
 
 ext {
-	set('springAiVersion', "1.0.3")
+    set('springAiVersion', "1.0.0-M3")  // ✅ 버전 변경 (1.0.3 → 1.0.0-M3)
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'com.oracle.database.jdbc:ojdbc11'
-	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+<<<<<<< HEAD
     implementation 'org.springframework.ai:spring-ai-starter-model-openai'
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
@@ -45,38 +52,38 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
     implementation 'com.github.iamport:iamport-rest-client-java:0.2.23' // Iamport 결제 연동
 
+=======
+    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'  // ✅ 의존성 이름 수정
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    implementation 'com.corundumstudio.socketio:netty-socketio:2.0.3'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.apache.pdfbox:pdfbox:2.0.30'
+    implementation 'com.github.iamport:iamport-rest-client-java:0.2.23'
+    
+>>>>>>> 16f9fd1d8832b31f24e862d3fb30fb3a49c15e5b
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-	
-    developmentOnly 'org.springframework.boot:spring-boot-devtools' // 자동 리스타트
-
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-	implementation 'org.springframework.boot:spring-boot-starter-mail' //SMTP 인증코드 발송 API
-
-	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
-
-	implementation 'org.apache.pdfbox:pdfbox:2.0.30'
-
-	implementation 'com.corundumstudio.socketio:netty-socketio:2.0.3'
-
 }
 
 dependencyManagement {
-	imports {
-		mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
-	}
+    imports {
+        mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
+    }
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
 
-// [수정된 설정] 충돌 없이 Java 폴더의 XML만 빌드에 포함시키는 코드
+// XML 빌드 포함
 tasks.named('processResources') {
     from('src/main/java') {
         include '**/*.xml'
     }
 }
-
