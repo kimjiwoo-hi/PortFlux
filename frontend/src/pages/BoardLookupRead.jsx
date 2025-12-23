@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { X } from "lucide-react";
 import heartIcon from "../assets/heart.png";
@@ -7,6 +7,7 @@ import binheartIcon from "../assets/binheart.png";
 import commentIcon from "../assets/comment.png";
 import cartIcon from "../assets/cartIcon.png";
 import summaryAIIcon from "../assets/summary_AI.svg";
+import UserDefaultIcon from "../assets/user_default_icon.png";
 import "./BoardLookupRead.css";
 
 const BoardLookupRead = () => {
@@ -29,51 +30,53 @@ const BoardLookupRead = () => {
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const lastScrollY = useRef(0);
 
-  // 게시글 데이터 로드
-  useEffect(() => {
-    const fetchPostData = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(
-          `http://localhost:8080/api/boardlookup/${postId}`,
-          { withCredentials: true }
-        );
+  // 게시글 데이터 로드 함수 (useCallback으로 메모이제이션)
+  const fetchPostData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        `http://localhost:8080/api/boardlookup/${postId}?timestamp=${new Date().getTime()}`,
+        { withCredentials: true }
+      );
 
-        if (response.data) {
-          setPostData(response.data.post || response.data);
-          setComments(response.data.comments || []);
+      if (response.data) {
+        setPostData(response.data.post || response.data);
+        setComments(response.data.comments || []);
 
-          const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
-          if (storedUser) {
-            const loggedInUser = JSON.parse(storedUser);
-            setLoggedInUser(loggedInUser);
-            
-            // 초기 좋아요 상태 확인
+        const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          setLoggedInUser(parsedUser);
+
+          if (parsedUser && parsedUser.userNum) {
             const likeCheckResponse = await axios.get(
               `http://localhost:8080/api/boardlookup/${postId}/like/check`,
               {
-                params: { userNum: loggedInUser.userNum },
+                params: { userNum: parsedUser.userNum },
                 withCredentials: true,
               }
             );
-
             setIsLiked(likeCheckResponse.data.isLiked);
             setLikeCount(likeCheckResponse.data.totalLikes);
           }
         }
-        setLoading(false);
-      } catch (err) {
-        console.error("게시글 로드 실패:", err);
-        setError("게시글을 불러오는데 실패했습니다.");
-        setLoading(false);
       }
-    };
-
-    if (postId) fetchPostData();
+      setError(null); // 성공 시 에러 상태 초기화
+    } catch (err) {
+      console.error("게시글 로드 실패:", err);
+      setError("게시글을 불러오는데 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
   }, [postId]);
 
-  // 스크롤 이벤트
+  // 최초 로드 및 이벤트 핸들러 통합
   useEffect(() => {
+    if (postId) {
+      fetchPostData();
+    }
+    
+    const handleFocus = () => fetchPostData();
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
@@ -85,9 +88,15 @@ const BoardLookupRead = () => {
       }
       lastScrollY.current = currentScrollY;
     };
+    
+    window.addEventListener('focus', handleFocus);
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [postId, fetchPostData]);
 
   // 좋아요 토글
   const handleLikeToggle = async () => {
@@ -260,11 +269,7 @@ const BoardLookupRead = () => {
     console.error("태그 파싱 실패:", e);
   }
 
-  const userImageSrc = postData.userImage
-    ? `data:image/jpeg;base64,${btoa(
-        String.fromCharCode(...new Uint8Array(postData.userImage))
-      )}`
-    : null;
+
 
   return (
     <div className="board-lookup-read" onClick={handleBackgroundClick}>
@@ -283,11 +288,10 @@ const BoardLookupRead = () => {
             <div className="profile-left">
               <div className="profile-top">
                 <div className="profile-image">
-                  {userImageSrc ? (
-                    <img src={userImageSrc} alt="profile" />
-                  ) : (
-                    <div className="default-profile">👤</div>
-                  )}
+                  <img 
+                    src={postData.userImageBase64 ? `data:image/jpeg;base64,${postData.userImageBase64}` : UserDefaultIcon} 
+                    alt="profile" 
+                  />
                   <button
                     className={`follow-btn ${isFollowing ? "following" : ""}`}
                     onClick={handleFollowToggle}
@@ -409,15 +413,11 @@ const BoardLookupRead = () => {
       {/* 사이드바 */}
       <div className={`sidebar ${!sidebarVisible ? "hidden" : ""}`}>
         <div className="sidebar-icon profile-icon">
-          {userImageSrc ? (
-            <img
-              src={userImageSrc}
-              alt="프로필"
-              className="profile-mini-image"
-            />
-          ) : (
-            <div className="default-profile-mini">👤</div>
-          )}
+          <img
+            src={postData.userImageBase64 ? `data:image/jpeg;base64,${postData.userImageBase64}` : UserDefaultIcon}
+            alt="프로필"
+            className="profile-mini-image"
+          />
         </div>
         <div
           className={`sidebar-icon heart-icon ${isLiked ? "liked" : ""}`}
@@ -473,20 +473,14 @@ const BoardLookupRead = () => {
           ) : (
             comments.map((comment) => {
               const commentUserImageSrc = comment.userImage
-                ? `data:image/jpeg;base64,${btoa(
-                    String.fromCharCode(...new Uint8Array(comment.userImage))
-                  )}`
-                : null;
+                ? `data:image/jpeg;base64,${comment.userImage}`
+                : UserDefaultIcon;
 
               return (
                 <div key={comment.commentId} className="comment-item">
                   <div className="comment-author">
                     <div className="comment-author-profile">
-                      {commentUserImageSrc ? (
-                        <img src={commentUserImageSrc} alt={comment.userNickname} className="comment-profile-pic" />
-                      ) : (
-                        <div className="comment-default-pic">👤</div>
-                      )}
+                      <img src={commentUserImageSrc} alt={comment.userNickname} className="comment-profile-pic" />
                       <span className="comment-nickname">
                         {comment.userNickname}
                       </span>
