@@ -13,7 +13,7 @@ const NotFound = () => {
       <div className="not-found-content">
         {/* Left Column */}
         <div className="not-found-left">
-          <h1>404</h1>
+          <h1>4o4</h1>
           <p className="not-found-subtext">Not Found</p>
         </div>
 
