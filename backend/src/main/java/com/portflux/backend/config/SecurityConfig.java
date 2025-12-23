@@ -3,6 +3,7 @@ package com.portflux.backend.config;
 import java.util.Collections;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -52,7 +53,7 @@ public class SecurityConfig {
                 // 4. URL 권한 설정 (가장 중요)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/user/register/check-id").permitAll()
-                    
+                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/user/register/**").permitAll()
                         .requestMatchers("/user/register/**").permitAll()
                         .requestMatchers("/company/register/**").permitAll()
@@ -62,7 +63,7 @@ public class SecurityConfig {
                         // API 및 로그인 관련 경로 허용
                         .requestMatchers("/api/mail/**").permitAll()
                         .requestMatchers("/user/login/**").permitAll()
-
+                        .requestMatchers("/user/chats/**").permitAll()
 
                         // ★★★ 게시판 API 허용 (추가) ★★★
         .requestMatchers("/api/boardlookup/**").permitAll()
