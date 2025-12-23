@@ -15,6 +15,52 @@ function BoardLookupPage() {
   const [isLoggedIn, /*setIsLoggedIn*/] = useState(true); 
   const navigate = useNavigate();
 
+  // 로그인 상태 및 사용자 정보 확인
+  useEffect(() => {
+    const storedUser =
+      localStorage.getItem("user") || sessionStorage.getItem("user");
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      setCurrentUser(user.user);
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+      setCurrentUser(null);
+    }
+  }, []);
+
+  const handleAddToCart = async (post) => {
+    if (!isLoggedIn || !currentUser) {
+      alert("로그인이 필요합니다.");
+      navigate("/login");
+      return;
+    }
+
+    // --- [디버깅 추가] ---
+    console.log("--- 장바구니 추가 디버깅 ---");
+    console.log("사용자 ID (currentUser.userId):", currentUser.userId);
+    console.log("포스트 객체 (post):", post);
+    // --------------------
+
+    try {
+      const item = {
+        productId: post.id,
+        productName: post.title,
+        unitPrice: parseFloat(post.price),
+        qty: 1,
+      };
+
+      await addToCart(currentUser.userNum, item);
+      alert("포트폴리오가 장바구니에 추가되었습니다.");
+    } catch (error) {
+      console.error("장바구니 추가 실패:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        "장바구니 추가에 실패했습니다. 이미 담겨있을 수 있습니다.";
+      alert(errorMessage);
+    }
+  };
+
   // 게시글 목록 로드
   useEffect(() => {
     const fetchPosts = async () => {
