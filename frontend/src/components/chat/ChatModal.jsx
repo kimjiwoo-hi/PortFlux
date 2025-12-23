@@ -1,46 +1,51 @@
-import { useMemo, useState } from "react";
-
+import { useEffect, useState } from "react";
 import ChatLayout from "./ChatLayout";
 import Sidebar from "./Sidebar";
 import ChatHeader from "./ChatHeader";
 import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
+import { useChatSocket } from "../../hooks/useChatSocket";
+import { getChatRooms } from "../../api/chatRest";
 
 // ChatModal
 // - loginUserNum: 현재 로그인 사용자(소켓/REST 연결용)
 // - onClose: X 버튼 클릭 시 닫기
-
 export default function ChatModal({ loginUserNum, onClose }) {
   //내상태
   const me = { name: `User${loginUserNum}`, status: "온라인" };
-
   //방목록
-  const rooms = useMemo(
-    () => [
-      { roomId: 1, title: "채팅방1", subtitle: "임시 채팅방입니다" },
-      { roomId: 1, title: "채팅방2", subtitle: "임시 채팅방입니다" },
-    ],
-    []
-  );
-
+  const [rooms, setRooms] = useState([]);
   //현재 선택된 방
-  const [activeRoomId, setActiveRoomId] = useState(1);
+  const [activeRoomId, setActiveRoomId] = useState(null);
+  const { messages, joinRoom, loadMessages, sendMessage } =
+    useChatSocket(loginUserNum);
 
-  //메시지 목록
-  const [messages, setMessages] = useState([
-    { id: 1, sender: "User1", time: "p.m 4:30", text: "안녕하세요" },
-    { id: 2, sender: "User2", time: "p.m 4:30", text: "안녕하세요" },
-    { id: 1, sender: "User1", time: "p.m 4:30", text: "오늘 날씨가 좋네요" },
-    { id: 2, sender: "User2", time: "p.m 4:30", text: "밖에 비오는데요" },
-  ]);
+  // 1. 로그인 사용자의 채팅방 목록 불러오기
+  useEffect(() => {
+    if (!loginUserNum) return;
+    (async () => {
+      const roomList = await getChatRooms(loginUserNum);
+      setRooms(roomList);
+      // 첫 번째 방을 활성 방으로 자동 선택
+      if (roomList.length > 0) {
+        setActiveRoomId(roomList[0].roomId);
+      }
+    })();
+  }, [loginUserNum]);
+
+  // 2. 활성 방이 변경되면, 해당 방에 조인하고 메시지 불러오기
+  useEffect(() => {
+    if (!activeRoomId) return;
+
+    joinRoom(activeRoomId);
+    loadMessages(activeRoomId);
+  }, [activeRoomId, joinRoom, loadMessages]);
 
   const activeRoom = rooms.find((r) => r.roomId === activeRoomId);
 
   const handleSend = (text) => {
-    setMessages((prev) => [
-      ...prev,
-      { id: Date.now(), sender: me.name, time: "sysdate", text },
-    ]);
+    if (!activeRoomId || !text.trim()) return;
+    sendMessage(activeRoomId, text.trim());
   };
 
   return (
@@ -57,11 +62,11 @@ export default function ChatModal({ loginUserNum, onClose }) {
       right={
         <section className="chat-main">
           <ChatHeader room={activeRoom} />
-          <MessageList messages={messages} />
+          <MessageList messages={messages} loginUserNum={loginUserNum} />
           <MessageInput
-            placeholder="임시 메세지를 임력합니다"
+            placeholder="메시지를 입력하세요"
             onSend={handleSend}
-            onAttach={() => alert("첨부")}
+            onAttach={() => alert("첨부 기능은 준비중입니다.")}
           />
         </section>
       }
