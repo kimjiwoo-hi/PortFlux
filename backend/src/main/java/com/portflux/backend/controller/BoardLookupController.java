@@ -7,6 +7,7 @@ import com.portflux.backend.service.LikeService;  // ✅ 추가
 import com.portflux.backend.service.CommentService;
 import com.portflux.backend.service.PdfImageService;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -146,9 +147,12 @@ public class BoardLookupController {
     @PostMapping("/posts")
     public ResponseEntity<Map<String, Object>> createPost(
             @ModelAttribute BoardLookupPostDto postDto,
-            @RequestParam(value = "file", required = false) MultipartFile file
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam("userNum") int userNum
     ) {
         try {
+            postDto.setUserNum(userNum);
+
             // 1. 파일 유효성 검사 및 저장
             if (file != null && !file.isEmpty()) {
                 String originalFilename = file.getOriginalFilename();
@@ -163,7 +167,7 @@ public class BoardLookupController {
                 return ResponseEntity.badRequest().body(Map.of("message", "파일이 없습니다."));
             }
 
-            // 2. 초기값 설정
+            // 2. 초기값 설정 (aiSummary는 content에 통합되었으므로 제거)
             postDto.setAiSummary("AI 요약 대기 중...");
             postDto.setDownloadCnt(0);
             postDto.setViewCnt(0);
