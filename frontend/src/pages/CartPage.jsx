@@ -1,131 +1,107 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { getCart, createOrder, removeFromCart, updateCartQuantity } from "../api/api";
-import CheckoutModal from "../components/CheckoutModal";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import "./CartPage.css";
 
-// TODO: 임시 사용자 ID. 실제 프로덕션에서는 로그인 및 인증을 통해 동적으로 받아와야 합니다.
-const TEMP_USER_ID = 1;
+function CartPage() {
+  // 1. 초기값은 항상 빈 배열로 설정
+  const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-export default function CartPage() {
-  const [cart, setCart] = useState({ items: [], total: 0 });
-  const [checkoutInfo, setCheckoutInfo] = useState(null);
-  const [error, setError] = useState(null);
-
-  const fetchCart = useCallback(async () => {
-    try {
-      setError(null);
-      const res = await getCart(TEMP_USER_ID);
-      setCart(res.data);
-    } catch (e) {
-      console.error(e);
-      setError("장바구니 정보를 불러오는데 실패했습니다.");
-    }
-  }, []);
+  // 로그인 유저 정보 가져오기
+  const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+  const loggedData = storedUser ? JSON.parse(storedUser) : null;
+  const userId = loggedData?.user?.userNum || loggedData?.userNum;
 
   useEffect(() => {
-    fetchCart();
-  }, [fetchCart]);
-
-  const handleUpdateQuantity = async (cartId, newQty) => {
-    const originalQty = cart.items.find(item => item.cartId === cartId)?.qty;
-    
-    if (newQty <= 0) {
-      // 수량이 0 이하면 삭제 처리
-      await handleRemove(cartId);
+    if (!userId) {
+      alert("로그인이 필요한 서비스입니다.");
+      navigate("/login");
       return;
     }
 
-    if (newQty === originalQty) return; // 수량 변경이 없으면 아무것도 하지 않음
+    // ... 기존 코드 동일
 
-    try {
-      await updateCartQuantity(cartId, newQty);
-      // 성공 시 장바구니 정보 다시 로드
-      await fetchCart();
-    } catch (e) {
-      console.error(e);
-      alert("수량 변경에 실패했습니다.");
-    }
-  };
+    const fetchCart = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8080/api/cart/${userId}`, {
+          withCredentials: true
+        });
 
-  const handleRemove = async (cartId) => {
-    if (!window.confirm("정말로 이 상품을 삭제하시겠습니까?")) return;
+        // ★ [수정 핵심] 서버 응답 데이터 구조 반영
+        // 서버가 {"items": []} 형태로 보내므로 response.data.items를 확인해야 합니다.
+        console.log("서버 응답 실제 데이터:", response.data); 
+        
+        const safeData = (response.data && Array.isArray(response.data.items)) 
+                         ? response.data.items 
+                         : [];
+        
+        setCartItems(safeData);
 
-    try {
-      await removeFromCart(cartId);
-      // 성공 시 장바구니 정보 다시 로드
-      await fetchCart();
-    } catch (e) {
-      console.error(e);
-      alert("상품 삭제에 실패했습니다.");
-    }
-  };
-
-  const handleCheckout = async () => {
-    const payload = {
-      userId: TEMP_USER_ID,
-      items: cart.items.map((it) => ({
-        productId: it.productId,
-        productName: it.productName,
-        unitPrice: it.unitPrice,
-        qty: it.qty,
-      })),
+      } catch (err) {
+        console.error("장바구니 로딩 실패:", err);
+        setCartItems([]); 
+      } finally {
+        setLoading(false);
+      }
     };
 
-    try {
-      const res = await createOrder(payload);
-      const data = res.data;
-      setCheckoutInfo({ merchantUid: data.merchantUid, amount: data.amount, orderId: data.orderId });
-    } catch (err) {
-      console.error(err);
-      alert("주문 생성에 실패했습니다.");
-    }
+// ... 이하 totalAmount 계산 및 렌더링 로직 동일
+
+    fetchCart();
+  }, [userId, navigate]);
+
+  // ★ [수정 핵심] 합계 계산 전 배열 여부 확인 (cartItems.reduce is not a function 에러 방지)
+  const itemsForCalc = Array.isArray(cartItems) ? cartItems : [];
+  const totalAmount = itemsForCalc.reduce((sum, item) => {
+    // unitPrice나 qty가 누락되었을 경우를 대비해 0으로 처리
+    const price = item.unitPrice || 0;
+    const quantity = item.qty || 0;
+    return sum + (price * quantity);
+  }, 0);
+
+  const handleCheckout = () => {
+    navigate("/order-step"); 
   };
 
-  if (error) {
-    return <div className="cart-page"><p>{error}</p></div>;
-  }
-// ... 기존 코드 동일
+  if (loading) return <div className="cart-container">장바구니 확인 중...</div>;
 
   return (
-    <div className="cart-page">
-      <h2>장바구니</h2>
-      <ul>
-        {cart.items && cart.items.length > 0 ? (
-          cart.items.map((it) => (
-            <li key={it.cartId}>
-              {/* ✅ 수정: unitPrice가 없을 경우를 대비해 기본값 0 설정 및 옵셔널 체이닝(?.) 사용 */}
-              <span>
-                {it.productName} (단가: {(it.unitPrice || 0).toLocaleString()}원)
-              </span>
-              <div>
-                <input
-                  type="number"
-                  min="1"
-                  defaultValue={it.qty}
-                  onBlur={(e) => handleUpdateQuantity(it.cartId, parseInt(e.target.value, 10))}
-                  style={{ width: "50px", marginRight: "10px" }}
-                />
-                <button onClick={() => handleRemove(it.cartId)}>삭제</button>
-              </div>
-            </li>
-          ))
-        ) : (
-          <li>장바구니가 비어있습니다.</li>
-        )}
-      </ul>
-      
-      {/* ✅ 수정: cart.total이 undefined일 경우를 대비해 기본값 0 설정 */}
-      <div className="summary">
-        총 합계: {(cart.total || 0).toLocaleString()}원
-      </div>
-
-      <button 
-        onClick={handleCheckout} 
-        disabled={!cart.items || cart.items.length === 0}
-      >
-        결제하러 가기
-      </button>
-
-      {/* ... CheckoutModal 부분 동일 */}
+    <div className="cart-container">
+      <h2>🛒 나의 장바구니</h2>
+      {cartItems.length === 0 ? (
+        <div className="empty-cart">장바구니가 비어 있습니다.</div>
+      ) : (
+        <div className="cart-content">
+          <table className="cart-table">
+            <thead>
+              <tr>
+                <th>상품명</th>
+                <th>가격</th>
+                <th>수량</th>
+                <th>소계</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cartItems.map((item, index) => (
+                <tr key={item.cartItemId || index}>
+                  <td>{item.productName}</td>
+                  <td>{(item.unitPrice || 0).toLocaleString()}원</td>
+                  <td>{item.qty}</td>
+                  <td>{((item.unitPrice || 0) * (item.qty || 0)).toLocaleString()}원</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="cart-summary">
+            <h3>총 결제 예상 금액: <span className="total-price">{totalAmount.toLocaleString()}원</span></h3>
+            <button className="checkout-btn" onClick={handleCheckout}>결제하기</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+export default CartPage;

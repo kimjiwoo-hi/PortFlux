@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Upload, X, FileText, CheckCircle } from 'lucide-react';
+import { Upload, X, FileText, CheckCircle, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './BoardLookupWritePage.css';
@@ -9,13 +9,19 @@ export default function BoardLookupWritePage() {
   const navigate = useNavigate();
   const [selectedFile, setSelectedFile] = useState(null);
   const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState(''); // content가 AI 요약 또는 직접 작성 내용 모두를 담음
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState('');
   const [price, setPrice] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [expandedCategories, setExpandedCategories] = useState({});
+  
+  // AI 요약 관련 state는 더 이상 필요 없음
+  // const [aiSummary, setAiSummary] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  // const [showAiSummary, setShowAiSummary] = useState(false);
+
 
   const allTags = useMemo(() => {
     return Object.values(tagData).flat();
@@ -29,11 +35,49 @@ export default function BoardLookupWritePage() {
 
       if (allowedExtensions.includes(fileExtension.toLowerCase())) {
         setSelectedFile(file);
+        // setShowAiSummary(false); // 파일 변경 시 AI 요약 초기화 (더 이상 필요 없음)
+        // setAiSummary(''); // (더 이상 필요 없음)
       } else {
         alert('PDF 파일만 업로드할 수 있습니다.');
         e.target.value = null;
         setSelectedFile(null);
       }
+    }
+  };
+
+  // AI 요약 생성 함수
+  const handleGenerateAiSummary = async () => {
+    if (!selectedFile) {
+      alert('먼저 PDF 파일을 업로드해주세요.');
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const formData = new FormData();
+      formData.append('pdf', selectedFile);
+
+      const response = await axios.post(
+        'http://localhost:8080/api/pdf/analyze',
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          withCredentials: true
+        }
+      );
+
+      if (response.data.success === 'true') {
+        // setAiSummary(response.data.aiSummary); // 더 이상 필요 없음
+        setContent(response.data.aiSummary); // ✅ 생성된 AI 요약을 메인 content state에 바로 적용
+        // setShowAiSummary(true); // 더 이상 필요 없음
+      } else {
+        alert('AI 요약 생성에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('AI 요약 생성 오류:', error);
+      alert('AI 요약 생성 중 오류가 발생했습니다: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
@@ -113,11 +157,12 @@ export default function BoardLookupWritePage() {
       formData.append('price', parseInt(price));
       formData.append('userNum', loggedInUser.userNum);
       formData.append('tags', JSON.stringify(tags));
-      
+      // formData.append('aiSummary', aiSummary || ''); // AI 요약은 content에 통합되므로 제거
 
       console.log('=== 업로드 시작 ===');
       console.log('파일:', selectedFile.name);
       console.log('크기:', formatFileSize(selectedFile.size));
+      // console.log('AI 요약:', aiSummary ? '포함됨' : '없음'); // AI 요약은 content에 통합되므로 제거
 
       const response = await axios.post(
         'http://localhost:8080/api/boardlookup/posts',
@@ -189,9 +234,37 @@ export default function BoardLookupWritePage() {
                     <p className="pdf-hint">
                       등록 후 자동으로 이미지로 변환됩니다
                     </p>
+                    
+                    {/* AI 요약 생성 버튼 */}
+                    <button 
+                      onClick={handleGenerateAiSummary} 
+                      disabled={isAnalyzing}
+                      className="ai-analyze-button"
+                      style={{
+                        marginTop: '15px',
+                        padding: '10px 20px',
+                        backgroundColor: isAnalyzing ? '#ccc' : '#8b5cf6',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: isAnalyzing ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        fontSize: '14px',
+                        fontWeight: '600'
+                      }}
+                    >
+                      <Sparkles size={18} />
+                      {isAnalyzing ? 'AI 분석 중...' : 'AI 요약 생성'}
+                    </button>
                   </div>
                   <button 
-                    onClick={() => setSelectedFile(null)} 
+                    onClick={() => {
+                      setSelectedFile(null);
+                      // setShowAiSummary(false); // 더 이상 필요 없음
+                      // setAiSummary(''); // 더 이상 필요 없음
+                    }} 
                     className="remove-image-button"
                   >
                     <X className="remove-icon" />
@@ -201,7 +274,7 @@ export default function BoardLookupWritePage() {
             </div>
             <div className="feature-description">
               <p>• PDF 업로드 후 자동으로 페이지별 이미지 변환</p>
-              <p>• Behance 스타일 스크롤 뷰어 제공</p>
+              <p>• AI가 PDF 내용을 분석하여 '내용'에 요약 제공</p>
               <p>• 태그를 추가하여 검색 최적화</p>
             </div>
           </div>

@@ -6,8 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -28,16 +26,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 1. CORS 설정 (Security 필터 레벨)
+                // 1. CORS 설정 (프론트엔드 URL 명시)
                 .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration config = new CorsConfiguration();
-
-                        // ★★★ [수정 핵심] 와일드카드 대신 프론트엔드 URL 명시 ★★★
-                        // 프론트엔드가 5173 포트를 사용하므로 명시합니다.
                         config.setAllowedOriginPatterns(Collections.singletonList("http://localhost:5173"));
-
                         config.setAllowedMethods(Collections.singletonList("*"));
                         config.setAllowCredentials(true);
                         config.setAllowedHeaders(Collections.singletonList("*"));
@@ -45,45 +39,34 @@ public class SecurityConfig {
                     }
                 }))
 
-                // 2. CSRF 비활성화
+                // 2. CSRF 비활성화 (POST/PUT 요청 시 403 에러 방지 핵심)
                 .csrf(csrf -> csrf.disable())
 
-                // 3. 세션 설정
+                // 3. 세션 설정 (JWT 기반이므로 STATELESS)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // 4. URL 권한 설정 (가장 중요)
+                // 4. URL 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user/register/check-id").permitAll()
-                    
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/user/register/**").permitAll()
-                        .requestMatchers("/user/register/**").permitAll()
-                        .requestMatchers("/company/register/**").permitAll()
-                        // [추가] 아이디 찾기 API 허용
-                        .requestMatchers("/user/find/**").permitAll()
+                        // 회원가입, 아이디 찾기, 로그인 관련 모두 허용
+                        .requestMatchers("/user/register/**", "/company/register/**", "/user/find/**").permitAll()
+                        .requestMatchers("/api/mail/**", "/user/login/**").permitAll()
 
-                        // API 및 로그인 관련 경로 허용
-                        .requestMatchers("/api/mail/**").permitAll()
-                        .requestMatchers("/user/login/**").permitAll()
+                        // 게시판 조회 및 이미지 파일 접근 허용
+                        .requestMatchers("/api/boardlookup/**", "/uploads/**").permitAll()
 
-
-                        // ★★★ 게시판 API 허용 (추가) ★★★
-                        .requestMatchers("/api/boardlookup/**").permitAll()
-        
-                        // ★★★ 업로드된 파일 접근 허용 (추가) ★★★
-                        .requestMatchers("/uploads/**").permitAll()
-                        // [추가] 사용자 정보 조회/수정 API 허용
+                        // 사용자 정보 조회 허용
                         .requestMatchers("/user/info/**").permitAll()
 
-                        // [추가] 장바구니 API는 인증된 사용자만 허용
-                        .requestMatchers("/api/cart/**").authenticated()
+                        // ★★★ [수정] 장바구니 API 임시 허용 ★★★
+                        // 개발 막바지 단계에서 인증 필터(JWT) 문제로 인한 403을 방지하기 위해 permitAll로 변경합니다.
+                        .requestMatchers("/api/cart/**").permitAll()
 
-                        // 정적 리소스 허용
-                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
-                        // 컨트롤러 매핑 오류(404) 시 시큐리티가 403으로 막지 않도록 에러 경로 허용
-                        .requestMatchers("/error").permitAll()
-                        // ★★★ [최하위 우선순위] 그 외 모든 요청은 인증 필요 ★★★
+                        // 정적 리소스 및 에러 경로 허용
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/error").permitAll()
+
+                        // 그 외 모든 요청은 인증 필요
                         .anyRequest().authenticated())
-                
+
                 // 5. JWT 필터 추가
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

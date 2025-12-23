@@ -882,3 +882,113 @@
   height: auto;
   display: block;
 }
+.close-post-button {
+  background: none;
+  border: none;
+  color: #191919;
+  cursor: pointer;
+  padding: 0;
+  position: absolute;
+  top: 20px; /* Match header padding-top */
+  right: 60px; /* Match header padding-right */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+  z-index: 51; /* Ensure it's above other header elements if needed */
+}
+
+.close-post-button:hover {
+  background-color: #f0f0f0;
+}
+
+
+.comment-author {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* This will vertically align the date with the profile info */
+  margin-bottom: 8px;
+}
+
+.comment-author-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Space between picture and nickname */
+}
+
+.comment-profile-pic,
+.comment-default-pic {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+}
+
+.comment-default-pic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+
+.comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.comment-delete-btn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.comment-delete-btn:hover {
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+
+.summary-section {
+  margin-bottom: 25px;
+  padding-bottom: 25px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.summary-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.summary-section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #191919;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.summary-content-text {
+  color: #333;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  white-space: pre-wrap; /* Preserve whitespace and line breaks */
+  text-align: left;
+}
+
+.summary-placeholder-text {
+  text-align: center;
+  color: #999;
+  padding: 20px 0;
+}
+
