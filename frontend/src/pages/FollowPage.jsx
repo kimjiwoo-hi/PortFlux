@@ -1,3 +1,4 @@
+/*
 import React, { useState, useEffect, useCallback } from 'react';
 import { getFollowing, getFollowers, follow, unfollow } from '../api/api';
 import './FollowPage.css';
@@ -85,6 +86,22 @@ const FollowPage = () => {
                     <UserList users={followers} title="Followers" />
                 )}
             </div>
+        </div>
+    );
+};
+
+export default FollowPage;
+*/
+
+import React from 'react'; // React만 필요
+import './FollowPage.css'; // 기존 CSS는 유지
+
+const FollowPage = () => {
+    return (
+        <div className="follow-page" style={{ textAlign: 'center', padding: '50px', fontSize: '1.2rem', color: '#555' }}>
+            <h2>팔로우 페이지</h2>
+            <p>팔로우 기능은 현재 준비 중입니다. 원본 코드는 파일 내 주석 처리되어 있습니다.</p>
+            <p>불편을 드려 죄송합니다.</p>
         </div>
     );
 };
