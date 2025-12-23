@@ -254,44 +254,73 @@ function RegisterPage() {
   };
 
   const handleRegister = async () => {
-    if (!userId || !email || !password || !passwordCheck || !userName || !nickname || !phoneNumber) return;
+    // 1. 유효성 검사 (빈 값 체크)
+    if (!userId || !email || !password || !passwordCheck || !userName || !nickname || !phoneNumber) {
+        alert("모든 필수 항목을 입력해주세요.");
+        return;
+    }
     
-    if (!isAuthVerified && !authCode && !isGoogle) return; 
-    if (isIdAvailable !== true) return;
+    if (!isAuthVerified && !authCode && !isGoogle) {
+        alert("이메일 인증을 완료해주세요.");
+        return;
+    }
+    if (isIdAvailable !== true) {
+        alert("아이디 중복 확인을 해주세요.");
+        return;
+    }
     if (isEmailValid !== true) return;
     if (isPwdValid === false) return;
     if (isPwdMatch === false) return;
     
-    if (isNicknameAvailable !== true) return;
+    if (isNicknameAvailable !== true) {
+        alert("닉네임 중복 확인을 해주세요.");
+        return;
+    }
     
     if (!isIndividual && isBizNumValid !== true) return;
     if (isPhoneValid === false) return; 
 
+    // 2. 백엔드로 보낼 데이터 구성
     const data = {
-      userId, email, password, passwordCheck, name: userName, nickname, phoneNumber, 
+      userId: userId,
+      email: email,
+      password: password,
+      passwordCheck: passwordCheck,
+      name: userName,
+      nickname: nickname,
+      phoneNumber: phoneNumber,
       authCode: authCode || "GOOGLE_PASS", 
       ...( !isIndividual && { businessNumber: businessNumber } )
     };
+
     const url = isIndividual ? "http://localhost:8080/user/register/general" : "http://localhost:8080/company/register/proc";
 
     try {
       const res = await fetch(url, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data),
       });
+      
       if (res.ok) { 
-        localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("userId", userId);
-        localStorage.setItem("userNickname", nickname);
-        localStorage.setItem("userEmail", email);
+        // [수정 핵심] 회원가입 성공 시 localStorage 저장을 하지 않습니다. (자동 로그인 방지)
+        // 아래 줄들을 삭제했습니다:
+        // localStorage.setItem("isLoggedIn", "true");
+        // localStorage.setItem("userId", userId); ... 등등
 
         navigate("/success", { 
             state: { 
                 title: "회원가입 완료", 
-                message: "회원가입이 성공적으로 완료되었습니다." 
+                message: "회원가입이 성공적으로 완료되었습니다. 로그인 후 이용해 주세요!" 
             } 
         });
-      } else { console.error(await res.text()); }
-    } catch { console.error("서버 오류"); }
+      } else { 
+          const errorMsg = await res.text();
+          console.error("회원가입 실패:", errorMsg);
+          alert("회원가입 실패: " + errorMsg);
+      }
+    } catch (err) { 
+        console.error("서버 연결 오류:", err);
+        alert("서버 연결에 실패했습니다.");
+    }
   };
 
   return (

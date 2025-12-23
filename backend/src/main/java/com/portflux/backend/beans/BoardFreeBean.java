@@ -1,36 +1,25 @@
 package com.portflux.backend.beans;
 
 import lombok.Data;
-import java.util.Date;
+import java.sql.Timestamp;
 
 @Data
 public class BoardFreeBean {
-    private int post_id;      // DB PK
-    private int postId;       // Frontend용 (카멜케이스)
+    private Integer postId;      // 게시글 번호
+    private String boardType;    // 게시판 타입 (free, notice 등)
+    private String title;        // 제목
+    private String content;      // 내용
+    private Timestamp createdAt; // 생성일
+    private Timestamp updatedAt; // 수정일
+    private Integer viewCnt;     // 조회수
+    private Integer likeCnt;     // 좋아요 수
+    private String postFile;     // 첨부파일 경로
+    private String image;        // 이미지 경로
     
-    private String board_type;
-    private String boardType; // Frontend용
+    // 작성자 정보
+    private Integer userNum;     // 유저 고유 번호
+    private String userNickname; // 유저 닉네임
+    private Integer adminNum;    // 관리자 번호 (필요 시 사용)
     
-    private String title;
-    private String content;
-    
-    private String userId;    // DB Insert용 (user_id)
-    private String user_nickname; 
-    private String userNickname;  
-
-    private int view_cnt;
-    private int like_cnt;
-    private int comment_cnt;
-    
-    private Date created_at;
-    private Date updated_at;
-    
-    // Lombok(@Data) 미작동 시 대비용 수동 Getter/Setter
-    public int getPost_id() { return post_id; }
-    public void setPost_id(int post_id) { this.post_id = post_id; this.postId = post_id; }
-    
-    public String getBoardType() { return boardType != null ? boardType : board_type; }
-    public void setBoardType(String boardType) { this.boardType = boardType; this.board_type = boardType; }
-    
-    public String getUserNickname() { return userNickname != null ? userNickname : user_nickname; }
+    private Integer commentCnt;  // 댓글 개수
 }

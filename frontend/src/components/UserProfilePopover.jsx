@@ -18,14 +18,14 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
       const userId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
       
       if (userId) {
-        // [수정] 백엔드에서 사용자 정보 조회 (URL은 상황에 맞춰 조정 필요)
+        // 백엔드에서 사용자 정보 조회
         fetch(`http://localhost:8080/user/info/${userId}`)
           .then(response => {
             if (!response.ok) throw new Error("Network response was not ok");
             return response.json();
           })
           .then(data => {
-            // DB 컬럼이 스네이크 케이스일 수도, 카멜 케이스일 수도 있으므로 둘 다 체크
+            // DB 컬럼명에 따라 매핑 (스네이크/카멜 케이스 모두 고려)
             const fallbackNickname = localStorage.getItem("userNickname") || "사용자";
             
             setUserInfo({
@@ -82,9 +82,7 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
         <div className="popover-name">
             {userInfo.userNickname || "사용자"}
         </div>
-        <div className="popover-email">
-            {userInfo.userEmail}
-        </div>
+        {/* [수정] 아이디(이메일) 표시 부분 삭제함 */}
       </div>
 
       <div className="stats-container">

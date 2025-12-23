@@ -70,10 +70,11 @@ function LoginPage() {
           // 기존 회원: 로그인 성공
           console.log("구글 로그인 성공:", json);
           
-          // ▼▼▼ [추가] 로그인 성공 상태 저장 (Header 감지용) + 닉네임 저장 ▼▼▼
+          // ▼▼▼ [추가] 로그인 성공 상태 저장 (Header 감지용) + 닉네임/유저번호 저장 ▼▼▼
           localStorage.setItem("isLoggedIn", "true");
           localStorage.setItem("userId", json.email); // 구글은 이메일을 ID 대용으로 저장
           localStorage.setItem("userNickname", json.nickname); // 닉네임 저장
+          localStorage.setItem("userNum", json.userNum); // 유저번호 저장
           // ▲▲▲ 추가 끝 ▲▲▲
 
           // 원래 있던 페이지로 이동
@@ -108,21 +109,24 @@ function LoginPage() {
         body: JSON.stringify(data),
       });
 
-      if (res.ok) {
+    if (res.ok) {
         setLoginError("");
         const json = await res.json();
         console.log("로그인 성공:", json);
         
-        // ▼▼▼ [수정] 로그인 유지 체크 여부에 따라 저장소 분기 + 닉네임 저장 ▼▼▼
         const storage = autoLogin ? localStorage : sessionStorage;
         storage.setItem("isLoggedIn", "true");
         storage.setItem("userId", userId);
-        storage.setItem("userNickname", json.nickname); // 닉네임 저장
-        // ▲▲▲ 수정 끝 ▲▲▲
+        
+        // [중요 수정] json.nickname -> json.userNickname 으로 변경
+        // 자바 Bean 필드명이 userNickname이기 때문입니다.
+        storage.setItem("userNickname", json.userNickname || json.user_nickname); 
+        
+        storage.setItem("userNum", json.userNum);
 
-        // 로그인 성공 시 이전 페이지로 이동
         const targetPath = location.state?.from || "/";
         navigate(targetPath);
+      
 
       } else {
         setLoginError("아이디 혹은 비밀번호가 일치하지 않습니다.");

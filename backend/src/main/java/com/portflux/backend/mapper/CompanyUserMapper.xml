@@ -15,12 +15,12 @@
             company_create_at, 
             business_number
         ) VALUES (
-            #{email},           #{password}, 
-            #{name},            #{phoneNumber}, 
+            #{userId},          #{password},        #{name},            #{phoneNumber}, 
             #{email}, 
             'N', 
             SYSDATE, 
-            #{businessNumber}   )
+            #{businessNumber}
+        )
     </insert>
 
     <select id="checkBusinessNumber" parameterType="String" resultType="int">
@@ -49,4 +49,5 @@
         FROM COMPANY
         WHERE lower(company_name) = lower(#{name})
     </select>
+
 </mapper>

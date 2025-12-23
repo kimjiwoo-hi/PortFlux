@@ -1,57 +1,116 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.portflux.backend.dao.BoardFreeDao">
+<mapper namespace="com.portflux.backend.mapper.BoardFreeMapper">
 
-    <select id="getBoardList" resultType="com.portflux.backend.beans.BoardFreeBean">
-        SELECT p.post_id, p.board_type, p.title, p.content, 
-               p.created_at, p.view_cnt, 
-               (SELECT COUNT(*) FROM POST_LIKE pl WHERE pl.post_id = p.post_id) as like_cnt,
-               u.user_nickname, u.user_id as userId
-        FROM POST p
-        LEFT JOIN USERS u ON p.user_num = u.user_num
-        WHERE p.board_type = 'free' OR p.board_type = 'notice'
-        ORDER BY p.post_id DESC
+    <select id="checkLike" resultType="int">
+        SELECT COUNT(*) FROM POST_LIKE WHERE post_id = #{postId} AND user_num = #{userNum}
     </select>
 
-    <insert id="insertBoard" parameterType="com.portflux.backend.beans.BoardFreeBean">
-        INSERT INTO POST (
-            board_type, user_num, title, content, created_at
-        ) VALUES (
-            #{boardType}, 
-            (SELECT user_num FROM USERS WHERE user_id = #{userId}), 
-            #{title}, 
-            #{content}, 
-            SYSDATE
-        )
+    <insert id="insertLike">
+        INSERT INTO POST_LIKE (user_num, post_id, liked_at) VALUES (#{userNum}, #{postId}, SYSDATE)
     </insert>
 
-    <select id="getBoardDetail" parameterType="int" resultType="com.portflux.backend.beans.BoardFreeBean">
-        SELECT p.*, u.user_nickname, u.user_id as userId
-        FROM POST p
+    <delete id="deleteLike">
+        DELETE FROM POST_LIKE WHERE post_id = #{postId} AND user_num = #{userNum}
+    </delete>
+
+    <update id="increaseLikeCount" parameterType="int">
+        UPDATE POST SET like_cnt = NVL(like_cnt, 0) + 1 WHERE post_id = #{postId}
+    </update>
+
+    <update id="decreaseLikeCount" parameterType="int">
+        UPDATE POST SET like_cnt = CASE WHEN NVL(like_cnt, 0) > 0 THEN like_cnt - 1 ELSE 0 END WHERE post_id = #{postId}
+    </update>
+
+    <select id="getBoardList" parameterType="String" resultType="com.portflux.backend.beans.BoardFreeBean">
+        SELECT p.post_id as postId, 
+               CASE 
+                   WHEN p.board_type = 'notice' OR a.user_num IS NOT NULL THEN 'notice' 
+                   ELSE 'free' 
+               END as boardType, 
+               p.title, 
+               p.content, 
+               p.created_at as createdAt, 
+               NVL(p.view_cnt, 0) as viewCnt, 
+               NVL(p.like_cnt, 0) as likeCnt, 
+               p.post_file as postFile, 
+               p.image as image, 
+               u.user_nickname as userNickname, 
+               p.user_num as userNum,
+               (SELECT COUNT(*) FROM POST_COMMENT c WHERE c.post_id = p.post_id) as commentCnt
+        FROM POST p 
         LEFT JOIN USERS u ON p.user_num = u.user_num
+        LEFT JOIN ADMIN_ACCOUNT a ON p.user_num = a.user_num
+        <where>
+            <if test="keyword != null and keyword != ''">
+                (p.title LIKE '%' || #{keyword} || '%' OR p.content LIKE '%' || #{keyword} || '%')
+            </if>
+            AND p.board_type IN ('free', 'notice')
+        </where>
+        ORDER BY CASE WHEN p.board_type = 'notice' OR a.user_num IS NOT NULL THEN 0 ELSE 1 END ASC, p.post_id DESC
+    </select>
+
+    <select id="getBoardDetail" parameterType="int" resultType="com.portflux.backend.beans.BoardFreeBean">
+        SELECT 
+            p.post_id as postId, 
+            p.board_type as boardType, 
+            p.title, 
+            p.content, 
+            p.created_at as createdAt, 
+            p.updated_at as updatedAt,
+            NVL(p.view_cnt, 0) as viewCnt, 
+            NVL(p.like_cnt, 0) as likeCnt,
+            p.post_file as postFile,
+            p.image as image,
+            p.user_num as userNum,
+            u.user_nickname as userNickname
+        FROM POST p 
+        LEFT JOIN USERS u ON p.user_num = u.user_num
+        LEFT JOIN ADMIN_ACCOUNT a ON p.user_num = a.user_num
         WHERE p.post_id = #{postId}
     </select>
 
+    <insert id="insertBoard" parameterType="com.portflux.backend.beans.BoardFreeBean">
+        INSERT INTO POST (board_type, user_num, title, content, post_file, image) 
+        VALUES (#{boardType}, #{userNum}, #{title}, #{content}, #{postFile, jdbcType=VARCHAR}, #{image, jdbcType=VARCHAR})
+    </insert>
+
     <update id="increaseViewCount" parameterType="int">
-        UPDATE POST 
-        SET view_cnt = view_cnt + 1 
-        WHERE post_id = #{postId}
+        UPDATE POST SET view_cnt = NVL(view_cnt, 0) + 1 WHERE post_id = #{postId}
     </update>
 
     <update id="updateBoard" parameterType="com.portflux.backend.beans.BoardFreeBean">
-        UPDATE POST 
-        SET title = #{title}, 
-            content = #{content}, 
-            updated_at = SYSDATE, 
-            board_type = #{boardType}
+        UPDATE POST SET title = #{title}, content = #{content}
+        <if test="postFile != null">, post_file = #{postFile, jdbcType=VARCHAR}</if>
+        <if test="image != null">, image = #{image, jdbcType=VARCHAR}</if>
         WHERE post_id = #{postId}
     </update>
 
     <delete id="deleteBoard" parameterType="int">
-        DELETE FROM POST 
-        WHERE post_id = #{postId}
+        DELETE FROM POST WHERE post_id = #{postId}
     </delete>
+
+    <select id="getCommentList" parameterType="int" resultType="com.portflux.backend.beans.BoardCommentBean">
+        SELECT c.comment_id as commentId, c.post_id as postId, c.user_num as userNum,
+               c.comment_content as content, c.comment_created_at as createdAt,
+               c.comment_modify_at as modifyAt, c.parent_id as parentId, u.user_nickname as userNickname
+        FROM POST_COMMENT c LEFT JOIN USERS u ON c.user_num = u.user_num
+        WHERE c.post_id = #{postId} ORDER BY c.comment_id ASC
+    </select>
+
+    <insert id="insertComment" parameterType="com.portflux.backend.beans.BoardCommentBean">
+        INSERT INTO POST_COMMENT (user_num, post_id, comment_content, comment_created_at, parent_id)
+        VALUES (#{userNum}, #{postId}, #{content}, SYSDATE, #{parentId, jdbcType=INTEGER})
+    </insert>
+
+    <delete id="deleteComment" parameterType="int">
+        DELETE FROM POST_COMMENT WHERE comment_id = #{commentId}
+    </delete>
+
+    <update id="updateComment" parameterType="com.portflux.backend.beans.BoardCommentBean">
+        UPDATE POST_COMMENT SET comment_content = #{content}, comment_modify_at = SYSDATE WHERE comment_id = #{commentId}
+    </update>
 
 </mapper>

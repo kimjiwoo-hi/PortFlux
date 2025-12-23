@@ -1,137 +1,105 @@
 package com.portflux.backend.service;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.portflux.backend.beans.AdminBean;
+import com.portflux.backend.beans.UserBean;
+import com.portflux.backend.beans.UserLoginBean;
+import com.portflux.backend.beans.UserRegisterBean;
+import com.portflux.backend.mapper.AdminMapper;
+import com.portflux.backend.mapper.UserMapper;
+import com.portflux.backend.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.portflux.backend.api.GoogleApi;
-import com.portflux.backend.beans.UserBean;
-import com.portflux.backend.beans.UserLoginBean;
-import com.portflux.backend.beans.UserRegisterBean;
-import com.portflux.backend.mapper.CompanyUserMapper;
-import com.portflux.backend.repository.UserRepository;
-
-import lombok.RequiredArgsConstructor;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 public class UserService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final GoogleApi googleApi;
-    private final CompanyUserMapper companyUserMapper;
+    @Autowired
+    private UserRepository userRepository; // JPA (일반유저 저장)
+    
+    @Autowired
+    private UserMapper userMapper;         // MyBatis (일반유저 조회)
+    
+    @Autowired
+    private AdminMapper adminMapper;       // MyBatis (관리자 여부 확인용)
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-    // 1. 회원가입
+    /**
+     * 1. 회원가입
+     */
     @Transactional
     public void registerUser(UserRegisterBean registerBean) {
-        // 비밀번호 일치 확인
-        if (!registerBean.getPassword().equals(registerBean.getPasswordCheck())) {
+        if (registerBean.getPassword() == null || !registerBean.getPassword().equals(registerBean.getPasswordCheck())) {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
 
-        // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(registerBean.getPassword());
-
-        // Entity 생성 및 저장
+        
         UserBean user = new UserBean();
-        user.setUserId(registerBean.getUserId());         // 아이디 저장
-        user.setUserEmail(registerBean.getEmail());       // 이메일 저장
-        user.setUserPassword(encodedPassword);
+        user.setUserId(registerBean.getUserId());
+        user.setUserEmail(registerBean.getEmail());
+        user.setUserPw(encodedPassword);
         user.setUserName(registerBean.getName());
         user.setUserNickname(registerBean.getNickname());
         user.setUserPhone(registerBean.getPhoneNumber());
-        user.setUserLevel(1); // 기본 레벨
+        user.setUserLevel(1);
 
         userRepository.save(user);
     }
 
-    // 2. 닉네임 중복 확인
-    public boolean isNicknameDuplicate(String nickname) {
-        boolean userExists = userRepository.existsByUserNicknameIgnoreCase(nickname);
-        boolean companyExists = companyUserMapper.existsByCompanyName(nickname) > 0;
-        return userExists || companyExists;
-    }
+    /**
+     * 2. 통합 로그인 로직
+     */
+    public Map<String, Object> login(UserLoginBean loginBean) {
+        Map<String, Object> response = new HashMap<>();
+        System.out.println("### [Login Attempt] ID: " + loginBean.getUserId());
 
-    // 3. 로그인 (아이디로 로그인)
-    public UserBean login(UserLoginBean loginBean) {
-        // 아이디로 조회
-        UserBean user = userRepository.findByUserId(loginBean.getUserId());
-
-        if (user == null) {
-            throw new RuntimeException("존재하지 않는 아이디입니다.");
-        }
-        if (!passwordEncoder.matches(loginBean.getPassword(), user.getUserPassword())) {
-            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
-        }
-        return user;
-    }
-
-    // 4. ★ [수정] 구글 로그인 프로세스 (리턴 타입 변경: UserBean -> Map)
-    // 이유: 회원이 아닐 경우에도 구글 정보(이메일, 이름)를 컨트롤러에 전달해야 함
-    public Map<String, Object> processGoogleLogin(String authCode) {
-        String accessToken = googleApi.getAccessToken(authCode);
-        if (accessToken == null)
-            throw new RuntimeException("구글 로그인 실패: 토큰 발급 오류");
-
-        Map<String, Object> googleInfo = googleApi.getUserInfo(accessToken);
-        String email = (String) googleInfo.get("email");
-        String name = (String) googleInfo.get("name");
-
-        // DB에서 이메일로 유저 조회
-        UserBean user = userRepository.findByUserEmail(email);
+        // A. 모든 사용자는 USERS 테이블에서 먼저 인증합니다.
+        UserBean user = userMapper.getUserInfo(loginBean.getUserId());
         
-        // 결과 맵 생성
-        Map<String, Object> result = new HashMap<>();
-        
-        if (user != null) {
-            // 이미 가입된 유저 -> 유저 정보 리턴
-            result.put("user", user);
-            result.put("isMember", true);
-        } else {
-            // 미가입 유저 -> 구글에서 받아온 정보만 리턴 (회원가입 프리셋 용도)
-            result.put("email", email);
-            result.put("name", name);
-            result.put("isMember", false);
+        if (user != null && passwordEncoder.matches(loginBean.getPassword(), user.getUserPw())) {
+            response.put("userNum", user.getUserNum());
+            response.put("userId", user.getUserId());
+            response.put("userNickname", user.getUserNickname());
+            
+            // B. [핵심] 인증 성공 후, 이 유저가 관리자 권한 테이블에 있는지 확인합니다.
+            // adminMapper.checkAdminExists(userNum)은 존재하면 1, 없으면 0 반환
+            int adminCount = adminMapper.checkAdminExists(user.getUserNum());
+            
+            if (adminCount > 0) {
+                response.put("role", "ADMIN");
+                System.out.println("=> 관리자 로그인 성공: " + user.getUserNickname());
+            } else {
+                response.put("role", "USER");
+                System.out.println("=> 일반 유저 로그인 성공: " + user.getUserNickname());
+            }
+            
+            return response;
         }
-        
-        return result;
+
+        throw new RuntimeException("아이디 또는 비밀번호가 일치하지 않습니다.");
     }
 
-    // 5. 이메일 중복 확인
-    public boolean isEmailDuplicate(String email) {
-        return userRepository.existsByUserEmail(email);
-    }
+    public boolean isNicknameDuplicate(String nickname) { return userMapper.checkNicknameCount(nickname) > 0; }
+    public boolean isEmailDuplicate(String email) { return userMapper.checkEmailDuplicate(email) > 0; }
+    public boolean isIdDuplicate(String userId) { return userMapper.checkIdDuplicate(userId) > 0; }
+    public UserBean getUserInfo(String userId) { return userMapper.getUserInfo(userId); }
+    public UserBean findByNameAndEmail(String name, String email) { return userMapper.findByNameAndEmail(name, email); }
+    public Map<String, Object> processGoogleLogin(String authCode) { return new HashMap<>(); }
 
-    // 6. 아이디 중복 확인 메서드
-    public boolean isIdDuplicate(String userId) {
-        return userRepository.existsByUserId(userId);
-    }
-
-    // 7. 아이디 찾기 (이름 + 이메일로 조회)
-    public UserBean findByNameAndEmail(String name, String email) {
-        return userRepository.findByUserNameAndUserEmail(name, email);
-    }
-
-    // 8. 비밀번호 변경
     @Transactional
     public void updatePassword(String userId, String newPassword) {
-        UserBean user = userRepository.findByUserId(userId);
-        
-        if (user == null) {
-            throw new RuntimeException("사용자를 찾을 수 없습니다.");
-        }
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        userMapper.updatePassword(userId, encodedPassword);
+    }
 
-        // 이전 비밀번호와 일치하는지 확인
-        if (passwordEncoder.matches(newPassword, user.getUserPassword())) {
-            throw new RuntimeException("이전 비밀번호로는 변경할 수 없습니다.");
-        }
-
-        // 새 비밀번호 암호화 후 저장
-        user.setUserPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
+    public UserBean getUserInfoByNum(int userNum) {
+        return userRepository.findById(userNum).orElse(null);
     }
 }
