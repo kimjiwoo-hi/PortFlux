@@ -4,14 +4,62 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { tagData, tagSearchMap } from "../database/taglist";
 import axios from "axios";
+import { addToCart } from "../api/api";
 
 function BoardLookupPage() {
   const [selectedTags, setSelectedTags] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isLoggedIn /*setIsLoggedIn*/] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
+
+  // 로그인 상태 및 사용자 정보 확인
+  useEffect(() => {
+    const storedUser =
+      localStorage.getItem("user") || sessionStorage.getItem("user");
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      setCurrentUser(user.user);
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+      setCurrentUser(null);
+    }
+  }, []);
+
+  const handleAddToCart = async (post) => {
+    if (!isLoggedIn || !currentUser) {
+      alert("로그인이 필요합니다.");
+      navigate("/login");
+      return;
+    }
+
+    // --- [디버깅 추가] ---
+    console.log("--- 장바구니 추가 디버깅 ---");
+    console.log("사용자 ID (currentUser.userId):", currentUser.userId);
+    console.log("포스트 객체 (post):", post);
+    // --------------------
+
+    try {
+      const item = {
+        productId: post.id,
+        productName: post.title,
+        unitPrice: parseFloat(post.price),
+        qty: 1,
+      };
+
+      await addToCart(currentUser.userNum, item);
+      alert("포트폴리오가 장바구니에 추가되었습니다.");
+    } catch (error) {
+      console.error("장바구니 추가 실패:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        "장바구니 추가에 실패했습니다. 이미 담겨있을 수 있습니다.";
+      alert(errorMessage);
+    }
+  };
 
   // 게시글 목록 로드
   useEffect(() => {
@@ -52,6 +100,7 @@ function BoardLookupPage() {
             views: post.viewCnt,
             isLiked: false,
             tags: tagsArray,
+            price: post.price, // 가격 정보 추가
           };
         });
 
@@ -204,13 +253,36 @@ function BoardLookupPage() {
               />
               <div className="board-item-info">
                 <h4 className="info-title">{post.title}</h4>
-                <a
-                  href={`/profile/${post.author}`}
-                  className="info-author"
-                  onClick={(e) => e.stopPropagation()}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
                 >
-                  {post.author}
-                </a>
+                  <a
+                    href={`/profile/${post.author}`}
+                    className="info-author"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {post.author}
+                  </a>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddToCart(post);
+                    }}
+                    style={{
+                      padding: "5px 10px",
+                      cursor: "pointer",
+                      border: "1px solid #ccc",
+                      borderRadius: "5px",
+                      backgroundColor: "#f0f0f0",
+                    }}
+                  >
+                    장바구니
+                  </button>
+                </div>
               </div>
             </div>
           )

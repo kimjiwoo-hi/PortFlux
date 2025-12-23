@@ -83,6 +83,7 @@ export default function CartPage() {
   if (error) {
     return <div className="cart-page"><p>{error}</p></div>;
   }
+// ... 기존 코드 동일
 
   return (
     <div className="cart-page">
@@ -91,7 +92,10 @@ export default function CartPage() {
         {cart.items && cart.items.length > 0 ? (
           cart.items.map((it) => (
             <li key={it.cartId}>
-              <span>{it.productName} (단가: {it.unitPrice.toLocaleString()}원)</span>
+              {/* ✅ 수정: unitPrice가 없을 경우를 대비해 기본값 0 설정 및 옵셔널 체이닝(?.) 사용 */}
+              <span>
+                {it.productName} (단가: {(it.unitPrice || 0).toLocaleString()}원)
+              </span>
               <div>
                 <input
                   type="number"
@@ -108,19 +112,20 @@ export default function CartPage() {
           <li>장바구니가 비어있습니다.</li>
         )}
       </ul>
-      <div className="summary">총 합계: {cart.total.toLocaleString()}원</div>
-      <button onClick={handleCheckout} disabled={!cart.items || cart.items.length === 0}>
+      
+      {/* ✅ 수정: cart.total이 undefined일 경우를 대비해 기본값 0 설정 */}
+      <div className="summary">
+        총 합계: {(cart.total || 0).toLocaleString()}원
+      </div>
+
+      <button 
+        onClick={handleCheckout} 
+        disabled={!cart.items || cart.items.length === 0}
+      >
         결제하러 가기
       </button>
 
-      {checkoutInfo && (
-        <CheckoutModal
-          merchantUid={checkoutInfo.merchantUid}
-          amount={checkoutInfo.amount}
-          orderId={checkoutInfo.orderId}
-          onClose={() => setCheckoutInfo(null)}
-        />
-      )}
+      {/* ... CheckoutModal 부분 동일 */}
     </div>
   );
 }

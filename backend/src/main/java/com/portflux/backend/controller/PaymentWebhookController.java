@@ -1,6 +1,6 @@
 package com.portflux.backend.controller;
 
-import com.portflux.backend.model.Payment;
+import com.portflux.backend.model.PaymentRecord;
 import com.portflux.backend.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +55,7 @@ public class PaymentWebhookController {
             // ========================================
             // Idempotency 처리: 중복 수신 방지
             // ========================================
-            Optional<Payment> existingPayment = paymentRepository.findByImpUid(impUid);
+            Optional<PaymentRecord> existingPayment = paymentRepository.findByImpUid(impUid);
             if (existingPayment.isPresent()) {
                 // 이미 처리된 imp_uid → 중복 수신
                 log.warn("Duplicate webhook received: impUid={}, merchantUid={} (already processed)", 

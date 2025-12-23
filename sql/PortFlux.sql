@@ -1,4 +1,4 @@
--- ±âÁ¸ Å×ÀÌºí »èÁ¦ (ÀÖÀ» °æ¿ì)
+-- ê¸°ì¡´ í…Œì´ë¸” ì‚­ì œ (ìžˆì„ ê²½ìš°)
 DROP TABLE USERS CASCADE CONSTRAINTS;
 DROP TABLE COMPANY CASCADE CONSTRAINTS;
 DROP TABLE POST CASCADE CONSTRAINTS;
@@ -58,24 +58,24 @@ CREATE TABLE POST (
     board_type VARCHAR2(10) NOT NULL,
     CONSTRAINT ck_post_board_type CHECK (board_type IN ('lookup', 'job', 'free')),
 
-    -- ÀÛ¼º ÁÖÃ¼
+    -- ìž‘ì„± ì£¼ì²´
     user_num NUMBER(20),
     company_num NUMBER(20),
 
-    -- °øÅë ÇÊµå
+    -- ê³µí†µ í•„ë“œ
     title VARCHAR2(255) NOT NULL,
     content VARCHAR2(4000) NOT NULL,
     created_at DATE DEFAULT SYSDATE NOT NULL,
     updated_at DATE DEFAULT SYSDATE NOT NULL,
     view_cnt NUMBER DEFAULT 0,
 
-    -- lookup Àü¿ë
+    -- lookup ì „ìš©
     price NUMBER(10),
     ai_summary VARCHAR2(500),
     download_cnt NUMBER DEFAULT 0,
     post_file VARCHAR2(255),
 
-    -- CHECK Á¦¾à
+    -- CHECK ì œì•½
     CONSTRAINT ck_lookup_user CHECK (
         (board_type = 'lookup' AND price IS NOT NULL AND ai_summary IS NOT NULL AND download_cnt IS NOT NULL AND post_file IS NOT NULL)
         OR board_type IN ('job', 'free')
@@ -95,7 +95,7 @@ CREATE TABLE POST (
 
 
 ------------------------------------------------------------
--- POST updated_at ÀÚµ¿ ¾÷µ¥ÀÌÆ® Æ®¸®°Å
+-- POST updated_at ìžë™ ì—…ë°ì´íŠ¸ íŠ¸ë¦¬ê±°
 ------------------------------------------------------------
 CREATE OR REPLACE TRIGGER trg_post_update
 BEFORE UPDATE ON POST
@@ -106,29 +106,29 @@ END;
 /
 
 -----------------------------------------------------------
--- POST tags ÄÃ·³ 
+-- POST tags ì»¬ëŸ¼ 
 ------------------------------------------------------------
 ALTER TABLE POST ADD tags VARCHAR2(2000);
 
--- ±âÁ¸ µ¥ÀÌÅÍ ±âº»°ª ¼³Á¤
+-- ê¸°ì¡´ ë°ì´í„° ê¸°ë³¸ê°’ ì„¤ì •
 UPDATE POST SET tags = '[]' WHERE tags IS NULL;
 
 COMMIT;
 
--- ÀÎµ¦½º »ý¼º
+-- ì¸ë±ìŠ¤ ìƒì„±
 CREATE INDEX idx_post_tags ON POST(tags);
 
--- POST Å×ÀÌºí ±¸Á¶ È®ÀÎ
+-- POST í…Œì´ë¸” êµ¬ì¡° í™•ì¸
 DESC POST;
 
--- tags ÄÃ·³ »ó¼¼ È®ÀÎ
+-- tags ì»¬ëŸ¼ ìƒì„¸ í™•ì¸
 SELECT column_name, data_type, data_length 
 FROM user_tab_columns 
 WHERE table_name = 'POST' 
   AND column_name = 'TAGS';
 
 ------------------------------------------------------------
--- POST ¿Ü·¡Å°
+-- POST ì™¸ëž˜í‚¤
 ------------------------------------------------------------
 ALTER TABLE POST ADD CONSTRAINT fk_post_user
     FOREIGN KEY (user_num) REFERENCES USERS(user_num);
@@ -281,7 +281,7 @@ ALTER TABLE PAY ADD CONSTRAINT fk_pay_cart
     FOREIGN KEY (cart_id) REFERENCES CART(cart_id);
 
 ------------------------------------------------------------
--- 12) POST_LIKE (°Ô½Ã±Û ÁÁ¾Æ¿ä)
+-- 12) POST_LIKE (ê²Œì‹œê¸€ ì¢‹ì•„ìš”)
 ------------------------------------------------------------
 CREATE TABLE POST_LIKE (
     like_id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -291,7 +291,7 @@ CREATE TABLE POST_LIKE (
     CONSTRAINT uq_post_like UNIQUE (user_num, post_id)
 );
 
--- ¿Ü·¡Å°
+-- ì™¸ëž˜í‚¤
 ALTER TABLE POST_LIKE ADD CONSTRAINT fk_postlike_user
     FOREIGN KEY (user_num) REFERENCES USERS(user_num);
 
@@ -299,7 +299,7 @@ ALTER TABLE POST_LIKE ADD CONSTRAINT fk_postlike_post
     FOREIGN KEY (post_id) REFERENCES POST(post_id);
 
 ------------------------------------------------------------
--- 13) COMMENT_LIKE (´ñ±Û ÁÁ¾Æ¿ä)
+-- 13) COMMENT_LIKE (ëŒ“ê¸€ ì¢‹ì•„ìš”)
 ------------------------------------------------------------
 CREATE TABLE COMMENT_LIKE (
     like_id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -309,7 +309,7 @@ CREATE TABLE COMMENT_LIKE (
     CONSTRAINT uq_comment_like UNIQUE (user_num, comment_id)
 );
 
--- ¿Ü·¡Å°
+-- ì™¸ëž˜í‚¤
 ALTER TABLE COMMENT_LIKE ADD CONSTRAINT fk_commentlike_user
     FOREIGN KEY (user_num) REFERENCES USERS(user_num);
 
@@ -318,174 +318,174 @@ ALTER TABLE COMMENT_LIKE ADD CONSTRAINT fk_commentlike_comment
 
 
 -- ============================================================
--- »ùÇÃ µ¥ÀÌÅÍ INSERT ½ºÅ©¸³Æ®
+-- ìƒ˜í”Œ ë°ì´í„° INSERT ìŠ¤í¬ë¦½íŠ¸
 -- ============================================================
 
 ------------------------------------------------------------
--- 1) USERS (2°³)
+-- 1) USERS (2ê°œ)
 ------------------------------------------------------------
 INSERT INTO USERS (user_id, user_password, user_name, user_phone, user_email, user_nickname, user_level)
-VALUES ('user001', 'password123!', '±èÃ¶¼ö', '010-1234-5678', 'kimcs@email.com', 'Ã¶¼öÂ¯', 1);
+VALUES ('user001', 'password123!', 'ê¹€ì² ìˆ˜', '010-1234-5678', 'kimcs@email.com', 'ì² ìˆ˜ì§±', 1);
 
 INSERT INTO USERS (user_id, user_password, user_name, user_phone, user_email, user_nickname, user_level)
-VALUES ('user002', 'password456!', 'ÀÌ¿µÈñ', '010-9876-5432', 'leeyh@email.com', '¿µÈñ³×', 2);
+VALUES ('user002', 'password456!', 'ì´ì˜í¬', '010-9876-5432', 'leeyh@email.com', 'ì˜í¬ë„¤', 2);
 
 ------------------------------------------------------------
--- 2) COMPANY (2°³)
+-- 2) COMPANY (2ê°œ)
 ------------------------------------------------------------
 INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
-VALUES ('company001', 'comp123!', 'Å×Å©½ºÅ¸Æ®¾÷', '02-1234-5678', 'contact@techstartup.com', '123-45-67890');
+VALUES ('company001', 'comp123!', 'í…Œí¬ìŠ¤íƒ€íŠ¸ì—…', '02-1234-5678', 'contact@techstartup.com', '123-45-67890');
 
 INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
-VALUES ('company002', 'comp456!', 'µðÀÚÀÎ¿¡ÀÌÀü½Ã', '02-9876-5432', 'hello@designagency.com', '987-65-43210');
+VALUES ('company002', 'comp456!', 'ë””ìžì¸ì—ì´ì „ì‹œ', '02-9876-5432', 'hello@designagency.com', '987-65-43210');
 
 ------------------------------------------------------------
--- 3) POST (6°³ - lookup 2°³, job 2°³, free 2°³)
+-- 3) POST (6ê°œ - lookup 2ê°œ, job 2ê°œ, free 2ê°œ)
 ------------------------------------------------------------
--- lookup °Ô½Ã±Û (user_num 1, 2 »ç¿ë)
+-- lookup ê²Œì‹œê¸€ (user_num 1, 2 ì‚¬ìš©)
 INSERT INTO POST (board_type, user_num, title, content, price, ai_summary, download_cnt, post_file, view_cnt)
-VALUES ('lookup', 1, 'Python ¸Ó½Å·¯´× ¿Ïº® °¡ÀÌµå', 'PythonÀ¸·Î ¸Ó½Å·¯´×À» ¹è¿ì´Â ¿Ïº®ÇÑ ÀÚ·áÀÔ´Ï´Ù. ÃÊº¸ÀÚºÎÅÍ °í±Þ±îÁö ¸ðµÎ ÇÐ½À °¡´ÉÇÕ´Ï´Ù.', 
-        15000, 'Python ¸Ó½Å·¯´× ÇÐ½À ÀÚ·á·Î ÃÊº¸ºÎÅÍ °í±Þ±îÁö ´Ü°èº° ÇÐ½À °¡´É', 25, 'python_ml_guide.pdf', 150);
+VALUES ('lookup', 1, 'Python ë¨¸ì‹ ëŸ¬ë‹ ì™„ë²½ ê°€ì´ë“œ', 'Pythonìœ¼ë¡œ ë¨¸ì‹ ëŸ¬ë‹ì„ ë°°ìš°ëŠ” ì™„ë²½í•œ ìžë£Œìž…ë‹ˆë‹¤. ì´ˆë³´ìžë¶€í„° ê³ ê¸‰ê¹Œì§€ ëª¨ë‘ í•™ìŠµ ê°€ëŠ¥í•©ë‹ˆë‹¤.', 
+        15000, 'Python ë¨¸ì‹ ëŸ¬ë‹ í•™ìŠµ ìžë£Œë¡œ ì´ˆë³´ë¶€í„° ê³ ê¸‰ê¹Œì§€ ë‹¨ê³„ë³„ í•™ìŠµ ê°€ëŠ¥', 25, 'python_ml_guide.pdf', 150);
 
 INSERT INTO POST (board_type, user_num, title, content, price, ai_summary, download_cnt, post_file, view_cnt)
-VALUES ('lookup', 2, 'React ÇÁ·ÎÁ§Æ® ÅÛÇÃ¸´ ¸ðÀ½', 'React·Î ¸¸µç ´Ù¾çÇÑ ÇÁ·ÎÁ§Æ® ÅÛÇÃ¸´ 10Á¾ÀÔ´Ï´Ù. Áï½Ã »ç¿ë °¡´ÉÇÑ ÄÚµå°¡ Æ÷ÇÔµÇ¾î ÀÖ½À´Ï´Ù.', 
-        20000, 'React ÇÁ·ÎÁ§Æ® ÅÛÇÃ¸´ 10Á¾ ¸ðÀ½, Áï½Ã »ç¿ë °¡´É', 40, 'react_templates.zip', 230);
+VALUES ('lookup', 2, 'React í”„ë¡œì íŠ¸ í…œí”Œë¦¿ ëª¨ìŒ', 'Reactë¡œ ë§Œë“  ë‹¤ì–‘í•œ í”„ë¡œì íŠ¸ í…œí”Œë¦¿ 10ì¢…ìž…ë‹ˆë‹¤. ì¦‰ì‹œ ì‚¬ìš© ê°€ëŠ¥í•œ ì½”ë“œê°€ í¬í•¨ë˜ì–´ ìžˆìŠµë‹ˆë‹¤.', 
+        20000, 'React í”„ë¡œì íŠ¸ í…œí”Œë¦¿ 10ì¢… ëª¨ìŒ, ì¦‰ì‹œ ì‚¬ìš© ê°€ëŠ¥', 40, 'react_templates.zip', 230);
 
--- job °Ô½Ã±Û (company_num 1, 2 »ç¿ë)
+-- job ê²Œì‹œê¸€ (company_num 1, 2 ì‚¬ìš©)
 INSERT INTO POST (board_type, company_num, title, content, view_cnt)
-VALUES ('job', 1, '[Å×Å©½ºÅ¸Æ®¾÷] ¹é¿£µå °³¹ßÀÚ Ã¤¿ë', 
-        'ÀúÈñ Å×Å©½ºÅ¸Æ®¾÷¿¡¼­ ¹é¿£µå °³¹ßÀÚ¸¦ ¸ðÁýÇÕ´Ï´Ù.
+VALUES ('job', 1, '[í…Œí¬ìŠ¤íƒ€íŠ¸ì—…] ë°±ì—”ë“œ ê°œë°œìž ì±„ìš©', 
+        'ì €í¬ í…Œí¬ìŠ¤íƒ€íŠ¸ì—…ì—ì„œ ë°±ì—”ë“œ ê°œë°œìžë¥¼ ëª¨ì§‘í•©ë‹ˆë‹¤.
         
-ÁÖ¿ä ¾÷¹«:
-- Spring Boot ±â¹Ý API °³¹ß
-- AWS ÀÎÇÁ¶ó ±¸Ãà ¹× °ü¸®
-- µ¥ÀÌÅÍº£ÀÌ½º ¼³°è ¹× ÃÖÀûÈ­
+ì£¼ìš” ì—…ë¬´:
+- Spring Boot ê¸°ë°˜ API ê°œë°œ
+- AWS ì¸í”„ë¼ êµ¬ì¶• ë° ê´€ë¦¬
+- ë°ì´í„°ë² ì´ìŠ¤ ì„¤ê³„ ë° ìµœì í™”
 
-ÀÚ°Ý ¿ä°Ç:
-- Java/Spring 3³â ÀÌ»ó °æÇè
-- MySQL, Oracle µî RDBMS °æÇè
-- ¿øÈ°ÇÑ Ä¿¹Â´ÏÄÉÀÌ¼Ç ´É·Â
+ìžê²© ìš”ê±´:
+- Java/Spring 3ë…„ ì´ìƒ ê²½í—˜
+- MySQL, Oracle ë“± RDBMS ê²½í—˜
+- ì›í™œí•œ ì»¤ë®¤ë‹ˆì¼€ì´ì…˜ ëŠ¥ë ¥
 
-¿ì´ë »çÇ×:
-- Docker, Kubernetes °æÇè
-- MSA ¾ÆÅ°ÅØÃ³ ±¸Ãà °æÇè
+ìš°ëŒ€ ì‚¬í•­:
+- Docker, Kubernetes ê²½í—˜
+- MSA ì•„í‚¤í…ì²˜ êµ¬ì¶• ê²½í—˜
 
-¿¬ºÀ: 5000¸¸¿ø ~ 7000¸¸¿ø (ÇùÀÇ °¡´É)', 320);
+ì—°ë´‰: 5000ë§Œì› ~ 7000ë§Œì› (í˜‘ì˜ ê°€ëŠ¥)', 320);
 
 INSERT INTO POST (board_type, company_num, title, content, view_cnt)
-VALUES ('job', 2, '[µðÀÚÀÎ¿¡ÀÌÀü½Ã] UI/UX µðÀÚÀÌ³Ê Ã¤¿ë', 
-        'µðÀÚÀÎ¿¡ÀÌÀü½Ã¿¡¼­ UI/UX µðÀÚÀÌ³Ê¸¦ Ã¤¿ëÇÕ´Ï´Ù.
+VALUES ('job', 2, '[ë””ìžì¸ì—ì´ì „ì‹œ] UI/UX ë””ìžì´ë„ˆ ì±„ìš©', 
+        'ë””ìžì¸ì—ì´ì „ì‹œì—ì„œ UI/UX ë””ìžì´ë„ˆë¥¼ ì±„ìš©í•©ë‹ˆë‹¤.
 
-´ã´ç ¾÷¹«:
-- À¥/¾Û ¼­ºñ½º UI/UX µðÀÚÀÎ
-- »ç¿ëÀÚ ¸®¼­Ä¡ ¹× ºÐ¼®
-- ÇÁ·ÎÅäÅ¸ÀÔ Á¦ÀÛ ¹× Å×½ºÆ®
+ë‹´ë‹¹ ì—…ë¬´:
+- ì›¹/ì•± ì„œë¹„ìŠ¤ UI/UX ë””ìžì¸
+- ì‚¬ìš©ìž ë¦¬ì„œì¹˜ ë° ë¶„ì„
+- í”„ë¡œí† íƒ€ìž… ì œìž‘ ë° í…ŒìŠ¤íŠ¸
 
-Áö¿ø ÀÚ°Ý:
-- Figma, Adobe XD ´É¼÷
-- Æ÷Æ®Æú¸®¿À ÇÊ¼ö Á¦Ãâ
-- 2³â ÀÌ»ó ½Ç¹« °æÇè
+ì§€ì› ìžê²©:
+- Figma, Adobe XD ëŠ¥ìˆ™
+- í¬íŠ¸í´ë¦¬ì˜¤ í•„ìˆ˜ ì œì¶œ
+- 2ë…„ ì´ìƒ ì‹¤ë¬´ ê²½í—˜
 
-º¹¸®ÈÄ»ý:
-- ÁÖ 4.5ÀÏ ±Ù¹«
-- ÀçÅÃ±Ù¹« °¡´É
-- 4´ëº¸Çè + ÅðÁ÷±Ý
+ë³µë¦¬í›„ìƒ:
+- ì£¼ 4.5ì¼ ê·¼ë¬´
+- ìž¬íƒê·¼ë¬´ ê°€ëŠ¥
+- 4ëŒ€ë³´í—˜ + í‡´ì§ê¸ˆ
 
-¿¬ºÀ: 4000¸¸¿ø ~ 5500¸¸¿ø', 180);
+ì—°ë´‰: 4000ë§Œì› ~ 5500ë§Œì›', 180);
 
--- free °Ô½Ã±Û (user_num 1, 2 »ç¿ë)
+-- free ê²Œì‹œê¸€ (user_num 1, 2 ì‚¬ìš©)
 INSERT INTO POST (board_type, user_num, title, content, view_cnt)
-VALUES ('free', 1, '¿À¶óÅ¬ DB ¼³Ä¡ Áß ¿¡·¯ ÇØ°á ¹æ¹ý', 
-        '¿À¶óÅ¬ 19c ¼³Ä¡ÇÏ´Ù°¡ ORA-12154 ¿¡·¯°¡ ¹ß»ýÇß¾î¿ä.
+VALUES ('free', 1, 'ì˜¤ë¼í´ DB ì„¤ì¹˜ ì¤‘ ì—ëŸ¬ í•´ê²° ë°©ë²•', 
+        'ì˜¤ë¼í´ 19c ì„¤ì¹˜í•˜ë‹¤ê°€ ORA-12154 ì—ëŸ¬ê°€ ë°œìƒí–ˆì–´ìš”.
         
-ÇØ°á ¹æ¹ý °øÀ¯ÇÕ´Ï´Ù:
-1. tnsnames.ora ÆÄÀÏ °æ·Î È®ÀÎ
-2. È¯°æº¯¼ö TNS_ADMIN ¼³Á¤
-3. ¸®½º³Ê Àç½ÃÀÛ
+í•´ê²° ë°©ë²• ê³µìœ í•©ë‹ˆë‹¤:
+1. tnsnames.ora íŒŒì¼ ê²½ë¡œ í™•ì¸
+2. í™˜ê²½ë³€ìˆ˜ TNS_ADMIN ì„¤ì •
+3. ë¦¬ìŠ¤ë„ˆ ìž¬ì‹œìž‘
 
-ÀÌ·¸°Ô ÇÏ´Ï±î ÇØ°áµÆ³×¿ä! °°Àº ¹®Á¦ °ÞÀ¸½Ã´Â ºÐµé²² µµ¿òÀÌ µÇ±æ ¹Ù¶ø´Ï´Ù.', 85);
+ì´ë ‡ê²Œ í•˜ë‹ˆê¹Œ í•´ê²°ëë„¤ìš”! ê°™ì€ ë¬¸ì œ ê²ªìœ¼ì‹œëŠ” ë¶„ë“¤ê»˜ ë„ì›€ì´ ë˜ê¸¸ ë°”ëžë‹ˆë‹¤.', 85);
 
 INSERT INTO POST (board_type, user_num, title, content, view_cnt)
-VALUES ('free', 2, 'Spring Boot ÇÁ·ÎÁ§Æ® ±¸Á¶ ÃßÃµÇØÁÖ¼¼¿ä', 
-        'Ã³À½À¸·Î Spring Boot·Î Å« ÇÁ·ÎÁ§Æ®¸¦ ½ÃÀÛÇÏ´Âµ¥¿ä.
+VALUES ('free', 2, 'Spring Boot í”„ë¡œì íŠ¸ êµ¬ì¡° ì¶”ì²œí•´ì£¼ì„¸ìš”', 
+        'ì²˜ìŒìœ¼ë¡œ Spring Bootë¡œ í° í”„ë¡œì íŠ¸ë¥¼ ì‹œìž‘í•˜ëŠ”ë°ìš”.
         
-ÆÐÅ°Áö ±¸Á¶¸¦ ¾î¶»°Ô °¡Á®°¡´Â °Ô ÁÁÀ»±î¿ä?
-- µµ¸ÞÀÎº°·Î ³ª´­±î¿ä?
-- ·¹ÀÌ¾îº°·Î ³ª´­±î¿ä?
+íŒ¨í‚¤ì§€ êµ¬ì¡°ë¥¼ ì–´ë–»ê²Œ ê°€ì ¸ê°€ëŠ” ê²Œ ì¢‹ì„ê¹Œìš”?
+- ë„ë©”ì¸ë³„ë¡œ ë‚˜ëˆŒê¹Œìš”?
+- ë ˆì´ì–´ë³„ë¡œ ë‚˜ëˆŒê¹Œìš”?
 
-°æÇè ¸¹À¸½Å ºÐµéÀÇ Á¶¾ð ºÎÅ¹µå¸³´Ï´Ù!', 120);
-
-------------------------------------------------------------
--- 4) POST_COMMENT (°¢ °Ô½Ã±Û¿¡ 2°³¾¿ = 12°³)
-------------------------------------------------------------
--- lookup °Ô½Ã±Û 1¹ø¿¡ ´ñ±Û
-INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
-VALUES (2, 1, 'ÀÚ·á Á¤¸» À¯ÀÍÇÏ³×¿ä! ´Ù¿î·ÎµåÇØ¼­ °øºÎÇÏ°Ú½À´Ï´Ù.');
-
-INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
-VALUES (1, 1, '°¨»çÇÕ´Ï´Ù! ¸¹Àº µµ¿òÀÌ µÇ¼ÌÀ¸¸é ÁÁ°Ú¾î¿ä~');
-
--- lookup °Ô½Ã±Û 2¹ø¿¡ ´ñ±Û
-INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
-VALUES (1, 2, 'ÅÛÇÃ¸´ ±¸Á¶°¡ ±ò²ûÇÏ³×¿ä. ¹Ù·Î Àû¿ëÇØºÁ¾ß°Ú¾î¿ä.');
-
-INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
-VALUES (2, 2, '°í¸¿½À´Ï´Ù! ½ÇÁ¦ ÇÁ·ÎÁ§Æ®¿¡ »ç¿ëÇÏ½Ã°í ÇÇµå¹é ÁÖ½Ã¸é ´õ ÁÁ¾Æ¿ä ^^');
-
--- job °Ô½Ã±Û 3¹ø¿¡ ´ñ±Û
-INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
-VALUES (1, 3, 'Áö¿ø ¹æ¹ýÀÌ ¾î¶»°Ô µÇ³ª¿ä? ÀÌ·Â¼­´Â ¾îµð·Î º¸³»¸é µÉ±î¿ä?');
-
-INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
-VALUES (2, 3, 'Àúµµ °ü½É ÀÖ½À´Ï´Ù. MSA °æÇèÀº ÀÖ´Âµ¥ Áö¿øÇØº¼°Ô¿ä!');
-
--- job °Ô½Ã±Û 4¹ø¿¡ ´ñ±Û
-INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
-VALUES (1, 4, 'ÁÖ 4.5ÀÏ ±Ù¹« ³Ê¹« ÁÁ³×¿ä! Æ÷Æ®Æú¸®¿À ÁØºñÇØ¼­ Áö¿øÇÏ°Ú½À´Ï´Ù.');
-
-INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
-VALUES (2, 4, 'ÀçÅÃ±Ù¹« °¡´ÉÇÑ °Ô Å« ÀåÁ¡ÀÌ³×¿ä. ¸éÁ¢ ÀÏÁ¤Àº ¾î¶»°Ô µÇ³ª¿ä?');
-
--- free °Ô½Ã±Û 5¹ø¿¡ ´ñ±Û
-INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
-VALUES (2, 5, 'Àúµµ ¶È°°Àº ¿¡·¯ °Þ¾ú´Âµ¥ ´öºÐ¿¡ ÇØ°áÇß¾î¿ä! °¨»çÇÕ´Ï´Ù ¤Ð¤Ð');
-
-INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
-VALUES (1, 5, 'µµ¿òÀÌ µÇ¼Ì´Ù´Ï ´ÙÇàÀÌ³×¿ä! ¿À¶óÅ¬Àº ¿¡·¯°¡ Âü ¸¹¾Æ¿ä ¤¾¤¾');
-
--- free °Ô½Ã±Û 6¹ø¿¡ ´ñ±Û
-INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
-VALUES (1, 6, 'Àú´Â µµ¸ÞÀÎº°·Î ³ª´©´Â °É ÃßÃµµå·Á¿ä. À¯Áöº¸¼ö°¡ ÈÎ¾À ÆíÇÕ´Ï´Ù.');
-
-INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
-VALUES (2, 6, 'ÁÁÀº ÀÇ°ß °¨»çÇÕ´Ï´Ù! µµ¸ÞÀÎº° ±¸Á¶·Î °¡´ÚÀ» Àâ¾ÆºÁ¾ß°Ú¾î¿ä.');
+ê²½í—˜ ë§Žìœ¼ì‹  ë¶„ë“¤ì˜ ì¡°ì–¸ ë¶€íƒë“œë¦½ë‹ˆë‹¤!', 120);
 
 ------------------------------------------------------------
--- 5) POST_SAVE (°¢ À¯Àú°¡ 2°³¾¿ ÀúÀå = 4°³)
+-- 4) POST_COMMENT (ê° ê²Œì‹œê¸€ì— 2ê°œì”© = 12ê°œ)
+------------------------------------------------------------
+-- lookup ê²Œì‹œê¸€ 1ë²ˆì— ëŒ“ê¸€
+INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
+VALUES (2, 1, 'ìžë£Œ ì •ë§ ìœ ìµí•˜ë„¤ìš”! ë‹¤ìš´ë¡œë“œí•´ì„œ ê³µë¶€í•˜ê² ìŠµë‹ˆë‹¤.');
+
+INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
+VALUES (1, 1, 'ê°ì‚¬í•©ë‹ˆë‹¤! ë§Žì€ ë„ì›€ì´ ë˜ì…¨ìœ¼ë©´ ì¢‹ê² ì–´ìš”~');
+
+-- lookup ê²Œì‹œê¸€ 2ë²ˆì— ëŒ“ê¸€
+INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
+VALUES (1, 2, 'í…œí”Œë¦¿ êµ¬ì¡°ê°€ ê¹”ë”í•˜ë„¤ìš”. ë°”ë¡œ ì ìš©í•´ë´ì•¼ê² ì–´ìš”.');
+
+INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
+VALUES (2, 2, 'ê³ ë§™ìŠµë‹ˆë‹¤! ì‹¤ì œ í”„ë¡œì íŠ¸ì— ì‚¬ìš©í•˜ì‹œê³  í”¼ë“œë°± ì£¼ì‹œë©´ ë” ì¢‹ì•„ìš” ^^');
+
+-- job ê²Œì‹œê¸€ 3ë²ˆì— ëŒ“ê¸€
+INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
+VALUES (1, 3, 'ì§€ì› ë°©ë²•ì´ ì–´ë–»ê²Œ ë˜ë‚˜ìš”? ì´ë ¥ì„œëŠ” ì–´ë””ë¡œ ë³´ë‚´ë©´ ë ê¹Œìš”?');
+
+INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
+VALUES (2, 3, 'ì €ë„ ê´€ì‹¬ ìžˆìŠµë‹ˆë‹¤. MSA ê²½í—˜ì€ ìžˆëŠ”ë° ì§€ì›í•´ë³¼ê²Œìš”!');
+
+-- job ê²Œì‹œê¸€ 4ë²ˆì— ëŒ“ê¸€
+INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
+VALUES (1, 4, 'ì£¼ 4.5ì¼ ê·¼ë¬´ ë„ˆë¬´ ì¢‹ë„¤ìš”! í¬íŠ¸í´ë¦¬ì˜¤ ì¤€ë¹„í•´ì„œ ì§€ì›í•˜ê² ìŠµë‹ˆë‹¤.');
+
+INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
+VALUES (2, 4, 'ìž¬íƒê·¼ë¬´ ê°€ëŠ¥í•œ ê²Œ í° ìž¥ì ì´ë„¤ìš”. ë©´ì ‘ ì¼ì •ì€ ì–´ë–»ê²Œ ë˜ë‚˜ìš”?');
+
+-- free ê²Œì‹œê¸€ 5ë²ˆì— ëŒ“ê¸€
+INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
+VALUES (2, 5, 'ì €ë„ ë˜‘ê°™ì€ ì—ëŸ¬ ê²ªì—ˆëŠ”ë° ë•ë¶„ì— í•´ê²°í–ˆì–´ìš”! ê°ì‚¬í•©ë‹ˆë‹¤ ã… ã… ');
+
+INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
+VALUES (1, 5, 'ë„ì›€ì´ ë˜ì…¨ë‹¤ë‹ˆ ë‹¤í–‰ì´ë„¤ìš”! ì˜¤ë¼í´ì€ ì—ëŸ¬ê°€ ì°¸ ë§Žì•„ìš” ã…Žã…Ž');
+
+-- free ê²Œì‹œê¸€ 6ë²ˆì— ëŒ“ê¸€
+INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
+VALUES (1, 6, 'ì €ëŠ” ë„ë©”ì¸ë³„ë¡œ ë‚˜ëˆ„ëŠ” ê±¸ ì¶”ì²œë“œë ¤ìš”. ìœ ì§€ë³´ìˆ˜ê°€ í›¨ì”¬ íŽ¸í•©ë‹ˆë‹¤.');
+
+INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
+VALUES (2, 6, 'ì¢‹ì€ ì˜ê²¬ ê°ì‚¬í•©ë‹ˆë‹¤! ë„ë©”ì¸ë³„ êµ¬ì¡°ë¡œ ê°€ë‹¥ì„ ìž¡ì•„ë´ì•¼ê² ì–´ìš”.');
+
+------------------------------------------------------------
+-- 5) POST_SAVE (ê° ìœ ì €ê°€ 2ê°œì”© ì €ìž¥ = 4ê°œ)
 ------------------------------------------------------------
 INSERT INTO POST_SAVE (user_num, post_id)
-VALUES (1, 2);  -- user1ÀÌ lookup °Ô½Ã±Û 2 ÀúÀå
+VALUES (1, 2);  -- user1ì´ lookup ê²Œì‹œê¸€ 2 ì €ìž¥
 
 INSERT INTO POST_SAVE (user_num, post_id)
-VALUES (1, 4);  -- user1ÀÌ job °Ô½Ã±Û 4 ÀúÀå
+VALUES (1, 4);  -- user1ì´ job ê²Œì‹œê¸€ 4 ì €ìž¥
 
 INSERT INTO POST_SAVE (user_num, post_id)
-VALUES (2, 1);  -- user2°¡ lookup °Ô½Ã±Û 1 ÀúÀå
+VALUES (2, 1);  -- user2ê°€ lookup ê²Œì‹œê¸€ 1 ì €ìž¥
 
 INSERT INTO POST_SAVE (user_num, post_id)
-VALUES (2, 3);  -- user2°¡ job °Ô½Ã±Û 3 ÀúÀå
+VALUES (2, 3);  -- user2ê°€ job ê²Œì‹œê¸€ 3 ì €ìž¥
 
 ------------------------------------------------------------
--- 6) FOLLOWS (¼­·Î ÆÈ·Î¿ì 2°³)
+-- 6) FOLLOWS (ì„œë¡œ íŒ”ë¡œìš° 2ê°œ)
 ------------------------------------------------------------
 INSERT INTO FOLLOWS (follower_id, following_id)
-VALUES (1, 2);  -- user1ÀÌ user2¸¦ ÆÈ·Î¿ì
+VALUES (1, 2);  -- user1ì´ user2ë¥¼ íŒ”ë¡œìš°
 
 INSERT INTO FOLLOWS (follower_id, following_id)
-VALUES (2, 1);  -- user2°¡ user1À» ÆÈ·Î¿ì
+VALUES (2, 1);  -- user2ê°€ user1ì„ íŒ”ë¡œìš°
 
 ------------------------------------------------------------
--- 7) DIRECT_CHAT_ROOMS (2°³)
+-- 7) DIRECT_CHAT_ROOMS (2ê°œ)
 ------------------------------------------------------------
 INSERT INTO DIRECT_CHAT_ROOMS (user1_num, user2_num, last_message_at, status)
 VALUES (1, 2, SYSDATE - 1, 'ACTIVE');
@@ -494,24 +494,24 @@ INSERT INTO DIRECT_CHAT_ROOMS (user1_num, user2_num, last_message_at, status)
 VALUES (2, 1, SYSDATE, 'ACTIVE');
 
 ------------------------------------------------------------
--- 8) CHAT_MESSAGES (°¢ Ã¤ÆÃ¹æ¿¡ 2°³¾¿ = 4°³)
+-- 8) CHAT_MESSAGES (ê° ì±„íŒ…ë°©ì— 2ê°œì”© = 4ê°œ)
 ------------------------------------------------------------
--- Ã¤ÆÃ¹æ 1ÀÇ ¸Þ½ÃÁö
+-- ì±„íŒ…ë°© 1ì˜ ë©”ì‹œì§€
 INSERT INTO CHAT_MESSAGES (room_id, user_num, sender_num, content, read_yn)
-VALUES (1, 2, 1, '¾È³çÇÏ¼¼¿ä! Python ÀÚ·á °ü·ÃÇØ¼­ Áú¹®ÀÌ ÀÖ´Âµ¥¿ä.', 'Y');
+VALUES (1, 2, 1, 'ì•ˆë…•í•˜ì„¸ìš”! Python ìžë£Œ ê´€ë ¨í•´ì„œ ì§ˆë¬¸ì´ ìžˆëŠ”ë°ìš”.', 'Y');
 
 INSERT INTO CHAT_MESSAGES (room_id, user_num, sender_num, content, read_yn)
-VALUES (1, 1, 2, '³× ¸»¾¸ÇÏ¼¼¿ä! ¹«¾ùÀÌµç ´äº¯µå¸±°Ô¿ä ^^', 'Y');
+VALUES (1, 1, 2, 'ë„¤ ë§ì”€í•˜ì„¸ìš”! ë¬´ì—‡ì´ë“  ë‹µë³€ë“œë¦´ê²Œìš” ^^', 'Y');
 
--- Ã¤ÆÃ¹æ 2ÀÇ ¸Þ½ÃÁö
+-- ì±„íŒ…ë°© 2ì˜ ë©”ì‹œì§€
 INSERT INTO CHAT_MESSAGES (room_id, user_num, sender_num, content, read_yn)
-VALUES (2, 1, 2, 'React ÅÛÇÃ¸´ Á¤¸» Àß ¸¸µå¼Ì³×¿ä!', 'Y');
+VALUES (2, 1, 2, 'React í…œí”Œë¦¿ ì •ë§ ìž˜ ë§Œë“œì…¨ë„¤ìš”!', 'Y');
 
 INSERT INTO CHAT_MESSAGES (room_id, user_num, sender_num, content, read_yn)
-VALUES (2, 2, 1, '°¨»çÇÕ´Ï´Ù! ÇÊ¿äÇÏ½Å ºÎºÐ ÀÖÀ¸¸é ¾ðÁ¦µç ¿¬¶ôÁÖ¼¼¿ä~', 'N');
+VALUES (2, 2, 1, 'ê°ì‚¬í•©ë‹ˆë‹¤! í•„ìš”í•˜ì‹  ë¶€ë¶„ ìžˆìœ¼ë©´ ì–¸ì œë“  ì—°ë½ì£¼ì„¸ìš”~', 'N');
 
 ------------------------------------------------------------
--- 9) CHAT_MESSAGE_FILES (2°³)
+-- 9) CHAT_MESSAGE_FILES (2ê°œ)
 ------------------------------------------------------------
 INSERT INTO CHAT_MESSAGE_FILES (message_id, file_name, mime_type, file_size, file_path)
 VALUES (1, 'question_screenshot.png', 'image/png', 245680, '/files/chat/2024/12/question_screenshot.png');
@@ -520,58 +520,58 @@ INSERT INTO CHAT_MESSAGE_FILES (message_id, file_name, mime_type, file_size, fil
 VALUES (3, 'sample_code.txt', 'text/plain', 5120, '/files/chat/2024/12/sample_code.txt');
 
 ------------------------------------------------------------
--- 10) CART (°¢ À¯Àú°¡ 2°³¾¿ = 4°³)
+-- 10) CART (ê° ìœ ì €ê°€ 2ê°œì”© = 4ê°œ)
 ------------------------------------------------------------
 INSERT INTO CART (user_num, post_id)
-VALUES (1, 1);  -- user1ÀÌ lookup °Ô½Ã±Û 1À» Àå¹Ù±¸´Ï¿¡
+VALUES (1, 1);  -- user1ì´ lookup ê²Œì‹œê¸€ 1ì„ ìž¥ë°”êµ¬ë‹ˆì—
 
 INSERT INTO CART (user_num, post_id)
-VALUES (1, 2);  -- user1ÀÌ lookup °Ô½Ã±Û 2¸¦ Àå¹Ù±¸´Ï¿¡
+VALUES (1, 2);  -- user1ì´ lookup ê²Œì‹œê¸€ 2ë¥¼ ìž¥ë°”êµ¬ë‹ˆì—
 
 INSERT INTO CART (user_num, post_id)
-VALUES (2, 1);  -- user2°¡ lookup °Ô½Ã±Û 1À» Àå¹Ù±¸´Ï¿¡
+VALUES (2, 1);  -- user2ê°€ lookup ê²Œì‹œê¸€ 1ì„ ìž¥ë°”êµ¬ë‹ˆì—
 
 INSERT INTO CART (user_num, post_id)
-VALUES (2, 2);  -- user2°¡ lookup °Ô½Ã±Û 2¸¦ Àå¹Ù±¸´Ï¿¡
+VALUES (2, 2);  -- user2ê°€ lookup ê²Œì‹œê¸€ 2ë¥¼ ìž¥ë°”êµ¬ë‹ˆì—
 
 ------------------------------------------------------------
--- 11) PAY (°¢ À¯Àú°¡ 1°Ç¾¿ °áÁ¦ = 2°³)
+-- 11) PAY (ê° ìœ ì €ê°€ 1ê±´ì”© ê²°ì œ = 2ê°œ)
 ------------------------------------------------------------
 INSERT INTO PAY (user_num, pay_price, setle_sttus, order_name, cart_id)
-VALUES (1, 15000, 1, 'Python ¸Ó½Å·¯´× ¿Ïº® °¡ÀÌµå', 1);
+VALUES (1, 15000, 1, 'Python ë¨¸ì‹ ëŸ¬ë‹ ì™„ë²½ ê°€ì´ë“œ', 1);
 
 INSERT INTO PAY (user_num, pay_price, setle_sttus, order_name, cart_id)
-VALUES (2, 20000, 1, 'React ÇÁ·ÎÁ§Æ® ÅÛÇÃ¸´ ¸ðÀ½', 3);
+VALUES (2, 20000, 1, 'React í”„ë¡œì íŠ¸ í…œí”Œë¦¿ ëª¨ìŒ', 3);
 
 ------------------------------------------------------------
--- 12) POST_LIKE (°¢ °Ô½Ã±Û¿¡ ÁÁ¾Æ¿ä 2°³¾¿ = 12°³)
+-- 12) POST_LIKE (ê° ê²Œì‹œê¸€ì— ì¢‹ì•„ìš” 2ê°œì”© = 12ê°œ)
 ------------------------------------------------------------
--- °Ô½Ã±Û 1¿¡ ÁÁ¾Æ¿ä
+-- ê²Œì‹œê¸€ 1ì— ì¢‹ì•„ìš”
 INSERT INTO POST_LIKE (user_num, post_id) VALUES (1, 1);
 INSERT INTO POST_LIKE (user_num, post_id) VALUES (2, 1);
 
--- °Ô½Ã±Û 2¿¡ ÁÁ¾Æ¿ä
+-- ê²Œì‹œê¸€ 2ì— ì¢‹ì•„ìš”
 INSERT INTO POST_LIKE (user_num, post_id) VALUES (1, 2);
 INSERT INTO POST_LIKE (user_num, post_id) VALUES (2, 2);
 
--- °Ô½Ã±Û 3¿¡ ÁÁ¾Æ¿ä
+-- ê²Œì‹œê¸€ 3ì— ì¢‹ì•„ìš”
 INSERT INTO POST_LIKE (user_num, post_id) VALUES (1, 3);
 INSERT INTO POST_LIKE (user_num, post_id) VALUES (2, 3);
 
--- °Ô½Ã±Û 4¿¡ ÁÁ¾Æ¿ä
+-- ê²Œì‹œê¸€ 4ì— ì¢‹ì•„ìš”
 INSERT INTO POST_LIKE (user_num, post_id) VALUES (1, 4);
 INSERT INTO POST_LIKE (user_num, post_id) VALUES (2, 4);
 
--- °Ô½Ã±Û 5¿¡ ÁÁ¾Æ¿ä
+-- ê²Œì‹œê¸€ 5ì— ì¢‹ì•„ìš”
 INSERT INTO POST_LIKE (user_num, post_id) VALUES (1, 5);
 INSERT INTO POST_LIKE (user_num, post_id) VALUES (2, 5);
 
--- °Ô½Ã±Û 6¿¡ ÁÁ¾Æ¿ä
+-- ê²Œì‹œê¸€ 6ì— ì¢‹ì•„ìš”
 INSERT INTO POST_LIKE (user_num, post_id) VALUES (1, 6);
 INSERT INTO POST_LIKE (user_num, post_id) VALUES (2, 6);
 
 ------------------------------------------------------------
--- 13) COMMENT_LIKE (°¢ ´ñ±Û¿¡ ÁÁ¾Æ¿ä 1°³¾¿ = 12°³)
+-- 13) COMMENT_LIKE (ê° ëŒ“ê¸€ì— ì¢‹ì•„ìš” 1ê°œì”© = 12ê°œ)
 ------------------------------------------------------------
 INSERT INTO COMMENT_LIKE (user_num, comment_id) VALUES (2, 1);
 INSERT INTO COMMENT_LIKE (user_num, comment_id) VALUES (1, 2);
@@ -592,72 +592,72 @@ INSERT INTO COMMENT_LIKE (user_num, comment_id) VALUES (1, 12);
 COMMIT;
 
 -- ============================================================
--- Ã¤¿ë°ø°í ±â´ÉÀ» À§ÇÑ POST Å×ÀÌºí ÄÃ·³ Ãß°¡
+-- ì±„ìš©ê³µê³  ê¸°ëŠ¥ì„ ìœ„í•œ POST í…Œì´ë¸” ì»¬ëŸ¼ ì¶”ê°€
 -- ============================================================
 
--- 1´Ü°è: Ã¤¿ë°ø°í Àü¿ë ÄÃ·³ Ãß°¡ (Á¦¾àÁ¶°Ç ¾øÀÌ)
+-- 1ë‹¨ê³„: ì±„ìš©ê³µê³  ì „ìš© ì»¬ëŸ¼ ì¶”ê°€ (ì œì•½ì¡°ê±´ ì—†ì´)
 ALTER TABLE POST ADD (
-    job_region VARCHAR2(100),           -- ±Ù¹« Áö¿ª (regions.jsÀÇ ID)
-    job_career_type VARCHAR2(500),      -- °æ·Â Å¸ÀÔ (JSON ¹è¿­: ["½ÅÀÔ", "°æ·Â"])
-    job_career_years VARCHAR2(500),     -- °æ·Â ¿¬Â÷ (JSON ¹è¿­: ["1³â", "3³â"])
-    job_education VARCHAR2(50),         -- ÇÐ·Â (high_below, high, college_2_3, university, master, doctor, doctor_above)
-    job_education_exclude CHAR(1) DEFAULT 'N', -- ÇÐ·Â¹«°ü ¿©ºÎ (Y/N)
-    job_salary_min NUMBER(10),          -- ÃÖ¼Ò ±Þ¿©
-    job_salary_max NUMBER(10),          -- ÃÖ´ë ±Þ¿©
-    job_deadline DATE,                  -- Ã¤¿ë ¸¶°¨ÀÏ
-    job_status VARCHAR2(20) DEFAULT 'ACTIVE', -- °ø°í »óÅÂ (ACTIVE/EXPIRED/CLOSED)
-    job_industries VARCHAR2(500),       -- ¾÷Á¾ (JSON ¹è¿­)
-    job_company_types VARCHAR2(500),    -- ±â¾÷ÇüÅÂ (JSON ¹è¿­)
-    job_work_types VARCHAR2(500),       -- ±Ù¹«ÇüÅÂ (JSON ¹è¿­)
-    job_work_days VARCHAR2(500)         -- ±Ù¹«¿äÀÏ (JSON ¹è¿­)
+    job_region VARCHAR2(100),           -- ê·¼ë¬´ ì§€ì—­ (regions.jsì˜ ID)
+    job_career_type VARCHAR2(500),      -- ê²½ë ¥ íƒ€ìž… (JSON ë°°ì—´: ["ì‹ ìž…", "ê²½ë ¥"])
+    job_career_years VARCHAR2(500),     -- ê²½ë ¥ ì—°ì°¨ (JSON ë°°ì—´: ["1ë…„", "3ë…„"])
+    job_education VARCHAR2(50),         -- í•™ë ¥ (high_below, high, college_2_3, university, master, doctor, doctor_above)
+    job_education_exclude CHAR(1) DEFAULT 'N', -- í•™ë ¥ë¬´ê´€ ì—¬ë¶€ (Y/N)
+    job_salary_min NUMBER(10),          -- ìµœì†Œ ê¸‰ì—¬
+    job_salary_max NUMBER(10),          -- ìµœëŒ€ ê¸‰ì—¬
+    job_deadline DATE,                  -- ì±„ìš© ë§ˆê°ì¼
+    job_status VARCHAR2(20) DEFAULT 'ACTIVE', -- ê³µê³  ìƒíƒœ (ACTIVE/EXPIRED/CLOSED)
+    job_industries VARCHAR2(500),       -- ì—…ì¢… (JSON ë°°ì—´)
+    job_company_types VARCHAR2(500),    -- ê¸°ì—…í˜•íƒœ (JSON ë°°ì—´)
+    job_work_types VARCHAR2(500),       -- ê·¼ë¬´í˜•íƒœ (JSON ë°°ì—´)
+    job_work_days VARCHAR2(500)         -- ê·¼ë¬´ìš”ì¼ (JSON ë°°ì—´)
 );
 
--- 2´Ü°è: ±âÁ¸ job °Ô½Ã±Û¿¡ ÇÊ¼ö °ª Ã¤¿ì±â (Á¦¾àÁ¶°Ç À§¹Ý ¹æÁö)
+-- 2ë‹¨ê³„: ê¸°ì¡´ job ê²Œì‹œê¸€ì— í•„ìˆ˜ ê°’ ì±„ìš°ê¸° (ì œì•½ì¡°ê±´ ìœ„ë°˜ ë°©ì§€)
 UPDATE POST 
 SET 
     job_region = 'seoul_gangnam',
-    job_career_type = '["°æ·Â¹«°ü"]',
+    job_career_type = '["ê²½ë ¥ë¬´ê´€"]',
     job_career_years = '[]',
     job_education = NULL,
     job_education_exclude = 'Y',
     job_deadline = SYSDATE + 30,
     job_status = 'ACTIVE',
-    job_industries = '["IT¡¤À¥¡¤Åë½Å"]',
-    job_company_types = '["Áß¼Ò±â¾÷"]',
-    job_work_types = '["Á¤±ÔÁ÷"]',
-    job_work_days = '["ÁÖ 5ÀÏ(¿ù~±Ý)"]'
+    job_industries = '["ITÂ·ì›¹Â·í†µì‹ "]',
+    job_company_types = '["ì¤‘ì†Œê¸°ì—…"]',
+    job_work_types = '["ì •ê·œì§"]',
+    job_work_days = '["ì£¼ 5ì¼(ì›”~ê¸ˆ)"]'
 WHERE board_type = 'job' AND job_region IS NULL;
 
 COMMIT;
 
--- 3´Ü°è: Á¦¾àÁ¶°Ç Ãß°¡ (ÀÌÁ¦ ±âÁ¸ µ¥ÀÌÅÍ°¡ Á¦¾àÁ¶°ÇÀ» ¸¸Á·ÇÔ)
+-- 3ë‹¨ê³„: ì œì•½ì¡°ê±´ ì¶”ê°€ (ì´ì œ ê¸°ì¡´ ë°ì´í„°ê°€ ì œì•½ì¡°ê±´ì„ ë§Œì¡±í•¨)
 ALTER TABLE POST ADD CONSTRAINT ck_job_required_fields CHECK (
     (board_type = 'job' AND job_region IS NOT NULL AND job_deadline IS NOT NULL AND job_status IS NOT NULL)
     OR board_type IN ('lookup', 'free')
 );
 
--- Ã¤¿ë°ø°í »óÅÂ Ã¼Å© Á¦¾àÁ¶°Ç
+-- ì±„ìš©ê³µê³  ìƒíƒœ ì²´í¬ ì œì•½ì¡°ê±´
 ALTER TABLE POST ADD CONSTRAINT ck_job_status CHECK (
     job_status IN ('ACTIVE', 'EXPIRED', 'CLOSED') OR job_status IS NULL
 );
 
--- 4´Ü°è: ÀÎµ¦½º »ý¼º
--- Ã¤¿ë°ø°í ¸¶°¨ÀÏ ÀÎµ¦½º
+-- 4ë‹¨ê³„: ì¸ë±ìŠ¤ ìƒì„±
+-- ì±„ìš©ê³µê³  ë§ˆê°ì¼ ì¸ë±ìŠ¤
 CREATE INDEX idx_post_job_deadline ON POST(job_deadline);
 
--- Ã¤¿ë°ø°í Áö¿ª ÀÎµ¦½º
+-- ì±„ìš©ê³µê³  ì§€ì—­ ì¸ë±ìŠ¤
 CREATE INDEX idx_post_job_region ON POST(job_region);
 
--- Ã¤¿ë°ø°í »óÅÂ ÀÎµ¦½º
+-- ì±„ìš©ê³µê³  ìƒíƒœ ì¸ë±ìŠ¤
 CREATE INDEX idx_post_job_status ON POST(job_status);
 
--- º¹ÇÕ ÀÎµ¦½º: board_type + job_status + job_deadline
+-- ë³µí•© ì¸ë±ìŠ¤: board_type + job_status + job_deadline
 CREATE INDEX idx_post_job_search ON POST(board_type, job_status, job_deadline);
 
 COMMIT;
 
 ------------------------------------------------------------
--- Ã¤¿ë°ø°í »ùÇÃ µ¥ÀÌÅÍ (Å×½ºÆ®¿ë) - 3°³ Ãß°¡
+-- ì±„ìš©ê³µê³  ìƒ˜í”Œ ë°ì´í„° (í…ŒìŠ¤íŠ¸ìš©) - 3ê°œ ì¶”ê°€
 ------------------------------------------------------------
 INSERT INTO POST (
     board_type, company_num, title, content, 
@@ -666,26 +666,26 @@ INSERT INTO POST (
     job_salary_min, job_salary_max, job_deadline, job_status,
     job_industries, job_company_types, job_work_types, job_work_days
 ) VALUES (
-    'job', 1, 'ULTRAFIT À¥ µðÀÚÀÌ³Ê ½ÅÀÔ Ã¤¿ë',
-    'À¥ µðÀÚÀÌ³Ê ½ÅÀÔ Ã¤¿ëÇÕ´Ï´Ù. ¼ºÀå °¡´É¼ºÀÌ ³ôÀº È¸»çÀÔ´Ï´Ù.
+    'job', 1, 'ULTRAFIT ì›¹ ë””ìžì´ë„ˆ ì‹ ìž… ì±„ìš©',
+    'ì›¹ ë””ìžì´ë„ˆ ì‹ ìž… ì±„ìš©í•©ë‹ˆë‹¤. ì„±ìž¥ ê°€ëŠ¥ì„±ì´ ë†’ì€ íšŒì‚¬ìž…ë‹ˆë‹¤.
 
-ÁÖ¿ä ¾÷¹«:
-- À¥»çÀÌÆ® ¹× ¸ð¹ÙÀÏ ¾Û UI/UX µðÀÚÀÎ
-- ºê·£µù ¹× ±×·¡ÇÈ µðÀÚÀÎ
-- µðÀÚÀÎ ½Ã½ºÅÛ ±¸Ãà ¹× °ü¸®
+ì£¼ìš” ì—…ë¬´:
+- ì›¹ì‚¬ì´íŠ¸ ë° ëª¨ë°”ì¼ ì•± UI/UX ë””ìžì¸
+- ë¸Œëžœë”© ë° ê·¸ëž˜í”½ ë””ìžì¸
+- ë””ìžì¸ ì‹œìŠ¤í…œ êµ¬ì¶• ë° ê´€ë¦¬
 
-Áö¿ø ÀÚ°Ý:
-- ½ÅÀÔ ¶Ç´Â °æ·Â 1³â ¹Ì¸¸
-- Figma, Photoshop, Illustrator ´É¼÷
-- Æ÷Æ®Æú¸®¿À ÇÊ¼ö Á¦Ãâ
+ì§€ì› ìžê²©:
+- ì‹ ìž… ë˜ëŠ” ê²½ë ¥ 1ë…„ ë¯¸ë§Œ
+- Figma, Photoshop, Illustrator ëŠ¥ìˆ™
+- í¬íŠ¸í´ë¦¬ì˜¤ í•„ìˆ˜ ì œì¶œ
 
-¿ì´ë »çÇ×:
-- µðÀÚÀÎ °ü·Ã Àü°øÀÚ
-- HTML/CSS ÀÌÇØµµ°¡ ÀÖ´Â ºÐ',
-    'seoul_gangnam', '["½ÅÀÔ"]', '[]',
+ìš°ëŒ€ ì‚¬í•­:
+- ë””ìžì¸ ê´€ë ¨ ì „ê³µìž
+- HTML/CSS ì´í•´ë„ê°€ ìžˆëŠ” ë¶„',
+    'seoul_gangnam', '["ì‹ ìž…"]', '[]',
     'university', 'N',
     NULL, NULL, SYSDATE + 30, 'ACTIVE',
-    '["IT¡¤À¥¡¤Åë½Å"]', '["½ºÅ¸Æ®¾÷"]', '["Á¤±ÔÁ÷"]', '["ÁÖ 5ÀÏ(¿ù~±Ý)"]'
+    '["ITÂ·ì›¹Â·í†µì‹ "]', '["ìŠ¤íƒ€íŠ¸ì—…"]', '["ì •ê·œì§"]', '["ì£¼ 5ì¼(ì›”~ê¸ˆ)"]'
 );
 
 INSERT INTO POST (
@@ -695,32 +695,32 @@ INSERT INTO POST (
     job_salary_min, job_salary_max, job_deadline, job_status,
     job_industries, job_company_types, job_work_types, job_work_days
 ) VALUES (
-    'job', 1, '±¸¸Å ´ã´ç °æ·ÂÁ÷ Ã¤¿ë',
-    '±Û·Î¹ú À¯ÅëÈ¸»ç¿¡¼­ ±¸¸Å ´ã´çÀÚ¸¦ ¸ðÁýÇÕ´Ï´Ù.
+    'job', 1, 'êµ¬ë§¤ ë‹´ë‹¹ ê²½ë ¥ì§ ì±„ìš©',
+    'ê¸€ë¡œë²Œ ìœ í†µíšŒì‚¬ì—ì„œ êµ¬ë§¤ ë‹´ë‹¹ìžë¥¼ ëª¨ì§‘í•©ë‹ˆë‹¤.
 
-´ã´ç ¾÷¹«:
-- ¿øÀÚÀç ¹× ºÎÀÚÀç ±¸¸Å ¾÷¹«
-- Çù·Â¾÷Ã¼ ¹ß±¼ ¹× °ü¸®
-- ±¸¸Å ´Ü°¡ Çù»ó ¹× °è¾à °ü¸®
+ë‹´ë‹¹ ì—…ë¬´:
+- ì›ìžìž¬ ë° ë¶€ìžìž¬ êµ¬ë§¤ ì—…ë¬´
+- í˜‘ë ¥ì—…ì²´ ë°œêµ´ ë° ê´€ë¦¬
+- êµ¬ë§¤ ë‹¨ê°€ í˜‘ìƒ ë° ê³„ì•½ ê´€ë¦¬
 
-Áö¿ø ÀÚ°Ý:
-- ±¸¸Å ºÐ¾ß °æ·Â 5³â ÀÌ»ó
-- MS Office ´É¼÷ (Æ¯È÷ Excel)
-- ¿øÈ°ÇÑ Ä¿¹Â´ÏÄÉÀÌ¼Ç ´É·Â
+ì§€ì› ìžê²©:
+- êµ¬ë§¤ ë¶„ì•¼ ê²½ë ¥ 5ë…„ ì´ìƒ
+- MS Office ëŠ¥ìˆ™ (íŠ¹ížˆ Excel)
+- ì›í™œí•œ ì»¤ë®¤ë‹ˆì¼€ì´ì…˜ ëŠ¥ë ¥
 
-¿ì´ë »çÇ×:
-- ERP ½Ã½ºÅÛ »ç¿ë °æÇè
-- ¿µ¾î °¡´ÉÀÚ
-- °ü·Ã ÀÚ°ÝÁõ ¼ÒÁöÀÚ
+ìš°ëŒ€ ì‚¬í•­:
+- ERP ì‹œìŠ¤í…œ ì‚¬ìš© ê²½í—˜
+- ì˜ì–´ ê°€ëŠ¥ìž
+- ê´€ë ¨ ìžê²©ì¦ ì†Œì§€ìž
 
-º¹¸®ÈÄ»ý:
-- ¿¬ºÀ 3000~5000¸¸¿ø (°æ·Â¿¡ µû¶ó ÇùÀÇ)
-- 4´ë º¸Çè, ÅðÁ÷±Ý
-- Áß½Ä Á¦°ø, ¾ß±Ù¼ö´ç',
-    'seoul_gangnam', '["°æ·Â"]', '["5³â", "6³â", "7³â"]',
+ë³µë¦¬í›„ìƒ:
+- ì—°ë´‰ 3000~5000ë§Œì› (ê²½ë ¥ì— ë”°ë¼ í˜‘ì˜)
+- 4ëŒ€ ë³´í—˜, í‡´ì§ê¸ˆ
+- ì¤‘ì‹ ì œê³µ, ì•¼ê·¼ìˆ˜ë‹¹',
+    'seoul_gangnam', '["ê²½ë ¥"]', '["5ë…„", "6ë…„", "7ë…„"]',
     'college_2_3', 'N',
     3000, 5000, SYSDATE + 7, 'ACTIVE',
-    '["À¯Åë¡¤¹«¿ª"]', '["Áß°ß±â¾÷"]', '["Á¤±ÔÁ÷"]', '["ÁÖ 5ÀÏ(¿ù~±Ý)"]'
+    '["ìœ í†µÂ·ë¬´ì—­"]', '["ì¤‘ê²¬ê¸°ì—…"]', '["ì •ê·œì§"]', '["ì£¼ 5ì¼(ì›”~ê¸ˆ)"]'
 );
 
 INSERT INTO POST (
@@ -730,41 +730,41 @@ INSERT INTO POST (
     job_salary_min, job_salary_max, job_deadline, job_status,
     job_industries, job_company_types, job_work_types, job_work_days
 ) VALUES (
-    'job', 2, 'ÆíÁýµðÀÚÀÌ³Ê °æ·Â Ã¤¿ë',
-    '±¤°í ´ëÇà»ç¿¡¼­ ÆíÁýµðÀÚÀÌ³Ê¸¦ Ã¤¿ëÇÕ´Ï´Ù.
+    'job', 2, 'íŽ¸ì§‘ë””ìžì´ë„ˆ ê²½ë ¥ ì±„ìš©',
+    'ê´‘ê³  ëŒ€í–‰ì‚¬ì—ì„œ íŽ¸ì§‘ë””ìžì´ë„ˆë¥¼ ì±„ìš©í•©ë‹ˆë‹¤.
 
-ÁÖ¿ä ¾÷¹«:
-- ±¤°í ¹× È«º¸¹° ÆíÁý µðÀÚÀÎ
-- ºê·Î½´¾î, Ä«Å»·Î±× Á¦ÀÛ
-- SNS ÄÜÅÙÃ÷ µðÀÚÀÎ
+ì£¼ìš” ì—…ë¬´:
+- ê´‘ê³  ë° í™ë³´ë¬¼ íŽ¸ì§‘ ë””ìžì¸
+- ë¸Œë¡œìŠˆì–´, ì¹´íƒˆë¡œê·¸ ì œìž‘
+- SNS ì½˜í…ì¸  ë””ìžì¸
 
-Áö¿ø ÀÚ°Ý:
-- ÆíÁýµðÀÚÀÎ °æ·Â 3³â ÀÌ»ó
-- InDesign, Photoshop, Illustrator ´É¼÷
-- Æ÷Æ®Æú¸®¿À ÇÊ¼ö Á¦Ãâ
+ì§€ì› ìžê²©:
+- íŽ¸ì§‘ë””ìžì¸ ê²½ë ¥ 3ë…„ ì´ìƒ
+- InDesign, Photoshop, Illustrator ëŠ¥ìˆ™
+- í¬íŠ¸í´ë¦¬ì˜¤ í•„ìˆ˜ ì œì¶œ
 
-¿ì´ë »çÇ×:
-- ±¤°í´ëÇà»ç °æÇèÀÚ
-- ¿µ»ó ÆíÁý °¡´ÉÀÚ
-- 4³âÁ¦ ´ëÇÐ µðÀÚÀÎ Àü°øÀÚ
+ìš°ëŒ€ ì‚¬í•­:
+- ê´‘ê³ ëŒ€í–‰ì‚¬ ê²½í—˜ìž
+- ì˜ìƒ íŽ¸ì§‘ ê°€ëŠ¥ìž
+- 4ë…„ì œ ëŒ€í•™ ë””ìžì¸ ì „ê³µìž
 
-±Ù¹« Á¶°Ç:
-- ¿¬ºÀ 2500~4000¸¸¿ø
-- Á¤±ÔÁ÷ ¶Ç´Â °è¾àÁ÷ °¡´É
-- ÁÖ 5ÀÏ ±Ù¹«
-- ¸¶Æ÷±¸ ¼ÒÀç',
-    'seoul_mapo', '["°æ·Â"]', '["3³â", "4³â", "5³â"]',
+ê·¼ë¬´ ì¡°ê±´:
+- ì—°ë´‰ 2500~4000ë§Œì›
+- ì •ê·œì§ ë˜ëŠ” ê³„ì•½ì§ ê°€ëŠ¥
+- ì£¼ 5ì¼ ê·¼ë¬´
+- ë§ˆí¬êµ¬ ì†Œìž¬',
+    'seoul_mapo', '["ê²½ë ¥"]', '["3ë…„", "4ë…„", "5ë…„"]',
     'high', 'N',
     2500, 4000, SYSDATE + 14, 'ACTIVE',
-    '["¹Ìµð¾î¡¤±¤°í"]', '["Áß¼Ò±â¾÷"]', '["Á¤±ÔÁ÷", "°è¾àÁ÷"]', '["ÁÖ 5ÀÏ(¿ù~±Ý)"]'
+    '["ë¯¸ë””ì–´Â·ê´‘ê³ "]', '["ì¤‘ì†Œê¸°ì—…"]', '["ì •ê·œì§", "ê³„ì•½ì§"]', '["ì£¼ 5ì¼(ì›”~ê¸ˆ)"]'
 );
 
 COMMIT;
 
 ------------------------------------------------------------
--- Ã¤¿ë°ø°í Á¶È¸ Äõ¸® »ùÇÃ
+-- ì±„ìš©ê³µê³  ì¡°íšŒ ì¿¼ë¦¬ ìƒ˜í”Œ
 ------------------------------------------------------------
--- È°¼º Ã¤¿ë°ø°í ¸ñ·Ï Á¶È¸ (ÃÖ½Å¼ø)
+-- í™œì„± ì±„ìš©ê³µê³  ëª©ë¡ ì¡°íšŒ (ìµœì‹ ìˆœ)
 SELECT 
     p.post_id,
     p.title,
@@ -783,7 +783,7 @@ WHERE p.board_type = 'job'
   AND p.job_deadline >= SYSDATE
 ORDER BY p.created_at DESC;
 
--- Áö¿ªº° Ã¤¿ë°ø°í °³¼ö
+-- ì§€ì—­ë³„ ì±„ìš©ê³µê³  ê°œìˆ˜
 SELECT 
     job_region,
     COUNT(*) as job_count
@@ -794,7 +794,7 @@ WHERE board_type = 'job'
 GROUP BY job_region
 ORDER BY job_count DESC;
 
--- ¸¶°¨ ÀÓ¹Ú °ø°í (3ÀÏ ÀÌ³»)
+-- ë§ˆê° ìž„ë°• ê³µê³  (3ì¼ ì´ë‚´)
 SELECT 
     p.post_id,
     p.title,
@@ -810,95 +810,95 @@ ORDER BY p.job_deadline ASC;
 
 
 ------------------------------------------------------------
--- ¸ðµç Å×ÀÌºíÀÇ ÀüÃ¼ µ¥ÀÌÅÍ Á¶È¸
+-- ëª¨ë“  í…Œì´ë¸”ì˜ ì „ì²´ ë°ì´í„° ì¡°íšŒ
 ------------------------------------------------------------
 
--- 1) USERS Å×ÀÌºí ÀüÃ¼ Á¶È¸
+-- 1) USERS í…Œì´ë¸” ì „ì²´ ì¡°íšŒ
 SELECT '========================================' AS DIVIDER FROM DUAL;
-SELECT '1. USERS Å×ÀÌºí ÀüÃ¼ µ¥ÀÌÅÍ' AS INFO FROM DUAL;
+SELECT '1. USERS í…Œì´ë¸” ì „ì²´ ë°ì´í„°' AS INFO FROM DUAL;
 SELECT '========================================' AS DIVIDER FROM DUAL;
 SELECT * FROM USERS ORDER BY user_num;
 
--- 2) COMPANY Å×ÀÌºí ÀüÃ¼ Á¶È¸
+-- 2) COMPANY í…Œì´ë¸” ì „ì²´ ì¡°íšŒ
 SELECT '========================================' AS DIVIDER FROM DUAL;
-SELECT '2. COMPANY Å×ÀÌºí ÀüÃ¼ µ¥ÀÌÅÍ' AS INFO FROM DUAL;
+SELECT '2. COMPANY í…Œì´ë¸” ì „ì²´ ë°ì´í„°' AS INFO FROM DUAL;
 SELECT '========================================' AS DIVIDER FROM DUAL;
 SELECT * FROM COMPANY ORDER BY company_num;
 
--- 3) POST Å×ÀÌºí ÀüÃ¼ Á¶È¸
+-- 3) POST í…Œì´ë¸” ì „ì²´ ì¡°íšŒ
 SELECT '========================================' AS DIVIDER FROM DUAL;
-SELECT '3. POST Å×ÀÌºí ÀüÃ¼ µ¥ÀÌÅÍ' AS INFO FROM DUAL;
+SELECT '3. POST í…Œì´ë¸” ì „ì²´ ë°ì´í„°' AS INFO FROM DUAL;
 SELECT '========================================' AS DIVIDER FROM DUAL;
 SELECT * FROM POST ORDER BY post_id;
 
--- 4) POST_COMMENT Å×ÀÌºí ÀüÃ¼ Á¶È¸
+-- 4) POST_COMMENT í…Œì´ë¸” ì „ì²´ ì¡°íšŒ
 SELECT '========================================' AS DIVIDER FROM DUAL;
-SELECT '4. POST_COMMENT Å×ÀÌºí ÀüÃ¼ µ¥ÀÌÅÍ' AS INFO FROM DUAL;
+SELECT '4. POST_COMMENT í…Œì´ë¸” ì „ì²´ ë°ì´í„°' AS INFO FROM DUAL;
 SELECT '========================================' AS DIVIDER FROM DUAL;
 SELECT * FROM POST_COMMENT ORDER BY comment_id;
 
--- 5) POST_SAVE Å×ÀÌºí ÀüÃ¼ Á¶È¸
+-- 5) POST_SAVE í…Œì´ë¸” ì „ì²´ ì¡°íšŒ
 SELECT '========================================' AS DIVIDER FROM DUAL;
-SELECT '5. POST_SAVE Å×ÀÌºí ÀüÃ¼ µ¥ÀÌÅÍ' AS INFO FROM DUAL;
+SELECT '5. POST_SAVE í…Œì´ë¸” ì „ì²´ ë°ì´í„°' AS INFO FROM DUAL;
 SELECT '========================================' AS DIVIDER FROM DUAL;
 SELECT * FROM POST_SAVE ORDER BY board_save_id;
 
--- 6) FOLLOWS Å×ÀÌºí ÀüÃ¼ Á¶È¸
+-- 6) FOLLOWS í…Œì´ë¸” ì „ì²´ ì¡°íšŒ
 SELECT '========================================' AS DIVIDER FROM DUAL;
-SELECT '6. FOLLOWS Å×ÀÌºí ÀüÃ¼ µ¥ÀÌÅÍ' AS INFO FROM DUAL;
+SELECT '6. FOLLOWS í…Œì´ë¸” ì „ì²´ ë°ì´í„°' AS INFO FROM DUAL;
 SELECT '========================================' AS DIVIDER FROM DUAL;
 SELECT * FROM FOLLOWS ORDER BY follow_id;
 
--- 7) DIRECT_CHAT_ROOMS Å×ÀÌºí ÀüÃ¼ Á¶È¸
+-- 7) DIRECT_CHAT_ROOMS í…Œì´ë¸” ì „ì²´ ì¡°íšŒ
 SELECT '========================================' AS DIVIDER FROM DUAL;
-SELECT '7. DIRECT_CHAT_ROOMS Å×ÀÌºí ÀüÃ¼ µ¥ÀÌÅÍ' AS INFO FROM DUAL;
+SELECT '7. DIRECT_CHAT_ROOMS í…Œì´ë¸” ì „ì²´ ë°ì´í„°' AS INFO FROM DUAL;
 SELECT '========================================' AS DIVIDER FROM DUAL;
 SELECT * FROM DIRECT_CHAT_ROOMS ORDER BY room_id;
 
--- 8) CHAT_MESSAGES Å×ÀÌºí ÀüÃ¼ Á¶È¸
+-- 8) CHAT_MESSAGES í…Œì´ë¸” ì „ì²´ ì¡°íšŒ
 SELECT '========================================' AS DIVIDER FROM DUAL;
-SELECT '8. CHAT_MESSAGES Å×ÀÌºí ÀüÃ¼ µ¥ÀÌÅÍ' AS INFO FROM DUAL;
+SELECT '8. CHAT_MESSAGES í…Œì´ë¸” ì „ì²´ ë°ì´í„°' AS INFO FROM DUAL;
 SELECT '========================================' AS DIVIDER FROM DUAL;
 SELECT * FROM CHAT_MESSAGES ORDER BY message_id;
 
--- 9) CHAT_MESSAGE_FILES Å×ÀÌºí ÀüÃ¼ Á¶È¸
+-- 9) CHAT_MESSAGE_FILES í…Œì´ë¸” ì „ì²´ ì¡°íšŒ
 SELECT '========================================' AS DIVIDER FROM DUAL;
-SELECT '9. CHAT_MESSAGE_FILES Å×ÀÌºí ÀüÃ¼ µ¥ÀÌÅÍ' AS INFO FROM DUAL;
+SELECT '9. CHAT_MESSAGE_FILES í…Œì´ë¸” ì „ì²´ ë°ì´í„°' AS INFO FROM DUAL;
 SELECT '========================================' AS DIVIDER FROM DUAL;
 SELECT * FROM CHAT_MESSAGE_FILES ORDER BY file_id;
 
--- 10) CART Å×ÀÌºí ÀüÃ¼ Á¶È¸
+-- 10) CART í…Œì´ë¸” ì „ì²´ ì¡°íšŒ
 SELECT '========================================' AS DIVIDER FROM DUAL;
-SELECT '10. CART Å×ÀÌºí ÀüÃ¼ µ¥ÀÌÅÍ' AS INFO FROM DUAL;
+SELECT '10. CART í…Œì´ë¸” ì „ì²´ ë°ì´í„°' AS INFO FROM DUAL;
 SELECT '========================================' AS DIVIDER FROM DUAL;
 SELECT * FROM CART ORDER BY cart_id;
 
--- 11) PAY Å×ÀÌºí ÀüÃ¼ Á¶È¸
+-- 11) PAY í…Œì´ë¸” ì „ì²´ ì¡°íšŒ
 SELECT '========================================' AS DIVIDER FROM DUAL;
-SELECT '11. PAY Å×ÀÌºí ÀüÃ¼ µ¥ÀÌÅÍ' AS INFO FROM DUAL;
+SELECT '11. PAY í…Œì´ë¸” ì „ì²´ ë°ì´í„°' AS INFO FROM DUAL;
 SELECT '========================================' AS DIVIDER FROM DUAL;
 SELECT * FROM PAY ORDER BY order_id;
 
--- 12) POST_LIKE Å×ÀÌºí ÀüÃ¼ Á¶È¸
+-- 12) POST_LIKE í…Œì´ë¸” ì „ì²´ ì¡°íšŒ
 SELECT '========================================' AS DIVIDER FROM DUAL;
-SELECT '12. POST_LIKE Å×ÀÌºí ÀüÃ¼ µ¥ÀÌÅÍ' AS INFO FROM DUAL;
+SELECT '12. POST_LIKE í…Œì´ë¸” ì „ì²´ ë°ì´í„°' AS INFO FROM DUAL;
 SELECT '========================================' AS DIVIDER FROM DUAL;
 SELECT * FROM POST_LIKE ORDER BY like_id;
 
--- 13) COMMENT_LIKE Å×ÀÌºí ÀüÃ¼ Á¶È¸
+-- 13) COMMENT_LIKE í…Œì´ë¸” ì „ì²´ ì¡°íšŒ
 SELECT '========================================' AS DIVIDER FROM DUAL;
-SELECT '13. COMMENT_LIKE Å×ÀÌºí ÀüÃ¼ µ¥ÀÌÅÍ' AS INFO FROM DUAL;
+SELECT '13. COMMENT_LIKE í…Œì´ë¸” ì „ì²´ ë°ì´í„°' AS INFO FROM DUAL;
 SELECT '========================================' AS DIVIDER FROM DUAL;
 SELECT * FROM COMMENT_LIKE ORDER BY like_id;
 
 ------------------------------------------------------------
--- ¿ä¾à Åë°è
+-- ìš”ì•½ í†µê³„
 ------------------------------------------------------------
 SELECT '========================================' AS DIVIDER FROM DUAL;
-SELECT 'ÀüÃ¼ Å×ÀÌºí µ¥ÀÌÅÍ °³¼ö ¿ä¾à' AS INFO FROM DUAL;
+SELECT 'ì „ì²´ í…Œì´ë¸” ë°ì´í„° ê°œìˆ˜ ìš”ì•½' AS INFO FROM DUAL;
 SELECT '========================================' AS DIVIDER FROM DUAL;
 
-SELECT 'USERS' AS Å×ÀÌºí¸í, COUNT(*) AS µ¥ÀÌÅÍ°³¼ö FROM USERS
+SELECT 'USERS' AS í…Œì´ë¸”ëª…, COUNT(*) AS ë°ì´í„°ê°œìˆ˜ FROM USERS
 UNION ALL
 SELECT 'COMPANY', COUNT(*) FROM COMPANY
 UNION ALL

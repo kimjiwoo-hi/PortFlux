@@ -1,6 +1,6 @@
 package com.portflux.backend.controller;
 
-import com.portflux.backend.model.Payment;
+import com.portflux.backend.model.PaymentRecord;
 import com.portflux.backend.service.PaymentService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +45,7 @@ public class PaymentController {
             }
 
             // 결제 확인 (아임포트 서버 검증 포함)
-            Payment payment = paymentService.confirmPayment(req.getImpUid(), req.getMerchantUid(), req.getAmount());
+            PaymentRecord payment = paymentService.confirmPayment(req.getImpUid(), req.getMerchantUid(), req.getAmount());
 
             ConfirmResponse res = new ConfirmResponse();
             res.setPaymentId(payment.getId());

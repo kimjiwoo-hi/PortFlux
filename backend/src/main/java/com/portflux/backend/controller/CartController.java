@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,35 +25,19 @@ public class CartController {
         List<CartItemResponse> itemResponses = cartItems.stream()
                 .map(item -> new CartItemResponse(
                         item.getId(),
-                        item.getProductId(),
-                        item.getProductName(),
-                        item.getUnitPrice(),
-                        item.getQty()))
+                        item.getUserId(),
+                        item.getPostId())) // Updated to new CartItemResponse
                 .collect(Collectors.toList());
 
-        BigDecimal total = itemResponses.stream()
-                .map(item -> item.getUnitPrice().multiply(new BigDecimal(item.getQty())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        CartResponse res = new CartResponse(itemResponses, total);
+        // Total calculation removed as price/qty are not in Cart
+        CartResponse res = new CartResponse(itemResponses);
         return ResponseEntity.ok(res);
     }
 
     @PostMapping("/{userId}/items")
     public ResponseEntity<CartItemResponse> addItemToCart(@PathVariable("userId") Long userId, @RequestBody AddItemRequest req) {
-        Cart cartItem = cartService.addOrUpdateItem(userId, req.getProductId(), req.getProductName(), req.getUnitPrice(), req.getQty());
-        CartItemResponse res = new CartItemResponse(cartItem.getId(), cartItem.getProductId(), cartItem.getProductName(), cartItem.getUnitPrice(), cartItem.getQty());
-        return ResponseEntity.ok(res);
-    }
-
-    @PatchMapping("/items/{cartId}")
-    public ResponseEntity<CartItemResponse> updateCartItemQuantity(@PathVariable("cartId") Long cartId, @RequestBody UpdateQtyRequest req) {
-        Cart updatedItem = cartService.updateItemQuantity(cartId, req.getQty());
-        if (updatedItem == null) {
-            // 수량이 0이 되어 아이템이 삭제된 경우
-            return ResponseEntity.noContent().build();
-        }
-        CartItemResponse res = new CartItemResponse(updatedItem.getId(), updatedItem.getProductId(), updatedItem.getProductName(), updatedItem.getUnitPrice(), updatedItem.getQty());
+        Cart cartItem = cartService.addOrUpdateItem(userId, req.getProductId()); // Updated call
+        CartItemResponse res = new CartItemResponse(cartItem.getId(), cartItem.getUserId(), cartItem.getPostId()); // Updated response
         return ResponseEntity.ok(res);
     }
 
@@ -68,42 +51,30 @@ public class CartController {
     // --- DTOs ---
     @Data
     public static class AddItemRequest {
-        private Long productId;
-        private String productName;
-        private BigDecimal unitPrice;
-        private Integer qty;
-    }
-
-    @Data
-    public static class UpdateQtyRequest {
-        private Integer qty;
+        private Long productId; // Now represents postId
     }
 
     @Data
     public static class CartResponse {
         private List<CartItemResponse> items;
-        private BigDecimal total;
+        // private BigDecimal total; // Removed
 
-        public CartResponse(List<CartItemResponse> items, BigDecimal total) {
+        public CartResponse(List<CartItemResponse> items) { // Constructor updated
             this.items = items;
-            this.total = total;
+            // this.total = total; // Removed
         }
     }
 
     @Data
     public static class CartItemResponse {
-        private Long cartId; // 프론트에서 아이템 구분을 위해 cartId 추가
-        private Long productId;
-        private String productName;
-        private BigDecimal unitPrice;
-        private Integer qty;
+        private Long cartId;
+        private Long userId;
+        private Long postId; // Represents the productId from frontend's perspective
 
-        public CartItemResponse(Long cartId, Long productId, String productName, BigDecimal unitPrice, Integer qty) {
+        public CartItemResponse(Long cartId, Long userId, Long postId) {
             this.cartId = cartId;
-            this.productId = productId;
-            this.productName = productName;
-            this.unitPrice = unitPrice;
-            this.qty = qty;
+            this.userId = userId;
+            this.postId = postId;
         }
     }
 }
