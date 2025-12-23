@@ -1,8 +1,14 @@
-export default function MessageList({ messages }) {
+import MessageItem from "./MessageItem";
+
+export default function MessageList({ messages, loginUserNum }) {
   return (
     <div className="message-area">
-      {messages.map((m) => (
-        <MessageItem key={m.id} msg={m} />
+      {messages.map((m, index) => (
+        <MessageItem
+          key={m.messageId || `msg-${index}`}
+          msg={m}
+          isMe={m.senderNum === loginUserNum}
+        />
       ))}
     </div>
   );
