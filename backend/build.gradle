@@ -51,6 +51,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-mail' //SMTP 인증코드 발송 API
 
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+	
 	
 }
 

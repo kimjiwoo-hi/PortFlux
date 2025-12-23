@@ -1,54 +1,52 @@
 package com.portflux.backend.beans;
 
-import java.time.LocalDateTime; // Date 대신 LocalDateTime 권장
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
+import java.sql.Date;
 
+@Data
 @Entity
 @Table(name = "USERS")
-@Data
 public class UserBean {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "USER_NUM")
-    private Long userNum;
+    @Column(name = "user_num")
+    private int userNum;
 
-    @Column(name = "USER_ID", nullable = false, length = 50)
+    @Column(name = "user_id", unique = true, nullable = false)
     private String userId;
 
-    @Column(name = "USER_PASSWORD", nullable = false, length = 100)
-    private String userPassword;
+    @Column(name = "user_password", nullable = false)
+    private String userPw;
 
-    @Column(name = "USER_NAME", nullable = false, length = 100)
+    @Column(name = "user_name", nullable = false)
     private String userName;
 
-    @Column(name = "USER_PHONE", length = 20)
+    @Column(name = "user_phone")
     private String userPhone;
 
-    @Column(name = "USER_EMAIL", nullable = false, length = 255)
+    @Column(name = "user_email", nullable = false)
     private String userEmail;
 
-    @Column(name = "USER_NICKNAME", nullable = false, length = 100)
+    @Column(name = "user_nickname", nullable = false)
     private String userNickname;
 
-    @Column(name = "DRAWN_USER", length = 1)
+    @Column(name = "drawn_user")
     private String drawnUser;
 
-    @Column(name = "USER_CREATE_AT", nullable = false)
-    private LocalDateTime userCreateAt = LocalDateTime.now();
+    @Column(name = "user_create_at", insertable = false, updatable = false)
+    private Date userCreateAt;
 
-    @Column(name = "USER_LEVEL")
-    private Integer userLevel;
+    @Column(name = "user_level")
+    private int userLevel;
 
-    @Column(name = "USER_IMAGE")
-    private byte[] userImage;
+    // [핵심 수정] BLOB 컬럼은 String이 아니라 byte[]로 받아야 함
+    @Lob
+    @Column(name = "user_image")
+    private byte[] userImage; 
 
-    @Column(name = "USER_BANNER")
-    private byte[] userBanner;
+    @Lob
+    @Column(name = "user_banner")
+    private byte[] userBanner; 
 }

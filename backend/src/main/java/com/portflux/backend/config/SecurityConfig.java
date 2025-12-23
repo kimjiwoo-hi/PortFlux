@@ -1,5 +1,6 @@
 package com.portflux.backend.config;
 
+import java.util.Arrays;
 import java.util.Collections;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +18,6 @@ import jakarta.servlet.http.HttpServletRequest;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // 비밀번호 암호화 빈 등록 (필수)
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -26,15 +26,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 1. CORS 설정 (Security 필터 레벨)
+                // 1. CORS 설정
                 .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration config = new CorsConfiguration();
-
-                        // 프론트엔드 URL 명시
-                        config.setAllowedOriginPatterns(Collections.singletonList("http://localhost:5173"));
-
+                        config.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000", "http://localhost:5173"));
                         config.setAllowedMethods(Collections.singletonList("*"));
                         config.setAllowCredentials(true);
                         config.setAllowedHeaders(Collections.singletonList("*"));
@@ -63,16 +60,21 @@ public class SecurityConfig {
                         .requestMatchers("/api/mail/**").permitAll()
                         .requestMatchers("/user/login/**").permitAll()
 
-                        // [추가] 게시판 API 관련 경로 허용 (이 부분이 없어서 403 발생)
+                        // [추가] 관리자 계정 설정을 위한 임시 경로 허용
+                        .requestMatchers("/user/setup-admin").permitAll()
+
+                        // 게시판 관련
+                        .requestMatchers("/board/**").permitAll()
                         .requestMatchers("/api/board/**").permitAll()
 
-                        // [추가] 사용자 정보 조회(헤더 팝오버) 허용
+                        // 사용자 정보 조회
                         .requestMatchers("/user/info/**").permitAll()
 
-                        // 정적 리소스 및 에러 페이지
+                        // 정적 리소스 및 공통 항목
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/error").permitAll()
-
+                        .requestMatchers("/favicon.ico").permitAll()
+                        
                         // 그 외 모든 요청은 인증 필요
                         .anyRequest().authenticated());
 

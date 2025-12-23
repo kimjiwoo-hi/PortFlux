@@ -18,14 +18,16 @@ public class UserRegisterController {
 
     private final UserService userService;
 
-    // 1. 일반 회원가입 요청
+    // 1. 일반 회원가입
     @PostMapping("/general")
     public ResponseEntity<String> registerGeneral(@RequestBody UserRegisterBean registerBean) {
+        System.out.println(">>> 일반 회원가입 요청: " + registerBean); // 디버깅용
         try {
             userService.registerUser(registerBean);
             return ResponseEntity.ok("회원가입 성공");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("가입 실패: " + e.getMessage());
         }
     }
     
@@ -34,7 +36,7 @@ public class UserRegisterController {
     public ResponseEntity<Boolean> checkNickname(@RequestBody Map<String, String> request) {
         String nickname = request.get("nickname");
         boolean isDuplicate = userService.isNicknameDuplicate(nickname);
-        return ResponseEntity.ok(!isDuplicate);
+        return ResponseEntity.ok(!isDuplicate); // 중복 아니면 true(사용가능)
     }
     
     // 3. 이메일 중복 확인
@@ -42,14 +44,14 @@ public class UserRegisterController {
     public ResponseEntity<Boolean> checkEmailDuplicate(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         boolean isDuplicate = userService.isEmailDuplicate(email); 
-        return ResponseEntity.ok(isDuplicate);
+        return ResponseEntity.ok(isDuplicate); // 중복이면 true
     }
 
-    // 4. ★ 아이디 중복 확인 API (추가됨)
+    // 4. 아이디 중복 확인
     @PostMapping("/check-id")
     public ResponseEntity<Boolean> checkIdDuplicate(@RequestBody Map<String, String> request) {
         String userId = request.get("userId");
         boolean isDuplicate = userService.isIdDuplicate(userId); 
-        return ResponseEntity.ok(isDuplicate);
+        return ResponseEntity.ok(isDuplicate); // 중복이면 true
     }
 }
