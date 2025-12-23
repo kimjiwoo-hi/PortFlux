@@ -21,14 +21,10 @@ configurations {
 }
 
 repositories {
-<<<<<<< HEAD
-	mavenCentral()
-	maven { url 'https://jitpack.io' }
-=======
     mavenCentral()
     maven { url 'https://jitpack.io' }
     maven { url 'https://repo.spring.io/milestone' }  // ✅ Spring AI용 추가
->>>>>>> 16f9fd1d8832b31f24e862d3fb30fb3a49c15e5b
+
 }
 
 ext {
@@ -40,7 +36,6 @@ dependencies {
     implementation 'com.oracle.database.jdbc:ojdbc11'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-<<<<<<< HEAD
     implementation 'org.springframework.ai:spring-ai-starter-model-openai'
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
