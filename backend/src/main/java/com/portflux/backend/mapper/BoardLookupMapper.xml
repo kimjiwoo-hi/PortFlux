@@ -1,107 +1,137 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="com.portflux.backend.mapper.BoardLookupMapper">
 
-    <select id="findPostById" parameterType="int" resultType="com.portflux.backend.beans.BoardLookupPostDto">
+    <!-- ResultMap 정의 -->
+    <resultMap id="BoardLookupPostResultMap" type="com.portflux.backend.beans.BoardLookupPostDto">
+        <id property="postId" column="post_id"/>
+        <result property="boardType" column="board_type"/>
+        <result property="userNum" column="user_num"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="viewCnt" column="view_cnt"/>
+        <result property="price" column="price"/>
+        <result property="aiSummary" column="ai_summary"/>
+        <result property="downloadCnt" column="download_cnt"/>
+        <result property="postFile" column="post_file"/>
+        <result property="tags" column="tags"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="userImage" column="user_image"/>
+    </resultMap>
+
+    <!-- 게시글 상세 조회 -->
+    <select id="findPostById" parameterType="int" resultMap="BoardLookupPostResultMap">
         SELECT 
-            p.post_id as postId,
+            p.post_id,
+            p.board_type,
+            p.user_num,
             p.title,
             p.content,
+            p.created_at,
+            p.updated_at,
+            p.view_cnt,
             p.price,
-            p.post_file as postFile,
-            p.user_num as userNum,
-            u.user_nickname as userNickname,
-            u.user_image as userImage,
+            p.ai_summary,
+            p.download_cnt,
+            p.post_file,
             p.tags,
-            p.view_cnt as viewCnt,
-            p.created_at as createdAt,
-            p.ai_summary as aiSummary,
-            p.download_cnt as downloadCnt
+            u.user_nickname,
+            u.user_image
         FROM POST p
-        JOIN USERS u ON p.user_num = u.user_num
-        WHERE p.post_id = #{postId} AND p.board_type = 'lookup'
+        LEFT JOIN USERS u ON p.user_num = u.user_num
+        WHERE p.post_id = #{postId}
+          AND p.board_type = 'lookup'
     </select>
 
+    <!-- 전체 게시글 목록 조회 -->
+    <select id="findAllLookupPosts" resultMap="BoardLookupPostResultMap">
+        SELECT 
+            p.post_id,
+            p.board_type,
+            p.user_num,
+            p.title,
+            p.content,
+            p.created_at,
+            p.updated_at,
+            p.view_cnt,
+            p.price,
+            p.ai_summary,
+            p.download_cnt,
+            p.post_file,
+            p.tags,
+            u.user_nickname,
+            u.user_image
+        FROM POST p
+        LEFT JOIN USERS u ON p.user_num = u.user_num
+        WHERE p.board_type = 'lookup'
+        ORDER BY p.created_at DESC
+    </select>
+
+    <!-- 조회수 증가 -->
     <update id="incrementViewCount" parameterType="int">
-        UPDATE POST SET view_cnt = view_cnt + 1 WHERE post_id = #{postId}
+        UPDATE POST
+        SET view_cnt = view_cnt + 1
+        WHERE post_id = #{postId}
     </update>
 
-    <insert id="insertPost" parameterType="com.portflux.backend.beans.BoardLookupPostDto">
-        <selectKey keyProperty="postId" resultType="int" order="BEFORE">
-            SELECT NVL(MAX(post_id), 0) + 1 FROM POST
-        </selectKey>
-
+    <!-- 게시글 작성 -->
+    <insert id="insertPost" parameterType="com.portflux.backend.beans.BoardLookupPostDto"
+            useGeneratedKeys="true" keyProperty="postId" keyColumn="post_id">
         INSERT INTO POST (
-            post_id,
             board_type,
             user_num,
             title,
             content,
+            created_at,
+            updated_at,
+            view_cnt,
             price,
-            tags,
-            post_file,
             ai_summary,
             download_cnt,
-            view_cnt,
-            created_at,
-            updated_at
+            post_file,
+            tags
         ) VALUES (
-            #{postId},
             'lookup',
             #{userNum},
             #{title},
             #{content},
-            #{price},
-            #{tags, jdbcType=VARCHAR},
-            #{postFile},
-            #{aiSummary},
-            #{downloadCnt},
-            0,
             SYSDATE,
-            SYSDATE
+            SYSDATE,
+            #{viewCnt},
+            #{price},
+            #{aiSummary, jdbcType=VARCHAR},
+            #{downloadCnt},
+            #{postFile},
+            #{tags}
         )
     </insert>
 
-    <select id="findAllLookupPosts" resultType="com.portflux.backend.beans.BoardLookupPostDto">
-        SELECT 
-            post_id as postId,
-            title,
-            content,
-            price,
-            post_file as postFile,
-            user_num as userNum,
-            tags,
-            view_cnt as viewCnt,
-            created_at as createdAt
-        FROM POST
-        WHERE board_type = 'lookup'
-        ORDER BY created_at DESC
-    </select>
-
+    <!-- 게시글 수정 -->
     <update id="updatePost" parameterType="com.portflux.backend.beans.BoardLookupPostDto">
-        UPDATE POST SET
+        UPDATE POST
+        SET 
             title = #{title},
             content = #{content},
             price = #{price},
-            tags = #{tags, jdbcType=VARCHAR},
-            post_file = #{postFile},
             ai_summary = #{aiSummary},
+            <if test="postFile != null">
+                post_file = #{postFile},
+            </if>
+            tags = #{tags},
             updated_at = SYSDATE
         WHERE post_id = #{postId}
+          AND board_type = 'lookup'
     </update>
 
+    <!-- 게시글 삭제 -->
     <delete id="deletePost" parameterType="int">
-        DELETE FROM POST WHERE post_id = #{postId}
+        DELETE FROM POST
+        WHERE post_id = #{postId}
+          AND board_type = 'lookup'
     </delete>
-
-    <update id="incrementDownloadCount" parameterType="int">
-        UPDATE POST SET download_cnt = download_cnt + 1 WHERE post_id = #{postId}
-    </update>
-
-    <select id="findPostsByUserNum" parameterType="int" resultType="com.portflux.backend.beans.BoardLookupPostDto">
-        SELECT * FROM POST 
-        WHERE user_num = #{userNum} AND board_type = 'lookup'
-        ORDER BY created_at DESC
-    </select>
 
 </mapper>
