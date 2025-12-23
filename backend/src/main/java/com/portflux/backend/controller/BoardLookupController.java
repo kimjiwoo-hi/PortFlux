@@ -135,8 +135,23 @@ public class BoardLookupController {
     public ResponseEntity<List<BoardLookupPostDto>> getAllPosts() {
         try {
             List<BoardLookupPostDto> posts = boardLookupService.getAllLookupPosts();
+
+            // 각 게시글에 PDF 이미지 목록 추가 (썸네일용)
+            for (BoardLookupPostDto post : posts) {
+                Path imageDir = Paths.get(uploadDir, "pdf", "post_" + post.getPostId());
+                if (Files.exists(imageDir)) {
+                    List<String> images = Files.list(imageDir)
+                            .filter(p -> p.toString().endsWith(".jpg"))
+                            .sorted()
+                            .map(p -> "/uploads/pdf/post_" + post.getPostId() + "/" + p.getFileName())
+                            .toList();
+                    post.setPdfImages(images);
+                }
+            }
+
             return ResponseEntity.ok(posts);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }

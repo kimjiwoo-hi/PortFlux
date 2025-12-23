@@ -34,17 +34,23 @@ function BoardLookupPage() {
             console.error('태그 파싱 실패:', e);
           }
 
-          // 이미지 URL 생성 (postFile을 썸네일로 사용)
-          const imageUrl = post.postFile 
-            ? `http://localhost:8080/uploads/${post.postFile}`
-            : 'https://cdn.dribbble.com/userupload/12461999/file/original-251950a7c4585c49086113b190f7f224.png?resize=1024x768';
+          // 썸네일 이미지 URL 생성 (PDF 변환된 첫 번째 이미지 사용)
+          let imageUrl = 'https://cdn.dribbble.com/userupload/12461999/file/original-251950a7c4585c49086113b190f7f224.png?resize=1024x768';
+
+          if (post.pdfImages && post.pdfImages.length > 0) {
+            // PDF 이미지 첫 페이지를 썸네일로 사용
+            imageUrl = `http://localhost:8080${post.pdfImages[0]}`;
+          } else if (post.postFile) {
+            // PDF 이미지가 없으면 원본 파일 경로 시도 (호환성)
+            imageUrl = `http://localhost:8080/uploads/${post.postFile}`;
+          }
 
           return {
             id: post.postId,
             title: post.title,
             author: post.userNickname,
             imageUrl: imageUrl,
-            price: post.price, // Add price
+            price: post.price,
             likes: 0, // TODO: 좋아요 기능 추가 시 구현
             views: post.viewCnt,
             isLiked: false,
