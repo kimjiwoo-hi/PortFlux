@@ -84,6 +84,12 @@ const MyInfo = () => {
       };
 
       await axios.put(`http://localhost:8080/user/info/${userInfo.userId}`, dataToSave);
+      
+      // localStorage의 user 정보 업데이트
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const updatedUser = { ...storedUser, ...editedInfo, userImage: editedInfo.userImage };
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
       setUserInfo(editedInfo);
       setIsEditing(false);
       setSuccessMessage("정보가 성공적으로 수정되었습니다.");
