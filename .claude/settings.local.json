@@ -3,7 +3,10 @@
     "allow": [
       "Bash(find:*)",
       "Bash(grep:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(.gradlew.bat bootRun)",
+      "Bash(npm run dev:*)",
+      "Bash(timeout:*)"
     ]
   }
 }

@@ -116,14 +116,70 @@ function CartPage() {
     }
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (cartItems.length === 0) {
       alert("장바구니가 비어있습니다.");
       return;
     }
 
-    // TODO: 결제 페이지로 이동
-    alert("결제 기능은 준비 중입니다.");
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+    const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+
+    if (!storedUser) {
+      alert("로그인이 필요합니다.");
+      navigate("/login");
+      return;
+    }
+
+    const user = JSON.parse(storedUser);
+
+    try {
+      // 장바구니 아이템을 Order API 형식으로 변환
+      const orderItems = cartItems.map(item => ({
+        productId: item.postId,
+        productName: item.title,
+        unitPrice: item.price || 0,
+        qty: 1
+      }));
+
+      // 주문 생성 API 호출
+      const orderResponse = await axios.post(
+        'http://localhost:8080/api/orders',
+        {
+          userId: user.userNum,
+          items: orderItems
+        },
+        {
+          withCredentials: true,
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      console.log("주문 생성 완료:", orderResponse.data);
+
+      // 주문 완료 후 장바구니 비우기
+      for (const item of cartItems) {
+        await axios.delete(
+          `http://localhost:8080/api/cart/items/${item.cartId}`,
+          {
+            withCredentials: true,
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+      }
+
+      // OrderResultPage로 이동 (merchant_uid 전달)
+      navigate(`/order-result?merchant_uid=${orderResponse.data.merchantUid}`);
+
+    } catch (err) {
+      console.error("주문 생성 실패:", err);
+      alert("주문 처리 중 오류가 발생했습니다.");
+    }
   };
 
   const calculateTotal = () => {
