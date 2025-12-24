@@ -107,7 +107,7 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
         <Link to="/cart" onClick={handleMenuClick("/cart")}>
           <button className="menu-item">장바구니</button>
         </Link>
-        <Link to="/order-result" onClick={handleMenuClick("/order-result")}>
+        <Link to="/order-list" onClick={handleMenuClick("/order-list")}>
           <button className="menu-item">주문 내역</button>
         </Link>
         {/*
