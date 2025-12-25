@@ -81,6 +81,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/orders/**").authenticated()
                         // [추가] 결제 결과 조회 API 허용
                         .requestMatchers("/api/payments/result").permitAll()
+                        // [추가] 팔로우 API 허용
+                        .requestMatchers("/api/follow/**").permitAll()
 
                         // 정적 리소스 허용
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()

@@ -118,8 +118,8 @@ export default function OrderResultPage() {
               <button className="btn-primary" onClick={() => navigate("/")}>
                 계속 쇼핑하기
               </button>
-              <button className="btn-secondary" onClick={() => navigate("/mypage")}>
-                마이페이지
+              <button className="btn-secondary" onClick={() => navigate("/order-list")}>
+                주문 내역
               </button>
             </>
           ) : (
