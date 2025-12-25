@@ -436,3 +436,81 @@ Spring Security:
 생성일: 2025-12-25
 분석 도구: Claude Code (Claude Sonnet 4.5)
 프로젝트: PortFlux
+
+
+================================================================================
+                        🗑️ 추가 분석: 삭제 가능 및 개선 필요 항목
+================================================================================
+
+즉시 삭제 가능한 파일들 (완전히 비어있음)
+────────────────────────────────────────────────────────────────────
+
+백엔드 (8개):
+1. PageBean.java - 0 라인, 완전히 비어있음
+2. BoardFreeDao.java - 빈 클래스
+3. BoardFreeService.java - 빈 클래스
+4. BoardFreeController.java - 빈 클래스
+5. BoardFreeMapper.java - 빈 클래스
+6. BoardInterceptor.java - 빈 클래스
+7. FileUploadController.java - @RestController만 있고 메서드 없음
+8. BoardLookupDao.java - 빈 클래스
+
+프론트엔드 (1개):
+1. BoardFreePage.jsx - 빈 div만 반환, 기능 없음
+
+참고: 위 파일들은 나중에 사용할 계획이므로 보류
+
+
+심각한 문제
+────────────────────────────────────────────────────────────────────
+
+1. 잘못된 클래스명 (중복)
+   - api/BoardLookupPostDto.java가 실제로는 MailController(메일 인증 API)인데 이름이 잘못됨
+   - 상태: ✅ 수정 완료 (controller/MailController.java로 이동)
+
+2. 제대로 구현 안 된 기능
+   - UserService.isNicknameAvailable() - 항상 true만 반환
+
+   현재 코드:
+   // 실제 구현 시: !userRepository.existsByUserNickname(nickname)
+   return true; // 임시로 항상 사용 가능하다고 반환
+
+
+개선이 필요한 부분
+────────────────────────────────────────────────────────────────────
+
+디버그 코드 (프로덕션에서 제거 필요):
+- System.out.println: 16개 파일
+- console.log: 8개 파일
+- e.printStackTrace(): 14개 파일
+
+UI/UX 개선:
+- alert() 140개 이상 → Toast 알림으로 대체 권장
+
+TODO 주석들 (미완성 기능):
+- CartController: "실무에서는 인증 정보 사용 권장"
+- OrderController: "현재는 인증 없이 userId 받음"
+- PaymentService: "금액 불일치 시 결제 취소 로직 추가"
+- BoardLookupController: "실제로는 세션에서 userNum 가져오기"
+
+코드 일관성:
+- 일부는 @Autowired, 일부는 @RequiredArgsConstructor 사용 (통일 필요)
+
+주석 처리된 코드:
+- UserProfilePopover.jsx: 채팅방 메뉴 (삭제 또는 활성화 결정 필요)
+- MyInfo.jsx: 레벨 기능 (이미 숨김 처리했다고 했는데 코드는 남아있음)
+
+
+정리 작업 우선순위
+────────────────────────────────────────────────────────────────────
+
+가장 간단한 것부터 시작하면:
+1. 빈 파일 9개 삭제 (가장 쉬움) → 나중에 사용 예정이므로 보류
+2. 잘못된 클래스명 수정 (BoardLookupPostDto → MailController) → ✅ 완료
+3. 디버그 코드 제거 (System.out.println, console.log)
+4. UserService.isNicknameAvailable() 제대로 구현
+5. @Autowired → @RequiredArgsConstructor 통일
+6. alert() → Toast 알림으로 대체
+
+
+================================================================================
