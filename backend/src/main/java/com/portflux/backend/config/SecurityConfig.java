@@ -72,7 +72,6 @@ public class SecurityConfig {
         
                         // ★★★ 업로드된 파일 접근 허용 (추가) ★★★
                         .requestMatchers("/uploads/**").permitAll()
-                        // [추가] 사용자 정보 조회/수정 API 허용
                         .requestMatchers("/api/user/info/**").permitAll()
 
                         // [추가] 장바구니 API는 인증된 사용자만 허용
