@@ -59,7 +59,7 @@ function FindPasswordPage() {
       return;
     }
     try {
-      const res = await fetch("http://localhost:8080/api/mail/send", {
+      const res = await fetch("/api/mail/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -79,7 +79,7 @@ function FindPasswordPage() {
       return;
     }
     try {
-      const res = await fetch("http://localhost:8080/api/mail/verify", {
+      const res = await fetch("/api/mail/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, authCode }),
@@ -137,7 +137,7 @@ function FindPasswordPage() {
 
     try {
       const res = await fetch(
-        "http://localhost:8080/user/find/reset-password",
+        "/api/user/find/reset-password",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

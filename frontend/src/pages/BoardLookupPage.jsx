@@ -19,7 +19,7 @@ function BoardLookupPage() {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:8080/api/boardlookup/posts', {
+        const response = await axios.get('/api/boardlookup/posts', {
           withCredentials: true
         });
         
@@ -38,10 +38,10 @@ function BoardLookupPage() {
 
           if (post.pdfImages && post.pdfImages.length > 0) {
             // PDF 이미지 첫 페이지를 썸네일로 사용
-            imageUrl = `http://localhost:8080${post.pdfImages[0]}`;
+            imageUrl = `${post.pdfImages[0]}`;
           } else if (post.postFile) {
             // PDF 이미지가 없으면 원본 파일 경로 시도 (호환성)
-            imageUrl = `http://localhost:8080/uploads/${post.postFile}`;
+            imageUrl = `/uploads/${post.postFile}`;
           }
 
           return {
@@ -133,11 +133,11 @@ function BoardLookupPage() {
         productId: post.id,
       };
 
-      console.log("요청 URL:", `http://localhost:8080/api/cart/${loggedInUser.userNum}/items`);
+      console.log("요청 URL:", `/api/cart/${loggedInUser.userNum}/items`);
       console.log("요청 데이터:", requestData);
 
       const response = await axios.post(
-        `http://localhost:8080/api/cart/${loggedInUser.userNum}/items`,
+        `/api/cart/${loggedInUser.userNum}/items`,
         requestData,
         {
           withCredentials: true,

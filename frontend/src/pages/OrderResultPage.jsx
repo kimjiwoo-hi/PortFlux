@@ -22,7 +22,7 @@ export default function OrderResultPage() {
 
       try {
         const response = await axios.get(
-          `http://localhost:8080/api/payments/result?merchantUid=${encodeURIComponent(merchantUid)}`,
+          `/api/payments/result?merchantUid=${encodeURIComponent(merchantUid)}`,
           { withCredentials: true }
         );
 
