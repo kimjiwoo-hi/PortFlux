@@ -32,6 +32,7 @@ import MyInfo from "./pages/MyInfo.jsx";
 import MyPosts from "./pages/MyPosts.jsx";
 import MyComments from "./pages/MyComments.jsx";
 import SavedPosts from "./pages/SavedPosts.jsx";
+import UserProfile from "./pages/UserProfile.jsx";
 
 const router = createBrowserRouter([
   {
@@ -132,6 +133,10 @@ const router = createBrowserRouter([
       {
         path: "/success",
         element: <SuccessPage />,
+      },
+      {
+        path: "/user/:userNum",
+        element: <UserProfile />,
       },
       {
         path: "/etc",
