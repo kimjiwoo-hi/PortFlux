@@ -298,7 +298,11 @@ const BoardLookupRead = () => {
           <div className="profile-wrapper">
             <div className="profile-left">
               <div className="profile-top">
-                <div className="profile-image">
+                <div
+                  className="profile-image"
+                  onClick={() => navigate(`/user/${postData.userNum}`)}
+                  style={{ cursor: 'pointer', width: '40px', height: '40px' }}
+                >
                   {userImageSrc ? (
                     <img src={userImageSrc} alt="profile" />
                   ) : (
@@ -306,13 +310,16 @@ const BoardLookupRead = () => {
                   )}
                   <button
                     className={`follow-btn ${isFollowing ? "following" : ""}`}
-                    onClick={handleFollowToggle}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleFollowToggle();
+                    }}
                   >
                     {isFollowing ? "✓" : "+"}
                   </button>
                 </div>
                 <div className="profile-info">
-                  <div className="nickname">{postData.userNickname}</div>
+                  <div className="nickname" onClick={() => navigate(`/user/${postData.userNum}`)} style={{ cursor: 'pointer' }}>{postData.userNickname}</div>
                 </div>
               </div>
             </div>
@@ -497,7 +504,7 @@ const BoardLookupRead = () => {
               return (
                 <div key={comment.commentId} className="comment-item">
                   <div className="comment-author">
-                    <div className="comment-author-profile">
+                    <div className="comment-author-profile" onClick={() => navigate(`/user/${comment.userNum}`)} style={{ cursor: 'pointer' }}>
                       {commentUserImageSrc ? (
                         <img src={commentUserImageSrc} alt={comment.userNickname} className="comment-profile-pic" />
                       ) : (

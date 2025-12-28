@@ -48,6 +48,7 @@ function BoardLookupPage() {
             id: post.postId,
             title: post.title,
             author: post.userNickname,
+            userNum: post.userNum,
             imageUrl: imageUrl,
             price: post.price,
             likes: 0, // TODO: 좋아요 기능 추가 시 구현
@@ -263,13 +264,16 @@ function BoardLookupPage() {
               />
               <div className="board-item-info">
                 <h4 className="info-title">{post.title}</h4>
-                <a 
-                  href={`/profile/${post.author}`} 
+                <span
                   className="info-author"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/user/${post.userNum}`);
+                  }}
+                  style={{ cursor: 'pointer' }}
                 >
                   {post.author}
-                </a>
+                </span>
               </div>
             </div>
           )
