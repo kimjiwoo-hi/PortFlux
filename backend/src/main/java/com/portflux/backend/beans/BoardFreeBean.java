@@ -18,8 +18,11 @@ public class BoardFreeBean {
     
     // 작성자 정보
     private Integer userNum;     // 유저 고유 번호
+    private Integer companyNum;  // 회사 고유 번호
     private String userNickname; // 유저 닉네임
     private Integer adminNum;    // 관리자 번호 (필요 시 사용)
     
     private Integer commentCnt;  // 댓글 개수
+
+    private String writerNickname; // 작성자 닉네임
 }

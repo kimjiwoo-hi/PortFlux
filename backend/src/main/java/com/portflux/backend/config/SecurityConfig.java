@@ -47,21 +47,15 @@ public class SecurityConfig {
 
                 // 4. URL 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        // 회원가입 관련
-                        .requestMatchers("/user/register/check-id").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/user/register/**").permitAll()
-                        .requestMatchers("/user/register/**").permitAll()
-                        .requestMatchers("/company/register/**").permitAll()
-                        
-                        // 아이디/비밀번호 찾기
-                        .requestMatchers("/user/find/**").permitAll()
-
-                        // 로그인 및 메일 인증
-                        .requestMatchers("/api/mail/**").permitAll()
-                        .requestMatchers("/user/login/**").permitAll()
+                        // 회원가입 및 로그인, 아이디/비번 찾기 등 사용자 인증 관련
+                        .requestMatchers("/user/register/**", "/user/login/**", "/user/find/**").permitAll()
+                        .requestMatchers("/company/**").permitAll() // 기업 회원가입, 로그인 등 모두 허용
 
                         // [추가] 관리자 계정 설정을 위한 임시 경로 허용
                         .requestMatchers("/user/setup-admin").permitAll()
+                        
+                        // 메일 인증
+                        .requestMatchers("/api/mail/**").permitAll()
 
                         // 게시판 관련
                         .requestMatchers("/board/**").permitAll()

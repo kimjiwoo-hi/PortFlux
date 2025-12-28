@@ -8,15 +8,25 @@ import com.portflux.backend.beans.BoardCommentBean;
 
 @Mapper
 public interface BoardFreeMapper {
+    // [중요] userNum과 companyNum을 Integer로 변경하여 null 허용 (NPE 방지)
+    int checkLike(@Param("postId") int postId, 
+                  @Param("userNum") Integer userNum, 
+                  @Param("companyNum") Integer companyNum, 
+                  @Param("role") String role);
     
-    // 좋아요 관련
-    int checkLike(@Param("postId") int postId, @Param("userNum") int userNum);
-    void insertLike(@Param("postId") int postId, @Param("userNum") int userNum);
-    void deleteLike(@Param("postId") int postId, @Param("userNum") int userNum);
+    void insertLike(@Param("postId") int postId, 
+                    @Param("userNum") Integer userNum, 
+                    @Param("companyNum") Integer companyNum, 
+                    @Param("role") String role);
+    
+    void deleteLike(@Param("postId") int postId, 
+                    @Param("userNum") Integer userNum, 
+                    @Param("companyNum") Integer companyNum, 
+                    @Param("role") String role);
+
     void increaseLikeCount(int postId);
     void decreaseLikeCount(int postId);
 
-    // 게시판 CRUD 관련
     List<BoardFreeBean> getBoardList(@Param("keyword") String keyword);
     void insertBoard(BoardFreeBean bean);
     BoardFreeBean getBoardDetail(int postId);
@@ -24,7 +34,6 @@ public interface BoardFreeMapper {
     void updateBoard(BoardFreeBean bean);
     void deleteBoard(int postId);
 
-    // [추가] 댓글 관련 메서드
     List<BoardCommentBean> getCommentList(int postId);
     void insertComment(BoardCommentBean commentBean);
     void deleteComment(int commentId);

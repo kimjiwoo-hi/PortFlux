@@ -5,15 +5,35 @@
 <mapper namespace="com.portflux.backend.mapper.BoardFreeMapper">
 
     <select id="checkLike" resultType="int">
-        SELECT COUNT(*) FROM POST_LIKE WHERE post_id = #{postId} AND user_num = #{userNum}
+        SELECT COUNT(*) FROM POST_LIKE 
+        WHERE post_id = #{postId} 
+        AND 
+        <choose>
+            <when test="role == 'COMPANY'">company_num = #{companyNum}</when>
+            <otherwise>user_num = #{userNum}</otherwise>
+        </choose>
     </select>
 
     <insert id="insertLike">
-        INSERT INTO POST_LIKE (user_num, post_id, liked_at) VALUES (#{userNum}, #{postId}, SYSDATE)
+        INSERT INTO POST_LIKE (post_id, user_num, company_num, liked_at) 
+        VALUES (
+            #{postId}, 
+            <choose>
+                <when test="role == 'COMPANY'">NULL, #{companyNum}</when>
+                <otherwise>#{userNum}, NULL</otherwise>
+            </choose>, 
+            SYSDATE
+        )
     </insert>
 
     <delete id="deleteLike">
-        DELETE FROM POST_LIKE WHERE post_id = #{postId} AND user_num = #{userNum}
+        DELETE FROM POST_LIKE 
+        WHERE post_id = #{postId} 
+        AND 
+        <choose>
+            <when test="role == 'COMPANY'">company_num = #{companyNum}</when>
+            <otherwise>user_num = #{userNum}</otherwise>
+        </choose>
     </delete>
 
     <update id="increaseLikeCount" parameterType="int">
@@ -37,11 +57,13 @@
                NVL(p.like_cnt, 0) as likeCnt, 
                p.post_file as postFile, 
                p.image as image, 
-               u.user_nickname as userNickname, 
                p.user_num as userNum,
-               (SELECT COUNT(*) FROM POST_COMMENT c WHERE c.post_id = p.post_id) as commentCnt
+               p.company_num as companyNum,
+               COALESCE(u.user_nickname, c.company_name, '알 수 없음') as writerNickname,
+               (SELECT COUNT(*) FROM POST_COMMENT com WHERE com.post_id = p.post_id) as commentCnt
         FROM POST p 
         LEFT JOIN USERS u ON p.user_num = u.user_num
+        LEFT JOIN COMPANY c ON p.company_num = c.company_num
         LEFT JOIN ADMIN_ACCOUNT a ON p.user_num = a.user_num
         <where>
             <if test="keyword != null and keyword != ''">
@@ -65,16 +87,18 @@
             p.post_file as postFile,
             p.image as image,
             p.user_num as userNum,
-            u.user_nickname as userNickname
+            p.company_num as companyNum,
+            COALESCE(u.user_nickname, c.company_name, '알 수 없음') as writerNickname
         FROM POST p 
         LEFT JOIN USERS u ON p.user_num = u.user_num
+        LEFT JOIN COMPANY c ON p.company_num = c.company_num
         LEFT JOIN ADMIN_ACCOUNT a ON p.user_num = a.user_num
         WHERE p.post_id = #{postId}
     </select>
 
     <insert id="insertBoard" parameterType="com.portflux.backend.beans.BoardFreeBean">
-        INSERT INTO POST (board_type, user_num, title, content, post_file, image) 
-        VALUES (#{boardType}, #{userNum}, #{title}, #{content}, #{postFile, jdbcType=VARCHAR}, #{image, jdbcType=VARCHAR})
+        INSERT INTO POST (board_type, user_num, company_num, title, content, post_file, image) 
+        VALUES (#{boardType}, #{userNum, jdbcType=INTEGER}, #{companyNum, jdbcType=INTEGER}, #{title}, #{content}, #{postFile, jdbcType=VARCHAR}, #{image, jdbcType=VARCHAR})
     </insert>
 
     <update id="increaseViewCount" parameterType="int">
@@ -93,16 +117,26 @@
     </delete>
 
     <select id="getCommentList" parameterType="int" resultType="com.portflux.backend.beans.BoardCommentBean">
-        SELECT c.comment_id as commentId, c.post_id as postId, c.user_num as userNum,
+        SELECT c.comment_id as commentId, c.post_id as postId, c.user_num as userNum, c.company_num as companyNum,
                c.comment_content as content, c.comment_created_at as createdAt,
-               c.comment_modify_at as modifyAt, c.parent_id as parentId, u.user_nickname as userNickname
-        FROM POST_COMMENT c LEFT JOIN USERS u ON c.user_num = u.user_num
+               c.comment_modify_at as modifyAt, c.parent_id as parentId, 
+               COALESCE(u.user_nickname, comp.company_name, '알 수 없음') as userNickname
+        FROM POST_COMMENT c 
+        LEFT JOIN USERS u ON c.user_num = u.user_num
+        LEFT JOIN COMPANY comp ON c.company_num = comp.company_num
         WHERE c.post_id = #{postId} ORDER BY c.comment_id ASC
     </select>
 
     <insert id="insertComment" parameterType="com.portflux.backend.beans.BoardCommentBean">
-        INSERT INTO POST_COMMENT (user_num, post_id, comment_content, comment_created_at, parent_id)
-        VALUES (#{userNum}, #{postId}, #{content}, SYSDATE, #{parentId, jdbcType=INTEGER})
+        INSERT INTO POST_COMMENT (user_num, company_num, post_id, comment_content, comment_created_at, parent_id)
+        VALUES (
+            #{userNum, jdbcType=INTEGER}, 
+            #{companyNum, jdbcType=INTEGER}, 
+            #{postId}, 
+            #{content}, 
+            SYSDATE, 
+            #{parentId, jdbcType=INTEGER}
+        )
     </insert>
 
     <delete id="deleteComment" parameterType="int">

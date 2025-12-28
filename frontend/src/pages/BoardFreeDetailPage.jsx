@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ThumbsUp, MessageSquare, Share2, CornerDownRight, MoreHorizontal, Download, X, Copy } from "lucide-react";
 import "./BoardFreeDetailPage.css";
@@ -14,6 +14,8 @@ const BoardFreeDetailPage = () => {
   
   const [isLoggedIn] = useState(() => localStorage.getItem("isLoggedIn") === "true" || sessionStorage.getItem("isLoggedIn") === "true");
   const [currentUserNum] = useState(() => localStorage.getItem("userNum") || sessionStorage.getItem("userNum"));
+  // 권한 구분을 위한 role 상태
+  const [userRole] = useState(() => localStorage.getItem("role") || sessionStorage.getItem("role") || "USER");
   
   const [isLiked, setIsLiked] = useState(false);
   const [newComment, setNewComment] = useState("");
@@ -27,9 +29,25 @@ const BoardFreeDetailPage = () => {
   const [editingCommentId, setEditingCommentId] = useState(null); 
   const [editContent, setEditContent] = useState(""); 
   const [activeCommentMenu, setActiveCommentMenu] = useState(null); 
-
-  // [추가] 공유 모달 상태
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+
+  // 1. 권한 체크 로직 (오류 3 해결 반영)
+  const isMyPost = () => {
+    if (!postData || !currentUserNum) return false;
+    
+    const loginId = String(currentUserNum);
+    const role = userRole;
+
+    if (role === "ADMIN") return true;
+
+    if (role === "COMPANY") {
+      // 기업 회원이면 postData의 companyNum과 비교
+      return String(postData.companyNum) === loginId;
+    } else {
+      // 일반 회원이면 postData의 userNum과 비교
+      return String(postData.userNum) === loginId;
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -44,7 +62,7 @@ const BoardFreeDetailPage = () => {
     return () => { document.removeEventListener("mousedown", handleClickOutside); };
   }, [menuOpen, activeCommentMenu]);
 
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     try {
       const response = await fetch(`http://localhost:8080/api/board/free/comments/${id}`);
       if (response.ok) {
@@ -52,49 +70,49 @@ const BoardFreeDetailPage = () => {
         setComments(data);
       }
     } catch (error) { console.error("댓글 로딩 실패:", error); }
-  };
+  }, [id]);
+
+  const fetchPostDetail = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const postRes = await fetch(`http://localhost:8080/api/board/free/detail/${id}`);
+      if (postRes.ok) {
+        const postJson = await postRes.json();
+        setPostData(postJson);
+        
+        // 추천 상태 초기화 (권한별 구분된 키 사용)
+        if (currentUserNum) {
+          const storageKey = `likes_${userRole}_${currentUserNum}`;
+          const userLikes = JSON.parse(localStorage.getItem(storageKey)) || [];
+          setIsLiked(userLikes.includes(String(id)));
+        }
+      }
+      await fetchComments();
+    } catch (error) {
+      console.error("데이터 로딩 실패:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [id, currentUserNum, userRole, fetchComments]);
 
   useEffect(() => {
     if (hasFetched.current) return;
     hasFetched.current = true;
+    fetchPostDetail();
+  }, [fetchPostDetail]);
 
-    const fetchAllData = async () => {
-      setIsLoading(true);
-      try {
-        const postRes = await fetch(`http://localhost:8080/api/board/free/detail/${id}`);
-        if (postRes.ok) {
-          const postJson = await postRes.json();
-          setPostData(postJson);
-        }
-        await fetchComments();
-      } catch (error) {
-        console.error("데이터 로딩 실패:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchAllData();
-
-    if (currentUserNum) {
-      const userLikes = JSON.parse(localStorage.getItem(`likes_${currentUserNum}`)) || [];
-      setIsLiked(userLikes.includes(String(id)));
-    }
-  }, [id, currentUserNum]);
-
-  const handleUserClick = (userNum) => {
-    if (!userNum) return;
-    navigate("/mypage", { state: { userNum: userNum } });
+  const handleUserClick = (userNum, companyNum) => {
+    const targetNum = userNum || companyNum;
+    if (!targetNum) return;
+    navigate("/mypage", { state: { userNum: targetNum } });
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
     let date = new Date(dateString);
     if (isNaN(date.getTime())) return dateString;
-
     const KST_OFFSET = 9 * 60 * 60 * 1000;
     const kstDate = new Date(date.getTime() + KST_OFFSET);
-
     const pad = (n) => String(n).padStart(2, '0');
     return `${kstDate.getFullYear()}-${pad(kstDate.getMonth() + 1)}-${pad(kstDate.getDate())} ${pad(kstDate.getHours())}:${pad(kstDate.getMinutes())}:${pad(kstDate.getSeconds())}`;
   };
@@ -126,39 +144,50 @@ const BoardFreeDetailPage = () => {
     }
   };
 
+  // 2. 추천 로직 (요청하신 수정 사항 반영)
   const handleLike = async () => {
     if (!isLoggedIn) { alert("로그인이 필요한 서비스입니다."); return; }
+    
     try {
       const response = await fetch(`http://localhost:8080/api/board/free/like/${id}`, {
-        method: "POST", 
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: currentUserNum }),
+        body: JSON.stringify({ 
+          userId: currentUserNum, 
+          role: userRole // 반드시 role을 같이 보내야 서버에서 구분함
+        }),
       });
+
       if (response.ok) {
-        const isNowLiked = !isLiked; 
+        const result = await response.text();
+        const isNowLiked = (result === "LIKED");
         setIsLiked(isNowLiked);
+        
+        // 화면의 추천수 즉시 반영
         setPostData(prev => ({
           ...prev,
-          likeCnt: isNowLiked ? (prev.likeCnt || 0) + 1 : Math.max(0, (prev.likeCnt || 0) - 1)
+          likeCnt: isNowLiked ? (prev.likeCnt + 1) : Math.max(0, prev.likeCnt - 1)
         }));
-        const userLikes = JSON.parse(localStorage.getItem(`likes_${currentUserNum}`)) || [];
+        
+        // 로컬 스토리지에 유저별/게시글별 상태 저장
+        const storageKey = `likes_${userRole}_${currentUserNum}`;
+        const userLikes = JSON.parse(localStorage.getItem(storageKey)) || [];
         if (isNowLiked) {
-            localStorage.setItem(`likes_${currentUserNum}`, JSON.stringify([...userLikes, String(id)]));
+          localStorage.setItem(storageKey, JSON.stringify([...userLikes, String(id)]));
         } else {
-            const filtered = userLikes.filter(pid => pid !== String(id));
-            localStorage.setItem(`likes_${currentUserNum}`, JSON.stringify(filtered));
+          localStorage.setItem(storageKey, JSON.stringify(userLikes.filter(pid => pid !== String(id))));
         }
       }
     } catch (error) { console.error("추천 오류:", error); }
   };
 
-  // [추가] URL 복사 함수
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(window.location.href);
     alert("링크가 클립보드에 복사되었습니다.");
     setIsShareModalOpen(false);
   };
 
+  // 댓글 작성 시 role 정보 포함
   const submitComment = async (content, parentId = null) => {
     if (!isLoggedIn) { alert("로그인 필요"); navigate("/login"); return; }
     if (!content.trim()) return;
@@ -170,7 +199,8 @@ const BoardFreeDetailPage = () => {
                 postId: id,
                 userNum: parseInt(currentUserNum),
                 content: content,
-                parentId: parentId 
+                parentId: parentId,
+                role: userRole
             })
         });
         if (response.ok) {
@@ -185,10 +215,7 @@ const BoardFreeDetailPage = () => {
 
   const handleDeleteComment = async (commentId) => {
     const hasReplies = comments.some(c => c.parentId === commentId);
-    if (hasReplies) {
-        alert("답글이 달린 댓글은 삭제할 수 없습니다.");
-        return;
-    }
+    if (hasReplies) { alert("답글이 달린 댓글은 삭제할 수 없습니다."); return; }
     if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
     try {
         const res = await fetch(`http://localhost:8080/api/board/free/comment/delete/${commentId}`, { method: "DELETE" });
@@ -229,7 +256,7 @@ const BoardFreeDetailPage = () => {
               <span className="post-cat-badge">{postData.boardType === 'notice' ? '공지' : '자유'}</span>
               <h2 className="post-title">{postData.title}</h2>
             </div>
-            {String(postData.userNum) === String(currentUserNum) && (
+            {isMyPost() && (
               <div className="post-author-menu" ref={menuRef}>
                 <button onClick={() => setMenuOpen(!menuOpen)} className="menu-toggle-btn"><MoreHorizontal size={20} /></button>
                 {menuOpen && (
@@ -244,15 +271,14 @@ const BoardFreeDetailPage = () => {
           
           <div className="post-meta-row">
             <div className="meta-left">
-              <span className="writer-name" onClick={() => handleUserClick(postData.userNum)}>
-                {postData.userNickname}
+              <span className="writer-name" onClick={() => handleUserClick(postData.userNum, postData.companyNum)}>
+                {postData.writerNickname || "알 수 없음"}
               </span>
               <span className="divider-bar">|</span>
               <span className="post-date">{formatDate(postData.createdAt)}</span>
             </div>
             <div className="meta-right">
               <span className="meta-item">추천 {postData.likeCnt || 0}</span>
-              {/* 추천과 조회 사이 구분선 추가 */}
               <span className="divider-bar">|</span>
               <span className="meta-item">조회 {postData.viewCnt || 0}</span>
             </div>
@@ -280,7 +306,6 @@ const BoardFreeDetailPage = () => {
           <button className={`action-btn like-btn ${isLiked ? "active" : ""}`} onClick={handleLike}>
             <ThumbsUp size={20} /><span>추천 {postData.likeCnt || 0}</span>
           </button>
-          {/* 공유 버튼 클릭 시 모달 오픈 */}
           <button className="action-btn share-btn" onClick={() => setIsShareModalOpen(true)}>
             <Share2 size={20} /><span>공유</span>
           </button>
@@ -300,14 +325,14 @@ const BoardFreeDetailPage = () => {
                   <div className="comment-item root-comment">
                     <div className="cmt-top">
                       <div className="cmt-writer-row">
-                        <span className="cmt-writer" onClick={() => handleUserClick(rootCmt.userNum)}>
+                        <span className="cmt-writer" onClick={() => handleUserClick(rootCmt.userNum, rootCmt.companyNum)}>
                           {rootCmt.userNickname}
                         </span>
                         {rootCmt.modifyAt && <span className="cmt-edited-tag">(수정)</span>}
                       </div>
                       <div className="cmt-top-right">
                         <span className="cmt-date">{formatDate(rootCmt.createdAt)}</span>
-                        {String(rootCmt.userNum) === String(currentUserNum) && (
+                        {(String(rootCmt.userNum) === String(currentUserNum) || String(rootCmt.companyNum) === String(currentUserNum)) && (
                           <div className="comment-menu-container">
                             <button className="menu-toggle-btn" onClick={() => setActiveCommentMenu(activeCommentMenu === rootCmt.commentId ? null : rootCmt.commentId)}>
                               <MoreHorizontal size={16} />
@@ -343,12 +368,12 @@ const BoardFreeDetailPage = () => {
                       <div className="reply-body">
                         <div className="cmt-top">
                           <div className="cmt-writer-row">
-                            <span className="cmt-writer" onClick={() => handleUserClick(reply.userNum)}>{reply.userNickname}</span>
+                            <span className="cmt-writer" onClick={() => handleUserClick(reply.userNum, reply.companyNum)}>{reply.userNickname}</span>
                             {reply.modifyAt && <span className="cmt-edited-tag">(수정)</span>}
                           </div>
                           <div className="cmt-top-right">
                             <span className="cmt-date">{formatDate(reply.createdAt)}</span>
-                            {String(reply.userNum) === String(currentUserNum) && (
+                            {(String(reply.userNum) === String(currentUserNum) || String(reply.companyNum) === String(currentUserNum)) && (
                               <div className="comment-menu-container">
                                 <button className="menu-toggle-btn" onClick={() => setActiveCommentMenu(activeCommentMenu === reply.commentId ? null : reply.commentId)}>
                                   <MoreHorizontal size={16} />
@@ -406,7 +431,6 @@ const BoardFreeDetailPage = () => {
         </div>
       </div>
 
-      {/* [수정] 공유 모달 (X 버튼 추가 및 레이아웃 개선) */}
       {isShareModalOpen && (
         <div className="modal-overlay" onClick={() => setIsShareModalOpen(false)}>
           <div className="share-modal" onClick={(e) => e.stopPropagation()}>

@@ -14,9 +14,18 @@ public interface CompanyUserMapper {
     // 사업자번호 중복 확인
     int checkBusinessNumber(String businessNumber);
     
-    // 이메일로 기업 찾기
-    CompanyUserBean findCompanyByEmail(String email);
+    // [확인] 이메일로 기업 찾기 (구글 로그인 시 필수 사용)
+    CompanyUserBean findCompanyByEmail(@Param("email") String email);
     
-    // 기업명(닉네임) 중복 확인 (일반 유저와 닉네임 공유 시 사용)
+    // 기업명(닉네임) 중복 확인
     int existsByCompanyName(@Param("name") String name);
+
+    // 아이디 중복 확인
+    int checkCompanyIdDuplicate(String companyId);
+
+    // 이메일 중복 확인
+    int checkCompanyEmailDuplicate(String email);
+
+    // 기업 정보 가져오기 (로그인 및 프로필 조회용)
+    CompanyUserBean getCompanyUserInfo(String companyId);
 }
