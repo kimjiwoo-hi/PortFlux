@@ -40,9 +40,15 @@ const Header = () => {
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("userId");
     localStorage.removeItem("userNickname");
+    localStorage.removeItem("userNum");
+    localStorage.removeItem("role");
+    localStorage.removeItem("memberType");
     sessionStorage.removeItem("isLoggedIn");
     sessionStorage.removeItem("userId");
     sessionStorage.removeItem("userNickname");
+    sessionStorage.removeItem("userNum");
+    sessionStorage.removeItem("role");
+    sessionStorage.removeItem("memberType");
 
     setIsPopoverOpen(false);
     navigate("/");

@@ -23,13 +23,17 @@ public class BoardFreeService {
     @Value("${file.upload-dir:files}")
     private String uploadDir;
 
-    // 게시글 목록
+    // 게시글 목록 조회
     public List<BoardFreeBean> getBoardList(String keyword) {
         return boardFreeMapper.getBoardList(keyword);
     }
 
-    // 게시글 작성 (관리자 여부 로직 포함)
-    public void writeBoard(BoardFreeBean boardFreeBean, MultipartFile file, MultipartFile image) throws IOException {
+    /**
+     * 1. 게시글 작성
+     * 역할(role)에 따라 ID를 적절한 컬럼으로 배분합니다.
+     */
+    @Transactional
+    public void writeBoard(BoardFreeBean boardFreeBean, MultipartFile file, MultipartFile image, String role) throws IOException {
         if (file != null && !file.isEmpty()) {
             boardFreeBean.setPostFile(saveFile(file));
         }
@@ -37,21 +41,24 @@ public class BoardFreeService {
             boardFreeBean.setImage(saveFile(image));
         }
 
-        // [추가] 보안 로직: 공지사항인데 관리자 번호가 없다면 거부
-        if ("notice".equals(boardFreeBean.getBoardType()) && boardFreeBean.getAdminNum() == null) {
-            throw new RuntimeException("공지사항은 관리자만 작성할 수 있습니다.");
+        if ("COMPANY".equals(role)) {
+            boardFreeBean.setCompanyNum(boardFreeBean.getUserNum());
+            boardFreeBean.setUserNum(null); 
+        } else {
+            boardFreeBean.setCompanyNum(null);
         }
 
         boardFreeMapper.insertBoard(boardFreeBean);
     }
 
-    // 게시글 상세
+    // 게시글 상세 조회
     public BoardFreeBean getBoardDetail(int postId) {
         boardFreeMapper.increaseViewCount(postId);
         return boardFreeMapper.getBoardDetail(postId);
     }
 
     // 게시글 수정
+    @Transactional
     public void updateBoard(BoardFreeBean boardFreeBean, MultipartFile file, MultipartFile image) throws IOException {
         if (file != null && !file.isEmpty()) {
             boardFreeBean.setPostFile(saveFile(file));
@@ -67,34 +74,56 @@ public class BoardFreeService {
         boardFreeMapper.deleteBoard(postId);
     }
 
-    // 좋아요 토글
+    /**
+     * 2. 좋아요(추천) 토글
+     * [NPE 해결] 파라미터를 Integer 객체로 처리하여 null 안전성을 확보했습니다.
+     */
     @Transactional
-    public boolean toggleLike(int postId, String userId) {
-        int userNum = 0;
-        try {
-            userNum = Integer.parseInt(userId);
-        } catch (NumberFormatException e) {
+    public boolean toggleLike(int postId, String userId, String role) {
+        if (userId == null || "null".equals(userId) || userId.isEmpty()) {
             return false;
         }
 
-        int count = boardFreeMapper.checkLike(postId, userNum);
+        Integer userNum = null;
+        Integer companyNum = null;
+        int idVal = Integer.parseInt(userId);
+
+        if ("COMPANY".equals(role)) {
+            companyNum = idVal;
+        } else {
+            userNum = idVal;
+        }
+
+        // Mapper의 파라미터가 Integer이므로 null을 안전하게 전달합니다.
+        int count = boardFreeMapper.checkLike(postId, userNum, companyNum, role);
+        
         if (count > 0) {
-            boardFreeMapper.deleteLike(postId, userNum);
+            boardFreeMapper.deleteLike(postId, userNum, companyNum, role);
             boardFreeMapper.decreaseLikeCount(postId);
             return false;
         } else {
-            boardFreeMapper.insertLike(postId, userNum);
+            boardFreeMapper.insertLike(postId, userNum, companyNum, role);
             boardFreeMapper.increaseLikeCount(postId);
             return true;
         }
     }
 
-    // 댓글 목록
+    // 댓글 목록 조회
     public List<BoardCommentBean> getCommentList(int postId) {
         return boardFreeMapper.getCommentList(postId);
     }
 
+    /**
+     * 3. 댓글 작성
+     */
+    @Transactional
     public void writeComment(BoardCommentBean commentBean) {
+        if ("COMPANY".equals(commentBean.getRole())) {
+            commentBean.setCompanyNum(commentBean.getUserNum());
+            commentBean.setUserNum(null);
+        } else {
+            commentBean.setCompanyNum(null);
+        }
         boardFreeMapper.insertComment(commentBean);
     }
 
@@ -106,20 +135,16 @@ public class BoardFreeService {
         boardFreeMapper.updateComment(commentBean);
     }
 
-    // 파일 저장 로직
     private String saveFile(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) return null;
-
         String projectPath = System.getProperty("user.dir");
         String uploadPath = projectPath + File.separator + "files";
-
         File directory = new File(uploadPath);
         if (!directory.exists()) directory.mkdirs();
-
+        
         String savedFileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
         File dest = new File(directory, savedFileName);
         file.transferTo(dest);
-
         return savedFileName;
     }
 }

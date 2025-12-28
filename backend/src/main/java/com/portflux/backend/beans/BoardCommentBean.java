@@ -1,17 +1,18 @@
 package com.portflux.backend.beans;
 
 import lombok.Data;
-import java.sql.Timestamp; // [수정] 정밀한 시간 보관을 위해 변경
+import java.sql.Timestamp;
 
 @Data
 public class BoardCommentBean {
-    private int commentId;        // comment_id
-    private int userNum;          // user_num
-    private int postId;           // post_id
-    private String content;       // comment_content
-    private Timestamp createdAt;  // [수정] Timestamp로 변경
-    private Timestamp modifyAt;   // [수정] Timestamp로 변경
-
+    private int commentId;
+    private Integer userNum;    // Integer로 변경 (null 허용)
+    private Integer companyNum; // [추가] 기업 번호
+    private int postId;
+    private String content;
+    private Timestamp createdAt;
+    private Timestamp modifyAt;
     private Integer parentId; 
-    private String userNickname;  // 조인해서 가져올 작성자 닉네임
+    private String userNickname; // 조인해서 가져올 닉네임/기업명
+    private String role;         // [추가] 작성자 권한 (USER/COMPANY)
 }

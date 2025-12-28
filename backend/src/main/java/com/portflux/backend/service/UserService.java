@@ -1,13 +1,11 @@
 package com.portflux.backend.service;
 
-import com.portflux.backend.beans.AdminBean;
-import com.portflux.backend.beans.UserBean;
-import com.portflux.backend.beans.UserLoginBean;
-import com.portflux.backend.beans.UserRegisterBean;
+import com.portflux.backend.beans.*;
 import com.portflux.backend.mapper.AdminMapper;
+import com.portflux.backend.mapper.CompanyUserMapper;
 import com.portflux.backend.mapper.UserMapper;
 import com.portflux.backend.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,25 +14,29 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository; // JPA (일반유저 저장)
-    
-    @Autowired
-    private UserMapper userMapper;         // MyBatis (일반유저 조회)
-    
-    @Autowired
-    private AdminMapper adminMapper;       // MyBatis (관리자 여부 확인용)
-    
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
+    private final AdminMapper adminMapper;
+    private final CompanyUserMapper companyUserMapper;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * 1. 회원가입
      */
     @Transactional
     public void registerUser(UserRegisterBean registerBean) {
+        if (isIdDuplicate(registerBean.getUserId())) {
+            throw new RuntimeException("이미 사용 중인 아이디입니다.");
+        }
+        if (isEmailDuplicate(registerBean.getEmail())) {
+            throw new RuntimeException("이미 사용 중인 이메일입니다.");
+        }
+        if (isNicknameDuplicate(registerBean.getNickname())) {
+            throw new RuntimeException("이미 사용 중인 닉네임입니다.");
+        }
         if (registerBean.getPassword() == null || !registerBean.getPassword().equals(registerBean.getPasswordCheck())) {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
@@ -54,44 +56,115 @@ public class UserService {
     }
 
     /**
-     * 2. 통합 로그인 로직
+     * 2. 통합 로그인 로직 (USER / ADMIN / COMPANY)
      */
-    public Map<String, Object> login(UserLoginBean loginBean) {
+    public Map<String, Object> login(UserLoginBean loginBean, String loginType) {
         Map<String, Object> response = new HashMap<>();
-        System.out.println("### [Login Attempt] ID: " + loginBean.getUserId());
+        String inputId = loginBean.getUserId();
+        String inputPw = loginBean.getPassword();
 
-        // A. 모든 사용자는 USERS 테이블에서 먼저 인증합니다.
-        UserBean user = userMapper.getUserInfo(loginBean.getUserId());
-        
-        if (user != null && passwordEncoder.matches(loginBean.getPassword(), user.getUserPw())) {
-            response.put("userNum", user.getUserNum());
-            response.put("userId", user.getUserId());
-            response.put("userNickname", user.getUserNickname());
-            
-            // B. [핵심] 인증 성공 후, 이 유저가 관리자 권한 테이블에 있는지 확인합니다.
-            // adminMapper.checkAdminExists(userNum)은 존재하면 1, 없으면 0 반환
-            int adminCount = adminMapper.checkAdminExists(user.getUserNum());
-            
-            if (adminCount > 0) {
-                response.put("role", "ADMIN");
-                System.out.println("=> 관리자 로그인 성공: " + user.getUserNickname());
-            } else {
-                response.put("role", "USER");
-                System.out.println("=> 일반 유저 로그인 성공: " + user.getUserNickname());
+        if ("USER".equals(loginType)) {
+            UserBean user = userMapper.getUserInfo(inputId);
+            if (user != null && passwordEncoder.matches(inputPw, user.getUserPw())) {
+                response.put("num", user.getUserNum());
+                response.put("id", user.getUserId());
+                response.put("name", user.getUserNickname());
+                int adminCount = adminMapper.checkAdminExists(user.getUserNum());
+                response.put("role", adminCount > 0 ? "ADMIN" : "USER");
+                response.put("memberType", "user");
+                return response;
             }
-            
-            return response;
+        } else if ("COMPANY".equals(loginType)) {
+            CompanyUserBean company = companyUserMapper.getCompanyUserInfo(inputId);
+            if (company != null && passwordEncoder.matches(inputPw, company.getCompanyPassword())) {
+                response.put("num", company.getCompanyNum());
+                response.put("id", company.getCompanyId());
+                response.put("name", company.getCompanyName());
+                response.put("role", "COMPANY");
+                response.put("memberType", "company");
+                return response;
+            }
         }
-
         throw new RuntimeException("아이디 또는 비밀번호가 일치하지 않습니다.");
     }
 
-    public boolean isNicknameDuplicate(String nickname) { return userMapper.checkNicknameCount(nickname) > 0; }
-    public boolean isEmailDuplicate(String email) { return userMapper.checkEmailDuplicate(email) > 0; }
-    public boolean isIdDuplicate(String userId) { return userMapper.checkIdDuplicate(userId) > 0; }
-    public UserBean getUserInfo(String userId) { return userMapper.getUserInfo(userId); }
-    public UserBean findByNameAndEmail(String name, String email) { return userMapper.findByNameAndEmail(name, email); }
-    public Map<String, Object> processGoogleLogin(String authCode) { return new HashMap<>(); }
+    /**
+     * 이메일 기반 유저 조회 (소셜 로그인용)
+     */
+    public UserBean getUserByEmail(String email) {
+        if (email == null) return null;
+        return userMapper.findUserByEmail(email.trim());
+    }
+
+    /**
+     * 3. 구글 로그인 결과 처리 (수정 전문)
+     * 일반 유저 테이블과 기업 테이블을 모두 뒤져서 가입 여부를 판단합니다.
+     */
+    public Map<String, Object> processGoogleLogin(String email, String name) {
+        Map<String, Object> response = new HashMap<>();
+        String trimmedEmail = email.trim();
+
+        // [STEP 1] 일반 유저 테이블(USERS)에서 먼저 검색
+        UserBean user = userMapper.findUserByEmail(trimmedEmail);
+        if (user != null) {
+            response.put("status", "SUCCESS");
+            response.put("userNum", user.getUserNum());
+            response.put("userId", user.getUserId()); // 실제 DB ID 반환 (404 방지)
+            response.put("nickname", user.getUserNickname());
+            response.put("email", user.getUserEmail());
+            response.put("role", "USER");
+            return response;
+        }
+
+        // [STEP 2] 일반 유저가 없으면 기업 테이블(COMPANY)에서 검색
+        CompanyUserBean company = companyUserMapper.findCompanyByEmail(trimmedEmail);
+        if (company != null) {
+            response.put("status", "SUCCESS");
+            response.put("userNum", company.getCompanyNum());
+            response.put("userId", company.getCompanyId()); // 기업 아이디 반환
+            response.put("nickname", company.getCompanyName());
+            response.put("email", company.getCompanyEmail());
+            response.put("role", "COMPANY"); // 기업 권한 부여
+            return response;
+        }
+
+        // [STEP 3] 둘 다 없으면 신규 가입 유도
+        response.put("status", "NEW_USER");
+        response.put("email", trimmedEmail);
+        response.put("name", name);
+        return response;
+    }
+
+    public boolean isNicknameDuplicate(String nickname) { 
+        return (userMapper.checkNicknameCount(nickname) + companyUserMapper.existsByCompanyName(nickname)) > 0; 
+    }
+    public boolean isEmailDuplicate(String email) { 
+        return (userMapper.checkEmailDuplicate(email) + companyUserMapper.checkCompanyEmailDuplicate(email)) > 0; 
+    }
+    public boolean isIdDuplicate(String userId) { 
+        return (userMapper.checkIdDuplicate(userId) + companyUserMapper.checkCompanyIdDuplicate(userId)) > 0; 
+    }
+
+    public UserBean getUserInfo(String userId) { 
+        UserBean user = userMapper.getUserInfo(userId); 
+        if (user == null) {
+            CompanyUserBean company = companyUserMapper.getCompanyUserInfo(userId);
+            if (company != null) {
+                user = new UserBean();
+                if (company.getCompanyNum() != null) {
+                    user.setUserNum(company.getCompanyNum().intValue());
+                }
+                user.setUserId(company.getCompanyId());
+                user.setUserNickname(company.getCompanyName());
+                user.setUserEmail(company.getCompanyEmail());
+            }
+        }
+        return user;
+    }
+
+    public UserBean findByNameAndEmail(String name, String email) { 
+        return userMapper.findByNameAndEmail(name, email); 
+    }
 
     @Transactional
     public void updatePassword(String userId, String newPassword) {

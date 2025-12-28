@@ -50,8 +50,12 @@
 
     <select id="findUserByEmail" parameterType="String" resultType="com.portflux.backend.beans.UserBean">
         SELECT 
-            user_num as userNum, user_id as userId, user_password as userPw,
-            user_name as userName, user_nickname as userNickname, user_email as userEmail
+            user_num as userNum, 
+            user_id as userId, 
+            user_password as userPw,
+            user_name as userName, 
+            user_nickname as userNickname, 
+            user_email as userEmail
         FROM USERS
         WHERE user_email = #{email}
     </select>
