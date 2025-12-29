@@ -6,8 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -82,6 +80,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/orders/**").authenticated()
                         // [추가] 결제 결과 조회 API 허용
                         .requestMatchers("/api/payments/result").permitAll()
+
+                        // [추가] 채용공고 API 허용
+                        .requestMatchers("/api/jobs/**").permitAll()
 
                         // 정적 리소스 허용
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
