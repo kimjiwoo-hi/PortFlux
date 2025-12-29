@@ -47,6 +47,16 @@ const MyInfo = () => {
       }
 
       const user = JSON.parse(storedUser);
+
+      if (!user.userId) {
+        console.error("userId가 없습니다. 다시 로그인해주세요.");
+        setError("로그인 정보가 올바르지 않습니다. 다시 로그인해주세요.");
+        localStorage.removeItem("user");
+        sessionStorage.removeItem("user");
+        setLoading(false);
+        return;
+      }
+
       const response = await axios.get(
         `http://localhost:8080/user/info/${user.userId}`
       );
