@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { X } from "lucide-react";
 import heartIcon from "../assets/heart.png";
@@ -7,7 +7,6 @@ import binheartIcon from "../assets/binheart.png";
 import commentIcon from "../assets/comment.png";
 import cartIcon from "../assets/cartIcon.png";
 import summaryAIIcon from "../assets/summary_AI.svg";
-import UserDefaultIcon from "../assets/user_default_icon.png";
 import "./BoardLookupRead.css";
 
 const BoardLookupRead = () => {
@@ -36,48 +35,45 @@ const BoardLookupRead = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `/api/boardlookup/${postId}`,
+          `http://localhost:8080/api/boardlookup/${postId}`,
           { withCredentials: true }
         );
 
-      if (response.data) {
-        setPostData(response.data.post || response.data);
-        setComments(response.data.comments || []);
+        if (response.data) {
+          setPostData(response.data.post || response.data);
+          setComments(response.data.comments || []);
 
-        const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
-        if (storedUser) {
-          const parsedUser = JSON.parse(storedUser);
-          setLoggedInUser(parsedUser);
-
-          if (parsedUser && parsedUser.userNum) {
+          const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+          if (storedUser) {
+            const loggedInUser = JSON.parse(storedUser);
+            setLoggedInUser(loggedInUser);
+            
+            // 초기 좋아요 상태 확인
             const likeCheckResponse = await axios.get(
-              `/api/boardlookup/${postId}/like/check`,
+              `http://localhost:8080/api/boardlookup/${postId}/like/check`,
               {
-                params: { userNum: parsedUser.userNum },
+                params: { userNum: loggedInUser.userNum },
                 withCredentials: true,
               }
             );
+
             setIsLiked(likeCheckResponse.data.isLiked);
             setLikeCount(likeCheckResponse.data.totalLikes);
           }
         }
+        setLoading(false);
+      } catch (err) {
+        console.error("게시글 로드 실패:", err);
+        setError("게시글을 불러오는데 실패했습니다.");
+        setLoading(false);
       }
-      setError(null); // 성공 시 에러 상태 초기화
-    } catch (err) {
-      console.error("게시글 로드 실패:", err);
-      setError("게시글을 불러오는데 실패했습니다.");
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    if (postId) fetchPostData();
   }, [postId]);
 
-  // 최초 로드 및 이벤트 핸들러 통합
+  // 스크롤 이벤트
   useEffect(() => {
-    if (postId) {
-      fetchPostData();
-    }
-    
-    const handleFocus = () => fetchPostData();
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
@@ -89,15 +85,9 @@ const BoardLookupRead = () => {
       }
       lastScrollY.current = currentScrollY;
     };
-    
-    window.addEventListener('focus', handleFocus);
     window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [postId, fetchPostData]);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // 좋아요 토글
   const handleLikeToggle = async () => {
@@ -110,7 +100,7 @@ const BoardLookupRead = () => {
 
     try {
       const response = await axios.post(
-        `/api/boardlookup/${postId}/like`,
+        `http://localhost:8080/api/boardlookup/${postId}/like`,
         null,
         {
           params: { userNum: loggedInUser.userNum },
@@ -158,7 +148,7 @@ const BoardLookupRead = () => {
 
     try {
       await axios.post(
-        `/api/cart/${loggedInUser.userNum}/items`,
+        `http://localhost:8080/api/cart/${loggedInUser.userNum}/items`,
         { productId: postId },
         {
           withCredentials: true,
@@ -189,13 +179,13 @@ const BoardLookupRead = () => {
 
     try {
       await axios.post(
-        `/api/boardlookup/${postId}/comments`,
+        `http://localhost:8080/api/boardlookup/${postId}/comments`,
         { userNum: loggedInUser.userNum, content: newComment },
         { withCredentials: true }
       );
 
       const updatedResponse = await axios.get(
-        `/api/boardlookup/${postId}`
+        `http://localhost:8080/api/boardlookup/${postId}`
       );
       setComments(updatedResponse.data.comments || []);
       setNewComment("");
@@ -210,7 +200,7 @@ const BoardLookupRead = () => {
     if (window.confirm("정말로 이 댓글을 삭제하시겠습니까?")) {
       try {
         await axios.delete(
-          `/api/boardlookup/comments/${commentId}`,
+          `http://localhost:8080/api/boardlookup/comments/${commentId}`,
           {
             params: { userNum: loggedInUser.userNum },
             withCredentials: true,
@@ -241,7 +231,7 @@ const BoardLookupRead = () => {
     if (e.target === e.currentTarget) navigate("/");
   };
   
-  const handleCloseClick = () => navigate("/");
+ 
 
   if (loading)
     return (
@@ -286,7 +276,11 @@ const BoardLookupRead = () => {
     console.error("태그 파싱 실패:", e);
   }
 
-
+  const userImageSrc = postData.userImage
+    ? `data:image/jpeg;base64,${btoa(
+        String.fromCharCode(...new Uint8Array(postData.userImage))
+      )}`
+    : null;
 
   return (
     <div className="board-lookup-read" onClick={handleBackgroundClick}>
@@ -334,18 +328,14 @@ const BoardLookupRead = () => {
             <h1 className="post-title">{postData.title}</h1>
           </div>
         </div>
-        <div className="tags-section">
-          {tagsArray.map((tag, i) => (
-            <span key={i} className="tag">
-              {tag}
-            </span>
-          ))}
-        </div>
-        <button className="close-post-button" onClick={handleCloseClick}>
-          <X size={24} />
-        </button>
-      </div>
-
+                  <div className="tags-section">
+                    {tagsArray.map((tag, i) => (
+                      <span key={i} className="tag">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
       {/* PDF / 콘텐츠 */}
       <div className="main-content">
         <div className="pdf-viewer" onScroll={handlePdfScroll}>
@@ -356,18 +346,29 @@ const BoardLookupRead = () => {
                   const isPdf = /\.pdf$/i.test(postData.postFile);
                   const isPpt = /\.(ppt|pptx)$/i.test(postData.postFile);
                   const fileUrl = `/uploads/${postData.postFile}`;
+                  
                   if (isPdf && Array.isArray(postData.pdfImages)) {
                     return (
                       <div className="pdf-image-wrapper">
-                        {postData.pdfImages.map((imgUrl, index) => (
-                          <img
-                            key={index}
-                            src={`${imgUrl}`}
-                            alt={`pdf-${index}`}
-                            className="pdf-page-image"
-                            loading="lazy"
-                          />
-                        ))}
+                        {postData.pdfImages.map((imgUrl, index) => {
+                          const fullImageUrl = imgUrl.startsWith('http') 
+                            ? imgUrl 
+                            : `http://localhost:8080${imgUrl}`;
+                          
+                          return (
+                            <img
+                              key={index}
+                              src={fullImageUrl}
+                              alt={`pdf-${index}`}
+                              className="pdf-page-image"
+                              loading="lazy"
+                              onError={(e) => {
+                                console.error(`이미지 로드 실패: ${fullImageUrl}`);
+                                e.target.src = 'https://via.placeholder.com/800x600?text=Image+Load+Failed';
+                              }}
+                            />
+                          );
+                        })}
                       </div>
                     );
                   } else if (isPpt) {
@@ -438,11 +439,15 @@ const BoardLookupRead = () => {
       {/* 사이드바 */}
       <div className={`sidebar ${!sidebarVisible ? "hidden" : ""}`}>
         <div className="sidebar-icon profile-icon">
-          <img
-            src={postData.userImageBase64 ? `data:image/jpeg;base64,${postData.userImageBase64}` : UserDefaultIcon}
-            alt="프로필"
-            className="profile-mini-image"
-          />
+          {userImageSrc ? (
+            <img
+              src={userImageSrc}
+              alt="프로필"
+              className="profile-mini-image"
+            />
+          ) : (
+            <div className="default-profile-mini">👤</div>
+          )}
         </div>
         <div
           className={`sidebar-icon heart-icon ${isLiked ? "liked" : ""}`}
@@ -497,10 +502,11 @@ const BoardLookupRead = () => {
             </p>
           ) : (
             comments.map((comment) => {
-              // ✅ 수정 코드
-const commentUserImageSrc = comment.userImageBase64
-  ? `data:image/jpeg;base64,${comment.userImageBase64}`
-  : UserDefaultIcon;
+              const commentUserImageSrc = comment.userImage
+                ? `data:image/jpeg;base64,${btoa(
+                    String.fromCharCode(...new Uint8Array(comment.userImage))
+                  )}`
+                : null;
 
               return (
                 <div key={comment.commentId} className="comment-item">

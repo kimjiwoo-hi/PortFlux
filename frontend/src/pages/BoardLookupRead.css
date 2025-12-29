@@ -1,23 +1,24 @@
 /* Behance 스타일 - 전체 화면 레이아웃 */
 .board-lookup-read {
-  background-color: rgba(255, 255, 255, 0.65) !important;
+  background-color: #fff; /* 배경색을 흰색으로 변경 */
   color: #191919;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   min-height: 100vh;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  overflow-y: auto;
-  z-index: 1;
+  /* 기존 fixed 관련 속성 제거 */
+  /* position: fixed; */
+  /* top: 0; */
+  /* left: 0; */
+  /* width: 100vw; */
+  /* height: 100vh; */
+  /* overflow-y: auto; */
+  /* z-index: 1; */
 }
 
 /* PDF 뷰어 - 배경 투명하게 */
 .pdf-viewer {
-  background-color: transparent !important;  /* ← 수정 */
-  margin-top: 80px;
-  min-height: calc(100vh - 80px);
+  background-color: transparent !important;
+  margin-top: 20px; /* 기존 헤더를 고려하여 마진 조정 */
+  min-height: calc(100vh - 20px); /* 마진만큼 높이 조정 */
   padding: 60px 0;
   width: 100%;
 }
@@ -42,19 +43,18 @@
 
 /* 상단 헤더 - 스크롤 시 숨김 */
 .post-header {
-  background: rgba(255, 255, 255, 0.98);
-  border-bottom: 1px solid #f0f0f0;
-  left: 0;
-  padding: 20px 60px;
-  position: fixed;
-  top: 0;
-  transition: transform 0.3s ease;
+   background: rgba(255, 255, 255, 0.98);  /* 내부 래퍼로 이동 */
+   padding: 20px 60px;  /* 내부 래퍼로 이동 */
   width: 100%;
-  z-index: 50;
 }
 
-.post-header.hidden {
-  transform: translateY(-100%);
+.post-header-content-wrapper {
+  max-width: 1400px;
+  width: 85%;
+  margin: 0 auto;
+  padding: 20px 60px;
+  background: rgba(255, 255, 255, 0.98);
+  box-sizing: border-box;
 }
 
 /* 작가 정보 */
@@ -63,6 +63,9 @@
   display: flex;
   justify-content: space-between;
   position: relative;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .profile-wrapper {
@@ -271,36 +274,38 @@
   background: #e8e8e8;
 }
 
-/* 태그 & 제목 영역 */
+.tags-section {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 0; /* 상단 마진 제거 */
+  margin-left: 200px;
+}
+
+.tag {
+  background-color: #f0f0f0;
+  padding: 6px 12px; /* 패딩 약간 증가 */
+  border-radius: 12px;
+  font-size: 12px;
+  color: #666;
+}
+
+/* header-right가 프로필 옆에 오도록 */
 .header-right {
   align-items: flex-start;
   display: flex;
   flex-direction: column;
   gap: 12px;
   flex: 1;
-  margin-left: 40px;
-  padding-top: 4px;
-}
-
-.tags-section {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.tag {
-  background-color: #f0f0f0;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  color: #666;
+  margin-left: 0;
+  padding-top: 0; /* 패딩 제거해서 프로필과 수평 맞추기 */
 }
 
 .post-title {
   font-size: 24px;
   font-weight: 600;
   color: #191919;
-  margin-top: 0;
+  margin-top: 80px;
   line-height: 1.2;
 }
 
@@ -882,28 +887,7 @@
   height: auto;
   display: block;
 }
-.close-post-button {
-  background: none;
-  border: none;
-  color: #191919;
-  cursor: pointer;
-  padding: 0;
-  position: absolute;
-  top: 20px; /* Match header padding-top */
-  right: 60px; /* Match header padding-right */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  transition: background-color 0.2s ease;
-  z-index: 51; /* Ensure it's above other header elements if needed */
-}
 
-.close-post-button:hover {
-  background-color: #f0f0f0;
-}
 
 
 .comment-author {
