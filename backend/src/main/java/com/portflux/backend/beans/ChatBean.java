@@ -9,11 +9,13 @@ import lombok.Setter;
 @Setter
 public class ChatBean {
 
-
+    private Long messageId;
     private Long roomId;
-    private Long user1Num;
-    private Long user2Num;
-    private Date createdAt;
-    private Date lastMessageAt;
-    private String status;
+    private Long user1Num;   //수신자
+    private Long user2Num; //송신자
+    private String content;
+    private String hasFile;
+    private Date sentAt;
+    private String readYn;
+    private String deletedYn;
 }

@@ -1,3 +1,4 @@
+
 package com.portflux.backend.model;
 
 import jakarta.persistence.*;

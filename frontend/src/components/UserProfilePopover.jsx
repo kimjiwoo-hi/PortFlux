@@ -1,8 +1,11 @@
+
 import { useState, useEffect } from "react";
 import "./UserProfilePopover.css";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import UserDefaultIcon from "../assets/user_default_icon.png";
 
 const UserProfilePopover = ({ isOpen, onLogout }) => {
+  const location = useLocation();
   const [userInfo, setUserInfo] = useState({
     userName: "",
     userNickname: "",
@@ -13,9 +16,10 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
 
   useEffect(() => {
     if (isOpen) {
-      const userId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
-      if (userId) {
-        fetch(`http://localhost:8080/user/info/${userId}`)
+      const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        fetch(`http://localhost:8080/user/info/${user.userId}`)
           .then(response => response.json())
           .then(data => {
             setUserInfo({
@@ -34,21 +38,36 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
   }, [isOpen]);
 
   const getProfileImage = () => {
-    if (userInfo.userImage) {
-      return `data:image/jpeg;base64,${userInfo.userImage}`;
+    if (userInfo.userImage && userInfo.userImage.trim() !== "") {
+      // 백엔드에서 이미 "data:image/jpeg;base64," 접두사를 포함해서 보냄
+      return userInfo.userImage;
     }
-    return "https://i.pravatar.cc/150?img=33";
+    return UserDefaultIcon;
   };
 
   const getBannerStyle = () => {
-    if (userInfo.userBanner) {
+    if (userInfo.userBanner && userInfo.userBanner.trim() !== "") {
+      // 백엔드에서 이미 "data:image/jpeg;base64," 접두사를 포함해서 보냄
       return {
-        backgroundImage: `url(data:image/jpeg;base64,${userInfo.userBanner})`,
+        backgroundImage: `url(${userInfo.userBanner})`,
         backgroundSize: "cover",
         backgroundPosition: "center"
       };
     }
-    return {};
+    // 기본 배너 스타일 (그라데이션)
+    return {
+      backgroundImage: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+      backgroundSize: "cover",
+      backgroundPosition: "center"
+    };
+  };
+
+  const handleMenuClick = (path) => (e) => {
+    // 현재 페이지와 같은 경로를 클릭한 경우 새로고침
+    if (location.pathname === path) {
+      e.preventDefault();
+      window.location.reload();
+    }
   };
 
   return (
@@ -82,16 +101,20 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
       </div>
 
       <div className="menu-list">
-        <Link to="/mypage/myinfo">
+        <Link to="/mypage/myinfo" onClick={handleMenuClick("/mypage/myinfo")}>
           <button className="menu-item">내 정보 보기</button>
         </Link>
-        <Link to="/cart">
+        <Link to="/cart" onClick={handleMenuClick("/cart")}>
           <button className="menu-item">장바구니</button>
         </Link>
-
-        <Link to="/chat">
+        <Link to="/order-list" onClick={handleMenuClick("/order-list")}>
+          <button className="menu-item">주문 내역</button>
+        </Link>
+        {/*
+        <Link to="/chat" onClick={handleMenuClick("/chat")}>
           <button className="menu-item">채팅방</button>
         </Link>
+        */}
       </div>
 
       <div className="popover-footer">

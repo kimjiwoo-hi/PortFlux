@@ -1,163 +1,164 @@
 .profile-popover {
-    position: absolute;
-    top: calc(100% + 15px);
-    right: 0;
-    width: 380px;
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 1000;
+  position: absolute;
+  top: calc(100% + 15px);
+  right: 0;
+  width: 380px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
 }
 
 .profile-popover.active {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
 /* 말풍선 삼각형 - 상단 */
 .profile-popover::before {
-    content: '';
-    position: absolute;
-    top: -10px;
-    right: 10px;
-    width: 0;
-    height: 0;
-    border-left: 15px solid transparent;
-    border-right: 15px solid transparent;
-    border-bottom: 15px solid white;
-    z-index: 1001;
+  content: "";
+  position: absolute;
+  top: -10px;
+  right: 10px;
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 15px solid white;
+  z-index: 1001;
 }
 
 .popover-header {
-    padding: 6rem 2rem 0rem;
-    text-align: center;
-    position: relative;
-    background: white;
-    border-radius: 20px 20px 0 0;
-    overflow: hidden;
+  padding: 6rem 2rem 0rem;
+  text-align: center;
+  position: relative;
+  background: white;
+  border-radius: 20px 20px 0 0;
+  overflow: hidden;
 }
 
 .header-bg {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    right: 15px;
-    height: 130px;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 200"><defs><linearGradient id="oceanGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%233b5998;stop-opacity:0.8"/><stop offset="100%" style="stop-color:%235a7fb8;stop-opacity:0.9"/></linearGradient><pattern id="waves" x="0" y="0" width="100" height="20" patternUnits="userSpaceOnUse"><path d="M0 10 Q 25 5, 50 10 T 100 10" fill="none" stroke="white" stroke-opacity="0.1" stroke-width="2"/></pattern></defs><rect width="1200" height="200" fill="url(%23oceanGrad)"/><rect width="1200" height="200" fill="url(%23waves)"/></svg>') center/cover;
-    z-index: 0;
-    border-radius: 12px;
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  right: 15px;
+  height: 130px;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 200"><defs><linearGradient id="oceanGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%233b5998;stop-opacity:0.8"/><stop offset="100%" style="stop-color:%235a7fb8;stop-opacity:0.9"/></linearGradient><pattern id="waves" x="0" y="0" width="100" height="20" patternUnits="userSpaceOnUse"><path d="M0 10 Q 25 5, 50 10 T 100 10" fill="none" stroke="white" stroke-opacity="0.1" stroke-width="2"/></pattern></defs><rect width="1200" height="200" fill="url(%23oceanGrad)"/><rect width="1200" height="200" fill="url(%23waves)"/></svg>')
+    center/cover;
+  z-index: 0;
+  border-radius: 12px;
 }
 
 .popover-avatar {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    border: 5px solid white;
-    margin: 0 auto 1rem;
-    display: block;
-    position: relative;
-    z-index: 1;
-    background: #f0f0f0;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 5px solid white;
+  margin: 0 auto 1rem;
+  display: block;
+  position: relative;
+  z-index: 1;
+  background: #f0f0f0;
 }
 
 .popover-name {
-    color: #333;
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 0.3rem;
-    position: relative;
-    z-index: 1;
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  position: relative;
+  z-index: 1;
 }
 
 .popover-email {
-    color: #888;
-    font-size: 0.9rem;
-    position: relative;
-    z-index: 1;
+  color: #888;
+  font-size: 0.9rem;
+  position: relative;
+  z-index: 1;
 }
 
 .stats-container {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding: 1.5rem 2rem;
-    background: white;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  background: white;
 }
 
 .stat-item {
-    text-align: center;
-    flex: 1;
+  text-align: center;
+  flex: 1;
 }
 
 .stat-number {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 0.3rem;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 0.3rem;
 }
 
 .stat-label {
-    font-size: 0.85rem;
-    color: #888;
+  font-size: 0.85rem;
+  color: #888;
 }
 
 .stat-divider {
-    width: 1px;
-    height: 40px;
-    background: #e0e0e0;
+  width: 1px;
+  height: 40px;
+  background: #e0e0e0;
 }
 
 .menu-list {
-    padding: 0.5rem 0;
-    background: white;
+  padding: 0.5rem 0;
+  background: white;
 }
 
 .menu-item {
-    width: 100%;
-    padding: 1rem 2rem;
-    border: none;
-    background: white;
-    text-align: left;
-    font-size: 1rem;
-    color: #333;
-    cursor: pointer;
-    transition: background 0.2s;
-    border-bottom: 1px solid #f5f5f5;
+  width: 100%;
+  padding: 1rem 2rem;
+  border: none;
+  background: white;
+  text-align: left;
+  font-size: 1rem;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-bottom: 1px solid #f5f5f5;
 }
 
 .menu-item:hover {
-    background: #f8f9fa;
+  background: #f8f9fa;
 }
 
 .menu-item:last-child {
-    border-bottom: none;
+  border-bottom: none;
 }
 
 .popover-footer {
-    padding: 1rem 2rem 1.5rem;
-    background: white;
-    border-top: 1px solid #f0f0f0;
-    border-radius: 0 0 20px 20px;
+  padding: 1rem 2rem 1.5rem;
+  background: white;
+  border-top: 1px solid #f0f0f0;
+  border-radius: 0 0 20px 20px;
 }
 
 .btn-logout {
-    width: 100%;
-    padding: 0.8rem;
-    border: none;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    cursor: pointer;
-    background: #f5f5f5;
-    color: #666;
-    transition: all 0.2s;
+  width: 100%;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  background: #f5f5f5;
+  color: #666;
+  transition: all 0.2s;
 }
 
 .btn-logout:hover {
-    background: #e8e8e8;
+  background: #e8e8e8;
 }

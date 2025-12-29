@@ -1,0 +1,79 @@
+.not-found-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 20px;
+}
+
+.not-found-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 60px; /* Space between the two columns */
+  background-color: #ffffff;
+  padding: 40px;
+  max-width: 1000px; /* Adjusted width for the new layout */
+  width: 100%;
+}
+
+.not-found-left {
+  text-align: left; /* Aligned left */
+  margin: 0 0 40px
+}
+
+.not-found-right {
+  text-align: left;
+}
+
+/* .not-found-icon styles removed */
+
+.not-found-left h1 {
+  font-family: "BigCaslonBlack", "Noto Sans KR", sans-serif;
+  font-size: 10rem; /* Increased font size */
+  color: #000000;
+  line-height: 1;
+  white-space: nowrap; /* Prevent 404 from wrapping */
+  letter-spacing: 0.08em; /* Adjust spacing to match width */
+}
+
+.not-found-subtext {
+  font-family: "BigCaslonBlack", "Noto Sans KR", sans-serif; /* Applied BigCaslonBlack font */
+  font-size: 4rem; /* Increased font size */
+  font-weight: bold;
+  color: #000000;
+  margin-top: 5px;
+  line-height: 1;
+  white-space: nowrap; /* Prevent text from wrapping */
+  display: block; /* Ensure it takes full width for alignment */
+}
+
+.not-found-right h2 {
+  font-size: 1.75rem;
+  margin-top: 0;
+  color: #000000;
+}
+
+.not-found-right p {
+  font-size: 1rem;
+  margin-top: 20px;
+  color: #000000;
+  line-height: 1.6;
+}
+
+.info-404-button {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-top: 30px;
+  padding: 12px 25px;
+  color: #ffffff;
+  background-color: #3b5bdb;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.info-404-button:hover {
+  background: #2f49b0;
+}
