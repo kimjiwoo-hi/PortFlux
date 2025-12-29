@@ -79,6 +79,10 @@ public class SecurityConfig {
 
                         // [추가] 장바구니 API는 인증된 사용자만 허용
                         .requestMatchers("/api/cart/**").authenticated()
+                        // [추가] 주문 API는 인증된 사용자만 허용
+                        .requestMatchers("/api/orders/**").authenticated()
+                        // [추가] 결제 결과 조회 API 허용
+                        .requestMatchers("/api/payments/result").permitAll()
 
                         // 정적 리소스 허용
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()

@@ -73,10 +73,11 @@ function LoginPage() {
         } else {
           // 기존 회원: 로그인 성공
           console.log("구글 로그인 성공:", json);
-          
-          // ▼▼▼ [추가] 로그인 성공 상태 저장 (Header 감지용) ▼▼▼
-          localStorage.setItem("user", JSON.stringify(json));
-          // ▲▲▲ 추가 끝 ▲▲▲
+
+          // ▼▼▼ [수정] user 객체와 토큰 저장 ▼▼▼
+          localStorage.setItem("user", JSON.stringify(json.user));
+          localStorage.setItem("token", json.token);
+          // ▲▲▲ 수정 끝 ▲▲▲
 
           // 원래 있던 페이지로 이동
           const targetPath = getPreviousPage();
@@ -114,10 +115,11 @@ function LoginPage() {
         setLoginError("");
         const json = await res.json();
         console.log("로그인 성공:", json);
-        
-        // ▼▼▼ [수정] 로그인 유지 체크 여부에 따라 저장소 분기 ▼▼▼
+
+        // ▼▼▼ [수정] user 객체와 토큰 저장 ▼▼▼
         const storage = autoLogin ? localStorage : sessionStorage;
-        storage.setItem("user", JSON.stringify(json));
+        storage.setItem("user", JSON.stringify(json.user));
+        storage.setItem("token", json.token);
         // ▲▲▲ 수정 끝 ▲▲▲
 
         // 로그인 성공 시 이전 페이지로 이동
