@@ -1,220 +1,212 @@
 package com.portflux.backend.service;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
+import com.portflux.backend.beans.*;
+import com.portflux.backend.mapper.AdminMapper;
+import com.portflux.backend.mapper.CompanyUserMapper;
+import com.portflux.backend.mapper.UserMapper;
+import com.portflux.backend.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+// [추가] 시큐리티 관련 임포트
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.portflux.backend.api.GoogleApi;
-import com.portflux.backend.beans.UserBean;
-import com.portflux.backend.beans.UserLoginBean;
-import com.portflux.backend.beans.UserRegisterBean;
-import com.portflux.backend.mapper.CompanyUserMapper;
-import com.portflux.backend.repository.UserRepository;
-
-import lombok.RequiredArgsConstructor;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final GoogleApi googleApi;
+    private final UserMapper userMapper;
+    private final AdminMapper adminMapper;
     private final CompanyUserMapper companyUserMapper;
+    private final PasswordEncoder passwordEncoder;
 
+    // [추가] UserDetailsService 인터페이스의 필수 구현 메서드
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
         UserBean user = userRepository.findByUserId(userId);
         if (user == null) {
-            throw new UsernameNotFoundException("User not found with id: " + userId);
+            throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + userId);
         }
-        // For simplicity, giving every user a "ROLE_USER". You can expand this.
-        return new User(user.getUserId(), user.getUserPassword(), 
-                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+        return new org.springframework.security.core.userdetails.User(
+            user.getUserId(),
+            user.getUserPw(),
+            Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+        );
     }
 
-    // 1. 회원가입
     @Transactional
     public void registerUser(UserRegisterBean registerBean) {
-        // 비밀번호 일치 확인
-        if (!registerBean.getPassword().equals(registerBean.getPasswordCheck())) {
+        if (isIdDuplicate(registerBean.getUserId())) throw new RuntimeException("이미 사용 중인 아이디입니다.");
+        if (isEmailDuplicate(registerBean.getEmail())) throw new RuntimeException("이미 사용 중인 이메일입니다.");
+        if (isNicknameDuplicate(registerBean.getNickname())) throw new RuntimeException("이미 사용 중인 닉네임입니다.");
+        if (registerBean.getPassword() == null || !registerBean.getPassword().equals(registerBean.getPasswordCheck())) {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
 
-        // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(registerBean.getPassword());
-
-        // Entity 생성 및 저장
+        
         UserBean user = new UserBean();
-        user.setUserId(registerBean.getUserId());         // 아이디 저장
-        user.setUserEmail(registerBean.getEmail());       // 이메일 저장
-        user.setUserPassword(encodedPassword);
+        user.setUserId(registerBean.getUserId());
+        user.setUserEmail(registerBean.getEmail());
+        user.setUserPw(encodedPassword);
         user.setUserName(registerBean.getName());
         user.setUserNickname(registerBean.getNickname());
         user.setUserPhone(registerBean.getPhoneNumber());
-        user.setUserLevel(1); // 기본 레벨
+        user.setUserLevel(1);
 
         userRepository.save(user);
     }
 
-    // 2. 닉네임 중복 확인
-    public boolean isNicknameDuplicate(String nickname) {
-        boolean userExists = userRepository.existsByUserNicknameIgnoreCase(nickname);
-        boolean companyExists = companyUserMapper.existsByCompanyName(nickname) > 0;
-        return userExists || companyExists;
+    public Map<String, Object> login(UserLoginBean loginBean, String loginType) {
+        Map<String, Object> response = new HashMap<>();
+        String inputId = loginBean.getUserId();
+        String inputPw = loginBean.getPassword();
+
+        if ("USER".equals(loginType)) {
+            UserBean user = userMapper.getUserInfo(inputId);
+            if (user != null && passwordEncoder.matches(inputPw, user.getUserPw())) {
+                response.put("num", user.getUserNum());
+                response.put("id", user.getUserId());
+                response.put("name", user.getUserNickname());
+                int adminCount = adminMapper.checkAdminExists(user.getUserNum());
+                response.put("role", adminCount > 0 ? "ADMIN" : "USER");
+                response.put("memberType", "user");
+                response.put("user", user); // 컨트롤러에서 필요함
+                return response;
+            }
+        } else if ("COMPANY".equals(loginType)) {
+            CompanyUserBean company = companyUserMapper.getCompanyUserInfo(inputId);
+            if (company != null && passwordEncoder.matches(inputPw, company.getCompanyPassword())) {
+                response.put("num", company.getCompanyNum());
+                response.put("id", company.getCompanyId());
+                response.put("name", company.getCompanyName());
+                response.put("role", "COMPANY");
+                response.put("memberType", "company");
+                return response;
+            }
+        }
+        throw new RuntimeException("아이디 또는 비밀번호가 일치하지 않습니다.");
     }
 
-    // 3. 로그인 (아이디로 로그인)
-    public UserBean login(UserLoginBean loginBean) {
-        // 아이디로 조회
-        UserBean user = userRepository.findByUserId(loginBean.getUserId());
+    public UserBean getUserByEmail(String email) {
+        if (email == null) return null;
+        return userMapper.findUserByEmail(email.trim());
+    }
 
-        if (user == null) {
-            throw new RuntimeException("존재하지 않는 아이디입니다.");
+    public Map<String, Object> processGoogleLogin(String email, String name) {
+        Map<String, Object> response = new HashMap<>();
+        String trimmedEmail = email.trim();
+
+        UserBean user = userMapper.findUserByEmail(trimmedEmail);
+        if (user != null) {
+            response.put("isMember", true);
+            response.put("user", user);
+            response.put("status", "SUCCESS");
+            return response;
         }
-        if (!passwordEncoder.matches(loginBean.getPassword(), user.getUserPassword())) {
-            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+
+        CompanyUserBean company = companyUserMapper.findCompanyByEmail(trimmedEmail);
+        if (company != null) {
+            response.put("isMember", true);
+            response.put("company", company);
+            response.put("status", "SUCCESS");
+            return response;
+        }
+
+        response.put("isMember", false);
+        response.put("status", "NEW_USER");
+        response.put("email", trimmedEmail);
+        response.put("name", name);
+        return response;
+    }
+
+    public boolean isNicknameDuplicate(String nickname) { 
+        return (userMapper.checkNicknameCount(nickname) + companyUserMapper.existsByCompanyName(nickname)) > 0; 
+    }
+    public boolean isEmailDuplicate(String email) { 
+        return (userMapper.checkEmailDuplicate(email) + companyUserMapper.checkCompanyEmailDuplicate(email)) > 0; 
+    }
+    public boolean isIdDuplicate(String userId) { 
+        return (userMapper.checkIdDuplicate(userId) + companyUserMapper.checkCompanyIdDuplicate(userId)) > 0; 
+    }
+
+    public UserBean getUserInfo(String userId) { 
+        UserBean user = userMapper.getUserInfo(userId); 
+        if (user == null) {
+            CompanyUserBean company = companyUserMapper.getCompanyUserInfo(userId);
+            if (company != null) {
+                user = new UserBean();
+                if (company.getCompanyNum() != null) {
+                    user.setUserNum(company.getCompanyNum().intValue());
+                }
+                user.setUserId(company.getCompanyId());
+                user.setUserNickname(company.getCompanyName());
+                user.setUserEmail(company.getCompanyEmail());
+            }
         }
         return user;
     }
 
-    // 4. ★ [수정] 구글 로그인 프로세스 (리턴 타입 변경: UserBean -> Map)
-    // 이유: 회원이 아닐 경우에도 구글 정보(이메일, 이름)를 컨트롤러에 전달해야 함
-    public Map<String, Object> processGoogleLogin(String authCode) {
-        String accessToken = googleApi.getAccessToken(authCode);
-        if (accessToken == null)
-            throw new RuntimeException("구글 로그인 실패: 토큰 발급 오류");
-
-        Map<String, Object> googleInfo = googleApi.getUserInfo(accessToken);
-        String email = (String) googleInfo.get("email");
-        String name = (String) googleInfo.get("name");
-
-        // DB에서 이메일로 유저 조회
-        UserBean user = userRepository.findByUserEmail(email);
-        
-        // 결과 맵 생성
-        Map<String, Object> result = new HashMap<>();
-        
-        if (user != null) {
-            // 이미 가입된 유저 -> 유저 정보 리턴
-            result.put("user", user);
-            result.put("isMember", true);
-        }
-        else {
-            // 미가입 유저 -> 구글에서 받아온 정보만 리턴 (회원가입 프리셋 용도)
-            result.put("email", email);
-            result.put("name", name);
-            result.put("isMember", false);
-        }
-        
-        return result;
+    public UserBean findByNameAndEmail(String name, String email) { 
+        return userMapper.findByNameAndEmail(name, email); 
     }
 
-    // 5. 이메일 중복 확인
-    public boolean isEmailDuplicate(String email) {
-        return userRepository.existsByUserEmail(email);
-    }
-
-    // 6. 아이디 중복 확인 메서드
-    public boolean isIdDuplicate(String userId) {
-        return userRepository.existsByUserId(userId);
-    }
-
-    // 7. 아이디 찾기 (이름 + 이메일로 조회)
-    public UserBean findByNameAndEmail(String name, String email) {
-        return userRepository.findByUserNameAndUserEmail(name, email);
-    }
-
-    // 8. 비밀번호 변경
     @Transactional
     public void updatePassword(String userId, String newPassword) {
-        UserBean user = userRepository.findByUserId(userId);
-
-        if (user == null) {
-            throw new RuntimeException("사용자를 찾을 수 없습니다.");
-        }
-
-        // 이전 비밀번호와 일치하는지 확인
-        if (passwordEncoder.matches(newPassword, user.getUserPassword())) {
-            throw new RuntimeException("이전 비밀번호로는 변경할 수 없습니다.");
-        }
-
-        // 새 비밀번호 암호화 후 저장
-        user.setUserPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        userMapper.updatePassword(userId, encodedPassword);
     }
 
-    // 9. 사용자 정보 조회 (userId로)
+    public UserBean getUserInfoByNum(int userNum) {
+        return userRepository.findById(userNum).orElse(null);
+    }
+
     public UserBean getUserByUserId(String userId) {
         return userRepository.findByUserId(userId);
     }
 
-    // 10. 사용자 정보 수정
     @Transactional
     public void updateUserInfo(String userId, UserBean updateUser, boolean updateImage, boolean updateBanner) {
         UserBean user = userRepository.findByUserId(userId);
+        if (user == null) throw new RuntimeException("사용자를 찾을 수 없습니다.");
 
-        if (user == null) {
-            throw new RuntimeException("사용자를 찾을 수 없습니다.");
-        }
+        if (updateUser.getUserName() != null) user.setUserName(updateUser.getUserName());
+        if (updateUser.getUserNickname() != null) user.setUserNickname(updateUser.getUserNickname());
+        if (updateUser.getUserPhone() != null) user.setUserPhone(updateUser.getUserPhone());
+        if (updateUser.getUserEmail() != null) user.setUserEmail(updateUser.getUserEmail());
 
-        // 수정 가능한 필드만 업데이트
-        if (updateUser.getUserName() != null) {
-            user.setUserName(updateUser.getUserName());
-        }
-        if (updateUser.getUserNickname() != null) {
-            user.setUserNickname(updateUser.getUserNickname());
-        }
-        if (updateUser.getUserPhone() != null) {
-            user.setUserPhone(updateUser.getUserPhone());
-        }
-        if (updateUser.getUserEmail() != null) {
-            user.setUserEmail(updateUser.getUserEmail());
-        }
-
-        // 이미지 처리 (플래그가 true일 때만 업데이트)
-        // null로 설정된 경우도 포함하여 업데이트
-        if (updateImage) {
-            user.setUserImage(updateUser.getUserImage());
-        }
-        if (updateBanner) {
-            user.setUserBanner(updateUser.getUserBanner());
-        }
+        if (updateImage) user.setUserImage(updateUser.getUserImage());
+        if (updateBanner) user.setUserBanner(updateUser.getUserBanner());
 
         userRepository.save(user);
     }
 
-    // 11. 비밀번호 변경 (현재 비밀번호 확인 포함)
     @Transactional
     public void updatePasswordWithVerification(String userId, String currentPassword, String newPassword) {
         UserBean user = userRepository.findByUserId(userId);
+        if (user == null) throw new RuntimeException("사용자를 찾을 수 없습니다.");
 
-        if (user == null) {
-            throw new RuntimeException("사용자를 찾을 수 없습니다.");
-        }
-
-        // 현재 비밀번호 확인
-        if (!passwordEncoder.matches(currentPassword, user.getUserPassword())) {
+        // [수정] getUserPassword -> getUserPw 필드명 변경
+        if (!passwordEncoder.matches(currentPassword, user.getUserPw())) {
             throw new RuntimeException("현재 비밀번호가 일치하지 않습니다.");
         }
 
-        // 새 비밀번호가 현재 비밀번호와 같은지 확인
-        if (passwordEncoder.matches(newPassword, user.getUserPassword())) {
+        if (passwordEncoder.matches(newPassword, user.getUserPw())) {
             throw new RuntimeException("새 비밀번호는 현재 비밀번호와 달라야 합니다.");
         }
 
-        // 새 비밀번호 암호화 후 저장
-        user.setUserPassword(passwordEncoder.encode(newPassword));
+        // [수정] setUserPassword -> setUserPw 필드명 변경
+        user.setUserPw(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
 }

@@ -1,53 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.portflux.backend.mapper.UserMapper">
 
     <insert id="registerUser" parameterType="com.portflux.backend.beans.UserRegisterBean">
         INSERT INTO USERS (
-            user_id, 
-            user_password, 
-            user_name, 
-            user_phone, 
-            user_email, 
-            user_nickname, 
-            drawn_user, 
-            user_create_at, 
-            user_level
+            user_id, user_password, user_name, user_phone, 
+            user_email, user_nickname, user_level, user_create_at, drawn_user
         ) VALUES (
-            #{email},        #{password}, 
-            #{name},         #{phoneNumber}, 
-            #{email},        #{nickname},     'N', 
-            SYSDATE, 
-            1
+            #{userId}, #{password}, #{name}, #{phoneNumber}, 
+            #{email}, #{nickname}, 1, SYSDATE, 'N'
         )
     </insert>
 
-    <select id="checkNicknameCount" parameterType="String" resultType="int">
-        SELECT COUNT(*) 
-        FROM USERS 
-        WHERE user_nickname = #{value}
+    <select id="login" parameterType="com.portflux.backend.beans.UserLoginBean" resultType="com.portflux.backend.beans.UserBean">
+        SELECT 
+            user_num as userNum,
+            user_id as userId,
+            user_password as userPw,
+            user_name as userName,
+            user_nickname as userNickname,
+            user_email as userEmail,
+            user_level as userLevel
+        FROM USERS
+        WHERE user_id = #{userId} 
+          AND user_password = #{password}
     </select>
+
+    <select id="checkIdDuplicate" parameterType="String" resultType="int">
+        SELECT COUNT(*) FROM USERS WHERE user_id = #{userId}
+    </select>
+
+    <select id="checkNicknameCount" parameterType="String" resultType="int">
+        SELECT COUNT(*) FROM USERS WHERE user_nickname = #{nickname}
+    </select>
+
+    <select id="checkNicknameDuplicate" parameterType="String" resultType="int">
+        SELECT COUNT(*) FROM USERS WHERE user_nickname = #{nickname}
+    </select>
+
+    <select id="checkEmailDuplicate" parameterType="String" resultType="int">
+        SELECT COUNT(*) FROM USERS WHERE user_email = #{email}
+    </select>
+
+    <select id="findByNameAndEmail" resultType="com.portflux.backend.beans.UserBean">
+        SELECT user_id as userId FROM USERS WHERE user_name = #{userName} AND user_email = #{userEmail}
+    </select>
+
     <select id="findUserByEmail" parameterType="String" resultType="com.portflux.backend.beans.UserBean">
         SELECT 
-            user_num AS userNum,
-            user_id AS userId,
-            user_password AS userPassword,
-            user_name AS userName,
-            user_phone AS userPhone,
-            user_email AS userEmail,
-            user_nickname AS userNickname,
-            drawn_user AS drawnUser,
-            user_create_at AS userCreateAt,
-            user_level AS userLevel
+            user_num as userNum, 
+            user_id as userId, 
+            user_password as userPw,
+            user_name as userName, 
+            user_nickname as userNickname, 
+            user_email as userEmail
         FROM USERS
         WHERE user_email = #{email}
     </select>
 
-    <select id="findUserNumByUserId" parameterType="string" resultType="int">
-        SELECT user_num
-            FROM USERS
+    <select id="getUserInfo" parameterType="String" resultType="com.portflux.backend.beans.UserBean">
+        SELECT 
+            user_num as userNum,
+            user_id as userId,
+            user_password as userPw,
+            user_name as userName,
+            user_nickname as userNickname,
+            user_email as userEmail,
+            user_phone as userPhone,
+            user_image as userImage,
+            user_banner as userBanner
+        FROM USERS
         WHERE user_id = #{userId}
     </select>
+
+    <update id="updatePassword">
+        UPDATE USERS SET user_password = #{newPassword} WHERE user_id = #{userId}
+    </update>
+
 </mapper>
