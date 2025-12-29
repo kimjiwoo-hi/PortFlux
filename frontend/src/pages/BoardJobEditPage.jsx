@@ -43,6 +43,10 @@ const BoardJobEditPage = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [selectedMainRegion, setSelectedMainRegion] = useState("");
+  const [originalData, setOriginalData] = useState(null);
+
+  // 오늘 날짜 (마감일 최소값)
+  const today = new Date().toISOString().split("T")[0];
 
   // 기존 데이터 로드
   useEffect(() => {
@@ -50,7 +54,6 @@ const BoardJobEditPage = () => {
       try {
         setLoading(true);
         const data = await getJobDetail(postId);
-        const job = data.job || data;
 
         // 권한 체크
         if (data.isOwner === false) {
@@ -60,36 +63,53 @@ const BoardJobEditPage = () => {
         }
 
         // 지역 정보에서 상위 지역 추출
-        if (job.jobRegion) {
-          const parentRegion = getParentRegion(job.jobRegion);
+        if (data.jobRegion) {
+          const parentRegion = getParentRegion(data.jobRegion);
           if (parentRegion) {
             setSelectedMainRegion(parentRegion.id);
           }
         }
 
+        // jobEducationExclude: 'Y'/'N' → boolean 변환
+        const educationExclude =
+          data.jobEducationExclude === true || data.jobEducationExclude === "Y";
+
         // 폼 데이터 설정
-        setFormData({
-          title: job.title || "",
-          content: job.content || "",
-          jobRegion: job.jobRegion || "",
-          jobCareerType: job.jobCareerType || [],
-          jobCareerYears: job.jobCareerYears || [],
-          jobEducation: job.jobEducation || "",
-          jobEducationExclude: job.jobEducationExclude || false,
-          jobSalaryMin: job.jobSalaryMin || "",
-          jobSalaryMax: job.jobSalaryMax || "",
-          jobDeadline: job.jobDeadline ? job.jobDeadline.split("T")[0] : "",
-          jobIndustries: job.jobIndustries || [],
-          jobCompanyTypes: job.jobCompanyTypes || [],
-          jobWorkTypes: job.jobWorkTypes || [],
-          jobWorkDays: job.jobWorkDays || [],
-          jobStatus: job.jobStatus || "ACTIVE",
-        });
+        const formDataInit = {
+          title: data.title || "",
+          content: data.content || "",
+          jobRegion: data.jobRegion || "",
+          jobCareerType: Array.isArray(data.jobCareerType)
+            ? data.jobCareerType
+            : [],
+          jobCareerYears: Array.isArray(data.jobCareerYears)
+            ? data.jobCareerYears
+            : [],
+          jobEducation: data.jobEducation || "",
+          jobEducationExclude: educationExclude,
+          jobSalaryMin: data.jobSalaryMin || "",
+          jobSalaryMax: data.jobSalaryMax || "",
+          jobDeadline: data.jobDeadline ? data.jobDeadline.split("T")[0] : "",
+          jobIndustries: Array.isArray(data.jobIndustries)
+            ? data.jobIndustries
+            : [],
+          jobCompanyTypes: Array.isArray(data.jobCompanyTypes)
+            ? data.jobCompanyTypes
+            : [],
+          jobWorkTypes: Array.isArray(data.jobWorkTypes)
+            ? data.jobWorkTypes
+            : [],
+          jobWorkDays: Array.isArray(data.jobWorkDays) ? data.jobWorkDays : [],
+          jobStatus: data.jobStatus || "ACTIVE",
+        };
+
+        setFormData(formDataInit);
+        setOriginalData(formDataInit);
       } catch (error) {
         console.error("채용공고 로드 실패:", error);
-        if (error.response?.status === 404) {
+        if (error.message?.includes("404")) {
           alert("채용공고를 찾을 수 없습니다.");
-        } else if (error.response?.status === 401) {
+        } else if (error.message?.includes("401")) {
           alert("로그인이 필요합니다.");
           navigate("/login");
           return;
@@ -190,9 +210,6 @@ const BoardJobEditPage = () => {
       }
     }
 
-    // 마감일 검증 (수정 시에는 이미 지난 날짜도 허용할 수 있음)
-    // 단, 새로 설정하는 경우에만 검증
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }, [formData]);
@@ -223,6 +240,7 @@ const BoardJobEditPage = () => {
           ? Number(formData.jobSalaryMax)
           : null,
         jobDeadline: formData.jobDeadline || null,
+        // jobEducationExclude: boolean → 그대로 전송 (백엔드에서 처리)
       };
 
       await updateJob(postId, jobData);
@@ -230,14 +248,14 @@ const BoardJobEditPage = () => {
       navigate(`/boardjob/${postId}`);
     } catch (error) {
       console.error("채용공고 수정 실패:", error);
-      if (error.response?.status === 401) {
+      if (error.message?.includes("401")) {
         alert("로그인이 필요합니다.");
         navigate("/login");
-      } else if (error.response?.status === 403) {
+      } else if (error.message?.includes("403")) {
         alert("수정 권한이 없습니다.");
         navigate("/boardjob");
       } else {
-        alert(error.response?.data?.message || "채용공고 수정에 실패했습니다.");
+        alert(error.message || "채용공고 수정에 실패했습니다.");
       }
     } finally {
       setSubmitting(false);
@@ -246,15 +264,17 @@ const BoardJobEditPage = () => {
 
   // 취소 핸들러
   const handleCancel = useCallback(() => {
-    if (
-      window.confirm("수정을 취소하시겠습니까?\n변경사항이 저장되지 않습니다.")
-    ) {
-      navigate(`/boardjob/${postId}`);
-    }
-  }, [navigate, postId]);
+    // 변경사항 확인
+    const hasChanges =
+      originalData && JSON.stringify(formData) !== JSON.stringify(originalData);
 
-  // 오늘 날짜 (마감일 최소값)
-  const today = new Date().toISOString().split("T")[0];
+    if (hasChanges) {
+      if (!window.confirm("수정 중인 내용이 있습니다. 취소하시겠습니까?")) {
+        return;
+      }
+    }
+    navigate(`/boardjob/${postId}`);
+  }, [formData, originalData, navigate, postId]);
 
   // 로딩 중
   if (loading) {
@@ -278,10 +298,12 @@ const BoardJobEditPage = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="job-edit-form">
-          {/* 공고 상태 */}
+          {/* 공고 상태 섹션 */}
           <section className="form-section status-section">
             <h2 className="section-title">공고 상태</h2>
+
             <div className="form-group">
+              <label className="required">공고 상태</label>
               <div className="radio-group">
                 <label className="radio-item">
                   <input
@@ -304,6 +326,9 @@ const BoardJobEditPage = () => {
                   <span className="radio-text">마감</span>
                 </label>
               </div>
+              <small className="help-text">
+                마감으로 변경 시 구직자에게 노출되지 않습니다.
+              </small>
             </div>
           </section>
 
@@ -351,27 +376,21 @@ const BoardJobEditPage = () => {
                   name="jobRegion"
                   value={formData.jobRegion}
                   onChange={handleChange}
-                  className={`region-select ${errors.jobRegion ? "error" : ""}`}
                   disabled={!selectedMainRegion}
+                  className={`region-select ${errors.jobRegion ? "error" : ""}`}
                 >
-                  <option value="">구/군 선택</option>
-                  {selectedMainRegion &&
-                    getSubRegions(selectedMainRegion).map((sub) => (
-                      <option key={sub.value} value={sub.value}>
-                        {sub.label}
-                      </option>
-                    ))}
+                  <option value="">시/군/구 선택</option>
+                  {getSubRegions(selectedMainRegion).map((sub) => (
+                    <option key={sub.value} value={sub.value}>
+                      {sub.label}
+                    </option>
+                  ))}
                 </select>
               </div>
               {errors.jobRegion && (
                 <span className="error-message">{errors.jobRegion}</span>
               )}
             </div>
-          </section>
-
-          {/* 자격 요건 섹션 */}
-          <section className="form-section">
-            <h2 className="section-title">자격 요건</h2>
 
             {/* 경력 */}
             <div className="form-group">
@@ -395,7 +414,7 @@ const BoardJobEditPage = () => {
               )}
             </div>
 
-            {/* 경력 연차 (경력 선택 시) */}
+            {/* 경력연차 (경력 선택 시에만 표시) */}
             {formData.jobCareerType.includes("경력") && (
               <div className="form-group">
                 <label>경력 연차</label>

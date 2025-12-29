@@ -1,21 +1,21 @@
 package com.portflux.backend.beans;
 
 import java.sql.Date;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class CompanyUserBean {
-    private Long companyNum;       // PK
-    private String companyId;
-    private String businessNumber; // 사업자등록번호
-    private String companyPassword;
-    private String companyName;
-    private String companyPhone;
-    private String companyEmail;
-    private String drownCompany;   // Y/N
-    private Date companyCreateAt;
-    private byte[] companyImage;   // BLOB
-    private byte[] companyBanner;  // BLOB
+    private Long companyNum;       // PK: company_num
+    private String companyId;      // company_id
+    private String companyPassword;// company_password
+    private String companyName;    // company_name
+    private String companyPhone;   // company_phone
+    private String companyEmail;   // company_email
+    private String businessNumber; // business_number
+    private String drawnCompany;   // drawn_company (Y/N)
+    private Date companyCreateAt;  // company_create_at
+    
+    // BLOB 이미지는 필요시 byte[] 또는 String으로 처리
+    private String companyImage;   
+    private String companyBanner;  
 }

@@ -21,12 +21,20 @@ public class JwtTokenProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
-    // IMPORTANT: This key should be in your application.yml or environment variables and be at least 256 bits long.
-    // For demonstration, a new key is generated. Replace this with a persistent key.
-    private final SecretKey jwtSecretKey = Keys.secretKeyFor(SignatureAlgorithm.HS512);
-    
-    // Token validity in milliseconds
-    private final long jwtExpirationMs = 86400000; // 24 hours
+    @Value("${jwt.secret:portflux-default-secret-key-minimum-512-bits-required-for-hs512-algorithm-security}")
+    private String jwtSecret;
+
+    @Value("${jwt.expiration:86400000}")
+    private long jwtExpirationMs; // 기본값: 24시간
+
+    private SecretKey jwtSecretKey;
+
+    // SecretKey 초기화 (Bean 생성 후 자동 호출)
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        // application.properties의 jwt.secret을 SecretKey로 변환
+        this.jwtSecretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+    }
 
     // Generate a token from a user ID
     public String generateToken(String userId) {

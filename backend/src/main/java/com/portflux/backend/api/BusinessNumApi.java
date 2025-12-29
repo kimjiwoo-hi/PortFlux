@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +18,13 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class BusinessNumApi {
 
-    // 공공데이터포털 인증키 (Decoding된 상태의 키 사용)
-    private final String SERVICE_KEY = "0cd27a9d76a27f3a84fc16ab97338a986645f0a388d99feb0379edb7f16c8ec2";
-    
-    // 국세청 사업자등록정보 상태조회 API URL
-    private final String API_URL = "https://api.odcloud.kr/api/nts-businessman/v1/status";
+    // 공공데이터포털 인증키 (application.properties에서 주입)
+    @Value("${api.public.data.service-key}")
+    private String SERVICE_KEY;
+
+    // 국세청 사업자등록정보 상태조회 API URL (application.properties에서 주입)
+    @Value("${api.public.data.url}")
+    private String API_URL;
 
     private final RestTemplate restTemplate = new RestTemplate();
 

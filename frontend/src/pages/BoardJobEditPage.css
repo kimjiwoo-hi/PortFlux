@@ -1,53 +1,315 @@
 /* BoardJobEditPage.css - 채용공고 수정 페이지 스타일 */
 
 .job-edit-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 20px;
   background-color: #f9fafb;
+  min-height: calc(100vh - 200px);
 }
 
 .job-edit-card {
   background: #ffffff;
+  border-radius: 12px;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
 }
 
 /* 헤더 */
 .job-edit-header {
+  padding: 32px;
+  border-bottom: 1px solid #e5e7eb;
   background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
 }
 
 .job-edit-header h1 {
+  font-size: 28px;
+  font-weight: 700;
   color: #312e81;
+  margin: 0 0 8px 0;
 }
 
 .job-edit-header p {
+  font-size: 15px;
   color: #4338ca;
+  margin: 0;
 }
 
-/* 상태 섹션 */
+/* 폼 */
+.job-edit-form {
+  padding: 32px;
+}
+
+/* 상태 섹션 강조 */
+.status-section {
+  background: #faf5ff;
+  padding: 24px;
+  border-radius: 12px;
+  border: 2px solid #e9d5ff;
+  margin-bottom: 40px;
+}
+
 .status-section .section-title {
-  border-bottom-color: #4f46e5;
+  border-bottom-color: #7c3aed;
+  color: #5b21b6;
 }
 
-/* 섹션 타이틀 */
+.status-section .radio-item:has(input:checked) {
+  background: #f3e8ff;
+  border-color: #c084fc;
+}
+
+.status-section .radio-item:has(input:checked) .radio-text {
+  color: #7c3aed;
+}
+
+/* 섹션 */
+.form-section {
+  margin-bottom: 40px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.form-section:last-of-type {
+  margin-bottom: 32px;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
 .section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 24px 0;
+  padding-bottom: 12px;
   border-bottom: 2px solid #4f46e5;
+  display: inline-block;
 }
 
-/* 입력 포커스 */
+/* 폼 그룹 */
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 10px;
+}
+
+.form-group label.required::after {
+  content: "*";
+  color: #ef4444;
+  margin-left: 4px;
+}
+
+/* 입력 필드 */
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="date"],
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #0f172a;
+  transition: all 0.2s ease;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
+  outline: none;
   border-color: #4f46e5;
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
 }
 
-/* 체크박스 */
+.form-group input.error,
+.form-group select.error,
+.form-group textarea.error {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.form-group input:disabled,
+.form-group select:disabled {
+  background: #f1f5f9;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 200px;
+  line-height: 1.6;
+}
+
+/* 입력 푸터 */
+.input-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.char-count {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-left: auto;
+}
+
+.error-message {
+  font-size: 13px;
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.help-text {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+/* 지역 선택 그룹 */
+.region-select-group {
+  display: flex;
+  gap: 12px;
+}
+
+.region-select {
+  flex: 1;
+}
+
+/* 급여 그룹 */
+.salary-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.salary-group input {
+  flex: 1;
+}
+
+.salary-divider {
+  font-size: 18px;
+  color: #94a3b8;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+/* 학력 그룹 */
+.education-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.education-group select {
+  flex: 1;
+}
+
 .education-group .checkbox-item.highlight {
-  background: #eef2ff;
-  border: 1px solid #c7d2fe;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  flex-shrink: 0;
+}
+
+.education-group .checkbox-item.highlight:hover {
+  background: #fde68a;
 }
 
 .education-group .checkbox-item.highlight:has(input:checked) {
-  background: #c7d2fe;
+  background: #fde047;
+  border-color: #facc15;
+}
+
+.education-group .checkbox-item.highlight:has(input:checked) .checkbox-text {
+  color: #854d0e;
+  font-weight: 600;
+}
+
+/* 라디오 그룹 */
+.radio-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.radio-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.radio-item:hover {
+  background: #f1f5f9;
+}
+
+.radio-item:has(input:checked) {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+}
+
+.radio-item input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #4f46e5;
+  cursor: pointer;
+}
+
+.radio-text {
+  font-size: 14px;
+  color: #334155;
+  white-space: nowrap;
+}
+
+.radio-item:has(input:checked) .radio-text {
+  color: #4338ca;
+  font-weight: 600;
+}
+
+/* 체크박스 그룹 */
+.checkbox-group {
+  display: flex;
+  gap: 10px;
+}
+
+.checkbox-group.wrap {
+  flex-wrap: wrap;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.checkbox-item:hover {
+  background: #f1f5f9;
 }
 
 .checkbox-item:has(input:checked) {
@@ -56,37 +318,249 @@
 }
 
 .checkbox-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
   accent-color: #4f46e5;
+  cursor: pointer;
+}
+
+.checkbox-text {
+  font-size: 14px;
+  color: #334155;
+  white-space: nowrap;
 }
 
 .checkbox-item:has(input:checked) .checkbox-text {
   color: #4338ca;
+  font-weight: 600;
 }
 
-/* 라디오 */
-.radio-item:has(input:checked) {
-  background: #eef2ff;
-  border-color: #c7d2fe;
+/* 폼 액션 버튼 */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
 }
 
-.radio-item input[type="radio"] {
-  accent-color: #4f46e5;
+.btn-cancel {
+  padding: 14px 32px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.radio-item:has(input:checked) .radio-text {
-  color: #4338ca;
+.btn-cancel:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #475569;
 }
 
-/* 버튼 */
+.btn-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .btn-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 40px;
   background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
 }
 
 .btn-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.45);
 }
 
+.btn-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 로딩 상태 */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
 .loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e5e7eb;
   border-top-color: #4f46e5;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 20px;
+}
+
+.loading-state p {
+  font-size: 15px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .job-edit-container {
+    padding: 16px;
+  }
+
+  .job-edit-header {
+    padding: 24px;
+  }
+
+  .job-edit-header h1 {
+    font-size: 24px;
+  }
+
+  .job-edit-form {
+    padding: 24px;
+  }
+
+  .status-section {
+    padding: 20px;
+  }
+
+  .form-section {
+    margin-bottom: 32px;
+    padding-bottom: 32px;
+  }
+
+  .region-select-group {
+    flex-direction: column;
+  }
+
+  .salary-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .salary-divider {
+    text-align: center;
+    padding: 8px 0;
+  }
+
+  .education-group {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .education-group .checkbox-item.highlight {
+    justify-content: center;
+  }
+
+  .checkbox-group,
+  .radio-group {
+    flex-direction: column;
+  }
+
+  .checkbox-item,
+  .radio-item {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .btn-cancel,
+  .btn-submit {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .job-edit-container {
+    padding: 12px;
+  }
+
+  .job-edit-header {
+    padding: 20px;
+  }
+
+  .job-edit-header h1 {
+    font-size: 20px;
+  }
+
+  .job-edit-form {
+    padding: 20px;
+  }
+
+  .status-section {
+    padding: 16px;
+  }
+
+  .section-title {
+    font-size: 16px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+  }
+
+  .checkbox-item,
+  .radio-item {
+    padding: 10px 14px;
+  }
+
+  .checkbox-text,
+  .radio-text {
+    font-size: 13px;
+  }
+
+  .btn-cancel,
+  .btn-submit {
+    padding: 12px 24px;
+    font-size: 14px;
+  }
 }

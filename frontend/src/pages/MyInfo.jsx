@@ -57,8 +57,17 @@ const MyInfo = () => {
         return;
       }
 
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+
       const response = await axios.get(
-        `http://localhost:8080/user/info/${user.userId}`
+        `/api/user/info/${user.userId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true
+        }
       );
       setUserInfo(response.data);
       setEditedInfo(response.data);
@@ -100,9 +109,18 @@ const MyInfo = () => {
             : editedInfo.userBanner,
       };
 
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+
       await axios.put(
-        `http://localhost:8080/user/info/${userInfo.userId}`,
-        dataToSave
+        `/api/user/info/${userInfo.userId}`,
+        dataToSave,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true
+        }
       );
       setUserInfo(editedInfo);
       setIsEditing(false);
@@ -185,11 +203,20 @@ const MyInfo = () => {
     }
 
     try {
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+
       await axios.put(
-        `http://localhost:8080/user/info/${userInfo.userId}/password`,
+        `/api/user/info/${userInfo.userId}/password`,
         {
           currentPassword: passwords.currentPassword,
           newPassword: passwords.newPassword,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true
         }
       );
 

@@ -1,6 +1,6 @@
 package com.portflux.backend.mapper;
 
-import com.portflux.backend.beans.BoardLookupPostDto;
+import com.portflux.backend.dto.BoardLookupPostDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

@@ -1,6 +1,6 @@
 package com.portflux.backend.service;
 
-import com.portflux.backend.beans.BoardLookupPostDto;
+import com.portflux.backend.dto.BoardLookupPostDto;
 import com.portflux.backend.mapper.BoardLookupMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -75,5 +75,12 @@ public class BoardLookupService {
             throw new IllegalAccessException("이 게시글을 삭제할 권한이 없습니다.");
         }
         boardLookupMapper.deletePost(postId);
+    }
+
+    /**
+     * 특정 사용자의 게시글 목록 조회
+     */
+    public List<BoardLookupPostDto> getPostsByUserNum(int userNum) {
+        return boardLookupMapper.findPostsByUserNum(userNum);
     }
 }
