@@ -54,7 +54,7 @@ public class CartService {
                 // CartItemDto로 변환
                 return CartItemDto.builder()
                         .cartId(cartItem.getCartId())
-                        .postId(post.getPostId())
+                        .postId((long) post.getPostId())
                         .title(post.getTitle())
                         .price(post.getPrice())
                         .postFile(post.getPostFile()) // 썸네일용
