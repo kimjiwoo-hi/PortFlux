@@ -34,6 +34,15 @@ const Header = () => {
       if (storedUser) {
         try {
           const user = JSON.parse(storedUser);
+
+          if (!user.userId) {
+            console.error("userId가 없습니다. localStorage를 초기화해야 합니다.");
+            localStorage.removeItem("user");
+            sessionStorage.removeItem("user");
+            setUserProfileImage(UserDefaultIcon);
+            return;
+          }
+
           const response = await fetch(`http://localhost:8080/user/info/${user.userId}`);
           const data = await response.json();
 
@@ -73,8 +82,10 @@ const Header = () => {
   const handleLogout = () => {
     // 로컬 스토리지 삭제
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
     // 세션 스토리지 삭제
     sessionStorage.removeItem("user");
+    sessionStorage.removeItem("token");
 
     setIsPopoverOpen(false);
 

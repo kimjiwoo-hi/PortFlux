@@ -55,16 +55,28 @@ public class SecurityConfig {
                         .requestMatchers("/api/boardlookup/**", "/uploads/**").permitAll()
 
                         // 사용자 정보 조회 허용
+                        // ★★★ 게시판 API 허용 (추가) ★★★
+                        .requestMatchers("/api/boardlookup/**").permitAll()
+                        // PDF AI 분석 API 허용 (추가)
+                        .requestMatchers("/api/pdf/**").permitAll()
+        
+                        // ★★★ 업로드된 파일 접근 허용 (추가) ★★★
+                        .requestMatchers("/uploads/**").permitAll()
+                        // [추가] 사용자 정보 조회/수정 API 허용
                         .requestMatchers("/user/info/**").permitAll()
 
-                        // ★★★ [수정] 장바구니 API 임시 허용 ★★★
-                        // 개발 막바지 단계에서 인증 필터(JWT) 문제로 인한 403을 방지하기 위해 permitAll로 변경합니다.
-                        .requestMatchers("/api/cart/**").permitAll()
+                        // [추가] 장바구니 API는 인증된 사용자만 허용
+                        .requestMatchers("/api/cart/**").authenticated()
+                        // [추가] 주문 API는 인증된 사용자만 허용
+                        .requestMatchers("/api/orders/**").authenticated()
+                        // [추가] 결제 결과 조회 API 허용
+                        .requestMatchers("/api/payments/result").permitAll()
 
-                        // 정적 리소스 및 에러 경로 허용
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/error").permitAll()
-
-                        // 그 외 모든 요청은 인증 필요
+                        // 정적 리소스 허용
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                        // 컨트롤러 매핑 오류(404) 시 시큐리티가 403으로 막지 않도록 에러 경로 허용
+                        .requestMatchers("/error").permitAll()
+                        // ★★★ [최하위 우선순위] 그 외 모든 요청은 인증 필요 ★★★
                         .anyRequest().authenticated())
 
                 // 5. JWT 필터 추가
