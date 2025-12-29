@@ -17,7 +17,7 @@ import com.portflux.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/user/login")
+@RequestMapping("/api/user/login")
 @RequiredArgsConstructor
 public class UserLoginController {
 

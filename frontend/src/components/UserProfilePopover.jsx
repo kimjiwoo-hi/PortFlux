@@ -19,7 +19,7 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
       const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
       if (storedUser) {
         const user = JSON.parse(storedUser);
-        fetch(`http://localhost:8080/user/info/${user.userId}`)
+        fetch(`/api/user/info/${user.userId}`)
           .then(response => response.json())
           .then(data => {
             setUserInfo({

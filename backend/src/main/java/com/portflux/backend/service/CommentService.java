@@ -66,5 +66,14 @@ public class CommentService {
         }
         commentMapper.deleteComment(commentId);
     }
+
+    /**
+     * 특정 사용자의 댓글 목록 조회
+     * @param userNum 사용자 번호
+     * @return List<CommentDto>
+     */
+    public List<CommentDto> getCommentsByUserNum(int userNum) {
+        return commentMapper.findCommentsByUserNum(userNum);
+    }
 }
 

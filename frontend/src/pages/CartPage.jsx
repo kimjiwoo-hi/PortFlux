@@ -29,7 +29,7 @@ function CartPage() {
       console.log("Token 존재:", !!token);
 
       const cartResponse = await axios.get(
-        `http://localhost:8080/api/cart/${user.userNum}`,
+        `/api/cart/${user.userNum}`,
         {
           withCredentials: true,
           headers: {
@@ -48,7 +48,7 @@ function CartPage() {
         items.map(async (item) => {
           try {
             const postResponse = await axios.get(
-              `http://localhost:8080/api/boardlookup/${item.postId}`,
+              `/api/boardlookup/${item.postId}`,
               { withCredentials: true }
             );
 
@@ -58,9 +58,9 @@ function CartPage() {
             let imageUrl = 'https://cdn.dribbble.com/userupload/12461999/file/original-251950a7c4585c49086113b190f7f224.png?resize=1024x768';
 
             if (post.pdfImages && post.pdfImages.length > 0) {
-              imageUrl = `http://localhost:8080${post.pdfImages[0]}`;
+              imageUrl = `${post.pdfImages[0]}`;
             } else if (post.postFile) {
-              imageUrl = `http://localhost:8080/uploads/${post.postFile}`;
+              imageUrl = `/uploads/${post.postFile}`;
             }
 
             return {
@@ -99,7 +99,7 @@ function CartPage() {
 
     try {
       await axios.delete(
-        `http://localhost:8080/api/cart/items/${cartId}`,
+        `/api/cart/items/${cartId}`,
         {
           withCredentials: true,
           headers: {
@@ -144,7 +144,7 @@ function CartPage() {
 
       // 주문 생성 API 호출
       const orderResponse = await axios.post(
-        'http://localhost:8080/api/orders',
+        '/api/orders',
         {
           userId: user.userNum,
           items: orderItems
@@ -163,7 +163,7 @@ function CartPage() {
       // 주문 완료 후 장바구니 비우기
       for (const item of cartItems) {
         await axios.delete(
-          `http://localhost:8080/api/cart/items/${item.cartId}`,
+          `/api/cart/items/${item.cartId}`,
           {
             withCredentials: true,
             headers: {

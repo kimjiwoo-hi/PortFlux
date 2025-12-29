@@ -49,7 +49,7 @@ function LoginPage() {
   // [함수 1] 구글 인증 코드를 백엔드로 전송
   async function sendGoogleCodeToBackend(authCode) {
     try {
-      const res = await fetch("http://localhost:8080/user/login/google", {
+      const res = await fetch("/api/user/login/google", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: authCode }),
@@ -105,7 +105,7 @@ function LoginPage() {
     const data = { userId, password, autoLogin };
 
     try {
-      const res = await fetch("http://localhost:8080/user/login/proc", {
+      const res = await fetch("/api/user/login/proc", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

@@ -43,7 +43,7 @@ const Header = () => {
             return;
           }
 
-          const response = await fetch(`http://localhost:8080/user/info/${user.userId}`);
+          const response = await fetch(`/api/user/info/${user.userId}`);
           const data = await response.json();
 
           if (data.userImage && data.userImage.trim() !== "") {

@@ -76,4 +76,11 @@ public class BoardLookupService {
         }
         boardLookupMapper.deletePost(postId);
     }
+
+    /**
+     * 특정 사용자의 게시글 목록 조회
+     */
+    public List<BoardLookupPostDto> getPostsByUserNum(int userNum) {
+        return boardLookupMapper.findPostsByUserNum(userNum);
+    }
 }

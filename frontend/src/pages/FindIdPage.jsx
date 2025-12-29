@@ -35,7 +35,7 @@ function FindIdPage() {
     }
 
     try {
-      const res = await fetch("http://localhost:8080/api/mail/send", {
+      const res = await fetch("/api/mail/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email }),
@@ -61,7 +61,7 @@ function FindIdPage() {
     }
 
     try {
-      const res = await fetch("http://localhost:8080/api/mail/verify", {
+      const res = await fetch("/api/mail/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email, authCode: inputCode }),
@@ -92,7 +92,7 @@ function FindIdPage() {
     }
 
     try {
-      const res = await fetch("http://localhost:8080/user/find/id", {
+      const res = await fetch("/api/user/find/id", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: name, email: email }),

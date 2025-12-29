@@ -58,7 +58,7 @@ const MyInfo = () => {
       }
 
       const response = await axios.get(
-        `http://localhost:8080/user/info/${user.userId}`
+        `/api/user/info/${user.userId}`
       );
       setUserInfo(response.data);
       setEditedInfo(response.data);
@@ -101,7 +101,7 @@ const MyInfo = () => {
       };
 
       await axios.put(
-        `http://localhost:8080/user/info/${userInfo.userId}`,
+        `/api/user/info/${userInfo.userId}`,
         dataToSave
       );
       setUserInfo(editedInfo);
@@ -186,7 +186,7 @@ const MyInfo = () => {
 
     try {
       await axios.put(
-        `http://localhost:8080/user/info/${userInfo.userId}/password`,
+        `/api/user/info/${userInfo.userId}/password`,
         {
           currentPassword: passwords.currentPassword,
           newPassword: passwords.newPassword,
