@@ -22,7 +22,7 @@ export default function OrderResultPage() {
 
       try {
         const response = await axios.get(
-          `http://localhost:8080/api/payments/result?merchantUid=${encodeURIComponent(merchantUid)}`,
+          `/api/payments/result?merchantUid=${encodeURIComponent(merchantUid)}`,
           { withCredentials: true }
         );
 
@@ -118,8 +118,8 @@ export default function OrderResultPage() {
               <button className="btn-primary" onClick={() => navigate("/")}>
                 계속 쇼핑하기
               </button>
-              <button className="btn-secondary" onClick={() => navigate("/mypage")}>
-                마이페이지
+              <button className="btn-secondary" onClick={() => navigate("/order-list")}>
+                주문 내역
               </button>
             </>
           ) : (

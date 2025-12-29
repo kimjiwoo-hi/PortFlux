@@ -15,4 +15,6 @@ public class CommentDto {
     private byte[] userImage;
     private String commentContent;
     private Date commentCreatedAt;
+    private String postTitle;
+    private String boardType;
 }

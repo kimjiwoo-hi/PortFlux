@@ -51,17 +51,16 @@ public class SecurityConfig {
 
                 // 4. URL 권한 설정 (가장 중요)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user/register/check-id").permitAll()
-                    
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/user/register/**").permitAll()
-                        .requestMatchers("/user/register/**").permitAll()
-                        .requestMatchers("/company/register/**").permitAll()
-                        // [추가] 아이디 찾기 API 허용
-                        .requestMatchers("/user/find/**").permitAll()
+                        // [추가] 사용자 회원가입 관련 API 허용
+                        .requestMatchers("/api/user/register/**").permitAll()
+                        // [추가] 기업 회원가입 관련 API 허용
+                        .requestMatchers("/api/company/register/**").permitAll()
+                        // [추가] 아이디/비밀번호 찾기 API 허용
+                        .requestMatchers("/api/user/find/**").permitAll()
 
                         // API 및 로그인 관련 경로 허용
                         .requestMatchers("/api/mail/**").permitAll()
-                        .requestMatchers("/user/login/**").permitAll()
+                        .requestMatchers("/api/user/login/**").permitAll()
 
 
                         // ★★★ 게시판 API 허용 (추가) ★★★
@@ -71,8 +70,7 @@ public class SecurityConfig {
         
                         // ★★★ 업로드된 파일 접근 허용 (추가) ★★★
                         .requestMatchers("/uploads/**").permitAll()
-                        // [추가] 사용자 정보 조회/수정 API 허용
-                        .requestMatchers("/user/info/**").permitAll()
+                        .requestMatchers("/api/user/info/**").permitAll()
 
                         // [추가] 장바구니 API는 인증된 사용자만 허용
                         .requestMatchers("/api/cart/**").authenticated()
@@ -80,6 +78,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/orders/**").authenticated()
                         // [추가] 결제 결과 조회 API 허용
                         .requestMatchers("/api/payments/result").permitAll()
+                        // [추가] 팔로우 API 허용
+                        .requestMatchers("/api/follow/**").permitAll()
 
                         // [추가] 채용공고 API 허용
                         .requestMatchers("/api/jobs/**").permitAll()

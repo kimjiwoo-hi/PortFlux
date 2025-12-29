@@ -134,4 +134,28 @@
           AND board_type = 'lookup'
     </delete>
 
+    <!-- 특정 사용자의 게시글 목록 조회 -->
+    <select id="findPostsByUserNum" parameterType="int" resultMap="BoardLookupPostResultMap">
+        SELECT
+            p.post_id,
+            p.board_type,
+            p.user_num,
+            p.title,
+            p.content,
+            p.created_at,
+            p.updated_at,
+            p.view_cnt,
+            p.price,
+            p.ai_summary,
+            p.download_cnt,
+            p.post_file,
+            p.tags,
+            u.user_nickname,
+            u.user_image
+        FROM POST p
+        LEFT JOIN USERS u ON p.user_num = u.user_num
+        WHERE p.user_num = #{userNum}
+        ORDER BY p.created_at DESC
+    </select>
+
 </mapper>

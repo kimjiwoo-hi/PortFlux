@@ -79,7 +79,7 @@ function RegisterPage() {
       return;
     }
     try {
-      const res = await fetch("http://localhost:8080/user/register/check-id", {
+      const res = await fetch("/api/user/register/check-id", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: userId }),
@@ -117,7 +117,7 @@ function RegisterPage() {
     const timer = setTimeout(async () => {
       try {
         const res = await fetch(
-          "http://localhost:8080/user/register/check-email",
+          "/api/user/register/check-email",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -168,7 +168,7 @@ function RegisterPage() {
     }
     try {
       const res = await fetch(
-        "http://localhost:8080/user/register/check-nickname",
+        "/api/user/register/check-nickname",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -219,7 +219,7 @@ function RegisterPage() {
     if (rawValue.length === 10) {
       try {
         const res = await fetch(
-          "http://localhost:8080/company/register/check-business",
+          "/api/company/register/check-business",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -244,7 +244,7 @@ function RegisterPage() {
       return;
     }
     try {
-      const res = await fetch("http://localhost:8080/api/mail/send", {
+      const res = await fetch("/api/mail/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email }),
@@ -265,7 +265,7 @@ function RegisterPage() {
       return;
     }
     try {
-      const res = await fetch("http://localhost:8080/api/mail/verify", {
+      const res = await fetch("/api/mail/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email, authCode: authCode }),
@@ -339,8 +339,8 @@ function RegisterPage() {
       ...(!isIndividual && { businessNumber: businessNumber }),
     };
     const url = isIndividual
-      ? "http://localhost:8080/user/register/general"
-      : "http://localhost:8080/company/register/proc";
+      ? "/api/user/register/general"
+      : "/api/company/register/proc";
 
     try {
       const res = await fetch(url, {
