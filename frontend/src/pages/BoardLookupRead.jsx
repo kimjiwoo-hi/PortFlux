@@ -50,7 +50,7 @@ const BoardLookupRead = () => {
 
           if (parsedUser && parsedUser.userNum) {
             const likeCheckResponse = await axios.get(
-              `http://localhost:8080/api/boardlookup/${postId}/like/check`,
+              `/api/boardlookup/${postId}/like/check`,
               {
                 params: { userNum: parsedUser.userNum },
                 withCredentials: true,
@@ -109,7 +109,7 @@ const BoardLookupRead = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:8080/api/boardlookup/${postId}/like`,
+        `/api/boardlookup/${postId}/like`,
         null,
         {
           params: { userNum: loggedInUser.userNum },
@@ -153,11 +153,9 @@ const BoardLookupRead = () => {
       return;
     }
 
-    const loggedInUser = JSON.parse(storedUser);
-
     try {
       await axios.post(
-        `http://localhost:8080/api/cart/${loggedInUser.userNum}/items`,
+        `/api/cart/items`,
         { productId: postId },
         {
           withCredentials: true,
@@ -188,13 +186,13 @@ const BoardLookupRead = () => {
 
     try {
       await axios.post(
-        `http://localhost:8080/api/boardlookup/${postId}/comments`,
+        `/api/boardlookup/${postId}/comments`,
         { userNum: loggedInUser.userNum, content: newComment },
         { withCredentials: true }
       );
-      
+
       const updatedResponse = await axios.get(
-        `http://localhost:8080/api/boardlookup/${postId}`
+        `/api/boardlookup/${postId}`
       );
       setComments(updatedResponse.data.comments || []);
       setNewComment("");
@@ -209,7 +207,7 @@ const BoardLookupRead = () => {
     if (window.confirm("정말로 이 댓글을 삭제하시겠습니까?")) {
       try {
         await axios.delete(
-          `http://localhost:8080/api/boardlookup/comments/${commentId}`,
+          `/api/boardlookup/comments/${commentId}`,
           {
             params: { userNum: loggedInUser.userNum },
             withCredentials: true,
@@ -303,20 +301,28 @@ const BoardLookupRead = () => {
           <div className="profile-wrapper">
             <div className="profile-left">
               <div className="profile-top">
-                <div className="profile-image">
-                  <img 
-                    src={postData.userImageBase64 ? `data:image/jpeg;base64,${postData.userImageBase64}` : UserDefaultIcon} 
-                    alt="profile" 
-                  />
+                <div
+                  className="profile-image"
+                  onClick={() => navigate(`/user/${postData.userNum}`)}
+                  style={{ cursor: 'pointer', width: '40px', height: '40px' }}
+                >
+                  {userImageSrc ? (
+                    <img src={userImageSrc} alt="profile" />
+                  ) : (
+                    <div className="default-profile">👤</div>
+                  )}
                   <button
                     className={`follow-btn ${isFollowing ? "following" : ""}`}
-                    onClick={handleFollowToggle}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleFollowToggle();
+                    }}
                   >
                     {isFollowing ? "✓" : "+"}
                   </button>
                 </div>
                 <div className="profile-info">
-                  <div className="nickname">{postData.userNickname}</div>
+                  <div className="nickname" onClick={() => navigate(`/user/${postData.userNum}`)} style={{ cursor: 'pointer' }}>{postData.userNickname}</div>
                 </div>
               </div>
             </div>
@@ -346,14 +352,14 @@ const BoardLookupRead = () => {
                 (() => {
                   const isPdf = /\.pdf$/i.test(postData.postFile);
                   const isPpt = /\.(ppt|pptx)$/i.test(postData.postFile);
-                  const fileUrl = `http://localhost:8080/uploads/${postData.postFile}`;
+                  const fileUrl = `/uploads/${postData.postFile}`;
                   if (isPdf && Array.isArray(postData.pdfImages)) {
                     return (
                       <div className="pdf-image-wrapper">
                         {postData.pdfImages.map((imgUrl, index) => (
                           <img
                             key={index}
-                            src={`http://localhost:8080${imgUrl}`}
+                            src={`${imgUrl}`}
                             alt={`pdf-${index}`}
                             className="pdf-page-image"
                             loading="lazy"
@@ -495,8 +501,12 @@ const BoardLookupRead = () => {
               return (
                 <div key={comment.commentId} className="comment-item">
                   <div className="comment-author">
-                    <div className="comment-author-profile">
-                      <img src={commentUserImageSrc} alt={comment.userNickname} className="comment-profile-pic" />
+                    <div className="comment-author-profile" onClick={() => navigate(`/user/${comment.userNum}`)} style={{ cursor: 'pointer' }}>
+                      {commentUserImageSrc ? (
+                        <img src={commentUserImageSrc} alt={comment.userNickname} className="comment-profile-pic" />
+                      ) : (
+                        <div className="comment-default-pic">👤</div>
+                      )}
                       <span className="comment-nickname">
                         {comment.userNickname}
                       </span>

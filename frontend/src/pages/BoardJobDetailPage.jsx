@@ -25,17 +25,17 @@ const BoardJobDetailPage = () => {
         setError(null);
         const data = await getJobDetail(postId);
 
-        if (data.job) {
-          setJob(data.job);
-          setIsBookmarked(data.job.isBookmarked || false);
-          setIsOwner(data.isOwner || false);
-        } else {
-          setJob(data);
-          setIsBookmarked(data.isBookmarked || false);
-        }
+        // getJobDetail이 이미 { ...job, isOwner } 형태로 반환
+        setJob(data);
+        setIsBookmarked(data.isBookmarked || false);
+        setIsOwner(data.isOwner || false);
       } catch (err) {
         console.error("채용공고 로드 실패:", err);
-        setError("채용공고를 불러오는 중 오류가 발생했습니다.");
+        if (err.message?.includes("404")) {
+          setError("채용공고를 찾을 수 없습니다.");
+        } else {
+          setError("채용공고를 불러오는 중 오류가 발생했습니다.");
+        }
       } finally {
         setLoading(false);
       }
@@ -56,15 +56,16 @@ const BoardJobDetailPage = () => {
       setIsBookmarked(result.bookmarked);
     } catch (err) {
       console.error("북마크 처리 실패:", err);
-      if (err.response?.status === 401) {
+      if (err.message?.includes("401")) {
         alert("로그인이 필요합니다.");
+        navigate("/login", { state: { from: `/boardjob/${postId}` } });
       } else {
         alert("북마크 처리 중 오류가 발생했습니다.");
       }
     } finally {
       setBookmarkLoading(false);
     }
-  }, [postId, bookmarkLoading]);
+  }, [postId, bookmarkLoading, navigate]);
 
   // 수정 페이지로 이동
   const handleEdit = useCallback(() => {
@@ -87,7 +88,7 @@ const BoardJobDetailPage = () => {
       navigate("/boardjob");
     } catch (err) {
       console.error("삭제 실패:", err);
-      alert(err.response?.data?.message || "삭제 중 오류가 발생했습니다.");
+      alert(err.message || "삭제 중 오류가 발생했습니다.");
     }
   }, [postId, navigate]);
 
@@ -116,6 +117,32 @@ const BoardJobDetailPage = () => {
       alert("링크가 복사되었습니다.");
     }
   }, [job]);
+
+  // 경력 표시 헬퍼 (배열 또는 문자열 모두 처리)
+  const displayCareerType = useCallback((careerType) => {
+    if (!careerType) return "경력무관";
+    if (Array.isArray(careerType)) {
+      return careerType.length > 0 ? careerType.join(", ") : "경력무관";
+    }
+    return careerType;
+  }, []);
+
+  // 경력연차 표시 헬퍼
+  const displayCareerYears = useCallback((careerYears) => {
+    if (!careerYears) return "무관";
+    if (Array.isArray(careerYears)) {
+      return careerYears.length > 0 ? careerYears.join(", ") : "무관";
+    }
+    return careerYears;
+  }, []);
+
+  // 학력 표시 헬퍼 (jobEducationExclude는 'Y'/'N' 또는 boolean)
+  const displayEducation = useCallback((education, educationExclude) => {
+    if (educationExclude === true || educationExclude === "Y") {
+      return "학력무관";
+    }
+    return getEducationLabel(education);
+  }, []);
 
   // 로딩 중
   if (loading) {
@@ -149,7 +176,7 @@ const BoardJobDetailPage = () => {
     return (
       <div className="job-detail-container">
         <div className="error-state">
-          <div className="error-icon">📭</div>
+          <div className="error-icon">🔭</div>
           <p>채용공고를 찾을 수 없습니다.</p>
           <button onClick={handleBack} className="btn-back-large">
             목록으로 돌아가기
@@ -229,7 +256,11 @@ const BoardJobDetailPage = () => {
                   <span className="badge badge-deadline">마감임박</span>
                 )}
                 <span
-                  className={`badge badge-status ${job.jobStatus?.toLowerCase()}`}
+                  className={`badge badge-status ${
+                    job.jobStatus === "ACTIVE"
+                      ? "active"
+                      : job.jobStatus?.toLowerCase()
+                  }`}
                 >
                   {getJobStatusLabel(job.jobStatus)}
                 </span>
@@ -240,7 +271,7 @@ const BoardJobDetailPage = () => {
           {/* 공고 제목 */}
           <h1 className="job-title">{job.title}</h1>
 
-          {/* 핵심 정보 카드 */}
+          {/* 핵심 정보 그리드 */}
           <div className="key-info-grid">
             <div className="key-info-item">
               <span className="key-icon">📍</span>
@@ -256,9 +287,7 @@ const BoardJobDetailPage = () => {
               <div className="key-content">
                 <span className="key-label">경력</span>
                 <span className="key-value">
-                  {job.jobCareerType && job.jobCareerType.length > 0
-                    ? job.jobCareerType.join(", ")
-                    : "경력무관"}
+                  {displayCareerType(job.jobCareerType)}
                 </span>
               </div>
             </div>
@@ -267,9 +296,7 @@ const BoardJobDetailPage = () => {
               <div className="key-content">
                 <span className="key-label">경력연차</span>
                 <span className="key-value">
-                  {job.jobCareerYears && job.jobCareerYears.length > 0
-                    ? job.jobCareerYears.join(", ")
-                    : "무관"}
+                  {displayCareerYears(job.jobCareerYears)}
                 </span>
               </div>
             </div>
@@ -278,9 +305,7 @@ const BoardJobDetailPage = () => {
               <div className="key-content">
                 <span className="key-label">학력</span>
                 <span className="key-value">
-                  {job.jobEducationExclude
-                    ? "학력무관"
-                    : getEducationLabel(job.jobEducation)}
+                  {displayEducation(job.jobEducation, job.jobEducationExclude)}
                 </span>
               </div>
             </div>
@@ -301,9 +326,9 @@ const BoardJobDetailPage = () => {
                   className={`key-value ${job.isDeadlineSoon ? "urgent" : ""}`}
                 >
                   {job.jobDeadline
-                    ? `${new Date(job.jobDeadline).toLocaleDateString()} (D-${
-                        job.daysLeft
-                      })`
+                    ? `${new Date(job.jobDeadline).toLocaleDateString()}${
+                        job.daysLeft !== undefined ? ` (D-${job.daysLeft})` : ""
+                      }`
                     : "상시채용"}
                 </span>
               </div>
@@ -380,7 +405,7 @@ const BoardJobDetailPage = () => {
 
           {/* 하단 메타 정보 */}
           <div className="job-meta">
-            <span>조회수 {job.viewCnt?.toLocaleString()}</span>
+            <span>조회수 {job.viewCnt?.toLocaleString() || 0}</span>
             <span className="meta-divider">|</span>
             <span>등록일 {new Date(job.createdAt).toLocaleDateString()}</span>
             {job.updatedAt && job.updatedAt !== job.createdAt && (
@@ -394,7 +419,7 @@ const BoardJobDetailPage = () => {
           </div>
         </div>
 
-        {/* 우측: 지원 카드 (고정) */}
+        {/* 우측: 지원 사이드바 */}
         <div className="apply-sidebar">
           <div className="apply-card">
             <div className="apply-card-header">

@@ -13,7 +13,6 @@ public class CompanyUserDao {
 
     private final CompanyUserMapper companyUserMapper;
 
-    // 파라미터를 RegisterBean으로 받아서 Mapper로 전달
     public void insertCompanyUser(CompanyRegisterBean companyRegisterBean) {
         companyUserMapper.insertCompanyUser(companyRegisterBean);
     }
