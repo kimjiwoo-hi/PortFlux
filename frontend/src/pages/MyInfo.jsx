@@ -13,7 +13,7 @@ const MyInfo = () => {
     userCreateAt: "",
     userLevel: 0,
     userImage: "",
-    userBanner: ""
+    userBanner: "",
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -31,13 +31,14 @@ const MyInfo = () => {
   const [passwords, setPasswords] = useState({
     currentPassword: "",
     newPassword: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
 
   const fetchUserInfo = async () => {
     try {
       // localStorage 또는 sessionStorage에서 user 객체 가져오기
-      const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+      const storedUser =
+        localStorage.getItem("user") || sessionStorage.getItem("user");
 
       if (!storedUser) {
         setError("로그인 정보를 찾을 수 없습니다.");
@@ -46,7 +47,19 @@ const MyInfo = () => {
       }
 
       const user = JSON.parse(storedUser);
-      const response = await axios.get(`http://localhost:8080/user/info/${user.userId}`);
+
+      if (!user.userId) {
+        console.error("userId가 없습니다. 다시 로그인해주세요.");
+        setError("로그인 정보가 올바르지 않습니다. 다시 로그인해주세요.");
+        localStorage.removeItem("user");
+        sessionStorage.removeItem("user");
+        setLoading(false);
+        return;
+      }
+
+      const response = await axios.get(
+        `http://localhost:8080/user/info/${user.userId}`
+      );
       setUserInfo(response.data);
       setEditedInfo(response.data);
       setLoading(false);
@@ -79,17 +92,18 @@ const MyInfo = () => {
       // 기본 이미지인 경우 빈 문자열로 변환하여 서버에 전송
       const dataToSave = {
         ...editedInfo,
-        userImage: editedInfo.userImage === UserDefaultIcon ? "" : editedInfo.userImage,
-        userBanner: editedInfo.userBanner === getDefaultBanner() ? "" : editedInfo.userBanner
+        userImage:
+          editedInfo.userImage === UserDefaultIcon ? "" : editedInfo.userImage,
+        userBanner:
+          editedInfo.userBanner === getDefaultBanner()
+            ? ""
+            : editedInfo.userBanner,
       };
 
-      await axios.put(`http://localhost:8080/user/info/${userInfo.userId}`, dataToSave);
-      
-      // localStorage의 user 정보 업데이트
-      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-      const updatedUser = { ...storedUser, ...editedInfo, userImage: editedInfo.userImage };
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-
+      await axios.put(
+        `http://localhost:8080/user/info/${userInfo.userId}`,
+        dataToSave
+      );
       setUserInfo(editedInfo);
       setIsEditing(false);
       setSuccessMessage("정보가 성공적으로 수정되었습니다.");
@@ -104,7 +118,7 @@ const MyInfo = () => {
     const { name, value } = e.target;
     setEditedInfo({
       ...editedInfo,
-      [name]: value
+      [name]: value,
     });
   };
 
@@ -117,7 +131,7 @@ const MyInfo = () => {
         setProfilePreview(reader.result);
         setEditedInfo({
           ...editedInfo,
-          userImage: reader.result
+          userImage: reader.result,
         });
       };
       reader.readAsDataURL(file);
@@ -127,9 +141,9 @@ const MyInfo = () => {
   // 프로필 이미지 삭제
   const handleProfileImageDelete = () => {
     setProfilePreview(UserDefaultIcon);
-    setEditedInfo(prev => ({
+    setEditedInfo((prev) => ({
       ...prev,
-      userImage: UserDefaultIcon
+      userImage: UserDefaultIcon,
     }));
   };
 
@@ -142,7 +156,7 @@ const MyInfo = () => {
         setBannerPreview(reader.result);
         setEditedInfo({
           ...editedInfo,
-          userBanner: reader.result
+          userBanner: reader.result,
         });
       };
       reader.readAsDataURL(file);
@@ -153,9 +167,9 @@ const MyInfo = () => {
   const handleBannerImageDelete = () => {
     const defaultBanner = getDefaultBanner();
     setBannerPreview(defaultBanner);
-    setEditedInfo(prev => ({
+    setEditedInfo((prev) => ({
       ...prev,
-      userBanner: defaultBanner
+      userBanner: defaultBanner,
     }));
   };
 
@@ -171,13 +185,20 @@ const MyInfo = () => {
     }
 
     try {
-      await axios.put(`http://localhost:8080/user/info/${userInfo.userId}/password`, {
-        currentPassword: passwords.currentPassword,
-        newPassword: passwords.newPassword
-      });
+      await axios.put(
+        `http://localhost:8080/user/info/${userInfo.userId}/password`,
+        {
+          currentPassword: passwords.currentPassword,
+          newPassword: passwords.newPassword,
+        }
+      );
 
       setShowPasswordModal(false);
-      setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      setPasswords({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
       setSuccessMessage("비밀번호가 성공적으로 변경되었습니다.");
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
@@ -189,10 +210,10 @@ const MyInfo = () => {
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return date.toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -228,7 +249,9 @@ const MyInfo = () => {
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
-      {successMessage && <div className="alert alert-success">{successMessage}</div>}
+      {successMessage && (
+        <div className="alert alert-success">{successMessage}</div>
+      )}
 
       <div className="info-section">
         {/* 이미지 섹션 */}
@@ -239,11 +262,11 @@ const MyInfo = () => {
               src={
                 bannerPreview
                   ? bannerPreview
-                  : (editedInfo.userBanner && editedInfo.userBanner.trim() !== "")
-                    ? editedInfo.userBanner
-                    : (userInfo.userBanner && userInfo.userBanner.trim() !== "")
-                      ? userInfo.userBanner
-                      : getDefaultBanner()
+                  : editedInfo.userBanner && editedInfo.userBanner.trim() !== ""
+                  ? editedInfo.userBanner
+                  : userInfo.userBanner && userInfo.userBanner.trim() !== ""
+                  ? userInfo.userBanner
+                  : getDefaultBanner()
               }
               alt="배너"
               className="banner-image"
@@ -255,12 +278,17 @@ const MyInfo = () => {
                     type="file"
                     accept="image/*"
                     onChange={handleBannerImageChange}
-                    style={{ display: 'none' }}
+                    style={{ display: "none" }}
                   />
                   배너 변경
                 </label>
-                {(bannerPreview || (editedInfo.userBanner && editedInfo.userBanner.trim() !== "")) && (
-                  <button className="image-delete-btn banner-delete" onClick={handleBannerImageDelete}>
+                {(bannerPreview ||
+                  (editedInfo.userBanner &&
+                    editedInfo.userBanner.trim() !== "")) && (
+                  <button
+                    className="image-delete-btn banner-delete"
+                    onClick={handleBannerImageDelete}
+                  >
                     배너 삭제
                   </button>
                 )}
@@ -274,11 +302,11 @@ const MyInfo = () => {
               src={
                 profilePreview
                   ? profilePreview
-                  : (editedInfo.userImage && editedInfo.userImage.trim() !== "")
-                    ? editedInfo.userImage
-                    : (userInfo.userImage && userInfo.userImage.trim() !== "")
-                      ? userInfo.userImage
-                      : UserDefaultIcon
+                  : editedInfo.userImage && editedInfo.userImage.trim() !== ""
+                  ? editedInfo.userImage
+                  : userInfo.userImage && userInfo.userImage.trim() !== ""
+                  ? userInfo.userImage
+                  : UserDefaultIcon
               }
               alt="프로필"
               className="myinfo-profile-image"
@@ -290,12 +318,17 @@ const MyInfo = () => {
                     type="file"
                     accept="image/*"
                     onChange={handleProfileImageChange}
-                    style={{ display: 'none' }}
+                    style={{ display: "none" }}
                   />
                   프로필 변경
                 </label>
-                {(profilePreview || (editedInfo.userImage && editedInfo.userImage.trim() !== "")) && (
-                  <button className="image-delete-btn profile-delete" onClick={handleProfileImageDelete}>
+                {(profilePreview ||
+                  (editedInfo.userImage &&
+                    editedInfo.userImage.trim() !== "")) && (
+                  <button
+                    className="image-delete-btn profile-delete"
+                    onClick={handleProfileImageDelete}
+                  >
                     프로필 삭제
                   </button>
                 )}
@@ -334,7 +367,9 @@ const MyInfo = () => {
             <input
               type="text"
               name="userNickname"
-              value={isEditing ? editedInfo.userNickname : userInfo.userNickname}
+              value={
+                isEditing ? editedInfo.userNickname : userInfo.userNickname
+              }
               onChange={handleChange}
               disabled={!isEditing}
               className={isEditing ? "input-editable" : "input-disabled"}
@@ -376,7 +411,8 @@ const MyInfo = () => {
             />
           </div>
 
-          {/* 회원 등급 (수정 불가) */}
+          {/* 회원 등급 (수정 불가)
+          레벨 기능은 삭제
           <div className="info-item">
             <label>회원 등급</label>
             <input
@@ -386,6 +422,7 @@ const MyInfo = () => {
               className="input-disabled"
             />
           </div>
+          */}
         </div>
 
         {/* 수정 모드 버튼 */}
@@ -403,7 +440,10 @@ const MyInfo = () => {
         {/* 비밀번호 변경 버튼 */}
         {!isEditing && (
           <div className="password-section">
-            <button className="btn-password" onClick={() => setShowPasswordModal(true)}>
+            <button
+              className="btn-password"
+              onClick={() => setShowPasswordModal(true)}
+            >
               비밀번호 변경
             </button>
           </div>
@@ -412,7 +452,10 @@ const MyInfo = () => {
 
       {/* 비밀번호 변경 모달 */}
       {showPasswordModal && (
-        <div className="modal-overlay" onClick={() => setShowPasswordModal(false)}>
+        <div
+          className="modal-overlay"
+          onClick={() => setShowPasswordModal(false)}
+        >
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h2>비밀번호 변경</h2>
             <div className="modal-body">
@@ -421,7 +464,12 @@ const MyInfo = () => {
                 <input
                   type="password"
                   value={passwords.currentPassword}
-                  onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
+                  onChange={(e) =>
+                    setPasswords({
+                      ...passwords,
+                      currentPassword: e.target.value,
+                    })
+                  }
                   placeholder="현재 비밀번호를 입력하세요"
                 />
               </div>
@@ -430,7 +478,9 @@ const MyInfo = () => {
                 <input
                   type="password"
                   value={passwords.newPassword}
-                  onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
+                  onChange={(e) =>
+                    setPasswords({ ...passwords, newPassword: e.target.value })
+                  }
                   placeholder="새 비밀번호를 입력하세요"
                 />
               </div>
@@ -439,17 +489,29 @@ const MyInfo = () => {
                 <input
                   type="password"
                   value={passwords.confirmPassword}
-                  onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
+                  onChange={(e) =>
+                    setPasswords({
+                      ...passwords,
+                      confirmPassword: e.target.value,
+                    })
+                  }
                   placeholder="새 비밀번호를 다시 입력하세요"
                 />
               </div>
             </div>
             <div className="modal-footer">
-              <button className="btn-cancel" onClick={() => {
-                setShowPasswordModal(false);
-                setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" });
-                setError("");
-              }}>
+              <button
+                className="btn-cancel"
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setPasswords({
+                    currentPassword: "",
+                    newPassword: "",
+                    confirmPassword: "",
+                  });
+                  setError("");
+                }}
+              >
                 취소
               </button>
               <button className="btn-save" onClick={handlePasswordChange}>

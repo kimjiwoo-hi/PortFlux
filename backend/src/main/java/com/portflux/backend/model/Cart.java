@@ -2,9 +2,10 @@ package com.portflux.backend.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.*;
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -17,20 +18,13 @@ public class Cart {
     @Column(name = "CART_ID")
     private Long id;
 
-    // TODO: 추후 User 엔티티와 ManyToOne 관계로 변경해야 합니다.
-    @Column(name = "USER_ID", nullable = false)
+    @Column(name = "USER_NUM", nullable = false)
     private Long userId;
 
-    // TODO: 추후 Product 엔티티와 ManyToOne 관계로 변경해야 합니다.
-    @Column(name = "PRODUCT_ID", nullable = false)
-    private Long productId;
-    
-    @Column(name = "PRODUCT_NAME", nullable = false)
-    private String productName;
+    @Column(name = "POST_ID", nullable = false)
+    private Long postId;
 
-    @Column(name = "UNIT_PRICE", nullable = false)
-    private BigDecimal unitPrice;
-
-    @Column(name = "QTY", nullable = false)
-    private Integer qty;
+    @CreationTimestamp
+    @Column(name = "CREATED_AT", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 }
