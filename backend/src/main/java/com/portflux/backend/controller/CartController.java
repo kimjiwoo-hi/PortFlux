@@ -2,9 +2,13 @@ package com.portflux.backend.controller;
 
 import com.portflux.backend.model.Cart;
 import com.portflux.backend.service.CartService;
+import com.portflux.backend.repository.UserRepository;
+import com.portflux.backend.beans.UserBean;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,28 +20,39 @@ import java.util.stream.Collectors;
 public class CartController {
 
     private final CartService cartService;
+    private final UserRepository userRepository;
 
-    // TODO: 실무에서는 PathVariable 대신 @AuthenticationPrincipal 등으로 Spring Security context에서 사용자 정보를 얻어와야 합니다.
-    @GetMapping("/{userId}")
-    public ResponseEntity<CartResponse> getCart(@PathVariable("userId") Long userId) {
-        List<Cart> cartItems = cartService.getCartItems(userId);
-        
+    @GetMapping
+    public ResponseEntity<CartResponse> getCart(@AuthenticationPrincipal UserDetails userDetails) {
+        UserBean user = userRepository.findByUserId(userDetails.getUsername());
+        if (user == null) {
+            return ResponseEntity.status(404).build();
+        }
+
+        List<Cart> cartItems = cartService.getCartItems(Long.valueOf(user.getUserNum()));
+
         List<CartItemResponse> itemResponses = cartItems.stream()
                 .map(item -> new CartItemResponse(
                         item.getId(),
                         item.getUserId(),
-                        item.getPostId())) // Updated to new CartItemResponse
+                        item.getPostId()))
                 .collect(Collectors.toList());
 
-        // Total calculation removed as price/qty are not in Cart
         CartResponse res = new CartResponse(itemResponses);
         return ResponseEntity.ok(res);
     }
 
-    @PostMapping("/{userId}/items")
-    public ResponseEntity<CartItemResponse> addItemToCart(@PathVariable("userId") Long userId, @RequestBody AddItemRequest req) {
-        Cart cartItem = cartService.addOrUpdateItem(userId, req.getProductId()); // Updated call
-        CartItemResponse res = new CartItemResponse(cartItem.getId(), cartItem.getUserId(), cartItem.getPostId()); // Updated response
+    @PostMapping("/items")
+    public ResponseEntity<CartItemResponse> addItemToCart(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody AddItemRequest req) {
+        UserBean user = userRepository.findByUserId(userDetails.getUsername());
+        if (user == null) {
+            return ResponseEntity.status(404).build();
+        }
+
+        Cart cartItem = cartService.addOrUpdateItem(Long.valueOf(user.getUserNum()), req.getProductId());
+        CartItemResponse res = new CartItemResponse(cartItem.getId(), cartItem.getUserId(), cartItem.getPostId());
         return ResponseEntity.ok(res);
     }
 

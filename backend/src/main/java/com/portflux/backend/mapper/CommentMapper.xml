@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.portflux.backend.mapper.CommentMapper">
 
-    <select id="findCommentsByPostId" parameterType="int" resultType="com.portflux.backend.beans.CommentDto">
+    <select id="findCommentsByPostId" parameterType="int" resultType="com.portflux.backend.dto.CommentDto">
         SELECT
             c.comment_id AS commentId,
             c.user_num AS userNum,
@@ -20,7 +20,7 @@
             c.comment_created_at ASC
     </select>
 
-    <insert id="addComment" parameterType="com.portflux.backend.beans.CommentDto">
+    <insert id="addComment" parameterType="com.portflux.backend.dto.CommentDto">
         <selectKey keyProperty="commentId" resultType="int" order="BEFORE">
             SELECT NVL(MAX(comment_id), 0) + 1 FROM POST_COMMENT
         </selectKey>
@@ -39,7 +39,7 @@
         )
     </insert>
 
-    <select id="findCommentById" parameterType="int" resultType="com.portflux.backend.beans.CommentDto">
+    <select id="findCommentById" parameterType="int" resultType="com.portflux.backend.dto.CommentDto">
         SELECT
             comment_id AS commentId,
             user_num AS userNum,
@@ -55,7 +55,7 @@
         DELETE FROM POST_COMMENT WHERE comment_id = #{commentId}
     </delete>
 
-    <select id="findCommentsByUserNum" parameterType="int" resultType="com.portflux.backend.beans.CommentDto">
+    <select id="findCommentsByUserNum" parameterType="int" resultType="com.portflux.backend.dto.CommentDto">
         SELECT
             c.comment_id AS commentId,
             c.post_id AS postId,

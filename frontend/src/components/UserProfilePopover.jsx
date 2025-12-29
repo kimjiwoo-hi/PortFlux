@@ -19,7 +19,7 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
     if (isOpen) {
       const storage = localStorage.getItem("isLoggedIn") ? localStorage : sessionStorage;
       let userId = storage.getItem("userId");
-      
+
       if (!userId) {
         const storedUser = storage.getItem("user");
         if (storedUser) {
@@ -30,10 +30,20 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
           }
         }
       }
-      
+
       if (userId) {
-        fetch(`http://localhost:8080/user/info/${userId}`)
-          .then(response => response.ok ? response.json() : Promise.reject())
+        const token = storage.getItem("token");
+
+        fetch(`/api/user/info/${userId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        })
+          .then(response => {
+            return response.ok ? response.json() : Promise.reject(response.status);
+          })
           .then(data => {
             setUserInfo({
               userName: data.userName || data.user_name || "",
@@ -43,8 +53,8 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
               userBanner: data.userBanner || null
             });
           })
-          .catch(() => {
-            // error 변수 제거
+          .catch((error) => {
+            console.error("User info fetch error:", error);
             setUserInfo(prev => ({
               ...prev,
               userNickname: storage.getItem("userNickname") || "사용자",

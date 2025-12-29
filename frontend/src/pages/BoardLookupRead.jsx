@@ -144,11 +144,9 @@ const BoardLookupRead = () => {
       return;
     }
 
-    const loggedInUser = JSON.parse(storedUser);
-
     try {
       await axios.post(
-        `/api/cart/${loggedInUser.userNum}/items`,
+        `/api/cart/items`,
         { productId: postId },
         {
           withCredentials: true,

@@ -19,19 +19,14 @@ const Header = () => {
     const sessionUser = sessionStorage.getItem("user");
     const localLogin = localStorage.getItem("isLoggedIn");
     const sessionLogin = sessionStorage.getItem("isLoggedIn");
-    
+
     return !!localUser || !!sessionUser || localLogin === "true" || sessionLogin === "true";
   }, [location.pathname]);
 
-  // 1. 페이지 이동 시 팝오버 닫기 (비동기 처리로 Cascading Render 방지)
+  // 1. 페이지 이동 시 팝오버 닫기
   useEffect(() => {
-    if (isPopoverOpen) {
-      const timer = setTimeout(() => {
-        setIsPopoverOpen(false);
-      }, 0);
-      return () => clearTimeout(timer);
-    }
-  }, [location.pathname, isPopoverOpen]);
+    setIsPopoverOpen(false);
+  }, [location.pathname]);
 
   // 2. 사용자 프로필 이미지 불러오기
   useEffect(() => {
@@ -39,25 +34,33 @@ const Header = () => {
       const storage = localStorage.getItem("isLoggedIn") ? localStorage : sessionStorage;
       const storedUser = storage.getItem("user");
       let targetId = storage.getItem("userId");
-      
+
       if (storedUser) {
         try {
           const user = JSON.parse(storedUser);
           targetId = user.userId;
         } catch {
-          // err 변수 제거
           console.error("유저 정보 파싱 에러");
         }
       }
 
       if (targetId) {
         try {
-          const response = await fetch(`/api/user/info/${targetId}`);
+          const token = storage.getItem("token");
+          const response = await fetch(`/api/user/info/${targetId}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+          });
           if (response.ok) {
             const data = await response.json();
             if (data.userImage && userProfileImage !== data.userImage) {
               setUserProfileImage(data.userImage);
             }
+          } else {
+            console.log("프로필 이미지 조회 실패:", response.status);
           }
         } catch (error) {
           console.error("프로필 이미지 로드 실패:", error);
@@ -94,6 +97,11 @@ const Header = () => {
     setUserProfileImage(UserDefaultIcon);
     navigate("/");
     window.location.reload();
+  };
+
+  const handleProfileClick = (e) => {
+    e.stopPropagation();
+    setIsPopoverOpen(!isPopoverOpen);
   };
 
   useEffect(() => {
@@ -142,7 +150,7 @@ const Header = () => {
                 src={userProfileImage}
                 alt="프로필"
                 className="profile-pic"
-                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                onClick={handleProfileClick}
                 style={{ cursor: "pointer" }}
               />
               <div ref={popoverRef}>

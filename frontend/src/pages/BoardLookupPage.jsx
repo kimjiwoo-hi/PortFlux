@@ -116,29 +116,19 @@ function BoardLookupPage() {
     const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
     const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
-    console.log("=== 장바구니 추가 디버깅 ===");
-    console.log("Post 정보:", post);
-    console.log("Post ID:", post.id);
-    console.log("User:", storedUser ? JSON.parse(storedUser) : null);
-    console.log("Token 존재:", !!token);
-
     if (!storedUser) {
       alert("로그인이 필요합니다.");
       navigate("/login");
       return;
     }
-    const loggedInUser = JSON.parse(storedUser);
 
     try {
       const requestData = {
         productId: post.id,
       };
 
-      console.log("요청 URL:", `/api/cart/${loggedInUser.userNum}/items`);
-      console.log("요청 데이터:", requestData);
-
-      const response = await axios.post(
-        `/api/cart/${loggedInUser.userNum}/items`,
+      await axios.post(
+        `/api/cart/items`,
         requestData,
         {
           withCredentials: true,
@@ -148,13 +138,9 @@ function BoardLookupPage() {
         }
       );
 
-      console.log("장바구니 추가 성공:", response.data);
       alert("장바구니에 담겼습니다.");
     } catch (err) {
-      console.error("=== 장바구니 추가 실패 ===");
-      console.error("Status:", err.response?.status);
-      console.error("응답 데이터:", err.response?.data);
-      console.error("전체 에러:", err);
+      console.error("장바구니 추가 실패:", err);
 
       if (err.response?.status === 409) {
         alert("이미 장바구니에 담긴 항목입니다.");

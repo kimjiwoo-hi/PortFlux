@@ -1,6 +1,6 @@
 package com.portflux.backend.service;
 
-import com.portflux.backend.beans.CommentDto;
+import com.portflux.backend.dto.CommentDto;
 import com.portflux.backend.mapper.CommentMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

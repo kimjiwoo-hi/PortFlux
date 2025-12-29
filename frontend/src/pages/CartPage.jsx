@@ -29,7 +29,7 @@ function CartPage() {
       console.log("Token 존재:", !!token);
 
       const cartResponse = await axios.get(
-        `/api/cart/${user.userNum}`,
+        `/api/cart`,
         {
           withCredentials: true,
           headers: {
@@ -146,7 +146,6 @@ function CartPage() {
       const orderResponse = await axios.post(
         '/api/orders',
         {
-          userId: user.userNum,
           items: orderItems
         },
         {

@@ -5,7 +5,7 @@
 <mapper namespace="com.portflux.backend.mapper.BoardLookupMapper">
 
     <!-- ResultMap 정의 -->
-    <resultMap id="BoardLookupPostResultMap" type="com.portflux.backend.beans.BoardLookupPostDto">
+    <resultMap id="BoardLookupPostResultMap" type="com.portflux.backend.dto.BoardLookupPostDto">
         <id property="postId" column="post_id"/>
         <result property="boardType" column="board_type"/>
         <result property="userNum" column="user_num"/>
@@ -79,7 +79,7 @@
     </update>
 
     <!-- 게시글 작성 -->
-    <insert id="insertPost" parameterType="com.portflux.backend.beans.BoardLookupPostDto"
+    <insert id="insertPost" parameterType="com.portflux.backend.dto.BoardLookupPostDto"
             useGeneratedKeys="true" keyProperty="postId" keyColumn="post_id">
         INSERT INTO POST (
             board_type,
@@ -111,7 +111,7 @@
     </insert>
 
     <!-- 게시글 수정 -->
-    <update id="updatePost" parameterType="com.portflux.backend.beans.BoardLookupPostDto">
+    <update id="updatePost" parameterType="com.portflux.backend.dto.BoardLookupPostDto">
         UPDATE POST
         SET 
             title = #{title},

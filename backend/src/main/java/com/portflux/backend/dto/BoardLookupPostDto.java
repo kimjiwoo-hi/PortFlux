@@ -1,4 +1,4 @@
-package com.portflux.backend.beans;
+package com.portflux.backend.dto;
 
 import lombok.Getter;
 import lombok.Setter;
