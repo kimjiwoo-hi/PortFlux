@@ -1,7 +1,7 @@
 import './BoardLookupPage.css';
 import SearchIcon from '../assets/search.png';
 import cartIcon from '../assets/cartIcon.png';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { tagData, tagSearchMap } from '../database/taglist';
 import axios from 'axios';
@@ -15,53 +15,64 @@ function BoardLookupPage() {
   const [isLoggedIn, /*setIsLoggedIn*/] = useState(true); 
   const navigate = useNavigate();
 
-  // 게시글 목록 로드
+  // 게시글 목록 로드 함수 (useCallback으로 메모이제이션)
+  const fetchPosts = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`http://localhost:8080/api/boardlookup/posts?timestamp=${new Date().getTime()}`, {
+        withCredentials: true
+      });
+      
+      // API 응답 데이터를 프론트엔드 형식으로 변환
+      const transformedPosts = response.data.map(post => {
+        // 태그 파싱
+        let tagsArray = [];
+        try {
+          tagsArray = typeof post.tags === 'string' ? JSON.parse(post.tags) : post.tags || [];
+        } catch (e) {
+          console.error('태그 파싱 실패:', e);
+        }
+
+        // 이미지 URL 생성 (postFile을 썸네일로 사용)
+        const imageUrl = post.postFile 
+          ? `http://localhost:8080/uploads/${post.postFile}`
+          : 'https://cdn.dribbble.com/userupload/12461999/file/original-251950a7c4585c49086113b190f7f224.png?resize=1024x768';
+
+        return {
+          id: post.postId,
+          title: post.title,
+          author: post.userNickname,
+          imageUrl: imageUrl,
+          price: post.price, // Add price
+          likes: 0, // TODO: 좋아요 기능 추가 시 구현
+          views: post.viewCnt,
+          isLiked: false,
+          tags: tagsArray
+        };
+      });
+
+      setPosts(transformedPosts);
+      setLoading(false);
+    } catch (err) {
+      console.error('게시글 로드 실패:', err);
+      setLoading(false);
+    }
+  }, []); // 빈 배열은 이 함수가 컴포넌트 마운트 시 한번만 생성됨을 의미
+
+  // 최초 로드 및 포커스 이벤트 핸들러 통합
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get('http://localhost:8080/api/boardlookup/posts', {
-          withCredentials: true
-        });
-        
-        // API 응답 데이터를 프론트엔드 형식으로 변환
-        const transformedPosts = response.data.map(post => {
-          // 태그 파싱
-          let tagsArray = [];
-          try {
-            tagsArray = typeof post.tags === 'string' ? JSON.parse(post.tags) : post.tags || [];
-          } catch (e) {
-            console.error('태그 파싱 실패:', e);
-          }
+    fetchPosts(); // 컴포넌트 마운트 시 fetchPosts 호출
 
-          // 이미지 URL 생성 (postFile을 썸네일로 사용)
-          const imageUrl = post.postFile 
-            ? `http://localhost:8080/uploads/${post.postFile}`
-            : 'https://cdn.dribbble.com/userupload/12461999/file/original-251950a7c4585c49086113b190f7f224.png?resize=1024x768';
-
-          return {
-            id: post.postId,
-            title: post.title,
-            author: post.userNickname,
-            imageUrl: imageUrl,
-            price: post.price, // Add price
-            likes: 0, // TODO: 좋아요 기능 추가 시 구현
-            views: post.viewCnt,
-            isLiked: false,
-            tags: tagsArray
-          };
-        });
-
-        setPosts(transformedPosts);
-        setLoading(false);
-      } catch (err) {
-        console.error('게시글 로드 실패:', err);
-        setLoading(false);
-      }
+    const handleFocus = () => {
+      fetchPosts(); // 브라우저 포커스 시 fetchPosts 호출
     };
 
-    fetchPosts();
-  }, []);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [fetchPosts]); // fetchPosts가 변경될 때마다 useEffect 재실행 (useCallback 덕분에 안정적)
 
   const lowerCaseQuery = searchQuery.toLowerCase().trim();
   const filteredTagData = !lowerCaseQuery

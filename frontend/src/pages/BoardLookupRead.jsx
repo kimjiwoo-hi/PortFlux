@@ -472,9 +472,10 @@ const BoardLookupRead = () => {
             </p>
           ) : (
             comments.map((comment) => {
-              const commentUserImageSrc = comment.userImage
-                ? `data:image/jpeg;base64,${comment.userImage}`
-                : UserDefaultIcon;
+              // ✅ 수정 코드
+const commentUserImageSrc = comment.userImageBase64
+  ? `data:image/jpeg;base64,${comment.userImageBase64}`
+  : UserDefaultIcon;
 
               return (
                 <div key={comment.commentId} className="comment-item">
