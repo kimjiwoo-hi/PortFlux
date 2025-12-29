@@ -1,12 +1,12 @@
 
 package com.portflux.backend.repository;
 
-import com.portflux.backend.model.Payment;
+import com.portflux.backend.model.PaymentRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
-public interface PaymentRepository extends JpaRepository<Payment, Long> {
-    Optional<Payment> findByImpUid(String impUid);
+public interface PaymentRepository extends JpaRepository<PaymentRecord, Long> {
+    Optional<PaymentRecord> findByImpUid(String impUid);
 
-    Optional<Payment> findByMerchantUid(String merchantUid);
+    Optional<PaymentRecord> findByMerchantUid(String merchantUid);
 }
