@@ -12,61 +12,14 @@ function BoardLookupPage() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hoveredPostId, setHoveredPostId] = useState(null);
-  const [isLoggedIn, /*setIsLoggedIn*/] = useState(true); 
   const navigate = useNavigate();
-
-  // 로그인 상태 및 사용자 정보 확인
-  useEffect(() => {
-    const storedUser =
-      localStorage.getItem("user") || sessionStorage.getItem("user");
-    if (storedUser) {
-      const user = JSON.parse(storedUser);
-      setCurrentUser(user.user);
-      setIsLoggedIn(true);
-    } else {
-      setIsLoggedIn(false);
-      setCurrentUser(null);
-    }
-  }, []);
-
-  const handleAddToCart = async (post) => {
-    if (!isLoggedIn || !currentUser) {
-      alert("로그인이 필요합니다.");
-      navigate("/login");
-      return;
-    }
-
-    // --- [디버깅 추가] ---
-    console.log("--- 장바구니 추가 디버깅 ---");
-    console.log("사용자 ID (currentUser.userId):", currentUser.userId);
-    console.log("포스트 객체 (post):", post);
-    // --------------------
-
-    try {
-      const item = {
-        productId: post.id,
-        productName: post.title,
-        unitPrice: parseFloat(post.price),
-        qty: 1,
-      };
-
-      await addToCart(currentUser.userNum, item);
-      alert("포트폴리오가 장바구니에 추가되었습니다.");
-    } catch (error) {
-      console.error("장바구니 추가 실패:", error);
-      const errorMessage =
-        error.response?.data?.message ||
-        "장바구니 추가에 실패했습니다. 이미 담겨있을 수 있습니다.";
-      alert(errorMessage);
-    }
-  };
 
   // 게시글 목록 로드
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:8080/api/boardlookup/posts', {
+        const response = await axios.get('/api/boardlookup/posts', {
           withCredentials: true
         });
         
@@ -85,16 +38,17 @@ function BoardLookupPage() {
 
           if (post.pdfImages && post.pdfImages.length > 0) {
             // PDF 이미지 첫 페이지를 썸네일로 사용
-            imageUrl = `http://localhost:8080${post.pdfImages[0]}`;
+            imageUrl = `${post.pdfImages[0]}`;
           } else if (post.postFile) {
             // PDF 이미지가 없으면 원본 파일 경로 시도 (호환성)
-            imageUrl = `http://localhost:8080/uploads/${post.postFile}`;
+            imageUrl = `/uploads/${post.postFile}`;
           }
 
           return {
             id: post.postId,
             title: post.title,
             author: post.userNickname,
+            userNum: post.userNum,
             imageUrl: imageUrl,
             price: post.price,
             likes: 0, // TODO: 좋아요 기능 추가 시 구현
@@ -158,33 +112,40 @@ function BoardLookupPage() {
 
   const handleAddToCart = async (e, post) => {
     e.stopPropagation(); // 부모의 onClick 이벤트 전파를 막음
-    
+
     const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+
     if (!storedUser) {
       alert("로그인이 필요합니다.");
+      navigate("/login");
       return;
     }
-    const loggedInUser = JSON.parse(storedUser);
-    const userId = loggedInUser.userNum;
 
     try {
+      const requestData = {
+        productId: post.id,
+      };
+
       await axios.post(
-        `http://localhost:8080/api/cart/${userId}/items`,
+        `/api/cart/items`,
+        requestData,
         {
-          productId: post.id,
-          productName: post.title,
-          unitPrice: post.price,
-          qty: 1,
-        },
-        { withCredentials: true }
+          withCredentials: true,
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
       );
+
       alert("장바구니에 담겼습니다.");
     } catch (err) {
+      console.error("장바구니 추가 실패:", err);
+
       if (err.response?.status === 409) {
         alert("이미 장바구니에 담긴 항목입니다.");
       } else {
-        console.error("장바구니 추가 실패:", err);
-        alert("장바구니 추가에 실패했습니다.");
+        alert(`장바구니 추가에 실패했습니다: ${err.response?.data || err.message}`);
       }
     }
   };
@@ -203,7 +164,9 @@ function BoardLookupPage() {
   });
 
   let postsToRender = [...filteredPosts];
-  if (isLoggedIn) {
+  // 로그인 여부 확인하여 추가 버튼 표시
+  const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+  if (storedUser) {
     postsToRender.unshift({ id: 'add-new-post', type: 'add-new' });
   }
 
@@ -287,13 +250,16 @@ function BoardLookupPage() {
               />
               <div className="board-item-info">
                 <h4 className="info-title">{post.title}</h4>
-                <a 
-                  href={`/profile/${post.author}`} 
+                <span
                   className="info-author"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/user/${post.userNum}`);
+                  }}
+                  style={{ cursor: 'pointer' }}
                 >
                   {post.author}
-                </a>
+                </span>
               </div>
             </div>
           )

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/user/find")
+@RequestMapping("/api/user/find")
 @RequiredArgsConstructor
 public class UserFindController {
 

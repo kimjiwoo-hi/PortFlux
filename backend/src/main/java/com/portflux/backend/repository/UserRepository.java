@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserRepository extends JpaRepository<UserBean, Long> {
+public interface UserRepository extends JpaRepository<UserBean, Integer> {
 
     // 1. 이메일 존재 여부 확인 (회원가입 시 중복체크)
     boolean existsByUserEmail(String userEmail);
@@ -22,4 +22,6 @@ public interface UserRepository extends JpaRepository<UserBean, Long> {
 
     // 5. ★ 이름과 이메일로 유저 조회 (아이디 찾기 기능용)
     UserBean findByUserNameAndUserEmail(String userName, String userEmail);
+
+    boolean existsByUserNicknameIgnoreCase(String userNickname);
 }

@@ -37,4 +37,8 @@ public class OrderService {
     public Order updateOrderStatus(Order order) {
         return orderRepository.save(order);
     }
+
+    public List<Order> getOrdersByUserId(Long userId) {
+        return orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    }
 }

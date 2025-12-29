@@ -47,8 +47,27 @@ const MyInfo = () => {
       }
 
       const user = JSON.parse(storedUser);
+
+      if (!user.userId) {
+        console.error("userId가 없습니다. 다시 로그인해주세요.");
+        setError("로그인 정보가 올바르지 않습니다. 다시 로그인해주세요.");
+        localStorage.removeItem("user");
+        sessionStorage.removeItem("user");
+        setLoading(false);
+        return;
+      }
+
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+
       const response = await axios.get(
-        `http://localhost:8080/user/info/${user.userId}`
+        `/api/user/info/${user.userId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true
+        }
       );
       setUserInfo(response.data);
       setEditedInfo(response.data);
@@ -90,9 +109,18 @@ const MyInfo = () => {
             : editedInfo.userBanner,
       };
 
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+
       await axios.put(
-        `http://localhost:8080/user/info/${userInfo.userId}`,
-        dataToSave
+        `/api/user/info/${userInfo.userId}`,
+        dataToSave,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true
+        }
       );
       setUserInfo(editedInfo);
       setIsEditing(false);
@@ -175,11 +203,20 @@ const MyInfo = () => {
     }
 
     try {
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+
       await axios.put(
-        `http://localhost:8080/user/info/${userInfo.userId}/password`,
+        `/api/user/info/${userInfo.userId}/password`,
         {
           currentPassword: passwords.currentPassword,
           newPassword: passwords.newPassword,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true
         }
       );
 
