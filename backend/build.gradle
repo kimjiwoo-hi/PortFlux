@@ -1,12 +1,11 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.5.8'
+    id 'org.springframework.boot' version '3.4.1' // 버전을 안정적인 버전으로 살짝 조정했습니다.
     id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'com.portflux'
 version = '0.0.1-SNAPSHOT'
-description = 'Demo project for Spring Boot'
 
 java {
     toolchain {
@@ -21,52 +20,47 @@ configurations {
 }
 
 repositories {
-<<<<<<< HEAD
-	mavenCentral()
-	maven { url 'https://jitpack.io' }
-=======
     mavenCentral()
     maven { url 'https://jitpack.io' }
-    maven { url 'https://repo.spring.io/milestone' }  // ✅ Spring AI용 추가
->>>>>>> 16f9fd1d8832b31f24e862d3fb30fb3a49c15e5b
+    maven { url 'https://repo.spring.io/milestone' }
 }
 
 ext {
-    set('springAiVersion', "1.0.0-M3")  // ✅ 버전 변경 (1.0.3 → 1.0.0-M3)
+    set('springAiVersion', "1.0.0-M3")
 }
 
 dependencies {
+    // Spring Boot Starters
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'com.oracle.database.jdbc:ojdbc11'
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-<<<<<<< HEAD
-    implementation 'org.springframework.ai:spring-ai-starter-model-openai'
-	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
-	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
-	implementation 'com.corundumstudio.socketio:netty-socketio:2.0.3'
-    implementation 'org.springframework.boot:spring-boot-starter-security'// 로그인, 암호화 기능
-    // JWT (JSON Web Token) 라이브러리
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    
+    // Database & MyBatis
+    implementation 'com.oracle.database.jdbc:ojdbc11'
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+    
+    // Spring AI
+    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
+    
+    // JWT (JSON Web Token) - 버전 명시
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-    implementation 'com.github.iamport:iamport-rest-client-java:0.2.23' // Iamport 결제 연동
-
-=======
-    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'  // ✅ 의존성 이름 수정
-    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+    
+    // Utilities
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
     implementation 'com.corundumstudio.socketio:netty-socketio:2.0.3'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.apache.pdfbox:pdfbox:2.0.30'
     implementation 'com.github.iamport:iamport-rest-client-java:0.2.23'
     
->>>>>>> 16f9fd1d8832b31f24e862d3fb30fb3a49c15e5b
+    // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
     
+    // Dev & Test
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
@@ -81,7 +75,6 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-// XML 빌드 포함
 tasks.named('processResources') {
     from('src/main/java') {
         include '**/*.xml'
