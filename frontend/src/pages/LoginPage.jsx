@@ -43,14 +43,20 @@ function LoginPage() {
           sessionStorage.removeItem("prevPage");
         } else {
           localStorage.setItem("isLoggedIn", "true");
-          localStorage.setItem("userId", json.userId); 
-          localStorage.setItem("userNickname", json.nickname);
-          localStorage.setItem("userNum", json.userNum);
+          localStorage.setItem("userId", json.user?.userId || json.userId);
+          localStorage.setItem("userNickname", json.user?.userNickname || json.nickname);
+          localStorage.setItem("userNum", json.user?.userNum || json.userNum);
           localStorage.setItem("role", json.role || "USER");
+          localStorage.setItem("token", json.token); // JWT 토큰 저장
+
+          // user 객체 저장
+          if (json.user) {
+            localStorage.setItem("user", JSON.stringify(json.user));
+          }
 
           const targetPath = getPreviousPage();
           sessionStorage.removeItem("prevPage");
-          navigate(targetPath); 
+          navigate(targetPath);
         }
       } else {
         const text = await res.text();
@@ -92,7 +98,13 @@ function LoginPage() {
         storage.setItem("userId", json.id);
         storage.setItem("userNickname", json.name);
         storage.setItem("userNum", json.num);
-        
+        storage.setItem("token", json.token); // JWT 토큰 저장
+
+        // user 객체가 있으면 저장
+        if (json.user) {
+          storage.setItem("user", JSON.stringify(json.user));
+        }
+
         const targetPath = location.state?.from || "/";
         navigate(targetPath);
       } else {

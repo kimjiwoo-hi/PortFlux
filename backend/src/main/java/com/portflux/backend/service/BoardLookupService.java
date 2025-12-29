@@ -1,6 +1,6 @@
 package com.portflux.backend.service;
 
-import com.portflux.backend.beans.BoardLookupPostDto;
+import com.portflux.backend.dto.BoardLookupPostDto;
 import com.portflux.backend.mapper.BoardLookupMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

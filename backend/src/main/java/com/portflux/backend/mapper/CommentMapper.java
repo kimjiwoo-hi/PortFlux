@@ -1,6 +1,6 @@
 package com.portflux.backend.mapper;
 
-import com.portflux.backend.beans.CommentDto;
+import com.portflux.backend.dto.CommentDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

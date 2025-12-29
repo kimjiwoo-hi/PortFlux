@@ -58,9 +58,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/mail/**", "/mail/**").permitAll()
                         
                         // 게시판 및 공통 정보
-                        .requestMatchers("/api/boardlookup/**", "/api/pdf/**", "/api/user/info/**").permitAll()
+                        .requestMatchers("/api/boardlookup/**", "/api/pdf/**").permitAll()
+                        .requestMatchers("/api/board/free/**", "/api/board/job/**").permitAll()
                         .requestMatchers("/uploads/**", "/api/jobs/**", "/api/follow/**").permitAll()
                         .requestMatchers("/api/payments/result").permitAll()
+
+                        // 사용자 정보는 인증 필요
+                        .requestMatchers("/api/user/info/**").authenticated()
 
                         // 정적 리소스 및 에러 페이지
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/error").permitAll()

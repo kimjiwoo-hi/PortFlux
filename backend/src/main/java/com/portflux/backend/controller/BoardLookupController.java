@@ -1,7 +1,7 @@
 package com.portflux.backend.controller;
 
-import com.portflux.backend.beans.BoardLookupPostDto;
-import com.portflux.backend.beans.CommentDto;
+import com.portflux.backend.dto.BoardLookupPostDto;
+import com.portflux.backend.dto.CommentDto;
 import com.portflux.backend.service.BoardLookupService;
 import com.portflux.backend.service.LikeService;  // ✅ 추가
 import com.portflux.backend.service.CommentService;

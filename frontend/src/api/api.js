@@ -31,13 +31,12 @@ api.interceptors.request.use(
 
 
 // --- Cart APIs ---
-export async function getCart(userId) {
-  // TODO: userId는 추후 인증 로직을 통해 자동으로 처리되도록 변경해야 합니다.
-  return api.get(`/api/cart/${userId}`);
+export async function getCart() {
+  return api.get(`/api/cart`);
 }
 
-export async function addToCart(userId, item) {
-  return api.post(`/api/cart/${userId}/items`, item);
+export async function addToCart(item) {
+  return api.post(`/api/cart/items`, item);
 }
 
 export async function updateCartQuantity(cartId, qty) {
