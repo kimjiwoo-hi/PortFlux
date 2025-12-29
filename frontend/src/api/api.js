@@ -3,6 +3,7 @@ import axios from "axios";
 const api = axios.create({
   baseURL: "/", // baseURL을 루트로 변경
   headers: { "Content-Type": "application/json" },
+  withCredentials: true, // 모든 요청에 쿠키 포함
 });
 
 // Axios 요청 인터셉터 추가
@@ -30,20 +31,27 @@ api.interceptors.request.use(
 );
 
 
-// --- Cart APIs ---
-export async function getCart(userId) {
-  // TODO: userId는 추후 인증 로직을 통해 자동으로 처리되도록 변경해야 합니다.
-  return api.get(`/api/cart/${userId}`);
+// --- Cart APIs (Updated) ---
+/**
+ * 현재 사용자의 장바구니 목록을 가져옵니다.
+ * @returns {Promise<import("../dto/CartItemDto").CartItemDto[]>} 장바구니 항목 리스트
+ */
+export async function getCartItems() {
+  return api.get("/api/cart");
 }
 
-export async function addToCart(userId, item) {
-  return api.post(`/api/cart/${userId}/items`, item);
+/**
+ * 장바구니에 상품(게시물)을 추가합니다.
+ * @param {number} postId - 장바구니에 추가할 게시물의 ID
+ */
+export async function addItemToCart(postId) {
+  return api.post("/api/cart", { postId });
 }
 
-export async function updateCartQuantity(cartId, qty) {
-  return api.patch(`/api/cart/items/${cartId}`, { qty });
-}
-
+/**
+ * 장바구니에서 특정 항목을 삭제합니다.
+ * @param {number} cartId - 삭제할 장바구니 항목의 ID
+ */
 export async function removeFromCart(cartId) {
   return api.delete(`/api/cart/items/${cartId}`);
 }

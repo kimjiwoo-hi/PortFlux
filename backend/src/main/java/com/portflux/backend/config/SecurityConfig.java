@@ -76,8 +76,8 @@ public class SecurityConfig {
                         // [추가] 사용자 정보 조회/수정 API 허용
                         .requestMatchers("/user/info/**").permitAll()
 
-                        // [추가] 장바구니 API는 인증된 사용자만 허용
-                        .requestMatchers("/api/cart/**").authenticated()
+                        // [추가] 장바구니 API는 인증 불필요 (컨트롤러에서 Principal 확인)
+                        .requestMatchers("/api/cart/**").permitAll()
                         // [추가] 주문 API는 인증된 사용자만 허용
                         .requestMatchers("/api/orders/**").authenticated()
                         // [추가] 결제 결과 조회 API 허용
