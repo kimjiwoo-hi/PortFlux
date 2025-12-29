@@ -1,4 +1,4 @@
-package com.portflux.backend.api;
+package com.portflux.backend.controller;
 
 import java.util.Map;
 
@@ -10,14 +10,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.portflux.backend.service.MailService;
 
-
 import lombok.RequiredArgsConstructor;
-
 
 @RestController
 @RequestMapping("/api/mail")
 @RequiredArgsConstructor
-public class BoardLookupPostDto {
+public class MailController {
 
     private final MailService mailService;
 

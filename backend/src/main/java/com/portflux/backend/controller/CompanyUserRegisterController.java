@@ -13,7 +13,7 @@ import com.portflux.backend.service.CompanyUserService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/company/register")
+@RequestMapping("/api/company/register")
 @RequiredArgsConstructor
 public class CompanyUserRegisterController {
 
