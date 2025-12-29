@@ -8,10 +8,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class IamportConfig {
 
-    @Value("${iamport.key}")
+    @Value("${iamport.api.key}")
     private String apiKey;
 
-    @Value("${iamport.secret}")
+    @Value("${iamport.api.secret}")
     private String apiSecret;
 
     @Bean
