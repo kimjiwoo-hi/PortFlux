@@ -131,4 +131,21 @@ public class BoardLookupService {
     public List<BoardLookupPostDto> getPostsByUserNum(int userNum) {
         return boardLookupMapper.findPostsByUserNum(userNum);
     }
+
+    /**
+ * 사용자가 해당 게시물을 구매했는지 확인
+ */
+public boolean isPurchased(Long userNum, int postId) {
+    // PaymentRecord와 Order를 조인하여 확인
+    // 실제 구현은 PaymentRepository 또는 OrderRepository에 메서드 추가 필요
+    return boardLookupMapper.checkPurchaseStatus(userNum, postId);
+}
+
+/**
+ * 다운로드 카운트 증가
+ */
+@Transactional
+public void incrementDownloadCount(int postId) {
+    boardLookupMapper.incrementDownloadCount(postId);
+}
 }

@@ -158,4 +158,20 @@
         ORDER BY p.created_at DESC
     </select>
 
+<!-- 구매 여부 확인 -->
+<select id="checkPurchaseStatus" resultType="boolean">
+    SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+    FROM ORDER_ITEMS oi
+    INNER JOIN ORDERS o ON oi.order_id = o.id
+    WHERE o.user_id = #{userNum}
+    AND oi.product_id = #{postId}
+    AND o.status = 'PAID'
+</select>
+
+<!-- 다운로드 카운트 증가 -->
+<update id="incrementDownloadCount">
+    UPDATE POST
+    SET download_cnt = download_cnt + 1
+    WHERE post_id = #{postId}
+</update>
 </mapper>
