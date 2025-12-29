@@ -180,7 +180,7 @@ function BoardLookupPage() {
   // 로그인 여부 확인하여 추가 버튼 표시
   const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
   if (storedUser) {
-    postsToRender.unshift({ id: 'add-new-post', type: 'add-new' });
+          postsToRender.unshift({ id: 'add-new-post', type: 'add-new' });
   }
 
   if (loading) {
