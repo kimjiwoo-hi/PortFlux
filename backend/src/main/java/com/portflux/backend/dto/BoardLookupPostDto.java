@@ -2,6 +2,7 @@ package com.portflux.backend.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+
 import java.util.Date;
 import java.util.List;
 
@@ -13,10 +14,12 @@ public class BoardLookupPostDto {
     private String content;
     private int price;
     private String postFile;
-    private int userNum;
+    private Integer userNum;  // ✅ Integer로 수정 (integer는 오타)
     private String userNickname;
-    private byte[] userImage; // BLOB은 byte[]로 매핑
-    private String tags; // JSON 문자열 형태의 태그
+    private byte[] userImage;
+    private String userImageBase64;  // ✅ Base64 인코딩된 이미지
+    private String userBannerBase64; // ✅ Base64 인코딩된 배너
+    private String tags;
     private int viewCnt;
     private Date createdAt;
     private Date updatedAt;
@@ -24,7 +27,4 @@ public class BoardLookupPostDto {
     private List<String> pdfImages;
     private String aiSummary;
     private String boardType;
-
-    
-
 }

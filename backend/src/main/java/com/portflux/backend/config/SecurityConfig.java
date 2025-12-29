@@ -50,17 +50,32 @@ public class SecurityConfig {
 
                 // 4. URL 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        // 회원가입 및 로그인 관련 모든 경로 허용 (api 포함/미포함 둘 다 대응)
-                        .requestMatchers("/api/user/register/**", "/user/register/**").permitAll()
-                        .requestMatchers("/api/company/register/**", "/company/register/**").permitAll()
-                        .requestMatchers("/api/user/login/**", "/user/login/**").permitAll()
-                        .requestMatchers("/api/user/find/**", "/user/find/**").permitAll()
-                        .requestMatchers("/api/mail/**", "/mail/**").permitAll()
-                        
-                        // 게시판 및 공통 정보
-                        .requestMatchers("/api/boardlookup/**", "/api/pdf/**").permitAll()
-                        .requestMatchers("/api/board/free/**", "/api/board/job/**").permitAll()
-                        .requestMatchers("/uploads/**", "/api/jobs/**", "/api/follow/**").permitAll()
+                        // [추가] 사용자 회원가입 관련 API 허용
+                        .requestMatchers("/api/user/register/**").permitAll()
+                        // [추가] 기업 회원가입 관련 API 허용
+                        .requestMatchers("/api/company/register/**").permitAll()
+                        // [추가] 아이디/비밀번호 찾기 API 허용
+                        .requestMatchers("/api/user/find/**").permitAll()
+
+                        // API 및 로그인 관련 경로 허용
+                        .requestMatchers("/api/mail/**").permitAll()
+                        .requestMatchers("/api/user/login/**").permitAll()
+
+
+                        // ★★★ 게시판 API 허용 (추가) ★★★
+                        .requestMatchers("/api/boardlookup/**").permitAll()
+                        // PDF AI 분석 API 허용 (추가)
+                        .requestMatchers("/api/pdf/**").permitAll()
+        
+                        // ★★★ 업로드된 파일 접근 허용 (추가) ★★★
+                        .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers("/api/user/info/**").permitAll()
+
+                        // [추가] 장바구니 API는 인증 불필요 (컨트롤러에서 Principal 확인)
+                        .requestMatchers("/api/cart/**").permitAll()
+                        // [추가] 주문 API는 인증된 사용자만 허용
+                        .requestMatchers("/api/orders/**").authenticated()
+                        // [추가] 결제 결과 조회 API 허용
                         .requestMatchers("/api/payments/result").permitAll()
 
                         // 사용자 정보는 인증 필요
