@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 //로그인한 유저 기준 팔로우/언팔로우 처리
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/follow")
+@RequestMapping("/api/follow")
 public class FollowController {
 
     private final FollowService followService;

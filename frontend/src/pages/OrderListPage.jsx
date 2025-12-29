@@ -29,7 +29,7 @@ export default function OrderListPage() {
     try {
       setLoading(true);
       const response = await axios.get(
-        `http://localhost:8080/api/orders/user/${user.userNum}`,
+        `/api/orders/user/${user.userNum}`,
         {
           withCredentials: true,
           headers: {

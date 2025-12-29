@@ -13,7 +13,7 @@ import com.portflux.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/user/info")
+@RequestMapping("/api/user/info")
 @RequiredArgsConstructor
 public class UserInfoController {
 

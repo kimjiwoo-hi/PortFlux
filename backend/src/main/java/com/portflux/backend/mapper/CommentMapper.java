@@ -35,5 +35,10 @@ public interface CommentMapper {
      */
     void deleteComment(@Param("commentId") int commentId);
 
-    
+    /**
+     * 사용자 번호로 댓글 목록 조회
+     * @param userNum 사용자 번호
+     * @return List<CommentDto>
+     */
+    List<CommentDto> findCommentsByUserNum(@Param("userNum") int userNum);
 }
