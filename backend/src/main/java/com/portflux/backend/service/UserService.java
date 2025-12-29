@@ -1,8 +1,14 @@
 package com.portflux.backend.service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,11 +23,23 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final GoogleApi googleApi;
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+        UserBean user = userRepository.findByUserId(userId);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found with id: " + userId);
+        }
+        // For simplicity, giving every user a "ROLE_USER". You can expand this.
+        return new User(user.getUserId(), user.getUserPassword(), 
+                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+    }
 
     // 1. 회원가입
     @Transactional
@@ -89,7 +107,8 @@ public class UserService {
             // 이미 가입된 유저 -> 유저 정보 리턴
             result.put("user", user);
             result.put("isMember", true);
-        } else {
+        }
+        else {
             // 미가입 유저 -> 구글에서 받아온 정보만 리턴 (회원가입 프리셋 용도)
             result.put("email", email);
             result.put("name", name);

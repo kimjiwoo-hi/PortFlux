@@ -144,11 +144,27 @@ const BoardLookupRead = () => {
 
   // 장바구니 추가
   const handleAddToCart = async () => {
+    const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+
+    if (!storedUser) {
+      alert("로그인이 필요합니다.");
+      navigate("/login");
+      return;
+    }
+
+    const loggedInUser = JSON.parse(storedUser);
+
     try {
       await axios.post(
-        "http://localhost:8080/api/cart",
-        { postId },
-        { withCredentials: true }
+        `http://localhost:8080/api/cart/${loggedInUser.userNum}/items`,
+        { productId: postId },
+        {
+          withCredentials: true,
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
       );
       setShowCartToast(true);
       setTimeout(() => setShowCartToast(false), 3000);

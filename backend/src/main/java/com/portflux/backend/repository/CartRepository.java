@@ -17,11 +17,5 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
      */
     List<Cart> findByUserNum(Long userNum);
 
-    /**
-     * 사용자 번호와 게시글 번호로 특정 장바구니 항목이 존재하는지 확인합니다.
-     * @param userNum 사용자 번호
-     * @param postId 게시글 번호
-     * @return Optional<Cart>
-     */
-    Optional<Cart> findByUserNumAndPostId(Long userNum, Long postId);
+    Optional<Cart> findByUserIdAndProductId(Long userId, Long productId);
 }

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -21,7 +22,7 @@ public class Cart {
     private Long cartId;
 
     @Column(name = "USER_NUM", nullable = false)
-    private Long userNum;
+    private Long userId;
 
     @Column(name = "POST_ID", nullable = false)
     private Long postId;
@@ -29,9 +30,4 @@ public class Cart {
     @CreationTimestamp
     @Column(name = "CREATED_AT", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    public Cart(Long userNum, Long postId) {
-        this.userNum = userNum;
-        this.postId = postId;
-    }
 }

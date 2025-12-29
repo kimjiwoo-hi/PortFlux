@@ -10,9 +10,10 @@ import java.time.LocalDateTime;
 @Table(name = "payments")
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class Payment {
+public class PaymentRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -30,9 +30,21 @@ export function useChatSocket(userNum) {
       }
     });
 
+    //소켓 연결 오류
+    socket.on("connect_error", (err) => {
+      console.log("[Socket] 연결 오류 발생 : ", err.message);
+    });
+
+    //소켓 연결 끊김
+    socket.on("disconnect", (reason) => {
+      console.error(`[Socket] 연결이 끊어졌습니다 : ${reason}`);
+    });
+
     return () => {
       socket.off("message:list:result");
       socket.off("message:new");
+      socket.off("connect_error");
+      socket.off("disconnect");
       socket.disconnect();
     };
   }, [socket]);
@@ -55,5 +67,13 @@ export function useChatSocket(userNum) {
     socket.emit("room:read", { roomId });
   };
 
-  return { socket, messages, setMessages, joinRoom, loadMessages, sendMessage, markRead };
+  return {
+    socket,
+    messages,
+    setMessages,
+    joinRoom,
+    loadMessages,
+    sendMessage,
+    markRead,
+  };
 }

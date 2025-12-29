@@ -1,6 +1,6 @@
 package com.portflux.backend.controller;
 
-import com.portflux.backend.model.Payment;
+import com.portflux.backend.model.PaymentRecord;
 import com.portflux.backend.service.PaymentService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +17,38 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class PaymentController {
     private final PaymentService paymentService;
+    private final com.portflux.backend.service.OrderService orderService;
+
+    /**
+     * 주문 결과 조회
+     */
+    @GetMapping("/result")
+    public ResponseEntity<?> getOrderResult(@RequestParam String merchantUid) {
+        try {
+            com.portflux.backend.model.Order order = orderService.findByMerchantUid(merchantUid);
+
+            if (order == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ErrorResponse("ORDER_NOT_FOUND", "주문을 찾을 수 없습니다.")
+                );
+            }
+
+            ResultResponse res = new ResultResponse();
+            res.setStatus(order.getStatus());
+            res.setOrderId(order.getId());
+            res.setPaymentId(null); // 실제 결제 ID는 PaymentRecord에서 가져와야 함
+            res.setAmount(order.getTotalAmount());
+            res.setMessage("주문이 생성되었습니다.");
+
+            return ResponseEntity.ok(res);
+
+        } catch (Exception e) {
+            log.error("Error fetching order result", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                new ErrorResponse("INTERNAL_ERROR", "주문 조회 중 오류가 발생했습니다.")
+            );
+        }
+    }
 
     /**
      * 결제 검증 및 확인
@@ -45,7 +77,7 @@ public class PaymentController {
             }
 
             // 결제 확인 (아임포트 서버 검증 포함)
-            Payment payment = paymentService.confirmPayment(req.getImpUid(), req.getMerchantUid(), req.getAmount());
+            PaymentRecord payment = paymentService.confirmPayment(req.getImpUid(), req.getMerchantUid(), req.getAmount());
 
             ConfirmResponse res = new ConfirmResponse();
             res.setPaymentId(payment.getId());
@@ -89,6 +121,15 @@ public class PaymentController {
         private String impUid;
         private BigDecimal amount;
         private Object paidAt;
+    }
+
+    @Data
+    public static class ResultResponse {
+        private String status;
+        private Long orderId;
+        private Long paymentId;
+        private BigDecimal amount;
+        private String message;
     }
 
     @Data
