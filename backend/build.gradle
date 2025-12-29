@@ -54,6 +54,13 @@ dependencies {
     
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	implementation 'org.springframework.boot:spring-boot-starter-mail' //SMTP 인증코드 발송 API
+
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+	
+	
 }
 
 dependencyManagement {

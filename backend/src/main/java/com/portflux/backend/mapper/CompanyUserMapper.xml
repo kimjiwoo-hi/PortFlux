@@ -6,21 +6,13 @@
 
     <insert id="insertCompanyUser" parameterType="com.portflux.backend.beans.CompanyRegisterBean">
         INSERT INTO COMPANY (
-            company_id, 
-            company_password, 
-            company_name, 
-            company_phone, 
-            company_email, 
-            drawn_company, 
-            company_create_at, 
-            business_number
+            company_id, company_password, company_name, 
+            company_phone, company_email, drawn_company, 
+            company_create_at, business_number
         ) VALUES (
-            #{email},           #{password}, 
-            #{name},            #{phoneNumber}, 
-            #{email}, 
-            'N', 
-            SYSDATE, 
-            #{businessNumber}   )
+            #{userId}, #{password}, #{nickname},  #{phoneNumber}, #{email}, 'N', 
+            SYSDATE, #{businessNumber}
+        )
     </insert>
 
     <select id="checkBusinessNumber" parameterType="String" resultType="int">
@@ -49,4 +41,32 @@
         FROM COMPANY
         WHERE lower(company_name) = lower(#{name})
     </select>
+
+    <select id="checkCompanyIdDuplicate" parameterType="String" resultType="int">
+        SELECT COUNT(*) 
+        FROM COMPANY 
+        WHERE company_id = #{companyId}
+    </select>
+
+    <select id="checkCompanyEmailDuplicate" parameterType="String" resultType="int">
+        SELECT COUNT(*) 
+        FROM COMPANY 
+        WHERE company_email = #{email}
+    </select>
+
+    <select id="getCompanyUserInfo" parameterType="String" resultType="com.portflux.backend.beans.CompanyUserBean">
+        SELECT 
+            company_num AS companyNum,
+            company_id AS companyId,
+            business_number AS businessNumber,
+            company_password AS companyPassword,
+            company_name AS companyName,
+            company_phone AS companyPhone,
+            company_email AS companyEmail,
+            drawn_company AS drawnCompany,
+            company_create_at AS companyCreateAt
+        FROM COMPANY
+        WHERE company_id = #{companyId}
+    </select>
+
 </mapper>
