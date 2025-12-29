@@ -9,19 +9,21 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+
+import com.portflux.backend.security.JwtAuthenticationFilter;
+
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    // 비밀번호 암호화 빈 등록 (필수)
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -65,20 +67,31 @@ public class SecurityConfig {
 
 
                         // ★★★ 게시판 API 허용 (추가) ★★★
-        .requestMatchers("/api/boardlookup/**").permitAll()
+                        .requestMatchers("/api/boardlookup/**").permitAll()
+                        // PDF AI 분석 API 허용 (추가)
+                        .requestMatchers("/api/pdf/**").permitAll()
         
-        // ★★★ 업로드된 파일 접근 허용 (추가) ★★★
-        .requestMatchers("/uploads/**").permitAll()
-                // [추가] 사용자 정보 조회/수정 API 허용
+                        // ★★★ 업로드된 파일 접근 허용 (추가) ★★★
+                        .requestMatchers("/uploads/**").permitAll()
+                        // [추가] 사용자 정보 조회/수정 API 허용
                         .requestMatchers("/user/info/**").permitAll()
 
+                        // [추가] 장바구니 API는 인증된 사용자만 허용
+                        .requestMatchers("/api/cart/**").authenticated()
+                        // [추가] 주문 API는 인증된 사용자만 허용
+                        .requestMatchers("/api/orders/**").authenticated()
+                        // [추가] 결제 결과 조회 API 허용
+                        .requestMatchers("/api/payments/result").permitAll()
 
                         // 정적 리소스 허용
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         // 컨트롤러 매핑 오류(404) 시 시큐리티가 403으로 막지 않도록 에러 경로 허용
                         .requestMatchers("/error").permitAll()
                         // ★★★ [최하위 우선순위] 그 외 모든 요청은 인증 필요 ★★★
-                        .anyRequest().authenticated());
+                        .anyRequest().authenticated())
+                
+                // 5. JWT 필터 추가
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

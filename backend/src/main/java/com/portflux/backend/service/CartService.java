@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,37 +21,18 @@ public class CartService {
     }
 
     @Transactional
-    public Cart addOrUpdateItem(Long userId, Long productId, String productName, BigDecimal unitPrice, int qty) {
-        Optional<Cart> existingItem = cartRepository.findByUserIdAndProductId(userId, productId);
+    public Cart addOrUpdateItem(Long userId, Long postId) {
+        // DB 스키마에 따라, 동일 상품 중복 추가를 방지.
+        Optional<Cart> existingItem = cartRepository.findByUserIdAndPostId(userId, postId);
 
-        Cart cartItem;
         if (existingItem.isPresent()) {
-            // 이미 상품이 장바구니에 있는 경우: 수량 추가
-            cartItem = existingItem.get();
-            cartItem.setQty(cartItem.getQty() + qty);
+            // 이미 상품이 장바구니에 있는 경우: 기존 아이템 반환 (또는 예외 처리)
+            return existingItem.get();
         } else {
             // 새로운 상품인 경우: 장바구니에 추가
-            cartItem = new Cart();
+            Cart cartItem = new Cart();
             cartItem.setUserId(userId);
-            cartItem.setProductId(productId);
-            cartItem.setProductName(productName);
-            cartItem.setUnitPrice(unitPrice);
-            cartItem.setQty(qty);
-        }
-        return cartRepository.save(cartItem);
-    }
-
-    @Transactional
-    public Cart updateItemQuantity(Long cartId, int qty) {
-        Cart cartItem = cartRepository.findById(cartId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid cart item ID: " + cartId));
-        
-        if (qty <= 0) {
-            // 수량이 0 이하인 경우 아이템 삭제
-            cartRepository.delete(cartItem);
-            return null;
-        } else {
-            cartItem.setQty(qty);
+            cartItem.setPostId(postId);
             return cartRepository.save(cartItem);
         }
     }

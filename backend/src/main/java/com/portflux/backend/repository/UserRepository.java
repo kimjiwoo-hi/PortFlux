@@ -1,3 +1,4 @@
+
 package com.portflux.backend.repository;
 
 import com.portflux.backend.beans.UserBean;
@@ -22,6 +23,5 @@ public interface UserRepository extends JpaRepository<UserBean, Long> {
     // 5. ★ 이름과 이메일로 유저 조회 (아이디 찾기 기능용)
     UserBean findByUserNameAndUserEmail(String userName, String userEmail);
 
-    // 6. ★ 닉네임 존재 여부 확인
     boolean existsByUserNicknameIgnoreCase(String userNickname);
 }

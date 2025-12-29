@@ -1,8 +1,14 @@
 package com.portflux.backend.service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,12 +24,24 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final GoogleApi googleApi;
     private final CompanyUserMapper companyUserMapper;
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+        UserBean user = userRepository.findByUserId(userId);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found with id: " + userId);
+        }
+        // For simplicity, giving every user a "ROLE_USER". You can expand this.
+        return new User(user.getUserId(), user.getUserPassword(), 
+                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+    }
 
     // 1. 회원가입
     @Transactional
@@ -91,7 +109,8 @@ public class UserService {
             // 이미 가입된 유저 -> 유저 정보 리턴
             result.put("user", user);
             result.put("isMember", true);
-        } else {
+        }
+        else {
             // 미가입 유저 -> 구글에서 받아온 정보만 리턴 (회원가입 프리셋 용도)
             result.put("email", email);
             result.put("name", name);
@@ -142,7 +161,7 @@ public class UserService {
 
     // 10. 사용자 정보 수정
     @Transactional
-    public void updateUserInfo(String userId, UserBean updateUser) {
+    public void updateUserInfo(String userId, UserBean updateUser, boolean updateImage, boolean updateBanner) {
         UserBean user = userRepository.findByUserId(userId);
 
         if (user == null) {
@@ -162,10 +181,13 @@ public class UserService {
         if (updateUser.getUserEmail() != null) {
             user.setUserEmail(updateUser.getUserEmail());
         }
-        if (updateUser.getUserImage() != null) {
+
+        // 이미지 처리 (플래그가 true일 때만 업데이트)
+        // null로 설정된 경우도 포함하여 업데이트
+        if (updateImage) {
             user.setUserImage(updateUser.getUserImage());
         }
-        if (updateUser.getUserBanner() != null) {
+        if (updateBanner) {
             user.setUserBanner(updateUser.getUserBanner());
         }
 

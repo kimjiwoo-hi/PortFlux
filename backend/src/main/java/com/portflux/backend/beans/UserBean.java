@@ -1,12 +1,14 @@
 package com.portflux.backend.beans;
 
 import java.time.LocalDateTime; // Date 대신 LocalDateTime 권장
+import java.util.Base64;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Data;
 
 @Entity
@@ -51,4 +53,53 @@ public class UserBean {
 
     @Column(name = "USER_BANNER")
     private byte[] userBanner;
+
+    // 프론트엔드와 통신용 Base64 문자열 필드 (DB에 저장되지 않음)
+    @Transient
+    private String userImageBase64;
+
+    @Transient
+    private String userBannerBase64;
+
+    // userImage를 Base64 문자열로 변환하여 반환
+    public String getUserImageBase64() {
+        if (userImage != null && userImage.length > 0) {
+            return Base64.getEncoder().encodeToString(userImage);
+        }
+        return null;
+    }
+
+    // Base64 문자열을 받아서 userImage(byte[])로 변환
+    public void setUserImageBase64(String base64String) {
+        if (base64String != null && !base64String.isEmpty()) {
+            // "data:image/...;base64," 접두사 제거
+            String base64Data = base64String;
+            if (base64String.contains(",")) {
+                base64Data = base64String.split(",")[1];
+            }
+            this.userImage = Base64.getDecoder().decode(base64Data);
+        }
+        this.userImageBase64 = base64String;
+    }
+
+    // userBanner를 Base64 문자열로 변환하여 반환
+    public String getUserBannerBase64() {
+        if (userBanner != null && userBanner.length > 0) {
+            return Base64.getEncoder().encodeToString(userBanner);
+        }
+        return null;
+    }
+
+    // Base64 문자열을 받아서 userBanner(byte[])로 변환
+    public void setUserBannerBase64(String base64String) {
+        if (base64String != null && !base64String.isEmpty()) {
+            // "data:image/...;base64," 접두사 제거
+            String base64Data = base64String;
+            if (base64String.contains(",")) {
+                base64Data = base64String.split(",")[1];
+            }
+            this.userBanner = Base64.getDecoder().decode(base64Data);
+        }
+        this.userBannerBase64 = base64String;
+    }
 }

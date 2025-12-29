@@ -19,8 +19,10 @@ import BoardLookup from "./pages/BoardLookupPage.jsx";
 import BoardLookupWrite from "./pages/BoardLookupWritePage.jsx";
 import BoardLookupRead from "./pages/BoardLookupRead.jsx";
 import Cart from "./pages/CartPage.jsx";
+import Chat from "./pages/ChattingPage.jsx";
 import MyPage from "./pages/MyPage.jsx";
 import OrderResultPage from "./pages/OrderResultPage.jsx";
+import OrderListPage from "./pages/OrderListPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
 import FindIdPage from "./pages/FindIdPage.jsx";
@@ -78,6 +80,10 @@ const router = createBrowserRouter([
         element: <Cart />,
       },
       {
+        path: "/chat",
+        element: <Chat />,
+      },
+      {
         path: "/mypage",
         element: <MyPage />,
         children: [
@@ -102,6 +108,10 @@ const router = createBrowserRouter([
       {
         path: "/order-result",
         element: <OrderResultPage />,
+      },
+      {
+        path: "/order-list",
+        element: <OrderListPage />,
       },
       {
         path: "/login",
