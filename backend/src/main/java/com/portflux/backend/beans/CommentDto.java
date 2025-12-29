@@ -10,9 +10,10 @@ import java.util.Date;
 public class CommentDto {
     private int commentId;
     private int postId;
-    private int userNum;
+    private Integer userNum;  // ✅ Integer로 변경
     private String userNickname;
     private byte[] userImage;
+    private String userImageBase64;  // ✅ 추가: Base64 인코딩된 이미지
     private String commentContent;
     private Date commentCreatedAt;
 }

@@ -1,36 +1,37 @@
 package com.portflux.backend.model;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import jakarta.persistence.*;
-import java.math.BigDecimal;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
 @Table(name = "CART")
 public class Cart {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "CART_ID")
-    private Long id;
+    private Long cartId;
 
-    // TODO: 추후 User 엔티티와 ManyToOne 관계로 변경해야 합니다.
-    @Column(name = "USER_ID", nullable = false)
-    private Long userId;
+    @Column(name = "USER_NUM", nullable = false)
+    private Long userNum;
 
-    // TODO: 추후 Product 엔티티와 ManyToOne 관계로 변경해야 합니다.
-    @Column(name = "PRODUCT_ID", nullable = false)
-    private Long productId;
-    
-    @Column(name = "PRODUCT_NAME", nullable = false)
-    private String productName;
+    @Column(name = "POST_ID", nullable = false)
+    private Long postId;
 
-    @Column(name = "UNIT_PRICE", nullable = false)
-    private BigDecimal unitPrice;
+    @CreationTimestamp
+    @Column(name = "CREATED_AT", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-    @Column(name = "QTY", nullable = false)
-    private Integer qty;
+    public Cart(Long userNum, Long postId) {
+        this.userNum = userNum;
+        this.postId = postId;
+    }
 }

@@ -19,4 +19,10 @@ public interface UserMapper {
     int checkEmailExist(String email);
 
     Integer findUserNumByUserId(String userId);
+
+    // ✅ 새로 추가되는 메서드들
+    UserBean selectUserByNum(Integer userNum);  // userNum으로 사용자 조회
+    void updateUserInfo(UserBean user);          // 사용자 정보 수정
+    void updateUserImage(UserBean user);         // 프로필 이미지 수정
+    void updateUserBanner(UserBean user);        // 배너 이미지 수정
 }
