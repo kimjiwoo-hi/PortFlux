@@ -1,111 +1,779 @@
 /* BoardJobDetailPage.css - 채용공고 상세 페이지 스타일 */
 
 .job-detail-container {
-  background-color: #f9fafb;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 20px;
+  background-color: #f8f9fa;
+  min-height: calc(100vh - 200px);
 }
 
-/* 상단 네비게이션 */
+/* ===== 상단 네비게이션 ===== */
 .detail-nav {
-  background: #ffffff;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .btn-nav-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: transparent;
   border: 1px solid #e5e7eb;
-  color: #334155;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .btn-nav-back:hover {
-  background: #f8fafc;
-  border-color: #c7d2fe;
+  background: #f9fafb;
+  border-color: #d1d5db;
+  transform: translateX(-2px);
+}
+
+.nav-icon {
+  font-size: 16px;
+}
+
+.nav-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .btn-nav-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
   border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #9ca3af;
 }
 
 .btn-nav-action:hover {
-  background: #f8fafc;
-  border-color: #c7d2fe;
+  background: #f9fafb;
+  border-color: #d1d5db;
+  transform: scale(1.05);
 }
 
 .btn-nav-action.btn-bookmark.active {
-  background: #eef2ff;
-  border-color: #4f46e5;
-  color: #4f46e5;
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #f59e0b;
 }
 
-/* 좌측 콘텐츠 */
+.btn-nav-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== 메인 콘텐츠 레이아웃 ===== */
+.detail-main {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+  align-items: start;
+}
+
+/* ===== 좌측: 공고 정보 ===== */
 .detail-content {
-  background: #ffffff;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-/* 기업 로고 */
+/* 기업 정보 헤더 */
+.company-header {
+  display: flex;
+  gap: 20px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #f3f4f6;
+  margin-bottom: 24px;
+}
+
+.company-logo {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f3f4f6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.company-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .logo-placeholder {
-  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-size: 32px;
+  font-weight: 700;
+  color: white;
 }
 
-/* 배지 */
+.logo-placeholder.small {
+  font-size: 20px;
+}
+
+.company-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.company-name-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.company-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.owner-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-owner {
+  padding: 8px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-edit {
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #bfdbfe;
+}
+
+.btn-edit:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.btn-delete {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.btn-delete:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+/* 배지 스타일 */
+.job-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .badge-new {
   background: #fef2f2;
   color: #dc2626;
 }
 
 .badge-deadline {
-  background: #eef2ff;
-  color: #4338ca;
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.badge-status {
+  background: #f3f4f6;
+  color: #6b7280;
 }
 
 .badge-status.active {
-  background: #eef2ff;
-  color: #4f46e5;
+  background: #d1fae5;
+  color: #059669;
 }
 
-/* 핵심 정보 */
+.badge-status.closed,
+.badge-status.expired {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+/* 공고 제목 */
+.job-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.4;
+  margin: 0 0 32px 0;
+  word-break: keep-all;
+}
+
+/* 핵심 정보 그리드 */
 .key-info-grid {
-  background: #f8fafc;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  padding: 24px;
+  background: #f9fafb;
+  border-radius: 12px;
+  margin-bottom: 32px;
+}
+
+.key-info-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.key-icon {
+  font-size: 24px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.key-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.key-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.key-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  word-break: keep-all;
 }
 
 .key-value.salary {
-  color: #4f46e5;
+  color: #2563eb;
+  font-size: 16px;
 }
 
-/* 사이드바 */
+.key-value.urgent {
+  color: #dc2626;
+}
+
+/* 추가 정보 태그 */
+.additional-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background: #f9fafb;
+  border-radius: 12px;
+  margin-bottom: 32px;
+}
+
+.info-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.info-group-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  padding: 6px 14px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #374151;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.tag:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+/* 상세 내용 */
+.job-description {
+  margin-bottom: 32px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 20px 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #2563eb;
+}
+
+.description-content {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #374151;
+  white-space: pre-wrap;
+  word-break: keep-all;
+}
+
+/* 하단 메타 정보 */
+.job-meta {
+  display: flex;
+  gap: 12px;
+  padding-top: 24px;
+  border-top: 1px solid #f3f4f6;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.meta-divider {
+  color: #e5e7eb;
+}
+
+/* ===== 우측: 지원 사이드바 ===== */
+.apply-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: sticky;
+  top: 24px;
+}
+
+/* 지원 카드 */
 .apply-card {
-  background: #ffffff;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 2px solid #e5e7eb;
+}
+
+.apply-card-header {
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f3f4f6;
+  margin-bottom: 20px;
+}
+
+.apply-card-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px 0;
+}
+
+.apply-title {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+.apply-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.apply-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f9fafb;
+}
+
+.apply-info-row:last-child {
+  border-bottom: none;
+}
+
+.apply-label {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.apply-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  text-align: right;
+}
+
+.apply-value.expired {
+  color: #dc2626;
+}
+
+.apply-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .btn-apply-main {
-  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
-  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
 }
 
-.btn-apply-main:hover:not(.disabled) {
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.45);
+.btn-apply-main:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
 }
 
-.btn-apply-bookmark:hover {
-  border-color: #4f46e5;
-  color: #4f46e5;
+.btn-apply-main.disabled,
+.btn-apply-main:disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.btn-apply-bookmark {
+  padding: 14px 24px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-apply-bookmark:hover:not(:disabled) {
+  background: #fffbeb;
+  border-color: #fcd34d;
+  color: #f59e0b;
 }
 
 .btn-apply-bookmark.active {
-  background: #eef2ff;
-  border-color: #4f46e5;
-  color: #4338ca;
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #f59e0b;
 }
 
-/* 로딩 */
+.btn-apply-bookmark:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 기업 정보 카드 */
+.company-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.company-card h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 16px 0;
+}
+
+.company-card-content {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.company-card-logo {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+
+.company-card-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.company-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.company-card-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.company-card-industry {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* ===== 로딩/에러 상태 ===== */
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
 .loading-spinner {
-  border-top-color: #4f46e5;
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-state p,
+.error-state p {
+  font-size: 15px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.error-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  opacity: 0.5;
 }
 
 .btn-back-large {
-  background: #4f46e5;
+  margin-top: 24px;
+  padding: 12px 32px;
+  background: #2563eb;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .btn-back-large:hover {
-  background: #4338ca;
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+/* ===== 반응형 ===== */
+@media (max-width: 1024px) {
+  .detail-main {
+    grid-template-columns: 1fr;
+  }
+
+  .apply-sidebar {
+    position: relative;
+    top: 0;
+    order: -1;
+  }
+
+  .key-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .job-detail-container {
+    padding: 16px;
+  }
+
+  .detail-nav {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .btn-nav-back {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .nav-actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .detail-content {
+    padding: 24px;
+  }
+
+  .company-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .company-logo {
+    width: 64px;
+    height: 64px;
+  }
+
+  .company-name-row {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .owner-actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .job-badges {
+    justify-content: center;
+  }
+
+  .job-title {
+    font-size: 22px;
+    text-align: center;
+  }
+
+  .key-info-grid {
+    padding: 20px;
+  }
+
+  .additional-info {
+    padding: 20px;
+  }
+
+  .apply-card,
+  .company-card {
+    padding: 20px;
+  }
+
+  .job-meta {
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .meta-divider {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .job-detail-container {
+    padding: 12px;
+  }
+
+  .detail-content {
+    padding: 20px;
+  }
+
+  .job-title {
+    font-size: 20px;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+
+  .btn-apply-main,
+  .btn-apply-bookmark {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+
+  .company-name {
+    font-size: 18px;
+  }
+
+  .key-icon {
+    font-size: 20px;
+  }
+
+  .key-value {
+    font-size: 14px;
+  }
+
+  .key-info-grid {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .additional-info {
+    padding: 16px;
+  }
+
+  .tag {
+    padding: 5px 12px;
+    font-size: 12px;
+  }
 }
