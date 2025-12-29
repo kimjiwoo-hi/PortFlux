@@ -31,13 +31,12 @@ api.interceptors.request.use(
 
 
 // --- Cart APIs ---
-export async function getCart(userId) {
-  // TODO: userId는 추후 인증 로직을 통해 자동으로 처리되도록 변경해야 합니다.
-  return api.get(`/api/cart/${userId}`);
+export async function getCart() {
+  return api.get(`/api/cart`);
 }
 
-export async function addToCart(userId, item) {
-  return api.post(`/api/cart/${userId}/items`, item);
+export async function addToCart(item) {
+  return api.post(`/api/cart/items`, item);
 }
 
 export async function updateCartQuantity(cartId, qty) {
@@ -60,19 +59,19 @@ export async function confirmPayment(payload) {
 
 // --- Follow APIs ---
 export async function getFollowing(userId) {
-  return api.get(`/api/${userId}/following`);
+  return api.get(`/api/follow/following/${userId}`);
 }
 
 export async function getFollowers(userId) {
-  return api.get(`/api/${userId}/followers`);
+  return api.get(`/api/follow/followers/${userId}`);
 }
 
 export async function follow(followerId, followingId) {
-  return api.post("/api/follow", { followerId, followingId });
+  return api.post(`/api/follow/${followingId}`);
 }
 
 export async function unfollow(followerId, followingId) {
-  return api.delete("/api/unfollow", { data: { followerId, followingId } });
+  return api.delete(`/api/follow/${followingId}`);
 }
 
 export default api;
