@@ -1,7 +1,7 @@
 import './BoardLookupPage.css';
 import SearchIcon from '../assets/search.png';
 import cartIcon from '../assets/cartIcon.png';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { tagData, tagSearchMap } from '../database/taglist';
 import axios from 'axios';
@@ -14,23 +14,24 @@ function BoardLookupPage() {
   const [hoveredPostId, setHoveredPostId] = useState(null);
   const navigate = useNavigate();
 
-  // 게시글 목록 로드 함수 (useCallback으로 메모이제이션)
-  const fetchPosts = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`http://localhost:8080/api/boardlookup/posts?timestamp=${new Date().getTime()}`, {
-        withCredentials: true
-      });
-      
-      // API 응답 데이터를 프론트엔드 형식으로 변환
-      const transformedPosts = response.data.map(post => {
-        // 태그 파싱
-        let tagsArray = [];
-        try {
-          tagsArray = typeof post.tags === 'string' ? JSON.parse(post.tags) : post.tags || [];
-        } catch (e) {
-          console.error('태그 파싱 실패:', e);
-        }
+  // 게시글 목록 로드
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`http://localhost:8080/api/boardlookup/posts?timestamp=${new Date().getTime()}`, {
+          withCredentials: true
+        });
+        
+        // API 응답 데이터를 프론트엔드 형식으로 변환
+        const transformedPosts = response.data.map(post => {
+          // 태그 파싱
+          let tagsArray = [];
+          try {
+            tagsArray = typeof post.tags === 'string' ? JSON.parse(post.tags) : post.tags || [];
+          } catch (e) {
+            console.error('태그 파싱 실패:', e);
+          }
 
           // 썸네일 이미지 URL 생성 (PDF 변환된 첫 번째 이미지 사용)
           let imageUrl = 'https://cdn.dribbble.com/userupload/12461999/file/original-251950a7c4585c49086113b190f7f224.png?resize=1024x768';
@@ -56,7 +57,7 @@ function BoardLookupPage() {
           };
         });
 
-      setPosts(transformedPosts);
+        setPosts(transformedPosts);
         setLoading(false);
       } catch (err) {
         console.error('게시글 로드 실패:', err);
@@ -65,8 +66,7 @@ function BoardLookupPage() {
     };
 
     fetchPosts();
-  }, []);// 빈 배열은 이 함수가 컴포넌트 마운트 시 한번만 생성됨을 의미
-
+  }, [fetchPosts]); // fetchPosts가 변경될 때마다 useEffect 재실행 (useCallback 덕분에 안정적)
 
   const lowerCaseQuery = searchQuery.toLowerCase().trim();
   const filteredTagData = !lowerCaseQuery
@@ -180,7 +180,7 @@ function BoardLookupPage() {
   // 로그인 여부 확인하여 추가 버튼 표시
   const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
   if (storedUser) {
-          postsToRender.unshift({ id: 'add-new-post', type: 'add-new' });
+    postsToRender.unshift({ id: 'add-new-post', type: 'add-new' });
   }
 
   if (loading) {
