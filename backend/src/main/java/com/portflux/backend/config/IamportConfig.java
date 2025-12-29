@@ -1,17 +1,18 @@
 package com.portflux.backend.config;
 
-import com.siot.IamportRestClient.IamportClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.siot.IamportRestClient.IamportClient;
+
 @Configuration
 public class IamportConfig {
 
-    @Value("${iamport.key}")
+    @Value("${iamport.api.key}")
     private String apiKey;
 
-    @Value("${iamport.secret}")
+    @Value("${iamport.api.secret}")
     private String apiSecret;
 
     @Bean

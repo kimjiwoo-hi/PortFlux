@@ -1,0 +1,56 @@
+﻿[DIR ] C:\soldesk\Project\PortFlux\.claude
+[DIR ] C:\soldesk\Project\PortFlux\.vscode
+[DIR ] C:\soldesk\Project\PortFlux\backend
+[DIR ] C:\soldesk\Project\PortFlux\frontend
+[DIR ] C:\soldesk\Project\PortFlux\sql
+      C:\soldesk\Project\PortFlux\package-lock.json
+      C:\soldesk\Project\PortFlux\package.json
+      C:\soldesk\Project\PortFlux\project-tree.txt
+      C:\soldesk\Project\PortFlux\README.md
+      C:\soldesk\Project\PortFlux\.claude\settings.local.json
+      C:\soldesk\Project\PortFlux\.vscode\settings.json
+[DIR ] C:\soldesk\Project\PortFlux\backend\.gradle
+[DIR ] C:\soldesk\Project\PortFlux\backend\bin
+[DIR ] C:\soldesk\Project\PortFlux\backend\gradle
+[DIR ] C:\soldesk\Project\PortFlux\backend\src
+[DIR ] C:\soldesk\Project\PortFlux\backend\uploads
+      C:\soldesk\Project\PortFlux\backend\.env
+      C:\soldesk\Project\PortFlux\backend\gradlew
+      C:\soldesk\Project\PortFlux\backend\gradlew.bat
+      C:\soldesk\Project\PortFlux\backend\HELP.md
+      C:\soldesk\Project\PortFlux\backend\settings.gradle
+[DIR ] C:\soldesk\Project\PortFlux\backend\.gradle\8.14.3
+[DIR ] C:\soldesk\Project\PortFlux\backend\.gradle\nb-cache
+[DIR ] C:\soldesk\Project\PortFlux\backend\.gradle\vcs-1
+      C:\soldesk\Project\PortFlux\backend\.gradle\file-system.probe
+[DIR ] C:\soldesk\Project\PortFlux\backend\bin\default
+[DIR ] C:\soldesk\Project\PortFlux\backend\bin\generated-sources
+[DIR ] C:\soldesk\Project\PortFlux\backend\bin\generated-test-sources
+[DIR ] C:\soldesk\Project\PortFlux\backend\bin\main
+[DIR ] C:\soldesk\Project\PortFlux\backend\bin\test
+[DIR ] C:\soldesk\Project\PortFlux\backend\gradle\wrapper
+[DIR ] C:\soldesk\Project\PortFlux\backend\src\main
+[DIR ] C:\soldesk\Project\PortFlux\backend\src\test
+      C:\soldesk\Project\PortFlux\backend\uploads\2a474a0c-a7e2-44aa-8a7a-fb5cba17f6b5.png
+      C:\soldesk\Project\PortFlux\backend\uploads\6f7ec453-b7ed-476b-8c31-3fffe3cab328.pdf
+[DIR ] C:\soldesk\Project\PortFlux\frontend\public
+[DIR ] C:\soldesk\Project\PortFlux\frontend\src
+      C:\soldesk\Project\PortFlux\frontend\eslint.config.js
+      C:\soldesk\Project\PortFlux\frontend\index.html
+      C:\soldesk\Project\PortFlux\frontend\index.js
+      C:\soldesk\Project\PortFlux\frontend\package-lock.json
+      C:\soldesk\Project\PortFlux\frontend\package.json
+      C:\soldesk\Project\PortFlux\frontend\README.md
+      C:\soldesk\Project\PortFlux\frontend\vite.config.js
+      C:\soldesk\Project\PortFlux\frontend\public\p_favicon.svg
+[DIR ] C:\soldesk\Project\PortFlux\frontend\src\api
+[DIR ] C:\soldesk\Project\PortFlux\frontend\src\assets
+[DIR ] C:\soldesk\Project\PortFlux\frontend\src\components
+[DIR ] C:\soldesk\Project\PortFlux\frontend\src\database
+[DIR ] C:\soldesk\Project\PortFlux\frontend\src\layouts
+[DIR ] C:\soldesk\Project\PortFlux\frontend\src\pages
+      C:\soldesk\Project\PortFlux\frontend\src\index.css
+      C:\soldesk\Project\PortFlux\frontend\src\main.jsx
+      C:\soldesk\Project\PortFlux\sql\PortFlux.png
+      C:\soldesk\Project\PortFlux\sql\PortFlux.sql
+      C:\soldesk\Project\PortFlux\sql\계정 생성.sql

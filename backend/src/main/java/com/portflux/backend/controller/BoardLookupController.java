@@ -301,7 +301,7 @@ public class BoardLookupController {
         try {
             boolean isLiked = likeService.isLiked(userNum, postId);
             int totalLikes = likeService.getLikeCount(postId);
-            
+
             return ResponseEntity.ok(Map.of(
                 "isLiked", isLiked,
                 "totalLikes", totalLikes
@@ -311,6 +311,48 @@ public class BoardLookupController {
             return ResponseEntity.badRequest().body(
                 Map.of("success", false, "message", e.getMessage())
             );
+        }
+    }
+
+    /**
+     * 특정 사용자의 게시글 목록 조회 API
+     */
+    @GetMapping("/user/{userNum}/posts")
+    public ResponseEntity<List<BoardLookupPostDto>> getPostsByUser(@PathVariable int userNum) {
+        try {
+            List<BoardLookupPostDto> posts = boardLookupService.getPostsByUserNum(userNum);
+
+            // 각 게시글에 PDF 이미지 목록 추가 (썸네일용)
+            for (BoardLookupPostDto post : posts) {
+                Path imageDir = Paths.get(uploadDir, "pdf", "post_" + post.getPostId());
+                if (Files.exists(imageDir)) {
+                    List<String> images = Files.list(imageDir)
+                            .filter(p -> p.toString().endsWith(".jpg"))
+                            .sorted()
+                            .map(p -> "/uploads/pdf/post_" + post.getPostId() + "/" + p.getFileName())
+                            .toList();
+                    post.setPdfImages(images);
+                }
+            }
+
+            return ResponseEntity.ok(posts);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * 특정 사용자의 댓글 목록 조회 API
+     */
+    @GetMapping("/user/{userNum}/comments")
+    public ResponseEntity<List<CommentDto>> getCommentsByUser(@PathVariable int userNum) {
+        try {
+            List<CommentDto> comments = commentService.getCommentsByUserNum(userNum);
+            return ResponseEntity.ok(comments);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
         }
     }
 

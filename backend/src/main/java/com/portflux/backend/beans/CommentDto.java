@@ -16,4 +16,6 @@ public class CommentDto {
     private String userImageBase64;  // ✅ 추가: Base64 인코딩된 이미지
     private String commentContent;
     private Date commentCreatedAt;
+    private String postTitle;
+    private String boardType;
 }

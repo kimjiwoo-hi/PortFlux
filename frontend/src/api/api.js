@@ -68,19 +68,19 @@ export async function confirmPayment(payload) {
 
 // --- Follow APIs ---
 export async function getFollowing(userId) {
-  return api.get(`/api/${userId}/following`);
+  return api.get(`/api/follow/following/${userId}`);
 }
 
 export async function getFollowers(userId) {
-  return api.get(`/api/${userId}/followers`);
+  return api.get(`/api/follow/followers/${userId}`);
 }
 
 export async function follow(followerId, followingId) {
-  return api.post("/api/follow", { followerId, followingId });
+  return api.post(`/api/follow/${followingId}`);
 }
 
 export async function unfollow(followerId, followingId) {
-  return api.delete("/api/unfollow", { data: { followerId, followingId } });
+  return api.delete(`/api/follow/${followingId}`);
 }
 
 export default api;

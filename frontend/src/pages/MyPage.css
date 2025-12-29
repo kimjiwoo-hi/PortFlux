@@ -152,3 +152,174 @@
     min-height: 400px;
   }
 }
+
+/* MyPosts, MyComments 공통 스타일 */
+.my-content-container {
+  padding: 20px;
+}
+
+.my-content-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 20px 0;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.board-type-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.board-type-tabs .tab-button {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background: #fff;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.board-type-tabs .tab-button:hover {
+  background: #f8f9fa;
+  border-color: #bbb;
+}
+
+.board-type-tabs .tab-button.active {
+  background: #007bff;
+  color: #fff;
+  border-color: #007bff;
+  font-weight: 600;
+}
+
+.posts-list,
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.post-item {
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.post-info-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.post-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #e3f2fd;
+  color: #1976d2;
+  white-space: nowrap;
+}
+
+.post-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  flex: 1;
+}
+
+.post-bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.post-date {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.post-meta {
+  display: flex;
+  gap: 15px;
+  font-size: 14px;
+  color: #999;
+}
+
+.post-price {
+  color: #007bff;
+  font-weight: 600;
+}
+
+.comment-item {
+  padding: 15px 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.comment-post-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.comment-post-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+}
+
+.comment-content {
+  color: #333;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.comment-date {
+  font-size: 14px;
+  color: #999;
+}
+
+.empty-message {
+  text-align: center;
+  color: #999;
+  padding: 60px 0;
+  font-size: 16px;
+}
+
+.loading,
+.error {
+  text-align: center;
+  padding: 60px 0;
+  font-size: 16px;
+}
+
+.error {
+  color: #dc3545;
+}
+
+.loading {
+  color: #666;
+}
