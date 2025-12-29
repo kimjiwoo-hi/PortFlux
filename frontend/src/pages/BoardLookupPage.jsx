@@ -19,7 +19,7 @@ function BoardLookupPage() {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('/api/boardlookup/posts', {
+        const response = await axios.get(`http://localhost:8080/api/boardlookup/posts?timestamp=${new Date().getTime()}`, {
           withCredentials: true
         });
         
@@ -38,17 +38,16 @@ function BoardLookupPage() {
 
           if (post.pdfImages && post.pdfImages.length > 0) {
             // PDF 이미지 첫 페이지를 썸네일로 사용
-            imageUrl = `${post.pdfImages[0]}`;
+            imageUrl = `http://localhost:8080${post.pdfImages[0]}`;
           } else if (post.postFile) {
             // PDF 이미지가 없으면 원본 파일 경로 시도 (호환성)
-            imageUrl = `/uploads/${post.postFile}`;
+            imageUrl = `http://localhost:8080/uploads/${post.postFile}`;
           }
 
           return {
             id: post.postId,
             title: post.title,
             author: post.userNickname,
-            userNum: post.userNum,
             imageUrl: imageUrl,
             price: post.price,
             likes: 0, // TODO: 좋아요 기능 추가 시 구현
@@ -59,15 +58,19 @@ function BoardLookupPage() {
         });
 
         setPosts(transformedPosts);
+        console.log("=== 변환된 게시글 데이터 ===");
+        console.log("변환된 게시글 개수:", transformedPosts.length);
+        console.log("변환된 데이터:", transformedPosts);
         setLoading(false);
       } catch (err) {
         console.error('게시글 로드 실패:', err);
+        console.error('에러 상세:', err.response?.data);
         setLoading(false);
       }
     };
 
     fetchPosts();
-  }, []);
+  }, []); // 컴포넌트 마운트 시 한 번만 실행
 
   const lowerCaseQuery = searchQuery.toLowerCase().trim();
   const filteredTagData = !lowerCaseQuery
@@ -127,8 +130,11 @@ function BoardLookupPage() {
         productId: post.id,
       };
 
-      await axios.post(
-        `/api/cart/items`,
+      console.log("요청 URL:", `http://localhost:8080/api/cart/${loggedInUser.userNum}/items`);
+      console.log("요청 데이터:", requestData);
+
+      const response = await axios.post(
+        `http://localhost:8080/api/cart/${loggedInUser.userNum}/items`,
         requestData,
         {
           withCredentials: true,
@@ -163,11 +169,16 @@ function BoardLookupPage() {
     return selectedTagsList.some(tag => post.tags.includes(tag));
   });
 
+  console.log("=== 필터링 정보 ===");
+  console.log("전체 게시글:", posts.length);
+  console.log("선택된 태그:", Object.values(selectedTags).flat());
+  console.log("필터링된 게시글:", filteredPosts.length);
+
   let postsToRender = [...filteredPosts];
   // 로그인 여부 확인하여 추가 버튼 표시
   const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
   if (storedUser) {
-          postsToRender.unshift({ id: 'add-new-post', type: 'add-new' });
+    postsToRender.unshift({ id: 'add-new-post', type: 'add-new' });
   }
 
   if (loading) {
@@ -250,16 +261,13 @@ function BoardLookupPage() {
               />
               <div className="board-item-info">
                 <h4 className="info-title">{post.title}</h4>
-                <span
+                <a 
+                  href={`/profile/${post.author}`} 
                   className="info-author"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/user/${post.userNum}`);
-                  }}
-                  style={{ cursor: 'pointer' }}
+                  onClick={(e) => e.stopPropagation()}
                 >
                   {post.author}
-                </span>
+                </a>
               </div>
             </div>
           )
