@@ -58,7 +58,7 @@ export default function BoardLookupWritePage() {
       formData.append('pdf', selectedFile);
 
       const response = await axios.post(
-        'http://localhost:8080/api/pdf/analyze',
+        '/api/pdf/analyze',
         formData,
         {
           headers: { 'Content-Type': 'multipart/form-data' },
@@ -165,7 +165,7 @@ export default function BoardLookupWritePage() {
       // console.log('AI 요약:', aiSummary ? '포함됨' : '없음'); // AI 요약은 content에 통합되므로 제거
 
       const response = await axios.post(
-        'http://localhost:8080/api/boardlookup/posts',
+        '/api/boardlookup/posts',
         formData,
         {
           headers: { 'Content-Type': 'multipart/form-data' },

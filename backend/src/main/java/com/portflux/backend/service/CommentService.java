@@ -1,6 +1,6 @@
 package com.portflux.backend.service;
 
-import com.portflux.backend.beans.CommentDto;
+import com.portflux.backend.dto.CommentDto;
 import com.portflux.backend.mapper.CommentMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,6 +65,15 @@ public class CommentService {
             throw new IllegalAccessException("이 댓글을 삭제할 권한이 없습니다.");
         }
         commentMapper.deleteComment(commentId);
+    }
+
+    /**
+     * 특정 사용자의 댓글 목록 조회
+     * @param userNum 사용자 번호
+     * @return List<CommentDto>
+     */
+    public List<CommentDto> getCommentsByUserNum(int userNum) {
+        return commentMapper.findCommentsByUserNum(userNum);
     }
 }
 

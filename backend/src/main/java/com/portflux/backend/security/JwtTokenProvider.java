@@ -14,11 +14,20 @@ public class JwtTokenProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
-    // 보안을 위해 고정된 키를 사용하거나 환경변수에서 가져오는 것이 좋지만,
-    // 우선 컴파일 에러 해결을 위해 안정적인 방식으로 키를 생성합니다.
-    private final SecretKey jwtSecretKey = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+    @Value("${jwt.secret:portflux-default-secret-key-minimum-512-bits-required-for-hs512-algorithm-security}")
+    private String jwtSecret;
 
-    private final long jwtExpirationMs = 86400000; // 24시간
+    @Value("${jwt.expiration:86400000}")
+    private long jwtExpirationMs; // 기본값: 24시간
+
+    private SecretKey jwtSecretKey;
+
+    // SecretKey 초기화 (Bean 생성 후 자동 호출)
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        // application.properties의 jwt.secret을 SecretKey로 변환
+        this.jwtSecretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+    }
 
     // 토큰 생성
     public String generateToken(String userId) {

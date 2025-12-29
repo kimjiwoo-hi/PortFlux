@@ -19,7 +19,7 @@ function BoardLookupPage() {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:8080/api/boardlookup/posts', {
+        const response = await axios.get('/api/boardlookup/posts', {
           withCredentials: true
         });
         
@@ -33,15 +33,22 @@ function BoardLookupPage() {
             console.error('태그 파싱 실패:', e);
           }
 
-          // 이미지 URL 생성 (postFile을 썸네일로 사용)
-          const imageUrl = post.postFile 
-            ? `http://localhost:8080/uploads/${post.postFile}`
-            : 'https://cdn.dribbble.com/userupload/12461999/file/original-251950a7c4585c49086113b190f7f224.png?resize=1024x768';
+          // 썸네일 이미지 URL 생성 (PDF 변환된 첫 번째 이미지 사용)
+          let imageUrl = 'https://cdn.dribbble.com/userupload/12461999/file/original-251950a7c4585c49086113b190f7f224.png?resize=1024x768';
+
+          if (post.pdfImages && post.pdfImages.length > 0) {
+            // PDF 이미지 첫 페이지를 썸네일로 사용
+            imageUrl = `${post.pdfImages[0]}`;
+          } else if (post.postFile) {
+            // PDF 이미지가 없으면 원본 파일 경로 시도 (호환성)
+            imageUrl = `/uploads/${post.postFile}`;
+          }
 
           return {
             id: post.postId,
             title: post.title,
             author: post.userNickname,
+            userNum: post.userNum,
             imageUrl: imageUrl,
             price: post.price, // Add price
             likes: 0, // TODO: 좋아요 기능 추가 시 구현
@@ -109,29 +116,19 @@ function BoardLookupPage() {
     const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
     const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
-    console.log("=== 장바구니 추가 디버깅 ===");
-    console.log("Post 정보:", post);
-    console.log("Post ID:", post.id);
-    console.log("User:", storedUser ? JSON.parse(storedUser) : null);
-    console.log("Token 존재:", !!token);
-
     if (!storedUser) {
       alert("로그인이 필요합니다.");
       navigate("/login");
       return;
     }
-    const loggedInUser = JSON.parse(storedUser);
 
     try {
       const requestData = {
         productId: post.id,
       };
 
-      console.log("요청 URL:", `http://localhost:8080/api/cart/${loggedInUser.userNum}/items`);
-      console.log("요청 데이터:", requestData);
-
-      const response = await axios.post(
-        `http://localhost:8080/api/cart/${loggedInUser.userNum}/items`,
+      await axios.post(
+        `/api/cart/items`,
         requestData,
         {
           withCredentials: true,
@@ -141,13 +138,9 @@ function BoardLookupPage() {
         }
       );
 
-      console.log("장바구니 추가 성공:", response.data);
       alert("장바구니에 담겼습니다.");
     } catch (err) {
-      console.error("=== 장바구니 추가 실패 ===");
-      console.error("Status:", err.response?.status);
-      console.error("응답 데이터:", err.response?.data);
-      console.error("전체 에러:", err);
+      console.error("장바구니 추가 실패:", err);
 
       if (err.response?.status === 409) {
         alert("이미 장바구니에 담긴 항목입니다.");
@@ -257,13 +250,16 @@ function BoardLookupPage() {
               />
               <div className="board-item-info">
                 <h4 className="info-title">{post.title}</h4>
-                <a 
-                  href={`/profile/${post.author}`} 
+                <span
                   className="info-author"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/user/${post.userNum}`);
+                  }}
+                  style={{ cursor: 'pointer' }}
                 >
                   {post.author}
-                </a>
+                </span>
               </div>
             </div>
           )

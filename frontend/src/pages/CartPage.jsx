@@ -24,7 +24,7 @@ function CartPage() {
       const user = JSON.parse(storedUser);
 
       const cartResponse = await axios.get(
-        `http://localhost:8080/api/cart/${user.userNum}`,
+        `/api/cart`,
         {
           withCredentials: true,
           headers: {
@@ -38,7 +38,7 @@ function CartPage() {
         items.map(async (item) => {
           try {
             const postResponse = await axios.get(
-              `http://localhost:8080/api/boardlookup/${item.postId}`,
+              `/api/boardlookup/${item.postId}`,
               { withCredentials: true }
             );
 
@@ -46,9 +46,9 @@ function CartPage() {
 
             let imageUrl = 'https://cdn.dribbble.com/userupload/12461999/file/original-251950a7c4585c49086113b190f7f224.png?resize=1024x768';
             if (post.pdfImages && post.pdfImages.length > 0) {
-              imageUrl = `http://localhost:8080${post.pdfImages[0]}`;
+              imageUrl = `${post.pdfImages[0]}`;
             } else if (post.postFile) {
-              imageUrl = `http://localhost:8080/uploads/${post.postFile}`;
+              imageUrl = `/uploads/${post.postFile}`;
             }
 
             return {
@@ -87,7 +87,7 @@ function CartPage() {
 
     try {
       await axios.delete(
-        `http://localhost:8080/api/cart/items/${cartId}`,
+        `/api/cart/items/${cartId}`,
         {
           withCredentials: true,
           headers: {
@@ -125,19 +125,9 @@ function CartPage() {
     try {
       // 1. 백엔드에 주문 생성 요청 (결제 전 'CREATED' 상태의 주문)
       const orderResponse = await axios.post(
-        "http://localhost:8080/api/orders",
+        '/api/orders',
         {
-          userId: user.userNum,
-          items: cartItems.map(item => ({
-            productId: item.postId,
-            productName: item.title,
-            unitPrice: item.price || 0,
-            qty: 1
-          })),
-          // 아임포트 결제에 필요한 구매자 정보 전달 (예시, user 객체에 해당 필드가 있다고 가정)
-          buyerEmail: user.userEmail || "test@example.com", // 실제 user 객체에 이메일 필드가 있어야 함
-          buyerName: user.userNickname || "구매자", // 실제 user 객체에 닉네임 필드가 있어야 함
-          buyerTel: user.userPhone || "010-1234-5678" // 실제 user 객체에 전화번호 필드가 있어야 함
+          items: orderItems
         },
         { 
           withCredentials: true,
@@ -147,9 +137,21 @@ function CartPage() {
 
       console.log("주문 생성 완료:", orderResponse.data);
 
-      // 2. 생성된 merchantUid를 가지고 결제 페이지로 이동
-      const { merchantUid } = orderResponse.data;
-      navigate("/payment", { state: { merchantUid } });
+      // 주문 완료 후 장바구니 비우기
+      for (const item of cartItems) {
+        await axios.delete(
+          `/api/cart/items/${item.cartId}`,
+          {
+            withCredentials: true,
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+      }
+
+      // OrderResultPage로 이동 (merchant_uid 전달)
+      navigate(`/order-result?merchant_uid=${orderResponse.data.merchantUid}`);
 
     } catch (err) {
       console.error("주문 생성 실패:", err);
