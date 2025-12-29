@@ -72,7 +72,7 @@ function BoardLookupPage() {
     return () => {
       window.removeEventListener('focus', handleFocus);
     };
-  }, [fetchPosts]); // fetchPosts가 변경될 때마다 useEffect 재실행 (useCallback 덕분에 안정적)
+  }, []); // 빈 배열은 이펙트가 컴포넌트 마운트/언마운트 시 한번만 실행됨을 의미
 
   const lowerCaseQuery = searchQuery.toLowerCase().trim();
   const filteredTagData = !lowerCaseQuery
