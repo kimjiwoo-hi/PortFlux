@@ -45,56 +45,58 @@
     </update>
 
     <select id="getBoardList" parameterType="String" resultType="com.portflux.backend.beans.BoardFreeBean">
-        SELECT p.post_id as postId, 
-               CASE 
-                   WHEN p.board_type = 'notice' OR a.user_num IS NOT NULL THEN 'notice' 
-                   ELSE 'free' 
-               END as boardType, 
-               p.title, 
-               p.content, 
-               p.created_at as createdAt, 
-               NVL(p.view_cnt, 0) as viewCnt, 
-               NVL(p.like_cnt, 0) as likeCnt, 
-               p.post_file as postFile, 
-               p.image as image, 
-               p.user_num as userNum,
-               p.company_num as companyNum,
-               COALESCE(u.user_nickname, c.company_name, '알 수 없음') as writerNickname,
-               (SELECT COUNT(*) FROM POST_COMMENT com WHERE com.post_id = p.post_id) as commentCnt
-        FROM POST p 
-        LEFT JOIN USERS u ON p.user_num = u.user_num
-        LEFT JOIN COMPANY c ON p.company_num = c.company_num
-        LEFT JOIN ADMIN_ACCOUNT a ON p.user_num = a.user_num
-        <where>
-            <if test="keyword != null and keyword != ''">
-                (p.title LIKE '%' || #{keyword} || '%' OR p.content LIKE '%' || #{keyword} || '%')
-            </if>
-            AND p.board_type IN ('free', 'notice')
-        </where>
-        ORDER BY CASE WHEN p.board_type = 'notice' OR a.user_num IS NOT NULL THEN 0 ELSE 1 END ASC, p.post_id DESC
-    </select>
+    SELECT p.post_id as postId, 
+           CASE 
+               WHEN p.board_type = 'notice' OR a.user_num IS NOT NULL THEN 'notice' 
+               ELSE 'free' 
+           END as boardType, 
+           p.title, 
+           p.content, 
+           p.created_at as createdAt, 
+           NVL(p.view_cnt, 0) as viewCnt, 
+           NVL(p.like_cnt, 0) as likeCnt, 
+           p.post_file as postFile, 
+           p.image as image, 
+           p.user_num as userNum,
+           p.company_num as companyNum,
+           COALESCE(u.user_nickname, c.company_name, '관리자') as userNickname,
+           COALESCE(u.user_nickname, c.company_name, '관리자') as writerNickname,
+           (SELECT COUNT(*) FROM POST_COMMENT com WHERE com.post_id = p.post_id) as commentCnt
+    FROM POST p 
+    LEFT JOIN USERS u ON p.user_num = u.user_num
+    LEFT JOIN COMPANY c ON p.company_num = c.company_num
+    LEFT JOIN ADMIN_ACCOUNT a ON p.user_num = a.user_num
+    <where>
+        <if test="keyword != null and keyword != ''">
+            (p.title LIKE '%' || #{keyword} || '%' OR p.content LIKE '%' || #{keyword} || '%')
+        </if>
+        AND p.board_type IN ('free', 'notice')
+    </where>
+    ORDER BY CASE WHEN p.board_type = 'notice' OR a.user_num IS NOT NULL THEN 0 ELSE 1 END ASC, p.post_id DESC
+</select>
 
-    <select id="getBoardDetail" parameterType="int" resultType="com.portflux.backend.beans.BoardFreeBean">
-        SELECT 
-            p.post_id as postId, 
-            p.board_type as boardType, 
-            p.title, 
-            p.content, 
-            p.created_at as createdAt, 
-            p.updated_at as updatedAt,
-            NVL(p.view_cnt, 0) as viewCnt, 
-            NVL(p.like_cnt, 0) as likeCnt,
-            p.post_file as postFile,
-            p.image as image,
-            p.user_num as userNum,
-            p.company_num as companyNum,
-            COALESCE(u.user_nickname, c.company_name, '알 수 없음') as writerNickname
-        FROM POST p 
-        LEFT JOIN USERS u ON p.user_num = u.user_num
-        LEFT JOIN COMPANY c ON p.company_num = c.company_num
-        LEFT JOIN ADMIN_ACCOUNT a ON p.user_num = a.user_num
-        WHERE p.post_id = #{postId}
-    </select>
+<select id="getBoardDetail" parameterType="int" resultType="com.portflux.backend.beans.BoardFreeBean">
+    SELECT 
+        p.post_id as postId, 
+        p.board_type as boardType, 
+        p.title, 
+        p.content, 
+        p.created_at as createdAt, 
+        p.updated_at as updatedAt,
+        NVL(p.view_cnt, 0) as viewCnt, 
+        NVL(p.like_cnt, 0) as likeCnt,
+        p.post_file as postFile,
+        p.image as image,
+        p.user_num as userNum,
+        p.company_num as companyNum,
+        COALESCE(u.user_nickname, c.company_name, '관리자') as userNickname,
+        COALESCE(u.user_nickname, c.company_name, '관리자') as writerNickname
+    FROM POST p 
+    LEFT JOIN USERS u ON p.user_num = u.user_num
+    LEFT JOIN COMPANY c ON p.company_num = c.company_num
+    LEFT JOIN ADMIN_ACCOUNT a ON p.user_num = a.user_num
+    WHERE p.post_id = #{postId}
+</select>
 
     <insert id="insertBoard" parameterType="com.portflux.backend.beans.BoardFreeBean">
         INSERT INTO POST (board_type, user_num, company_num, title, content, post_file, image) 
