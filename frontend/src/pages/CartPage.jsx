@@ -23,11 +23,6 @@ function CartPage() {
 
       const user = JSON.parse(storedUser);
 
-      // 장바구니 목록 가져오기
-      console.log("=== 장바구니 조회 ===");
-      console.log("User Num:", user.userNum);
-      console.log("Token 존재:", !!token);
-
       const cartResponse = await axios.get(
         `http://localhost:8080/api/cart/${user.userNum}`,
         {
@@ -38,12 +33,7 @@ function CartPage() {
         }
       );
 
-      console.log("장바구니 응답:", cartResponse.data);
-
-      // postId로 게시물 정보 가져오기
       const items = cartResponse.data.items || [];
-      console.log("장바구니 항목 수:", items.length);
-      console.log("항목 목록:", items);
       const enrichedItems = await Promise.all(
         items.map(async (item) => {
           try {
@@ -54,9 +44,7 @@ function CartPage() {
 
             const post = postResponse.data.post || postResponse.data;
 
-            // 썸네일 이미지 URL 생성
             let imageUrl = 'https://cdn.dribbble.com/userupload/12461999/file/original-251950a7c4585c49086113b190f7f224.png?resize=1024x768';
-
             if (post.pdfImages && post.pdfImages.length > 0) {
               imageUrl = `http://localhost:8080${post.pdfImages[0]}`;
             } else if (post.postFile) {
@@ -107,8 +95,6 @@ function CartPage() {
           }
         }
       );
-
-      // 삭제 후 목록 다시 불러오기
       await fetchCartItems();
     } catch (err) {
       console.error("삭제 실패:", err);
@@ -116,6 +102,9 @@ function CartPage() {
     }
   };
 
+  // ------------------------------------------------------------------
+  // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 이 부분이 수정됩니다 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+  // ------------------------------------------------------------------
   const handleCheckout = async () => {
     if (cartItems.length === 0) {
       alert("장바구니가 비어있습니다.");
@@ -124,7 +113,7 @@ function CartPage() {
 
     const token = localStorage.getItem("token") || sessionStorage.getItem("token");
     const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
-
+    
     if (!storedUser) {
       alert("로그인이 필요합니다.");
       navigate("/login");
@@ -134,53 +123,42 @@ function CartPage() {
     const user = JSON.parse(storedUser);
 
     try {
-      // 장바구니 아이템을 Order API 형식으로 변환
-      const orderItems = cartItems.map(item => ({
-        productId: item.postId,
-        productName: item.title,
-        unitPrice: item.price || 0,
-        qty: 1
-      }));
-
-      // 주문 생성 API 호출
+      // 1. 백엔드에 주문 생성 요청 (결제 전 'CREATED' 상태의 주문)
       const orderResponse = await axios.post(
-        'http://localhost:8080/api/orders',
+        "http://localhost:8080/api/orders",
         {
           userId: user.userNum,
-          items: orderItems
+          items: cartItems.map(item => ({
+            productId: item.postId,
+            productName: item.title,
+            unitPrice: item.price || 0,
+            qty: 1
+          })),
+          // 아임포트 결제에 필요한 구매자 정보 전달 (예시, user 객체에 해당 필드가 있다고 가정)
+          buyerEmail: user.userEmail || "test@example.com", // 실제 user 객체에 이메일 필드가 있어야 함
+          buyerName: user.userNickname || "구매자", // 실제 user 객체에 닉네임 필드가 있어야 함
+          buyerTel: user.userPhone || "010-1234-5678" // 실제 user 객체에 전화번호 필드가 있어야 함
         },
-        {
+        { 
           withCredentials: true,
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+          headers: { 'Authorization': `Bearer ${token}` } 
         }
       );
 
       console.log("주문 생성 완료:", orderResponse.data);
 
-      // 주문 완료 후 장바구니 비우기
-      for (const item of cartItems) {
-        await axios.delete(
-          `http://localhost:8080/api/cart/items/${item.cartId}`,
-          {
-            withCredentials: true,
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          }
-        );
-      }
-
-      // OrderResultPage로 이동 (merchant_uid 전달)
-      navigate(`/order-result?merchant_uid=${orderResponse.data.merchantUid}`);
+      // 2. 생성된 merchantUid를 가지고 결제 페이지로 이동
+      const { merchantUid } = orderResponse.data;
+      navigate("/payment", { state: { merchantUid } });
 
     } catch (err) {
       console.error("주문 생성 실패:", err);
       alert("주문 처리 중 오류가 발생했습니다.");
     }
   };
+  // ------------------------------------------------------------------
+  // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ 이 부분이 수정됩니다 ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+  // ------------------------------------------------------------------
 
   const calculateTotal = () => {
     return cartItems.reduce((sum, item) => sum + (item.price || 0), 0);

@@ -70,14 +70,9 @@ public class PaymentController {
                         new ErrorResponse("INVALID_MERCHANT_UID", "merchantUid is required")
                 );
             }
-            if (req.getAmount() == null || req.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-                return ResponseEntity.badRequest().body(
-                        new ErrorResponse("INVALID_AMOUNT", "amount must be greater than 0")
-                );
-            }
 
             // 결제 확인 (아임포트 서버 검증 포함)
-            PaymentRecord payment = paymentService.confirmPayment(req.getImpUid(), req.getMerchantUid(), req.getAmount());
+            PaymentRecord payment = paymentService.confirmPayment(req.getImpUid(), req.getMerchantUid());
 
             ConfirmResponse res = new ConfirmResponse();
             res.setPaymentId(payment.getId());
@@ -111,7 +106,6 @@ public class PaymentController {
     public static class ConfirmRequest {
         private String impUid;
         private String merchantUid;
-        private BigDecimal amount;
     }
 
     @Data
