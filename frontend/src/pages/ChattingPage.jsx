@@ -3,6 +3,7 @@ import { getChatRooms } from "../api/chatRest";
 import { useChatSocket } from "../hooks/useChatSocket";
 import "./ChattingPage.css";
 
+
 export default function ChatPage({ loginUserNum }) {
   const [rooms, setRooms] = useState([]);
   const [activeRoomId, setActiveRoomId] = useState(null);

@@ -37,14 +37,14 @@ const BoardJobCreatePage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [selectedMainRegion, setSelectedMainRegion] = useState("");
 
-  // 기업 로그인 확인 (세션 체크)
+  // 로그인 확인
   useEffect(() => {
-    // TODO: 실제 세션 체크 로직 추가
-    // const companyNum = sessionStorage.getItem("companyNum");
-    // if (!companyNum) {
-    //   alert("기업 로그인이 필요합니다.");
-    //   navigate("/login");
-    // }
+    const user = localStorage.getItem("user") || sessionStorage.getItem("user");
+
+    if (!user) {
+      alert("로그인이 필요합니다.");
+      navigate("/login", { state: { from: "/boardjob/create" } });
+    }
   }, [navigate]);
 
   // 입력 변경 핸들러
