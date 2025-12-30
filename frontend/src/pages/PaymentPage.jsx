@@ -6,7 +6,7 @@ import "./CheckoutPage.css"; // CheckoutPage.css 재사용 (혹은 PaymentPage.c
 function PaymentPage() {
   const { state } = useLocation(); // merchantUid를 state로 받음
   const navigate = useNavigate();
-  const [payMethod, setPayMethod] = useState("html5_inicis"); // 기본 결제 수단: 신용카드
+  const [payMethod, setPayMethod] = useState("card"); // 기본 결제 수단: 신용카드
   const [orderInfo, setOrderInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -30,8 +30,9 @@ function PaymentPage() {
       try {
         // 백엔드에서 merchant_uid로 주문 정보 조회 (PaymentService에서 사용되는 API와는 다름)
         const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-        const response = await axios.get(`http://localhost:8080/api/orders/${merchantUid}`, {
-           headers: { 'Authorization': `Bearer ${token}` }
+        const response = await axios.get(`/api/orders/${merchantUid}`, {
+          withCredentials: true,
+          headers: { 'Authorization': `Bearer ${token}` }
         });
         setOrderInfo(response.data);
         setLoading(false);
@@ -53,62 +54,88 @@ function PaymentPage() {
     }
 
     const { IMP } = window;
-    IMP.init("imp77508670"); // TODO: 실제 아임포트 가맹점 식별코드로 변경하세요.
+    const impKey = import.meta.env.VITE_IMP_KEY || "imp77508670";
+    IMP.init(impKey);
+
+    // 결제수단별 Channel Key 설정 (포트원 V1 최신 방식)
+    const getChannelKey = () => {
+      switch (payMethod) {
+        case "kakaopay":
+          return "channel-key-5acc4805-406d-4644-b2d0-3bf69d7dd1a5"; // 카카오페이
+        case "tosspay":
+        case "naverpay":
+        case "payco":
+          return "channel-key-1a093847-6a4b-4cdf-bd11-78b638b4c4c6"; // 토스페이먼츠 (간편결제 통합)
+        case "card":
+        default:
+          return "channel-key-ab9ad1a7-935e-4e7a-b193-f1a407168af1"; // 이니시스 신용카드
+      }
+    };
 
     const paymentData = {
-      pg: payMethod === "kakaopay" ? "kakaopay" : "html5_inicis", // 카카오페이 PG사 설정
-      pay_method: "card", // 신용카드 결제 (카카오페이는 pg 설정 시 override됨)
+      channelKey: getChannelKey(), // V1 최신 방식: channelKey 사용
+      pay_method: payMethod === "card" ? "card" : "easy", // 간편결제는 'easy', 카드는 'card'
       merchant_uid: orderInfo.merchantUid,
       name: orderInfo.items.length > 1 ? `${orderInfo.items[0].productName} 외 ${orderInfo.items.length - 1}건` : orderInfo.items[0].productName,
       amount: orderInfo.totalAmount,
       buyer_email: orderInfo.buyerEmail,
       buyer_name: orderInfo.buyerName,
       buyer_tel: orderInfo.buyerTel,
-      m_redirect_url: `http://localhost:5173/order-result`, // 모바일 결제 시 리다이렉트 될 주소
+      m_redirect_url: `${window.location.origin}/order-result`, // 모바일 결제 시 리다이렉트 될 주소
     };
 
-    IMP.request_pay(paymentData, async (rsp) => {
-      if (rsp.success) {
-        try {
-          // 결제 성공 시, 백엔드에 결제 검증 요청 (우리가 수정한 /api/payments/confirm)
-          await axios.post(
-            "http://localhost:8080/api/payments/confirm",
-            {
-              impUid: rsp.imp_uid,
-              merchantUid: rsp.merchant_uid,
-            },
-            {
-              headers: { 'Authorization': `Bearer ${localStorage.getItem("token") || sessionStorage.getItem("token")}` }
-            }
-          );
-          
-          // 검증 성공 후 결과 페이지로 이동
-          navigate(`/order-result?merchant_uid=${rsp.merchant_uid}`);
+    IMP.request_pay(paymentData, async (response) => {
+      // 결제 실패 시 조기 반환 (공식 문서 권장 방식)
+      if (response.error_code != null) {
+        alert(`결제에 실패하였습니다. 에러 내용: ${response.error_msg}`);
+        navigate("/cart");
+        return;
+      }
 
-          // 장바구니 비우기 (결제 성공 및 검증 완료 후)
-          const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-          const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
-          if (storedUser) {
-            const user = JSON.parse(storedUser);
-            await axios.delete(
-                `http://localhost:8080/api/cart/${user.userNum}/empty`, // 백엔드에 장바구니 비우기 API가 필요함
-                { withCredentials: true, headers: { 'Authorization': `Bearer ${token}` } }
-            ).then(() => {
-                console.log("장바구니 비우기 성공");
-            }).catch(err => {
-                console.error("장바구니 비우기 실패:", err);
-            });
+      // 결제 성공 - 백엔드 검증 진행
+      try {
+        const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+
+        // 백엔드에 결제 검증 요청
+        await axios.post(
+          "/api/payments/confirm",
+          {
+            impUid: response.imp_uid,
+            merchantUid: response.merchant_uid,
+          },
+          {
+            withCredentials: true,
+            headers: { 'Authorization': `Bearer ${token}` }
           }
+        );
 
-        } catch (err) {
-          console.error("결제 검증 실패:", err);
-          alert(`결제 검증에 실패했습니다. 문제가 지속될 경우 고객센터로 문의해주세요.`);
-          // TODO: 결제는 성공했으나 검증이 실패한 경우, 사용자에게 안내하고 서버에 해당 내용을 로깅하는 등의 후처리 필요
-          navigate(`/order-result?merchant_uid=${rsp.merchant_uid}`); // 일단 결과 페이지로 보내서 사용자에게 상황을 알림
+        // 장바구니 비우기 (검증 성공 후)
+        const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+        if (storedUser) {
+          const user = JSON.parse(storedUser);
+          try {
+            await axios.delete(
+              `/api/cart/${user.userNum}/empty`,
+              {
+                withCredentials: true,
+                headers: { 'Authorization': `Bearer ${token}` }
+              }
+            );
+            console.log("장바구니 비우기 성공");
+          } catch (err) {
+            console.error("장바구니 비우기 실패:", err);
+            // 장바구니 비우기 실패해도 결제는 완료되었으므로 진행
+          }
         }
-      } else {
-        alert(`결제에 실패했습니다: ${rsp.error_msg}`);
-        navigate("/cart"); // 결제 실패 시 장바구니로 돌아감
+
+        // 주문 완료 페이지로 이동
+        navigate(`/order-result?merchant_uid=${response.merchant_uid}`);
+
+      } catch (err) {
+        console.error("결제 검증 실패:", err);
+        alert(`결제 검증에 실패했습니다. 결제는 완료되었으나 서버 처리 중 문제가 발생했습니다.\n고객센터로 문의해주세요.`);
+        // 결제는 완료되었으므로 주문 결과 페이지로 이동하여 상황 안내
+        navigate(`/order-result?merchant_uid=${response.merchant_uid}`);
       }
     });
   };
@@ -139,16 +166,34 @@ function PaymentPage() {
           <h2>결제 수단 선택</h2>
           <div className="payment-options">
             <button
-              className={`payment-option-btn ${selectedPg === 'html5_inicis' ? 'selected' : ''}`}
-              onClick={() => setSelectedPg('html5_inicis')}
+              className={`payment-option-btn ${payMethod === 'card' ? 'selected' : ''}`}
+              onClick={() => setPayMethod('card')}
             >
-              신용카드
+              💳 신용카드
             </button>
             <button
-              className={`payment-option-btn ${selectedPg === 'kakaopay' ? 'selected' : ''}`}
-              onClick={() => setSelectedPg('kakaopay')}
+              className={`payment-option-btn ${payMethod === 'kakaopay' ? 'selected' : ''}`}
+              onClick={() => setPayMethod('kakaopay')}
             >
-              카카오페이
+              <span style={{ color: '#FEE500' }}>●</span> 카카오페이
+            </button>
+            <button
+              className={`payment-option-btn ${payMethod === 'tosspay' ? 'selected' : ''}`}
+              onClick={() => setPayMethod('tosspay')}
+            >
+              <span style={{ color: '#0064FF' }}>●</span> 토스페이
+            </button>
+            <button
+              className={`payment-option-btn ${payMethod === 'naverpay' ? 'selected' : ''}`}
+              onClick={() => setPayMethod('naverpay')}
+            >
+              <span style={{ color: '#03C75A' }}>●</span> 네이버페이
+            </button>
+            <button
+              className={`payment-option-btn ${payMethod === 'payco' ? 'selected' : ''}`}
+              onClick={() => setPayMethod('payco')}
+            >
+              <span style={{ color: '#F23030' }}>●</span> 페이코
             </button>
           </div>
         </div>
