@@ -407,7 +407,7 @@ const UserProfile = () => {
           />
           {isEditing && (
             <>
-              <label className="image-upload-label banner-upload">
+              <label className="banner-upload">
                 <input
                   type="file"
                   accept="image/*"
@@ -418,7 +418,7 @@ const UserProfile = () => {
               </label>
               {(bannerPreview || (editedInfo.userBanner && editedInfo.userBanner.trim() !== "")) && (
                 <button
-                  className="image-delete-btn banner-delete"
+                  className="banner-delete"
                   onClick={handleBannerImageDelete}
                 >
                   배너 삭제
@@ -453,15 +453,12 @@ const UserProfile = () => {
                     onChange={handleProfileImageChange}
                     style={{ display: "none" }}
                   />
-                  프로필 변경
                 </label>
                 {(profilePreview || (editedInfo.userImage && editedInfo.userImage.trim() !== "")) && (
                   <button
                     className="image-delete-btn profile-delete"
                     onClick={handleProfileImageDelete}
-                  >
-                    프로필 삭제
-                  </button>
+                  />
                 )}
               </>
             )}
@@ -488,16 +485,16 @@ const UserProfile = () => {
           {isOwner && (
             <>
               <button
-                className={`tab-button ${activeTab === "myinfo" ? "active" : ""}`}
-                onClick={() => setActiveTab("myinfo")}
-              >
-                내 정보
-              </button>
-              <button
                 className={`tab-button ${activeTab === "saved" ? "active" : ""}`}
                 onClick={() => setActiveTab("saved")}
               >
                 저장한 게시글 ({savedPosts.length})
+              </button>
+              <button
+                className={`tab-button ${activeTab === "myinfo" ? "active" : ""}`}
+                onClick={() => setActiveTab("myinfo")}
+              >
+                내 정보
               </button>
             </>
           )}
@@ -561,12 +558,6 @@ const UserProfile = () => {
 
           {activeTab === "myinfo" && isOwner && fullUserInfo && (
             <div className="info-section">
-              {!isEditing && (
-                <button className="btn-edit" onClick={handleEdit}>
-                  수정하기
-                </button>
-              )}
-
               <div className="info-grid">
                 <div className="info-item">
                   <label>아이디</label>
@@ -631,7 +622,7 @@ const UserProfile = () => {
                 </div>
               </div>
 
-              {isEditing && (
+              {isEditing ? (
                 <div className="button-group">
                   <button className="btn-cancel" onClick={handleCancel}>
                     취소
@@ -640,15 +631,16 @@ const UserProfile = () => {
                     저장
                   </button>
                 </div>
-              )}
-
-              {!isEditing && (
-                <div className="password-section">
+              ) : (
+                <div className="button-group">
                   <button
                     className="btn-password"
                     onClick={() => setShowPasswordModal(true)}
                   >
                     비밀번호 변경
+                  </button>
+                  <button className="btn-edit" onClick={handleEdit}>
+                    내 정보 수정
                   </button>
                 </div>
               )}
