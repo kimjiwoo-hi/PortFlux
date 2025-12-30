@@ -1,29 +1,27 @@
-/* Behance 스타일 - 전체 화면 레이아웃 */
+/* =================================
+   전체 레이아웃 (Behance 스타일)
+================================= */
+/* 페이지 전체 배경 및 기본 스타일 설정 */
 .board-lookup-read {
-  background-color: #fff; /* 배경색을 흰색으로 변경 */
+  background-color: #fff;
   color: #191919;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   min-height: 100vh;
-  /* 기존 fixed 관련 속성 제거 */
-  /* position: fixed; */
-  /* top: 0; */
-  /* left: 0; */
-  /* width: 100vw; */
-  /* height: 100vh; */
-  /* overflow-y: auto; */
-  /* z-index: 1; */
 }
 
-/* PDF 뷰어 - 배경 투명하게 */
+/* =================================
+   PDF 뷰어 영역
+================================= */
+/* PDF를 표시하는 메인 뷰어 컨테이너 */
 .pdf-viewer {
   background-color: transparent !important;
-  margin-top: 20px; /* 기존 헤더를 고려하여 마진 조정 */
-  min-height: calc(100vh - 20px); /* 마진만큼 높이 조정 */
+  margin-top: 20px;
+  min-height: calc(100vh - 20px);
   padding: 60px 0;
   width: 100%;
 }
 
-/* PDF 페이지는 흰색 유지 */
+/* PDF 개별 페이지 카드 스타일 */
 .pdf-page {
   background-color: #fff;
   border-radius: 0;
@@ -34,20 +32,27 @@
   width: 85%;
 }
 
-/* 메인 컨텐츠 - 전체 화면 */
+/* =================================
+   메인 컨텐츠 영역
+================================= */
+/* PDF 뷰어를 감싸는 전체 컨텐츠 컨테이너 */
 .main-content {
   width: 100%;
   max-width: 100%;
   padding: 0;
 }
 
-/* 상단 헤더 - 스크롤 시 숨김 */
+/* =================================
+   상단 헤더 (게시글 정보)
+================================= */
+/* 게시글 제목, 작성자 정보를 표시하는 상단 헤더 */
 .post-header {
-   background: rgba(255, 255, 255, 0.98);  /* 내부 래퍼로 이동 */
-   padding: 20px 60px;  /* 내부 래퍼로 이동 */
+   background: rgba(255, 255, 255, 0.98);
+   padding: 20px 60px;
   width: 100%;
 }
 
+/* 헤더 내부 컨텐츠 래퍼 */
 .post-header-content-wrapper {
   max-width: 1400px;
   width: 85%;
@@ -57,7 +62,10 @@
   box-sizing: border-box;
 }
 
-/* 작가 정보 */
+/* =================================
+   작성자 프로필 영역
+================================= */
+/* 작성자 정보 전체 컨테이너 */
 .author-info {
   align-items: flex-start;
   display: flex;
@@ -68,38 +76,43 @@
   margin: 0 auto;
 }
 
+/* 프로필 이미지와 정보를 감싸는 래퍼 */
 .profile-wrapper {
   align-items: flex-start;
   display: flex;
   gap: 15px;
   position: relative;
-
 }
 
+/* 프로필 왼쪽 섹션 (이미지 + 닉네임) */
 .profile-left {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
+/* 프로필 상단 (이미지와 닉네임을 가로로 배치) */
 .profile-top {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
+/* 프로필 정보 (닉네임 등) */
 .profile-info {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
+/* 프로필 이미지 컨테이너 (팔로우 버튼 포함) */
 .profile-image {
   position: relative;
   width: 40px;
   height: 40px;
 }
 
+/* 프로필 이미지 또는 기본 프로필 아이콘 */
 .profile-image img,
 .default-profile {
   width: 100%;
@@ -112,6 +125,7 @@
   font-size: 20px;
 }
 
+/* 프로필 이미지 우측 하단의 팔로우 버튼 */
 .follow-btn {
   position: absolute;
   bottom: -2px;
@@ -131,15 +145,18 @@
   transition: all 0.3s ease;
 }
 
+/* 팔로우 버튼 호버 효과 */
 .follow-btn:hover {
   background-color: #0046cc;
   transform: scale(1.1);
 }
 
+/* 팔로우 중일 때 버튼 색상 */
 .follow-btn.following {
   background-color: #4caf50;
 }
 
+/* 작성자 닉네임 */
 .nickname {
   font-size: 15px;
   font-weight: 600;
@@ -148,7 +165,10 @@
   position: relative;
 }
 
-/* 닉네임 호버 시 프로필 카드 */
+/* =================================
+   닉네임 호버 시 프로필 카드
+================================= */
+/* 닉네임에 마우스 올렸을 때 나타나는 상세 프로필 카드 */
 .profile-card {
   position: absolute;
   top: calc(100% + 10px);
@@ -165,12 +185,14 @@
   pointer-events: none;
 }
 
+/* 호버 시 프로필 카드 표시 */
 .nickname:hover .profile-card {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
 }
 
+/* 프로필 카드 상단의 화살표 */
 .profile-card::before {
   content: '';
   position: absolute;
@@ -183,6 +205,7 @@
   box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05);
 }
 
+/* 프로필 카드 헤더 (아바타 + 이름) */
 .profile-card-header {
   display: flex;
   align-items: center;
@@ -192,6 +215,7 @@
   border-bottom: 1px solid #f0f0f0;
 }
 
+/* 프로필 카드의 큰 아바타 이미지 */
 .profile-card-avatar {
   width: 60px;
   height: 60px;
@@ -199,6 +223,7 @@
   background: #f0f0f0;
 }
 
+/* 프로필 카드 내 사용자 정보 텍스트 */
 .profile-card-info h3 {
   font-size: 18px;
   font-weight: 600;
@@ -206,6 +231,7 @@
   color: #191919;
 }
 
+/* 프로필 카드 내 위치 정보 */
 .profile-card-location {
   font-size: 13px;
   color: #666;
@@ -214,6 +240,7 @@
   gap: 4px;
 }
 
+/* 프로필 카드의 통계 영역 (팔로워, 게시글 등) */
 .profile-card-stats {
   display: flex;
   justify-content: space-around;
@@ -222,10 +249,12 @@
   border-bottom: 1px solid #f0f0f0;
 }
 
+/* 개별 통계 항목 */
 .profile-card-stat {
   text-align: center;
 }
 
+/* 통계 숫자 */
 .profile-card-stat-value {
   font-size: 18px;
   font-weight: 600;
@@ -233,18 +262,21 @@
   display: block;
 }
 
+/* 통계 라벨 */
 .profile-card-stat-label {
   font-size: 12px;
   color: #666;
   margin-top: 4px;
 }
 
+/* 프로필 카드의 액션 버튼 영역 */
 .profile-card-actions {
   display: flex;
   gap: 8px;
   margin-top: 16px;
 }
 
+/* 프로필 카드 버튼 기본 스타일 */
 .profile-card-btn {
   flex: 1;
   padding: 10px;
@@ -256,100 +288,144 @@
   border: none;
 }
 
+/* 프로필 카드 주요 버튼 (팔로우 등) */
 .profile-card-btn-primary {
   background: #0057ff;
   color: #fff;
 }
 
+/* 주요 버튼 호버 효과 */
 .profile-card-btn-primary:hover {
   background: #0046cc;
 }
 
+/* 프로필 카드 보조 버튼 */
 .profile-card-btn-secondary {
   background: #f0f0f0;
   color: #191919;
 }
 
+/* 보조 버튼 호버 효과 */
 .profile-card-btn-secondary:hover {
   background: #e8e8e8;
 }
 
+/* =================================
+   태그 영역
+================================= */
+/* 게시글 태그들을 표시하는 섹션 */
 .tags-section {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin-top: 0; /* 상단 마진 제거 */
+  margin-top: 0;
   margin-left: 200px;
 }
 
+/* 개별 태그 스타일 */
 .tag {
   background-color: #f0f0f0;
-  padding: 6px 12px; /* 패딩 약간 증가 */
+  padding: 6px 12px;
   border-radius: 12px;
   font-size: 12px;
   color: #666;
 }
 
-/* header-right가 프로필 옆에 오도록 */
+/* =================================
+   헤더 오른쪽 영역 (제목 + 수정/삭제 메뉴)
+================================= */
+/* 프로필 오른쪽의 게시글 제목 및 메뉴 영역 */
 .header-right {
-  align-items: flex-start;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
   flex: 1;
   margin-left: 0;
-  padding-top: 0; /* 패딩 제거해서 프로필과 수평 맞추기 */
+  padding-top: 0;
 }
 
+/* 게시글 제목 */
 .post-title {
   font-size: 24px;
   font-weight: 600;
   color: #191919;
   margin-top: 80px;
   line-height: 1.2;
+  flex: 1;
 }
 
-/* PDF 뷰어 - 전체 화면 */
-.pdf-viewer {
-  background-color: #fafafa;
-  margin-top: 80px;
-  min-height: calc(100vh - 80px);
-  padding: 60px 0;
-  width: 100%;
+/* =================================
+   게시글 수정/삭제 메뉴
+================================= */
+.post-author-actions {
+  display: flex;
+  gap: 12px;
+  margin-left: 24px;
 }
 
+.edit-btn {
+  background: #f3f4f6;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #191919;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.edit-btn:hover {
+  background: #e5e7eb;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ef4444;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  text-decoration: underline;
+}
+
+/* =================================
+   PDF 뷰어 스크롤바
+================================= */
+/* PDF 뷰어의 스크롤바 너비 */
 .pdf-viewer::-webkit-scrollbar {
   width: 8px;
 }
 
+/* 스크롤바 트랙 배경 */
 .pdf-viewer::-webkit-scrollbar-track {
   background: #f0f0f0;
 }
 
+/* 스크롤바 핸들 */
 .pdf-viewer::-webkit-scrollbar-thumb {
   background: #ccc;
   border-radius: 4px;
 }
 
+/* 스크롤바 핸들 호버 */
 .pdf-viewer::-webkit-scrollbar-thumb:hover {
   background: #999;
 }
 
-.pdf-page {
-  background-color: #fff;
-  border-radius: 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  margin: 0 auto 40px;
-  max-width: 1400px;
-  padding: 0;
-  width: 85%;
-}
-
+/* =================================
+   PDF 컨텐츠
+================================= */
+/* PDF 페이지 내부 컨텐츠 영역 */
 .pdf-content {
   padding: 80px 60px;
   text-align: left;
 }
 
+/* PDF 내 이미지 스타일 */
 .pdf-content img {
   max-width: 100%;
   height: auto;
@@ -357,7 +433,10 @@
   margin: 20px 0;
 }
 
-/* 플로팅 사이드바 - Behance 스타일 */
+/* =================================
+   플로팅 사이드바 (좋아요, 댓글 등)
+================================= */
+/* 화면 우측에 고정된 액션 버튼 사이드바 */
 .sidebar {
   position: fixed;
   right: 30px;
@@ -371,11 +450,13 @@
   transition: opacity 0.3s ease;
 }
 
+/* 스크롤 시 사이드바 숨김 */
 .sidebar.hidden {
   opacity: 0;
   pointer-events: none;
 }
 
+/* 사이드바의 개별 아이콘 버튼 */
 .sidebar-icon {
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid #e8e8e8;
@@ -393,6 +474,7 @@
   position: relative;
 }
 
+/* 프로필 아이콘의 미니 이미지 */
 .sidebar-icon.profile-icon .profile-mini-image {
   width: 32px;
   height: 32px;
@@ -400,6 +482,7 @@
   object-fit: cover;
 }
 
+/* 프로필 아이콘의 기본 아바타 */
 .sidebar-icon.profile-icon .default-profile-mini {
   width: 32px;
   height: 32px;
@@ -411,18 +494,21 @@
   font-size: 16px;
 }
 
+/* 사이드바 아이콘 호버 효과 */
 .sidebar-icon:hover {
   background: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transform: scale(1.05);
 }
 
+/* 사이드바 아이콘 내부 이미지 */
 .icon-image {
   width: 24px;
   height: 24px;
   object-fit: contain;
 }
 
+/* 사이드바 아이콘 라벨 (기본 숨김) */
 .sidebar-label {
   font-size: 10px;
   color: #666;
@@ -431,15 +517,27 @@
   display: none;
 }
 
+/* 호버 시 라벨 표시 */
 .sidebar-icon:hover .sidebar-label {
   display: block;
 }
 
-/* 하트 아이콘 애니메이션 */
+/* 좋아요 카운트 표시 */
+.like-count {
+  font-size: 12px;
+  color: #666;
+  font-weight: 600;
+}
+
+/* =================================
+   하트(좋아요) 아이콘 애니메이션
+================================= */
+/* 좋아요 클릭 시 하트 뛰는 애니메이션 */
 .heart-icon.liked .icon-image {
   animation: heartBeat 0.4s ease;
 }
 
+/* 하트 비트 애니메이션 정의 */
 @keyframes heartBeat {
   0%, 100% {
     transform: scale(1);
@@ -449,7 +547,10 @@
   }
 }
 
-/* 장바구니 토스트 */
+/* =================================
+   토스트 메시지 (장바구니, 저장 알림)
+================================= */
+/* 화면 중앙에 나타나는 알림 토스트 */
 .cart-toast {
   position: fixed;
   top: 50%;
@@ -466,11 +567,13 @@
   display: none;
 }
 
+/* 토스트 표시 상태 */
 .cart-toast.show {
   display: block;
   animation: toastFadeIn 0.3s ease, toastFadeOut 0.3s ease 2.7s;
 }
 
+/* 토스트 나타나는 애니메이션 */
 @keyframes toastFadeIn {
   from {
     opacity: 0;
@@ -482,6 +585,7 @@
   }
 }
 
+/* 토스트 사라지는 애니메이션 */
 @keyframes toastFadeOut {
   from {
     opacity: 1;
@@ -491,7 +595,10 @@
   }
 }
 
-/* 댓글 팝업 - Behance 스타일 */
+/* =================================
+   댓글 팝업
+================================= */
+/* 우측에서 슬라이드되는 댓글 팝업 */
 .comments-popup {
   position: fixed;
   right: 120px;
@@ -508,10 +615,12 @@
   animation: slideIn 0.3s ease;
 }
 
+/* 댓글 팝업 활성화 상태 */
 .comments-popup.active {
   display: flex;
 }
 
+/* 댓글 팝업 슬라이드 인 애니메이션 */
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -523,6 +632,7 @@
   }
 }
 
+/* 댓글 팝업 헤더 */
 .comments-header {
   display: flex;
   justify-content: space-between;
@@ -531,6 +641,7 @@
   border-bottom: 1px solid #f0f0f0;
 }
 
+/* 댓글 헤더 제목 */
 .comments-header h3 {
   margin: 0;
   font-size: 18px;
@@ -538,6 +649,7 @@
   color: #191919;
 }
 
+/* 팝업 닫기 버튼 */
 .close-btn {
   background: none;
   border: none;
@@ -554,11 +666,13 @@
   transition: all 0.2s ease;
 }
 
+/* 닫기 버튼 호버 효과 */
 .close-btn:hover {
   background-color: #f0f0f0;
   color: #191919;
 }
 
+/* 댓글 목록 스크롤 영역 */
 .comments-list {
   flex: 1;
   overflow-y: auto;
@@ -566,29 +680,35 @@
   max-height: calc(70vh - 200px);
 }
 
+/* 댓글 목록 스크롤바 너비 */
 .comments-list::-webkit-scrollbar {
   width: 6px;
 }
 
+/* 댓글 목록 스크롤바 트랙 */
 .comments-list::-webkit-scrollbar-track {
   background: #f9f9f9;
 }
 
+/* 댓글 목록 스크롤바 핸들 */
 .comments-list::-webkit-scrollbar-thumb {
   background: #ddd;
   border-radius: 3px;
 }
 
+/* 개별 댓글 아이템 */
 .comment-item {
   margin-bottom: 24px;
   padding-bottom: 20px;
   border-bottom: 1px solid #f0f0f0;
 }
 
+/* 마지막 댓글의 밑줄 제거 */
 .comment-item:last-child {
   border-bottom: none;
 }
 
+/* 댓글 작성자 정보 영역 */
 .comment-author {
   display: flex;
   justify-content: space-between;
@@ -596,17 +716,69 @@
   margin-bottom: 8px;
 }
 
+/* 댓글 작성자 프로필 (사진 + 닉네임) */
+.comment-author-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 댓글 작성자 프로필 사진 */
+.comment-profile-pic,
+.comment-default-pic {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+}
+
+/* 댓글 작성자 기본 프로필 아이콘 */
+.comment-default-pic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+/* 댓글 작성자 닉네임 */
 .comment-nickname {
   font-weight: 600;
   color: #191919;
   font-size: 14px;
 }
 
+/* 댓글 메타 정보 (날짜, 삭제 버튼) */
+.comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 댓글 작성 날짜 */
 .comment-date {
   font-size: 12px;
   color: #999;
 }
 
+/* 댓글 삭제 버튼 */
+.comment-delete-btn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+/* 댓글 삭제 버튼 호버 효과 */
+.comment-delete-btn:hover {
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+/* 댓글 내용 텍스트 */
 .comment-text {
   margin: 0;
   color: #333;
@@ -614,12 +786,14 @@
   line-height: 1.6;
 }
 
+/* 댓글 입력 섹션 */
 .comment-input-section {
   padding: 20px 24px;
   border-top: 1px solid #f0f0f0;
   background-color: #fafafa;
 }
 
+/* 댓글 입력 텍스트 영역 */
 .comment-input-section textarea {
   width: 100%;
   background-color: #fff;
@@ -634,15 +808,18 @@
   transition: border-color 0.2s ease;
 }
 
+/* 댓글 입력창 포커스 효과 */
 .comment-input-section textarea:focus {
   outline: none;
   border-color: #0057ff;
 }
 
+/* 댓글 입력창 플레이스홀더 */
 .comment-input-section textarea::placeholder {
   color: #999;
 }
 
+/* 댓글 제출 버튼 */
 .submit-btn {
   width: 100%;
   background-color: #0057ff;
@@ -656,15 +833,20 @@
   transition: background-color 0.3s ease;
 }
 
+/* 댓글 제출 버튼 호버 효과 */
 .submit-btn:hover {
   background-color: #0046cc;
 }
 
+/* 댓글 제출 버튼 클릭 효과 */
 .submit-btn:active {
   transform: scale(0.98);
 }
 
-/* AI 요약 팝업 */
+/* =================================
+   AI 요약 팝업
+================================= */
+/* AI 요약을 표시하는 팝업 */
 .ai-summary-popup {
   position: fixed;
   right: 120px;
@@ -681,10 +863,12 @@
   animation: slideIn 0.3s ease;
 }
 
+/* AI 요약 팝업 활성화 상태 */
 .ai-summary-popup.active {
   display: flex;
 }
 
+/* AI 요약 팝업 헤더 */
 .ai-summary-header {
   display: flex;
   justify-content: space-between;
@@ -693,6 +877,7 @@
   border-bottom: 1px solid #f0f0f0;
 }
 
+/* AI 요약 헤더 제목 */
 .ai-summary-header h3 {
   margin: 0;
   font-size: 18px;
@@ -703,25 +888,30 @@
   color: #191919;
 }
 
+/* AI 요약 내용 스크롤 영역 */
 .ai-summary-content {
   flex: 1;
   overflow-y: auto;
   padding: 24px;
 }
 
+/* AI 요약 내용 스크롤바 너비 */
 .ai-summary-content::-webkit-scrollbar {
   width: 6px;
 }
 
+/* AI 요약 내용 스크롤바 트랙 */
 .ai-summary-content::-webkit-scrollbar-track {
   background: #f9f9f9;
 }
 
+/* AI 요약 내용 스크롤바 핸들 */
 .ai-summary-content::-webkit-scrollbar-thumb {
   background: #ddd;
   border-radius: 3px;
 }
 
+/* AI 요약 텍스트 */
 .ai-summary-text {
   color: #333;
   font-size: 14px;
@@ -729,7 +919,49 @@
   white-space: pre-wrap;
 }
 
-/* 가격 배지 - 플로팅 */
+/* AI 요약 섹션 구분 */
+.summary-section {
+  margin-bottom: 25px;
+  padding-bottom: 25px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* 마지막 섹션의 밑줄 제거 */
+.summary-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* AI 요약 섹션 제목 */
+.summary-section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #191919;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+/* AI 요약 내용 텍스트 */
+.summary-content-text {
+  color: #333;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  text-align: left;
+}
+
+/* AI 요약 내용이 없을 때 표시 */
+.summary-placeholder-text {
+  text-align: center;
+  color: #999;
+  padding: 20px 0;
+}
+
+/* =================================
+   가격 배지
+================================= */
+/* 우측 하단에 고정된 가격 표시 배지 */
 .price-badge {
   position: fixed;
   bottom: 30px;
@@ -746,121 +978,28 @@
   transition: all 0.3s ease;
 }
 
+/* 가격 배지 호버 효과 */
 .price-badge:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 32px rgba(102, 126, 234, 0.5);
 }
 
+/* 가격 라벨 ("가격") */
 .price-label {
   font-size: 12px;
   opacity: 0.9;
 }
 
+/* 가격 값 (숫자) */
 .price-value {
   font-size: 20px;
   font-weight: 700;
 }
 
-/* 반응형 */
-@media (max-width: 1024px) {
-  .post-header {
-    padding: 15px 30px;
-  }
-
-  .sidebar {
-    right: 20px;
-    gap: 15px;
-  }
-
-  .sidebar-icon {
-    width: 48px;
-    height: 48px;
-  }
-
-  .icon-image {
-    width: 20px;
-    height: 20px;
-  }
-
-  .comments-popup,
-  .ai-summary-popup {
-    right: 90px;
-    width: 380px;
-  }
-
-  .pdf-page {
-    width: 90%;
-  }
-
-  .pdf-content {
-    padding: 60px 40px;
-  }
-}
-
-@media (max-width: 768px) {
-  .post-header {
-    padding: 12px 20px;
-  }
-
-  .post-title {
-    font-size: 18px;
-  }
-
-  .sidebar {
-    position: fixed;
-    right: auto;
-    left: 50%;
-    top: auto;
-    bottom: 20px;
-    transform: translateX(-50%);
-    flex-direction: row;
-    gap: 12px;
-    background: rgba(255, 255, 255, 0.98);
-    padding: 12px;
-    border-radius: 50px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
-  }
-
-  .sidebar-icon {
-    width: 44px;
-    height: 44px;
-  }
-
-  .icon-image {
-    width: 20px;
-    height: 20px;
-  }
-
-  .comments-popup,
-  .ai-summary-popup {
-    right: 20px;
-    left: 20px;
-    width: auto;
-    max-height: 60vh;
-  }
-
-  .sidebar-label {
-    display: none !important;
-  }
-
-  .pdf-page {
-    width: 95%;
-  }
-
-  .pdf-content {
-    padding: 40px 20px;
-  }
-
-  .price-badge {
-    bottom: 80px;
-    right: 20px;
-    padding: 12px 20px;
-  }
-
-  .price-value {
-    font-size: 18px;
-  }
-}
+/* =================================
+   다운로드 버튼
+================================= */
+/* PDF 다운로드 버튼 */
 .download-button {
   display: inline-block;
   padding: 12px 24px;
@@ -872,107 +1011,47 @@
   transition: background-color 0.3s ease;
 }
 
+/* 다운로드 버튼 호버 효과 */
 .download-button:hover {
   background-color: #0046cc;
 }
 
+/* =================================
+   PDF 이미지 표시
+================================= */
+/* PDF 이미지들을 세로로 나열하는 래퍼 */
 .pdf-image-wrapper {
   display: flex;
   flex-direction: column;
   gap: 60px;
 }
 
+/* PDF의 각 페이지 이미지 */
 .pdf-page-image {
   width: 100%;
   height: auto;
   display: block;
 }
 
-
-
-.comment-author {
-  display: flex;
-  justify-content: space-between;
-  align-items: center; /* This will vertically align the date with the profile info */
-  margin-bottom: 8px;
+/* 오버레이 배경 (댓글/AI 팝업이 열렸을 때 뒷배경 어둡게) */
+.overlay-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 190;
 }
 
-.comment-author-profile {
-  display: flex;
-  align-items: center;
-  gap: 8px; /* Space between picture and nickname */
-}
-
-.comment-profile-pic,
-.comment-default-pic {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: #f0f0f0;
-}
-
-.comment-default-pic {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
+/* 오버레이 활성화 상태 */
+.overlay-background.active {
+  opacity: 1;
+  visibility: visible;
 }
 
 
-.comment-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.comment-delete-btn {
-  background: none;
-  border: none;
-  color: #9ca3af;
-  cursor: pointer;
-  font-size: 12px;
-  padding: 2px 4px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-}
-
-.comment-delete-btn:hover {
-  background-color: #f3f4f6;
-  color: #1f2937;
-}
-
-
-.summary-section {
-  margin-bottom: 25px;
-  padding-bottom: 25px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.summary-section:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
-}
-
-.summary-section-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #191919;
-  margin-bottom: 15px;
-  text-align: left;
-}
-
-.summary-content-text {
-  color: #333;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  white-space: pre-wrap; /* Preserve whitespace and line breaks */
-  text-align: left;
-}
-
-.summary-placeholder-text {
-  text-align: center;
-  color: #999;
-  padding: 20px 0;
-}
 
