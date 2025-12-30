@@ -1,36 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-
 <mapper namespace="com.portflux.backend.mapper.UserMapper">
 
     <insert id="registerUser" parameterType="com.portflux.backend.beans.UserRegisterBean">
         INSERT INTO USERS (
-            user_id, 
-            user_password, 
-            user_name, 
-            user_phone, 
-            user_email, 
-            user_nickname, 
-            drawn_user, 
-            user_create_at, 
-            user_level
+            user_id, user_password, user_name, user_phone, 
+            user_email, user_nickname, user_level, user_create_at, drawn_user
         ) VALUES (
-            #{email},        #{password}, 
-            #{name},         #{phoneNumber}, 
-            #{email},        #{nickname},     'N', 
+            #{email},
+            #{password}, 
+            #{name},
+            #{phoneNumber}, 
+            #{email},
+            #{nickname},
+            'N', 
             SYSDATE, 
             1
         )
     </insert>
 
+    <select id="login" parameterType="com.portflux.backend.beans.UserLoginBean" resultType="com.portflux.backend.beans.UserBean">
+        SELECT 
+            user_num as userNum,
+            user_id as userId,
+            user_password as userPw,
+            user_name as userName,
+            user_nickname as userNickname,
+            user_email as userEmail,
+            user_level as userLevel
+        FROM USERS
+        WHERE user_id = #{userId} 
+          AND user_password = #{password}
+    </select>
+
+    <select id="checkIdDuplicate" parameterType="String" resultType="int">
+        SELECT COUNT(*) FROM USERS WHERE user_id = #{userId}
+    </select>
+
     <select id="checkNicknameCount" parameterType="String" resultType="int">
-        SELECT COUNT(*) 
-        FROM USERS 
-        WHERE user_nickname = #{nickname}
+        SELECT COUNT(*) FROM USERS WHERE user_nickname = #{nickname}
+    </select>
+
+    <select id="checkNicknameDuplicate" parameterType="String" resultType="int">
+        SELECT COUNT(*) FROM USERS WHERE user_nickname = #{nickname}
+    </select>
+
+    <select id="checkEmailDuplicate" parameterType="String" resultType="int">
+        SELECT COUNT(*) FROM USERS WHERE user_email = #{email}
+    </select>
+
+    <select id="findByNameAndEmail" resultType="com.portflux.backend.beans.UserBean">
+        SELECT user_id as userId FROM USERS WHERE user_name = #{userName} AND user_email = #{userEmail}
     </select>
 
     <select id="findUserByEmail" parameterType="String" resultType="com.portflux.backend.beans.UserBean">
+        SELECT 
+            user_num as userNum, 
+            user_id as userId, 
+            user_password as userPw,
+            user_name as userName, 
+            user_nickname as userNickname, 
+            user_email as userEmail
+        FROM USERS
+        WHERE user_email = #{email}
+    </select>
+
+    <select id="findUserNumByUserId" parameterType="string" resultType="int">
+        SELECT user_num
+        FROM USERS
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- user_num으로 사용자 조회 (수정 - parameterType을 int로 변경) -->
+    <select id="selectUserByNum" parameterType="int" resultType="com.portflux.backend.beans.UserBean">
         SELECT 
             user_num AS userNum,
             user_id AS userId,
@@ -39,16 +82,13 @@
             user_phone AS userPhone,
             user_email AS userEmail,
             user_nickname AS userNickname,
+            user_image AS userImage,
+            user_banner AS userBanner,
             drawn_user AS drawnUser,
             user_create_at AS userCreateAt,
             user_level AS userLevel
         FROM USERS
-        WHERE user_email = #{email}
+        WHERE user_num = #{userNum}
     </select>
 
-    <select id="findUserNumByUserId" parameterType="string" resultType="int">
-        SELECT user_num
-            FROM USERS
-        WHERE user_id = #{userId}
-    </select>
 </mapper>

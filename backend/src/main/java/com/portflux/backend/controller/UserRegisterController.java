@@ -1,24 +1,19 @@
 package com.portflux.backend.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import com.portflux.backend.beans.UserRegisterBean;
 import com.portflux.backend.service.UserService;
-
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/user/register")
+@RequestMapping("/api/user/register")
 @RequiredArgsConstructor
 public class UserRegisterController {
 
     private final UserService userService;
 
-    // 1. 일반 회원가입 요청
     @PostMapping("/general")
     public ResponseEntity<String> registerGeneral(@RequestBody UserRegisterBean registerBean) {
         try {
@@ -29,27 +24,25 @@ public class UserRegisterController {
         }
     }
     
-    // 2. 닉네임 중복 확인
     @PostMapping("/check-nickname")
     public ResponseEntity<Boolean> checkNickname(@RequestBody Map<String, String> request) {
         String nickname = request.get("nickname");
-        boolean isAvailable = userService.isNicknameAvailable(nickname);
-        return ResponseEntity.ok(isAvailable);
+        // userService의 통합 중복 체크를 사용 (양쪽 테이블 모두 확인)
+        boolean isDuplicate = userService.isNicknameDuplicate(nickname);
+        return ResponseEntity.ok(!isDuplicate); // 중복이 아니어야 true(사용가능)
     }
     
-    // 3. 이메일 중복 확인
     @PostMapping("/check-email")
     public ResponseEntity<Boolean> checkEmailDuplicate(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         boolean isDuplicate = userService.isEmailDuplicate(email); 
-        return ResponseEntity.ok(isDuplicate);
+        return ResponseEntity.ok(isDuplicate); // 중복이면 true
     }
 
-    // 4. ★ 아이디 중복 확인 API (추가됨)
     @PostMapping("/check-id")
     public ResponseEntity<Boolean> checkIdDuplicate(@RequestBody Map<String, String> request) {
         String userId = request.get("userId");
         boolean isDuplicate = userService.isIdDuplicate(userId); 
-        return ResponseEntity.ok(isDuplicate);
+        return ResponseEntity.ok(isDuplicate); // 중복이면 true
     }
 }

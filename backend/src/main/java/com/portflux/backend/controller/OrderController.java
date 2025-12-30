@@ -3,9 +3,13 @@ package com.portflux.backend.controller;
 import com.portflux.backend.model.Order;
 import com.portflux.backend.model.OrderItem;
 import com.portflux.backend.service.OrderService;
+import com.portflux.backend.repository.UserRepository;
+import com.portflux.backend.beans.UserBean;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -18,11 +22,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
+    private final UserRepository userRepository;
 
     @PostMapping
-    public ResponseEntity<CreateOrderResponse> createOrder(@RequestBody CreateOrderRequest req) {
-        // TODO: 현재는 인증 없이 userId를 request에서 받습니다. 실제로는 인증정보 사용 권장.
-        Long userId = req.getUserId();
+    public ResponseEntity<CreateOrderResponse> createOrder(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody CreateOrderRequest req) {
+        UserBean user = userRepository.findByUserId(userDetails.getUsername());
+        if (user == null) {
+            return ResponseEntity.status(404).build();
+        }
 
         List<OrderItem> items = req.getItems().stream().map(i -> {
             OrderItem it = new OrderItem();
@@ -33,7 +42,7 @@ public class OrderController {
             return it;
         }).collect(Collectors.toList());
 
-        Order order = orderService.createOrder(userId, items);
+        Order order = orderService.createOrder(Long.valueOf(user.getUserNum()), items);
 
         CreateOrderResponse res = new CreateOrderResponse();
         res.setOrderId(order.getId());
@@ -45,7 +54,6 @@ public class OrderController {
 
     @Data
     public static class CreateOrderRequest {
-        private Long userId;
         private List<CreateItem> items;
     }
 
@@ -64,9 +72,14 @@ public class OrderController {
         private BigDecimal amount;
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<OrderResponse>> getUserOrders(@PathVariable("userId") Long userId) {
-        List<Order> orders = orderService.getOrdersByUserId(userId);
+    @GetMapping("/user")
+    public ResponseEntity<List<OrderResponse>> getUserOrders(@AuthenticationPrincipal UserDetails userDetails) {
+        UserBean user = userRepository.findByUserId(userDetails.getUsername());
+        if (user == null) {
+            return ResponseEntity.status(404).build();
+        }
+
+        List<Order> orders = orderService.getOrdersByUserId(Long.valueOf(user.getUserNum()));
 
         List<OrderResponse> responses = orders.stream()
                 .map(order -> {

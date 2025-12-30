@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.portflux.backend.mapper.AdminMapper">
+
+    <select id="getAdminById" resultType="com.portflux.backend.beans.AdminBean">
+        SELECT 
+            admin_num as adminNum,
+            admin_id as adminId,
+            admin_password as adminPw,  admin_name as adminName
+        FROM ADMIN_ACCOUNT
+        WHERE admin_id = #{adminId}
+    </select>
+
+</mapper>
