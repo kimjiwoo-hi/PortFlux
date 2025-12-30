@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import "./MyInfo.css";
 import UserDefaultIcon from "../assets/user_default_icon.png";
+import { updateUserInfoCache } from "../utils/userInfoCache";
 
 const MyInfo = () => {
   const [userInfo, setUserInfo] = useState({
@@ -122,7 +123,18 @@ const MyInfo = () => {
           withCredentials: true
         }
       );
+
       setUserInfo(editedInfo);
+
+      // 캐시 업데이트 - Header와 Popover가 즉시 새 이미지 표시
+      updateUserInfoCache({
+        userName: editedInfo.userName,
+        userNickname: editedInfo.userNickname,
+        userEmail: editedInfo.userEmail,
+        userImage: editedInfo.userImage,
+        userBanner: editedInfo.userBanner
+      });
+
       setIsEditing(false);
       setSuccessMessage("정보가 성공적으로 수정되었습니다.");
       setTimeout(() => setSuccessMessage(""), 3000);

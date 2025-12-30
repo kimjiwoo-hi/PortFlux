@@ -169,9 +169,10 @@ function RegisterPage() {
     else if (rawValue.length <= 5) formattedValue = `${rawValue.slice(0, 3)}-${rawValue.slice(3)}`;
     else if (rawValue.length < 10) formattedValue = `${rawValue.slice(0, 3)}-${rawValue.slice(3, 5)}-${rawValue.slice(5)}`;
     else formattedValue = `${rawValue.slice(0, 3)}-${rawValue.slice(3, 5)}-${rawValue.slice(5, 10)}`;
-    
+
     setBusinessNumber(formattedValue);
     setIsBizNumValid(null);
+
     if (rawValue.length === 10) {
       try {
         const res = await fetch("http://localhost:8080/api/company/register/check-business", {
@@ -179,7 +180,15 @@ function RegisterPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ businessNumber: formattedValue }),
         });
-        if (res.ok) setIsBizNumValid(await res.json());
+
+        if (res.ok) {
+          const isValid = await res.json();
+          console.log("사업자번호 검증 결과:", isValid);
+          setIsBizNumValid(isValid);
+        } else {
+          console.error("HTTP 에러:", res.status);
+          setIsBizNumValid(false);
+        }
       } catch (error) {
         console.error("사업자 번호 체크 실패:", error);
         setIsBizNumValid(false);
@@ -281,10 +290,10 @@ function RegisterPage() {
           {!isIndividual && (
             <div className="form-group">
               <label className="form-label">사업자등록번호</label>
-              <input type="text" className={`reg-input ${isBizNumValid === false ? "input-error" : ""}`} 
+              <input type="text" className={`reg-input ${isBizNumValid === false ? "input-error" : isBizNumValid === true ? "" : ""}`}
                      placeholder="사업자 등록번호 10자리" value={businessNumber} onChange={handleBusinessNumberChange} maxLength={12} />
-              {isBizNumValid === true && <span className="valid-msg">확인완료</span>}
-              {isBizNumValid === false && <span className="error-msg">유효하지 않은 번호입니다</span>}
+              {isBizNumValid === true && <span className="valid-msg">✓ 유효한 사업자번호입니다</span>}
+              {isBizNumValid === false && <span className="error-msg">✗ 유효하지 않은 사업자번호입니다</span>}
             </div>
           )}
 

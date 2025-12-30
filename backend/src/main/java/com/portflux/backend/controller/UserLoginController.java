@@ -31,12 +31,14 @@ public class UserLoginController {
      */
     @PostMapping("/proc")
     public ResponseEntity<?> login(
-            @RequestBody UserLoginBean loginBean, 
+            @RequestBody UserLoginBean loginBean,
             @RequestParam("type") String type) { // [수정] 쿼리 스트링의 type을 받음
         try {
+            System.out.println(">>> 로그인 시도: ID=" + loginBean.getUserId() + ", Type=" + type);
+
             // Service 로직 호출 (전달받은 type에 따라 USER/COMPANY 분기 처리됨)
             Map<String, Object> result = userService.login(loginBean, type);
-            
+
             // 토큰 생성을 위한 아이디 추출 (UserBean의 userId 혹은 CompanyUserBean의 companyId)
             String loginId = (String) result.get("id");
             String token = jwtTokenProvider.generateToken(loginId);
@@ -54,10 +56,13 @@ public class UserLoginController {
             if (result.containsKey("user")) {
                 response.put("user", result.get("user"));
             }
-            
+
+            System.out.println(">>> 로그인 성공: " + loginId);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             // 로그인 실패 시 400 에러와 함께 메시지 전달
+            System.err.println(">>> 로그인 실패: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -68,11 +73,14 @@ public class UserLoginController {
     @PostMapping("/google")
     public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> body) {
         try {
-            String email = body.get("email");
-            String name = body.get("name");
-            
-            // Service 호출 (가입 여부 판단)
-            Map<String, Object> result = userService.processGoogleLogin(email, name);
+            String authCode = body.get("code");
+
+            if (authCode == null || authCode.isEmpty()) {
+                return ResponseEntity.badRequest().body("Authorization code is missing");
+            }
+
+            // Google API를 통해 사용자 정보 가져오기는 Service에서 처리
+            Map<String, Object> result = userService.processGoogleLoginWithCode(authCode);
 
             boolean isMember = (boolean) result.get("isMember");
 
@@ -85,6 +93,8 @@ public class UserLoginController {
                 response.put("user", user);
                 response.put("token", token);
                 response.put("status", "SUCCESS");
+                response.put("role", "USER");
+                response.put("memberType", "user");
 
                 return ResponseEntity.ok(response);
             } else {
@@ -94,12 +104,13 @@ public class UserLoginController {
                 response.put("message", "회원가입이 필요합니다.");
                 response.put("email", result.get("email"));
                 response.put("name", result.get("name"));
-                
+
                 return ResponseEntity.ok(response);
             }
 
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("구글 로그인 처리 중 오류: " + e.getMessage());
         }
     }
 }
