@@ -141,6 +141,10 @@ const router = createBrowserRouter([
         element: <UserProfile />,
       },
       {
+        path: "/mypage/:nickname",
+        element: <UserProfile />,
+      },
+      {
         path: "/etc",
         element: <NotFound />,
       },

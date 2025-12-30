@@ -384,13 +384,12 @@ function BoardLookupPage() {
                 >
                   {post.title}
                 </h4>
-                <a
-                  href={`/profile/${post.author}`}
+                <span
                   className="info-author"
-                  onClick={(e) => e.preventDefault()}
+                  onClick={() => navigate(`/mypage/${post.author}`)}
                 >
                   {post.author}
-                </a>
+                </span>
               </div>
             </div>
           )

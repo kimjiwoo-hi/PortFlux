@@ -133,6 +133,13 @@ public class BoardLookupService {
     }
 
     /**
+     * 닉네임으로 사용자의 게시글 목록 조회
+     */
+    public List<BoardLookupPostDto> getPostsByNickname(String nickname) {
+        return boardLookupMapper.findPostsByNickname(nickname);
+    }
+
+    /**
  * 사용자가 해당 게시물을 구매했는지 확인
  */
 public boolean isPurchased(Long userNum, int postId) {
