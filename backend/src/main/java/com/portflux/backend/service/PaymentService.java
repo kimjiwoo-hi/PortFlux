@@ -27,10 +27,17 @@ public class PaymentService {
     private final OrderService orderService;
     private final IamportClient iamportClient; // 공식 IamportClient
 
+    /**
+     * imp_uid로 결제 기록 조회 (웹훅 중복 처리 방지용)
+     */
+    public PaymentRecord findByImpUid(String impUid) {
+        return paymentRepository.findByImpUid(impUid).orElse(null);
+    }
+
     @Transactional
-    public PaymentRecord confirmPayment(String impUid, String merchantUid, BigDecimal amount) throws IamportResponseException, IOException {
-        log.info("Starting payment confirmation: impUid={}, merchantUid={}, amount={}",
-                impUid, merchantUid, amount);
+    public PaymentRecord confirmPayment(String impUid, String merchantUid) throws IamportResponseException, IOException {
+        log.info("Starting payment confirmation: impUid={}, merchantUid={}",
+                impUid, merchantUid);
 
         // 1. 주문 조회
         Order order = orderService.findByMerchantUid(merchantUid);

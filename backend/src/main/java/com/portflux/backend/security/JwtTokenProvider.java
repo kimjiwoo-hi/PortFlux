@@ -1,11 +1,6 @@
 package com.portflux.backend.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +31,7 @@ public class JwtTokenProvider {
         this.jwtSecretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
-    // Generate a token from a user ID
+    // 토큰 생성
     public String generateToken(String userId) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
@@ -49,8 +44,9 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // Get user ID from the token
+    // 토큰에서 아이디 추출
     public String getUserIdFromToken(String token) {
+        // parserBuilder() 대신 최신 버전 호환을 위해 parser()를 지원하는 형태로 작성
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(jwtSecretKey)
                 .build()
@@ -60,19 +56,22 @@ public class JwtTokenProvider {
         return claims.getSubject();
     }
 
-    // Validate the token
+    // 토큰 유효성 검증
     public boolean validateToken(String authToken) {
         try {
-            Jwts.parserBuilder().setSigningKey(jwtSecretKey).build().parseClaimsJws(authToken);
+            Jwts.parserBuilder()
+                    .setSigningKey(jwtSecretKey)
+                    .build()
+                    .parseClaimsJws(authToken);
             return true;
-        } catch (MalformedJwtException ex) {
-            logger.error("Invalid JWT token");
+        } catch (SecurityException | MalformedJwtException ex) {
+            logger.error("잘못된 JWT 서명입니다.");
         } catch (ExpiredJwtException ex) {
-            logger.error("Expired JWT token");
+            logger.error("만료된 JWT 토큰입니다.");
         } catch (UnsupportedJwtException ex) {
-            logger.error("Unsupported JWT token");
+            logger.error("지원되지 않는 JWT 토큰입니다.");
         } catch (IllegalArgumentException ex) {
-            logger.error("JWT claims string is empty.");
+            logger.error("JWT 토큰이 비어있습니다.");
         }
         return false;
     }
