@@ -1,5 +1,6 @@
 package com.portflux.backend.service;
 
+import com.portflux.backend.api.GoogleApi;
 import com.portflux.backend.beans.*;
 import com.portflux.backend.mapper.AdminMapper;
 import com.portflux.backend.mapper.CompanyUserMapper;
@@ -28,6 +29,7 @@ public class UserService implements UserDetailsService {
     private final AdminMapper adminMapper;
     private final CompanyUserMapper companyUserMapper;
     private final PasswordEncoder passwordEncoder;
+    private final GoogleApi googleApi;
 
     // [추가] UserDetailsService 인터페이스의 필수 구현 메서드
     @Override
@@ -128,6 +130,31 @@ public class UserService implements UserDetailsService {
         response.put("email", trimmedEmail);
         response.put("name", name);
         return response;
+    }
+
+    /**
+     * Authorization Code로 구글 로그인 처리
+     */
+    public Map<String, Object> processGoogleLoginWithCode(String authCode) {
+        Map<String, Object> response = new HashMap<>();
+
+        // 1. Authorization Code로 Access Token 받기
+        String accessToken = googleApi.getAccessToken(authCode);
+        if (accessToken == null) {
+            throw new RuntimeException("구글 Access Token 발급 실패");
+        }
+
+        // 2. Access Token으로 사용자 정보 가져오기
+        Map<String, Object> userInfo = googleApi.getUserInfo(accessToken);
+        if (userInfo == null) {
+            throw new RuntimeException("구글 사용자 정보 조회 실패");
+        }
+
+        String email = (String) userInfo.get("email");
+        String name = (String) userInfo.get("name");
+
+        // 3. 기존 processGoogleLogin 로직 재사용
+        return processGoogleLogin(email, name);
     }
 
     public boolean isNicknameDuplicate(String nickname) { 

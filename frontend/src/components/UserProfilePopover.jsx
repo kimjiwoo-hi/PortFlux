@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./UserProfilePopover.css";
 import { Link, useLocation } from "react-router-dom";
 import UserDefaultIcon from "../assets/user_default_icon.png";
+import { fetchUserInfo, getCachedUserInfo } from "../utils/userInfoCache";
 
 const UserProfilePopover = ({ isOpen, onLogout }) => {
   const location = useLocation();
@@ -12,56 +13,40 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
     userImage: null,
     userBanner: null
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const USER_ROLE = localStorage.getItem("role") || sessionStorage.getItem("role") || "USER";
 
   useEffect(() => {
     if (isOpen) {
-      const storage = localStorage.getItem("isLoggedIn") ? localStorage : sessionStorage;
-      let userId = storage.getItem("userId");
-
-      if (!userId) {
-        const storedUser = storage.getItem("user");
-        if (storedUser) {
-          try {
-            userId = JSON.parse(storedUser).userId;
-          } catch {
-            console.warn("저장된 사용자 정보를 읽을 수 없습니다.");
-          }
+      const loadUserInfo = async () => {
+        // 먼저 캐시 확인 - 즉시 적용
+        const cachedInfo = getCachedUserInfo();
+        if (cachedInfo) {
+          setUserInfo(cachedInfo);
+          return;
         }
-      }
 
-      if (userId) {
-        const token = storage.getItem("token");
+        // 캐시가 없으면 API 호출
+        setIsLoading(true);
+        try {
+          const info = await fetchUserInfo();
+          setUserInfo(info);
+        } catch (error) {
+          console.error("User info fetch error:", error);
+          const storage = localStorage.getItem("isLoggedIn") ? localStorage : sessionStorage;
+          const userId = storage.getItem("userId");
+          setUserInfo(prev => ({
+            ...prev,
+            userNickname: storage.getItem("userNickname") || "사용자",
+            userEmail: userId || ""
+          }));
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
-        fetch(`/api/user/info/${userId}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include'
-        })
-          .then(response => {
-            return response.ok ? response.json() : Promise.reject(response.status);
-          })
-          .then(data => {
-            setUserInfo({
-              userName: data.userName || data.user_name || "",
-              userNickname: data.userNickname || data.user_nickname || storage.getItem("userNickname") || "사용자",
-              userEmail: data.userEmail || data.user_email || userId,
-              userImage: data.userImage || null,
-              userBanner: data.userBanner || null
-            });
-          })
-          .catch((error) => {
-            console.error("User info fetch error:", error);
-            setUserInfo(prev => ({
-              ...prev,
-              userNickname: storage.getItem("userNickname") || "사용자",
-              userEmail: userId
-            }));
-          });
-      }
+      loadUserInfo();
     }
   }, [isOpen]);
 

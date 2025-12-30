@@ -74,7 +74,7 @@
 
     <!-- user_num으로 사용자 조회 (수정 - parameterType을 int로 변경) -->
     <select id="selectUserByNum" parameterType="int" resultType="com.portflux.backend.beans.UserBean">
-        SELECT 
+        SELECT
             user_num AS userNum,
             user_id AS userId,
             user_password AS userPassword,
@@ -90,5 +90,31 @@
         FROM USERS
         WHERE user_num = #{userNum}
     </select>
+
+    <!-- user_id로 사용자 정보 조회 (로그인용) -->
+    <select id="getUserInfo" parameterType="string" resultType="com.portflux.backend.beans.UserBean">
+        SELECT
+            user_num AS userNum,
+            user_id AS userId,
+            user_password AS userPw,
+            user_name AS userName,
+            user_phone AS userPhone,
+            user_email AS userEmail,
+            user_nickname AS userNickname,
+            user_image AS userImage,
+            user_banner AS userBanner,
+            drawn_user AS drawnUser,
+            user_create_at AS userCreateAt,
+            user_level AS userLevel
+        FROM USERS
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 비밀번호 변경 -->
+    <update id="updatePassword">
+        UPDATE USERS
+        SET user_password = #{newPassword}
+        WHERE user_id = #{userId}
+    </update>
 
 </mapper>
