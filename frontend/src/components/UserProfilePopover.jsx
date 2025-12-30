@@ -90,7 +90,10 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
       </div>
 
       <div className="menu-list">
-        <Link to={USER_ROLE === "COMPANY" ? "/company/mypage" : "/mypage/myinfo"} onClick={handleMenuClick(USER_ROLE === "COMPANY" ? "/company/mypage" : "/mypage/myinfo")}>
+        <Link
+          to={USER_ROLE === "COMPANY" ? "/company/mypage" : `/mypage/${userInfo.userNickname}`}
+          onClick={handleMenuClick(USER_ROLE === "COMPANY" ? "/company/mypage" : `/mypage/${userInfo.userNickname}`)}
+        >
           <button className="menu-item">{USER_ROLE === "COMPANY" ? "기업 정보 관리" : "내 정보 보기"}</button>
         </Link>
         <Link to="/cart" onClick={handleMenuClick("/cart")}><button className="menu-item">장바구니</button></Link>
