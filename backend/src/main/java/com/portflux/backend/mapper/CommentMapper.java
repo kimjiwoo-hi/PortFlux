@@ -41,4 +41,11 @@ public interface CommentMapper {
      * @return List<CommentDto>
      */
     List<CommentDto> findCommentsByUserNum(@Param("userNum") int userNum);
+
+    /**
+     * 닉네임으로 댓글 목록 조회
+     * @param nickname 사용자 닉네임
+     * @return List<CommentDto>
+     */
+    List<CommentDto> findCommentsByNickname(@Param("nickname") String nickname);
 }

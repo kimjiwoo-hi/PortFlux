@@ -50,6 +50,13 @@ public interface BoardLookupMapper {
     List<BoardLookupPostDto> findPostsByUserNum(@Param("userNum") int userNum);
 
     /**
+     * 닉네임으로 게시글 조회
+     * @param nickname 사용자 닉네임
+     * @return List<BoardLookupPostDto>
+     */
+    List<BoardLookupPostDto> findPostsByNickname(@Param("nickname") String nickname);
+
+    /**
      * 게시글 수정 (선택적 기능)
      * @param post 수정할 게시글 정보
      */

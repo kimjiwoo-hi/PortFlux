@@ -5,7 +5,7 @@ import "./UserProfile.css";
 import UserDefaultIcon from "../assets/user_default_icon.png";
 
 const UserProfile = () => {
-  const { userNum } = useParams();
+  const { userNum, nickname } = useParams();
   const navigate = useNavigate();
 
   const [userInfo, setUserInfo] = useState(null);
@@ -20,11 +20,13 @@ const UserProfile = () => {
       try {
         setLoading(true);
 
-        // 사용자 정보 조회 - userNum을 userId로 변환하는 과정이 필요할 수 있음
-        // 여기서는 userNum으로 직접 조회한다고 가정
+        // nickname 또는 userNum으로 조회
+        const identifier = nickname || userNum;
+        const endpoint = nickname ? 'nickname' : 'userNum';
+
         const [postsResponse, commentsResponse] = await Promise.all([
-          axios.get(`/api/boardlookup/user/${userNum}/posts`),
-          axios.get(`/api/boardlookup/user/${userNum}/comments`)
+          axios.get(`/api/boardlookup/user/${endpoint}/${identifier}/posts`),
+          axios.get(`/api/boardlookup/user/${endpoint}/${identifier}/comments`)
         ]);
 
         setPosts(postsResponse.data);
@@ -60,10 +62,10 @@ const UserProfile = () => {
       }
     };
 
-    if (userNum) {
+    if (userNum || nickname) {
       fetchUserProfile();
     }
-  }, [userNum]);
+  }, [userNum, nickname]);
 
   const handlePostClick = (postId) => {
     navigate(`/board/lookup/${postId}`);
