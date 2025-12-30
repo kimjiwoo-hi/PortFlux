@@ -34,7 +34,8 @@
   margin-bottom: 30px;
 }
 
-.tab-btn {
+/* [수정] 클래스명 변경 (tab-btn -> reg-tab-btn) */
+.reg-tab-btn {
   flex: 1; /* 1:1 비율 */
   height: 52px;
   background-color: #fff;
@@ -49,11 +50,11 @@
   align-items: center;
 }
 
-/* 선택된 탭 스타일 (사진처럼 파란 테두리) */
-.tab-btn.active {
-  border: 2px solid #3b5bdb;
-  color: #3b5bdb;
-  background-color: #fff;
+/* [수정] 선택된 탭 스타일 (파란색 강제 적용) */
+.reg-tab-btn.active {
+  border: 1px solid #3b5bdb !important;
+  color: #fff !important;
+  background-color: #3b5bdb !important;
 }
 
 /* 폼 컨테이너 */
@@ -161,4 +162,11 @@
 /* 에러 시 인풋 테두리 */
 .input-error {
   border-color: #fa5252 !important;
+}
+
+/* 안내 문구 스타일 */
+.info-text {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.5;
 }

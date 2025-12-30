@@ -46,6 +46,11 @@ dependencies {
     implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'  // ✅ 의존성 이름 수정
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.apache.pdfbox:pdfbox:2.0.30'
+    implementation 'com.github.iamport:iamport-rest-client-java:0.2.23'
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
     
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -54,10 +59,12 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    // JWT (JSON Web Token) 라이브러리
-    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+   implementation 'org.springframework.boot:spring-boot-starter-mail' //SMTP 인증코드 발송 API
+
+   implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+   
+   
 }
 
 dependencyManagement {

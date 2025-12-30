@@ -1,6 +1,6 @@
 package com.portflux.backend.mapper;
 
-import com.portflux.backend.beans.BoardLookupPostDto;
+import com.portflux.backend.dto.BoardLookupPostDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -66,4 +66,10 @@ public interface BoardLookupMapper {
      * @param postId 게시글 ID
      */
     void incrementDownloadCount(@Param("postId") int postId);
+
+    /**
+ * 사용자의 구매 여부 확인
+ */
+boolean checkPurchaseStatus(@Param("userNum") Long userNum, @Param("postId") int postId);
+
 }

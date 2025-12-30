@@ -24,10 +24,16 @@ public class UserInfoResponse {
         response.setUserNickname(user.getUserNickname());
         response.setUserEmail(user.getUserEmail());
         response.setUserPhone(user.getUserPhone());
-        response.setUserCreateAt(user.getUserCreateAt());
+        
+        // [수정 포인트] java.sql.Date를 LocalDateTime으로 변환
+        if (user.getUserCreateAt() != null) {
+            // Date -> LocalDate -> LocalDateTime(시간은 00:00:00으로 설정)
+            response.setUserCreateAt(user.getUserCreateAt().toLocalDate().atStartOfDay());
+        }
+
         response.setUserLevel(user.getUserLevel());
 
-        // byte[]를 Base64 문자열로 변환하여 설정
+        // byte[]를 Base64 문자열로 변환하여 설정 (UserBean의 getter 활용)
         if (user.getUserImage() != null && user.getUserImage().length > 0) {
             response.setUserImage("data:image/jpeg;base64," + user.getUserImageBase64());
         }

@@ -5,7 +5,7 @@
 <mapper namespace="com.portflux.backend.mapper.BoardLookupMapper">
 
     <!-- ResultMap 정의 -->
-    <resultMap id="BoardLookupPostResultMap" type="com.portflux.backend.beans.BoardLookupPostDto">
+    <resultMap id="BoardLookupPostResultMap" type="com.portflux.backend.dto.BoardLookupPostDto">
         <id property="postId" column="post_id"/>
         <result property="boardType" column="board_type"/>
         <result property="userNum" column="user_num"/>
@@ -79,7 +79,7 @@
     </update>
 
     <!-- 게시글 작성 -->
-    <insert id="insertPost" parameterType="com.portflux.backend.beans.BoardLookupPostDto"
+    <insert id="insertPost" parameterType="com.portflux.backend.dto.BoardLookupPostDto"
             useGeneratedKeys="true" keyProperty="postId" keyColumn="post_id">
         INSERT INTO POST (
             board_type,
@@ -111,7 +111,7 @@
     </insert>
 
     <!-- 게시글 수정 -->
-    <update id="updatePost" parameterType="com.portflux.backend.beans.BoardLookupPostDto">
+    <update id="updatePost" parameterType="com.portflux.backend.dto.BoardLookupPostDto">
         UPDATE POST
         SET 
             title = #{title},
@@ -134,4 +134,44 @@
           AND board_type = 'lookup'
     </delete>
 
+    <!-- 특정 사용자의 게시글 목록 조회 -->
+    <select id="findPostsByUserNum" parameterType="int" resultMap="BoardLookupPostResultMap">
+        SELECT
+            p.post_id,
+            p.board_type,
+            p.user_num,
+            p.title,
+            p.content,
+            p.created_at,
+            p.updated_at,
+            p.view_cnt,
+            p.price,
+            p.ai_summary,
+            p.download_cnt,
+            p.post_file,
+            p.tags,
+            u.user_nickname,
+            u.user_image
+        FROM POST p
+        LEFT JOIN USERS u ON p.user_num = u.user_num
+        WHERE p.user_num = #{userNum}
+        ORDER BY p.created_at DESC
+    </select>
+
+<!-- 구매 여부 확인 -->
+<select id="checkPurchaseStatus" resultType="boolean">
+    SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+    FROM ORDER_ITEMS oi
+    INNER JOIN ORDERS o ON oi.order_id = o.id
+    WHERE o.user_id = #{userNum}
+    AND oi.product_id = #{postId}
+    AND o.status = 'PAID'
+</select>
+
+<!-- 다운로드 카운트 증가 -->
+<update id="incrementDownloadCount">
+    UPDATE POST
+    SET download_cnt = download_cnt + 1
+    WHERE post_id = #{postId}
+</update>
 </mapper>

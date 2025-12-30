@@ -1,13 +1,15 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { X } from "lucide-react";
 import heartIcon from "../assets/heart.png";
 import binheartIcon from "../assets/binheart.png";
 import commentIcon from "../assets/comment.png";
 import cartIcon from "../assets/cartIcon.png";
 import summaryAIIcon from "../assets/summary_AI.svg";
 import "./BoardLookupRead.css";
+import downloadIcon from "../assets/Downloadcloud.png";
+import bookmarkIcon from "../assets/Bookmark.png";
+import bookmarkFilledIcon from "../assets/FilldBookmark.png";
 
 const BoardLookupRead = () => {
   const { postId } = useParams();
@@ -28,6 +30,10 @@ const BoardLookupRead = () => {
   const [headerVisible, setHeaderVisible] = useState(true);
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const lastScrollY = useRef(0);
+  const [isPurchased, setIsPurchased] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [showSaveToast, setShowSaveToast] = useState(false);
+  const [saveToastMessage, setSaveToastMessage] = useState("");
 
   // 게시글 데이터 로드
   useEffect(() => {
@@ -43,12 +49,12 @@ const BoardLookupRead = () => {
           setPostData(response.data.post || response.data);
           setComments(response.data.comments || []);
 
-          const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+          const storedUser =
+            localStorage.getItem("user") || sessionStorage.getItem("user");
           if (storedUser) {
             const loggedInUser = JSON.parse(storedUser);
             setLoggedInUser(loggedInUser);
-            
-            // 초기 좋아요 상태 확인
+
             const likeCheckResponse = await axios.get(
               `http://localhost:8080/api/boardlookup/${postId}/like/check`,
               {
@@ -89,9 +95,62 @@ const BoardLookupRead = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // 구매 상태 확인
+  useEffect(() => {
+    const checkPurchaseStatus = async () => {
+      const storedUser =
+        localStorage.getItem("user") || sessionStorage.getItem("user");
+      if (!storedUser || !postId) return;
+
+      const loggedInUser = JSON.parse(storedUser);
+
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/api/boardlookup/${postId}/purchased`,
+          {
+            params: { userNum: loggedInUser.userNum },
+            withCredentials: true,
+          }
+        );
+        setIsPurchased(response.data.isPurchased);
+      } catch (err) {
+        console.error("구매 상태 확인 실패:", err);
+      }
+    };
+
+    checkPurchaseStatus();
+  }, [postId]);
+
+  // 저장 상태 확인
+  useEffect(() => {
+    const checkSaveStatus = async () => {
+      const storedUser =
+        localStorage.getItem("user") || sessionStorage.getItem("user");
+      if (!storedUser || !postId) return;
+
+      const loggedInUser = JSON.parse(storedUser);
+
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/api/boardlookup/${postId}/save/check`,
+          {
+            params: { userNum: loggedInUser.userNum },
+            withCredentials: true,
+          }
+        );
+        setIsSaved(response.data.isSaved);
+      } catch (err) {
+        console.error("저장 상태 확인 실패:", err);
+      }
+    };
+
+    checkSaveStatus();
+  }, [postId]);
+
   // 좋아요 토글
   const handleLikeToggle = async () => {
-    const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+    const storedUser =
+      localStorage.getItem("user") || sessionStorage.getItem("user");
     if (!storedUser) {
       alert("로그인이 필요합니다.");
       return;
@@ -133,18 +192,58 @@ const BoardLookupRead = () => {
     setShowComments(false);
   };
 
+  // PDF 다운로드
+  const handleDownload = async () => {
+    const storedUser =
+      localStorage.getItem("user") || sessionStorage.getItem("user");
+    if (!storedUser) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+
+    const loggedInUser = JSON.parse(storedUser);
+
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/boardlookup/${postId}/download`,
+        {
+          params: { userNum: loggedInUser.userNum },
+          responseType: "blob",
+          withCredentials: true,
+        }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", postData.postFile || "download.pdf");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      alert("다운로드가 완료되었습니다! 📥");
+    } catch (err) {
+      if (err.response?.status === 403) {
+        alert("구매하지 않은 게시물입니다.");
+      } else {
+        alert("다운로드에 실패했습니다.");
+      }
+    }
+  };
+
   // 장바구니 추가
   const handleAddToCart = async () => {
-    const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
-    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+    const storedUser =
+      localStorage.getItem("user") || sessionStorage.getItem("user");
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
 
     if (!storedUser) {
       alert("로그인이 필요합니다.");
       navigate("/login");
       return;
     }
-
-    const loggedInUser = JSON.parse(storedUser);
 
     try {
       await axios.post(
@@ -153,8 +252,8 @@ const BoardLookupRead = () => {
         {
           withCredentials: true,
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
       setShowCartToast(true);
@@ -166,11 +265,53 @@ const BoardLookupRead = () => {
     }
   };
 
+  // 북마크 토글 핸들러
+  const handleToggleSave = async () => {
+    const storedUser =
+      localStorage.getItem("user") || sessionStorage.getItem("user");
+    if (!storedUser) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+
+    const loggedInUser = JSON.parse(storedUser);
+
+    try {
+      const response = await axios.post(
+        `http://localhost:8080/api/boardlookup/${postId}/save`,
+        null,
+        {
+          params: { userNum: loggedInUser.userNum },
+          withCredentials: true,
+        }
+      );
+
+      if (response.data.success) {
+        setIsSaved(response.data.isSaved);
+
+        // ✅ 토스트 메시지 설정
+        if (response.data.isSaved) {
+          setSaveToastMessage("게시글이 저장되었습니다! 🔖");
+        } else {
+          setSaveToastMessage("저장이 취소되었습니다.");
+        }
+
+        // ✅ 토스트 표시
+        setShowSaveToast(true);
+        setTimeout(() => setShowSaveToast(false), 3000);
+      }
+    } catch (err) {
+      console.error("저장 실패:", err);
+      alert("저장 처리에 실패했습니다.");
+    }
+  };
+
   // 댓글 작성
   const handleCommentSubmit = async () => {
     if (!newComment.trim()) return;
 
-    const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+    const storedUser =
+      localStorage.getItem("user") || sessionStorage.getItem("user");
     if (!storedUser) {
       alert("로그인이 필요합니다.");
       return;
@@ -183,7 +324,7 @@ const BoardLookupRead = () => {
         { userNum: loggedInUser.userNum, content: newComment },
         { withCredentials: true }
       );
-      
+
       const updatedResponse = await axios.get(
         `http://localhost:8080/api/boardlookup/${postId}`
       );
@@ -206,7 +347,9 @@ const BoardLookupRead = () => {
             withCredentials: true,
           }
         );
-        setComments(prevComments => prevComments.filter(comment => comment.commentId !== commentId));
+        setComments((prevComments) =>
+          prevComments.filter((comment) => comment.commentId !== commentId)
+        );
       } catch (err) {
         console.error("댓글 삭제 실패:", err);
         alert(err.response?.data?.message || "댓글 삭제에 실패했습니다.");
@@ -226,12 +369,10 @@ const BoardLookupRead = () => {
     setShowComments(false);
     setShowAISummary(false);
   };
-  
+
   const handleBackgroundClick = (e) => {
     if (e.target === e.currentTarget) navigate("/");
   };
-  
-  const handleCloseClick = () => navigate("/");
 
   if (loading)
     return (
@@ -284,7 +425,6 @@ const BoardLookupRead = () => {
 
   return (
     <div className="board-lookup-read" onClick={handleBackgroundClick}>
-      {/* 오버레이 */}
       <div
         className={`overlay-background ${
           showComments || showAISummary ? "active" : ""
@@ -292,13 +432,16 @@ const BoardLookupRead = () => {
         onClick={handleOverlayClick}
       />
 
-      {/* 헤더 */}
       <div className={`post-header ${!headerVisible ? "hidden" : ""}`}>
         <div className="author-info">
           <div className="profile-wrapper">
             <div className="profile-left">
               <div className="profile-top">
-                <div className="profile-image">
+                <div
+                  className="profile-image"
+                  onClick={() => navigate(`/user/${postData.userNum}`)}
+                  style={{ cursor: "pointer", width: "40px", height: "40px" }}
+                >
                   {userImageSrc ? (
                     <img src={userImageSrc} alt="profile" />
                   ) : (
@@ -306,13 +449,22 @@ const BoardLookupRead = () => {
                   )}
                   <button
                     className={`follow-btn ${isFollowing ? "following" : ""}`}
-                    onClick={handleFollowToggle}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleFollowToggle();
+                    }}
                   >
                     {isFollowing ? "✓" : "+"}
                   </button>
                 </div>
                 <div className="profile-info">
-                  <div className="nickname">{postData.userNickname}</div>
+                  <div
+                    className="nickname"
+                    onClick={() => navigate(`/user/${postData.userNum}`)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {postData.userNickname}
+                  </div>
                 </div>
               </div>
             </div>
@@ -328,12 +480,8 @@ const BoardLookupRead = () => {
             </span>
           ))}
         </div>
-        <button className="close-post-button" onClick={handleCloseClick}>
-          <X size={24} />
-        </button>
       </div>
 
-      {/* PDF / 콘텐츠 */}
       <div className="main-content">
         <div className="pdf-viewer" onScroll={handlePdfScroll}>
           <div className="pdf-page">
@@ -342,19 +490,33 @@ const BoardLookupRead = () => {
                 (() => {
                   const isPdf = /\.pdf$/i.test(postData.postFile);
                   const isPpt = /\.(ppt|pptx)$/i.test(postData.postFile);
-                  const fileUrl = `http://localhost:8080/uploads/${postData.postFile}`;
+                  const fileUrl = `/uploads/${postData.postFile}`;
+
                   if (isPdf && Array.isArray(postData.pdfImages)) {
                     return (
                       <div className="pdf-image-wrapper">
-                        {postData.pdfImages.map((imgUrl, index) => (
-                          <img
-                            key={index}
-                            src={`http://localhost:8080${imgUrl}`}
-                            alt={`pdf-${index}`}
-                            className="pdf-page-image"
-                            loading="lazy"
-                          />
-                        ))}
+                        {postData.pdfImages.map((imgUrl, index) => {
+                          const fullImageUrl = imgUrl.startsWith("http")
+                            ? imgUrl
+                            : `http://localhost:8080${imgUrl}`;
+
+                          return (
+                            <img
+                              key={index}
+                              src={fullImageUrl}
+                              alt={`pdf-${index}`}
+                              className="pdf-page-image"
+                              loading="lazy"
+                              onError={(e) => {
+                                console.error(
+                                  `이미지 로드 실패: ${fullImageUrl}`
+                                );
+                                e.target.src =
+                                  "https://via.placeholder.com/800x600?text=Image+Load+Failed";
+                              }}
+                            />
+                          );
+                        })}
                       </div>
                     );
                   } else if (isPpt) {
@@ -422,7 +584,6 @@ const BoardLookupRead = () => {
         </div>
       </div>
 
-      {/* 사이드바 */}
       <div className={`sidebar ${!sidebarVisible ? "hidden" : ""}`}>
         <div className="sidebar-icon profile-icon">
           {userImageSrc ? (
@@ -452,26 +613,49 @@ const BoardLookupRead = () => {
         >
           <img src={commentIcon} alt="댓글" className="icon-image" />
         </div>
-        <div className="sidebar-icon cart-icon" onClick={handleAddToCart}>
-          <img src={cartIcon} alt="장바구니" className="icon-image" />
+        {isPurchased ? (
+          <div className="sidebar-icon download-icon" onClick={handleDownload}>
+            <img src={downloadIcon} alt="다운로드" className="icon-image" />
+          </div>
+        ) : (
+          <div className="sidebar-icon cart-icon" onClick={handleAddToCart}>
+            <img src={cartIcon} alt="장바구니" className="icon-image" />
+          </div>
+        )}
+
+        <div
+          className="sidebar-icon bookmark-icon"
+          onClick={handleToggleSave}
+          style={{
+            backgroundColor: isSaved ? "#FFD700" : "rgba(255, 255, 255, 0.95)",
+          }}
+        >
+          <img
+            src={isSaved ? bookmarkFilledIcon : bookmarkIcon}
+            alt="저장"
+            className="icon-image"
+          />
         </div>
+
         <div className="sidebar-icon ai-icon" onClick={handleAISummaryToggle}>
           <img src={summaryAIIcon} alt="AI 요약" className="icon-image" />
         </div>
       </div>
 
-      {/* 가격 */}
       <div className="price-badge">
         <span className="price-label">가격</span>
         <span className="price-value">{postData.price.toLocaleString()}₩</span>
       </div>
 
-      {/* 장바구니 토스트 */}
       <div className={`cart-toast ${showCartToast ? "show" : ""}`}>
         장바구니에 담겼습니다! 🛒
       </div>
 
-      {/* 댓글 팝업 */}
+      {/* ✅ 저장 토스트 추가 */}
+      <div className={`cart-toast ${showSaveToast ? "show" : ""}`}>
+        {saveToastMessage}
+      </div>
+
       <div className={`comments-popup ${showComments ? "active" : ""}`}>
         <div className="comments-header">
           <h3>댓글 {comments.length > 0 && `(${comments.length})`}</h3>
@@ -497,9 +681,17 @@ const BoardLookupRead = () => {
               return (
                 <div key={comment.commentId} className="comment-item">
                   <div className="comment-author">
-                    <div className="comment-author-profile">
+                    <div
+                      className="comment-author-profile"
+                      onClick={() => navigate(`/user/${comment.userNum}`)}
+                      style={{ cursor: "pointer" }}
+                    >
                       {commentUserImageSrc ? (
-                        <img src={commentUserImageSrc} alt={comment.userNickname} className="comment-profile-pic" />
+                        <img
+                          src={commentUserImageSrc}
+                          alt={comment.userNickname}
+                          className="comment-profile-pic"
+                        />
                       ) : (
                         <div className="comment-default-pic">👤</div>
                       )}
@@ -513,14 +705,17 @@ const BoardLookupRead = () => {
                           "ko-KR"
                         )}
                       </span>
-                      {loggedInUser && loggedInUser.userNum === comment.userNum && (
-                        <button 
-                          className="comment-delete-btn" 
-                          onClick={() => handleDeleteComment(comment.commentId)}
-                        >
-                          삭제
-                        </button>
-                      )}
+                      {loggedInUser &&
+                        loggedInUser.userNum === comment.userNum && (
+                          <button
+                            className="comment-delete-btn"
+                            onClick={() =>
+                              handleDeleteComment(comment.commentId)
+                            }
+                          >
+                            삭제
+                          </button>
+                        )}
                     </div>
                   </div>
                   <p className="comment-text">{comment.commentContent}</p>
@@ -542,7 +737,6 @@ const BoardLookupRead = () => {
         </div>
       </div>
 
-      {/* AI 요약 */}
       <div className={`ai-summary-popup ${showAISummary ? "active" : ""}`}>
         <div className="ai-summary-header">
           <h3>
@@ -558,7 +752,9 @@ const BoardLookupRead = () => {
             {postData.content ? (
               <p className="summary-content-text">{postData.content}</p>
             ) : (
-              <p className="summary-placeholder-text">작성된 내용이 없습니다.</p>
+              <p className="summary-placeholder-text">
+                작성된 내용이 없습니다.
+              </p>
             )}
           </div>
         </div>

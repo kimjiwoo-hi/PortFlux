@@ -2,7 +2,7 @@
  * 개발 단계에서만 X-USER-NUM 헤더로 사용자 식별
  * (운영에서는 JWT Authorization으로 교체 권장)
  */
-const BASE = "http://localhost:8080";
+const BASE = "";
 
 function headers(userNum) {
   return {

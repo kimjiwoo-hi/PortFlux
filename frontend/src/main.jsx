@@ -11,6 +11,8 @@ import NoFooterLayout from "./layouts/NoFooterLayout";
 // Pages
 import NotFound from "./pages/NotFound";
 import BoardFree from "./pages/BoardFreePage";
+import BoardFreeWritePage from "./pages/BoardFreeWritePage";
+import BoardFreeDetailPage from "./pages/BoardFreeDetailPage";
 import BoardJob from "./pages/BoardJobPage.jsx";
 import BoardJobDetailPage from "./pages/BoardJobDetailPage.jsx";
 import BoardJobCreatePage from "./pages/BoardJobCreatePage.jsx";
@@ -32,6 +34,7 @@ import MyInfo from "./pages/MyInfo.jsx";
 import MyPosts from "./pages/MyPosts.jsx";
 import MyComments from "./pages/MyComments.jsx";
 import SavedPosts from "./pages/SavedPosts.jsx";
+import UserProfile from "./pages/UserProfile.jsx";
 
 const router = createBrowserRouter([
   {
@@ -134,12 +137,24 @@ const router = createBrowserRouter([
         element: <SuccessPage />,
       },
       {
+        path: "/user/:userNum",
+        element: <UserProfile />,
+      },
+      {
         path: "/etc",
         element: <NotFound />,
       },
       {
         path: "*",
         element: <NotFound />,
+      },
+      {
+        path: "boardfree/write",
+        element: <BoardFreeWritePage />
+      },
+      {
+        path: "boardfree/:id", // 상세 페이지 라우트
+        element: <BoardFreeDetailPage />
       },
     ],
   },
