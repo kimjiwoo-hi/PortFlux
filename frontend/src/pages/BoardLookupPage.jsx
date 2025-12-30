@@ -335,52 +335,59 @@ function BoardLookupPage() {
             <div
               key={post.id}
               className="board-item"
-              onClick={() => handlePostClick(post.id)}
               onMouseEnter={() => setHoveredPostId(post.id)}
               onMouseLeave={() => setHoveredPostId(null)}
             >
-              {hoveredPostId === post.id && (
-                <div className="hover-actions-container">
-                  <span className="post-price-on-hover">
-                    {post.price.toLocaleString()}₩
-                  </span>
-                  <button
-                    className="cart-hover-button"
-                    onClick={(e) => handleAddToCart(e, post)}
-                  >
-                    <img src={cartIcon} alt="Add to cart" />
-                  </button>
-                  <button
-                    className="cart-hover-button bookmark-button"
-                    onClick={(e) => handleToggleSave(e, post)}
-                    style={{
-                      backgroundColor: savedPosts.has(post.id)
-                        ? "#FFD700"
-                        : "rgba(255, 255, 255, 0.9)",
-                    }}
-                  >
-                    <img
-                      src={
-                        savedPosts.has(post.id)
-                          ? bookmarkFilledIcon
-                          : bookmarkIcon
-                      }
-                      alt="Save"
-                    />
-                  </button>
-                </div>
-              )}
-              <img
-                src={post.imageUrl}
-                alt={post.title}
-                className="board-item-thumbnail"
-              />
+              <div style={{ position: 'relative' }}>
+                {hoveredPostId === post.id && (
+                  <div className="hover-actions-container">
+                    <span className="post-price-on-hover">
+                      {post.price.toLocaleString()}₩
+                    </span>
+                    <button
+                      className="cart-hover-button"
+                      onClick={(e) => handleAddToCart(e, post)}
+                    >
+                      <img src={cartIcon} alt="Add to cart" />
+                    </button>
+                    <button
+                      className="cart-hover-button bookmark-button"
+                      onClick={(e) => handleToggleSave(e, post)}
+                      style={{
+                        backgroundColor: savedPosts.has(post.id)
+                          ? "#FFD700"
+                          : "rgba(255, 255, 255, 0.9)",
+                      }}
+                    >
+                      <img
+                        src={
+                          savedPosts.has(post.id)
+                            ? bookmarkFilledIcon
+                            : bookmarkIcon
+                        }
+                        alt="Save"
+                      />
+                    </button>
+                  </div>
+                )}
+                <img
+                  src={post.imageUrl}
+                  alt={post.title}
+                  className="board-item-thumbnail"
+                  onClick={() => handlePostClick(post.id)}
+                />
+              </div>
               <div className="board-item-info">
-                <h4 className="info-title">{post.title}</h4>
+                <h4
+                  className="info-title"
+                  onClick={() => handlePostClick(post.id)}
+                >
+                  {post.title}
+                </h4>
                 <a
                   href={`/profile/${post.author}`}
                   className="info-author"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => e.preventDefault()}
                 >
                   {post.author}
                 </a>
