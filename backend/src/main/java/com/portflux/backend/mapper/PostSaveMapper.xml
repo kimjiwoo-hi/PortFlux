@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.portflux.backend.mapper.PostSaveMapper">
+
+    <!-- 게시글 저장 추가 -->
+    <insert id="insertPostSave">
+        INSERT INTO POST_SAVE (user_num, post_id, board_save_time)
+        VALUES (#{userNum}, #{postId}, SYSDATE)
+    </insert>
+
+    <!-- 게시글 저장 삭제 -->
+    <delete id="deletePostSave">
+        DELETE FROM POST_SAVE
+        WHERE user_num = #{userNum} AND post_id = #{postId}
+    </delete>
+
+    <!-- 저장 여부 확인 -->
+    <select id="isSaved" resultType="boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+        FROM POST_SAVE
+        WHERE user_num = #{userNum} AND post_id = #{postId}
+    </select>
+
+    <!-- 특정 사용자의 저장된 게시글 ID 목록 조회 -->
+    <select id="findSavedPostIdsByUserNum" resultType="int">
+        SELECT post_id
+        FROM POST_SAVE
+        WHERE user_num = #{userNum}
+        ORDER BY board_save_time DESC
+    </select>
+
+</mapper>
