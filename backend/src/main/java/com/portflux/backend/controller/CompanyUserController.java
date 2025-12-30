@@ -17,7 +17,7 @@ import com.portflux.backend.service.CompanyUserService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/company")
+@RequestMapping("/api/company")
 @RequiredArgsConstructor
 public class CompanyUserController {
 
@@ -43,7 +43,7 @@ public class CompanyUserController {
         }
     }
 
-    // 2. 사업자번호 조회 API
+    // 2. 사업자번호 검증 API
     @PostMapping("/register/check-business")
     public ResponseEntity<?> checkBusinessNumberOnly(@RequestBody Map<String, String> request) {
         String businessNumber = request.get("businessNumber");

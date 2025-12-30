@@ -4,6 +4,7 @@ import PortFluxLogo from "../assets/PortFlux.png";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import UserProfilePopover from "./UserProfilePopover";
 import UserDefaultIcon from "../assets/user_default_icon.png";
+import { fetchUserInfo, getCachedUserInfo, invalidateUserInfoCache } from "../utils/userInfoCache";
 
 const Header = () => {
   const location = useLocation();
@@ -28,56 +29,42 @@ const Header = () => {
     setIsPopoverOpen(false);
   }, [location.pathname]);
 
-  // 2. 사용자 프로필 이미지 불러오기
+  // 2. 사용자 프로필 이미지 불러오기 (캐시 사용)
   useEffect(() => {
-    const fetchUserProfileImage = async () => {
-      const storage = localStorage.getItem("isLoggedIn") ? localStorage : sessionStorage;
-      const storedUser = storage.getItem("user");
-      let targetId = storage.getItem("userId");
-
-      if (storedUser) {
-        try {
-          const user = JSON.parse(storedUser);
-          targetId = user.userId;
-        } catch {
-          console.error("유저 정보 파싱 에러");
+    const loadUserProfileImage = async () => {
+      // 먼저 캐시 확인
+      const cachedInfo = getCachedUserInfo();
+      if (cachedInfo) {
+        const newImage = cachedInfo.userImage || UserDefaultIcon;
+        if (userProfileImage !== newImage) {
+          setUserProfileImage(newImage);
         }
+        return;
       }
 
-      if (targetId) {
-        try {
-          const token = storage.getItem("token");
-          const response = await fetch(`/api/user/info/${targetId}`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-            credentials: 'include'
-          });
-          if (response.ok) {
-            const data = await response.json();
-            if (data.userImage && userProfileImage !== data.userImage) {
-              setUserProfileImage(data.userImage);
-            }
-          } else {
-            console.log("프로필 이미지 조회 실패:", response.status);
-          }
-        } catch (error) {
-          console.error("프로필 이미지 로드 실패:", error);
+      // 캐시에 없으면 API 호출
+      try {
+        const userInfo = await fetchUserInfo();
+        const newImage = userInfo.userImage || UserDefaultIcon;
+        if (userProfileImage !== newImage) {
+          setUserProfileImage(newImage);
+        }
+      } catch (error) {
+        console.error("프로필 이미지 로드 실패:", error);
+        if (userProfileImage !== UserDefaultIcon) {
+          setUserProfileImage(UserDefaultIcon);
         }
       }
     };
 
     if (isLoggedIn) {
-      fetchUserProfileImage();
-    } else if (userProfileImage !== UserDefaultIcon) {
-      // 비동기 처리로 Cascading Render 방지
-      const timer = setTimeout(() => {
+      loadUserProfileImage();
+    } else {
+      if (userProfileImage !== UserDefaultIcon) {
         setUserProfileImage(UserDefaultIcon);
-      }, 0);
-      return () => clearTimeout(timer);
+      }
     }
-  }, [isLoggedIn, userProfileImage]);
+  }, [isLoggedIn]);
 
   const getLinkClass = (path) => {
     return location.pathname === path ? "link hoverable-link active" : "link hoverable-link";
@@ -93,6 +80,7 @@ const Header = () => {
   const handleLogout = () => {
     localStorage.clear();
     sessionStorage.clear();
+    invalidateUserInfoCache(); // 캐시 무효화
     setIsPopoverOpen(false);
     setUserProfileImage(UserDefaultIcon);
     navigate("/");
