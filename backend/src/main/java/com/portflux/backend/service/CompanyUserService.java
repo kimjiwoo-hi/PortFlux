@@ -66,6 +66,11 @@ public class CompanyUserService {
         return businessNumApi.checkBusinessNumber(bNo);
     }
 
+    // 사업자번호 검증 및 기업 정보 조회
+    public Map<String, Object> getBusinessNumberInfo(String bNo) {
+        return businessNumApi.checkBusinessNumberWithInfo(bNo);
+    }
+
     /**
      * 2. 기업 로그인 로직
      */
