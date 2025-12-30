@@ -34,4 +34,13 @@ public interface UserMapper {
     void updateUserInfo(UserBean user);          // 사용자 정보 수정
     void updateUserImage(UserBean user);         // 프로필 이미지 수정
     void updateUserBanner(UserBean user);        // 배너 이미지 수정
+
+     // [수정] 이메일로 유저 정보를 조회하는 메서드 (구글 로그인용)
+    UserBean findUserByEmail(@Param("email") String email);
+
+     UserBean getUserInfo(String userId);
+        // 비밀번호 변경
+    void updatePassword(@Param("userId") String userId, @Param("newPassword") String newPassword);
+
+
 }

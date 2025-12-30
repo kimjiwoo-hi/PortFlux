@@ -166,6 +166,8 @@ function BoardLookupPage() {
       return;
     }
 
+    // ✅ 이 줄 추가!
+    const loggedInUser = JSON.parse(storedUser);
     try {
       const requestData = {
         productId: post.id,
