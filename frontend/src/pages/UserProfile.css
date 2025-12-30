@@ -28,11 +28,13 @@
 }
 
 .profile-header {
-  padding: 20px 40px;
+  padding: 0 40px 20px 40px;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 20px;
   border-bottom: 1px solid #eee;
+  margin-top: -60px;
+  position: relative;
 }
 
 .profile-image-wrapper {
@@ -51,12 +53,13 @@
 
 .profile-info {
   flex: 1;
+  padding-bottom: 10px;
 }
 
 .profile-nickname {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: bold;
-  margin: 0 0 10px 0;
+  margin: 0;
   color: #333;
 }
 
@@ -244,78 +247,153 @@
   position: absolute;
   top: 27px;
   right: 27px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 16px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #666;
+  border: 1.5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.banner-upload:hover {
+  background: rgba(255, 255, 255, 1);
+  color: #333;
+  border-color: rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
 }
 
 .banner-delete {
   position: absolute;
   top: 27px;
-  right: 115px;
+  right: 123px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 16px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #666;
+  border: 1.5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.banner-delete:hover {
+  background: rgba(255, 255, 255, 1);
+  color: #333;
+  border-color: rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
 }
 
 /* 프로필 이미지 컨테이너 */
 .myinfo-profile-container {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: 140px;
+  height: 140px;
+  flex-shrink: 0;
 }
 
 .myinfo-profile-image {
-  width: 120px;
-  height: 120px;
+  width: 140px;
+  height: 140px;
   border-radius: 50%;
-  border: 4px solid #fff;
+  border: 5px solid #fff;
   object-fit: cover;
   background: #f8f9fa;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .myinfo-profile-upload {
   position: absolute;
-  bottom: 0;
-  right: 0;
+  bottom: 5px;
+  right: 5px;
 }
 
 .profile-delete {
   position: absolute;
-  bottom: -40px;
-  right: 0;
+  bottom: 5px;
+  left: 5px;
 }
 
 /* 이미지 업로드/삭제 버튼 */
 .image-upload-label {
-  display: inline-block;
-  padding: 8px 16px;
-  background: #3b5bdb;
-  color: #fff;
-  font-size: 12px;
-  font-weight: bold;
-  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #666;
+  border: 1.5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 50%;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 .image-upload-label:hover {
-  background: #2f49b0;
+  background: rgba(255, 255, 255, 1);
+  color: #333;
+  border-color: rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+}
+
+.image-upload-label::before {
+  content: "+";
+  font-size: 26px;
+  font-weight: 300;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .image-delete-btn {
-  display: inline-block;
-  padding: 8px 16px;
-  background: #fa5252;
-  color: #fff;
-  font-size: 12px;
-  font-weight: bold;
-  border: none;
-  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #666;
+  border: 1.5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 50%;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 .image-delete-btn:hover {
-  background: #e03131;
+  background: rgba(255, 255, 255, 1);
+  color: #333;
+  border-color: rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
 }
 
 .image-delete-btn:active {
-  background: #c92a2a;
+  transform: translateY(0);
+}
+
+.image-delete-btn::before {
+  content: "×";
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* 정보 섹션 */
