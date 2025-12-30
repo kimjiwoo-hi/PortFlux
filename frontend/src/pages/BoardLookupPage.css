@@ -296,6 +296,10 @@
   font-weight: 200;
   line-height: 1;
 }
+
+/* =================================
+   호버 시 액션 버튼 (장바구니, 북마크)
+================================= */
 .hover-actions-container {
   position: absolute;
   top: 1rem;
@@ -324,7 +328,6 @@
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   transition: all 0.2s ease;
-  /* position: absolute; is REMOVED from here */
 }
 
 .cart-hover-button:hover {
@@ -338,8 +341,8 @@
 }
 
 .post-price-on-hover {
-  background-color: rgba(255, 255, 255, 0.9); /* White background */
-  color: #191919; /* Black text */
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #191919;
   padding: 0.4rem 0.8rem;
   border-radius: 12px;
   font-size: 0.9rem;
@@ -347,3 +350,46 @@
   white-space: nowrap;
 }
 
+/* =================================
+   ✅ 토스트 메시지 스타일 (장바구니 & 저장)
+================================= */
+.cart-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(25, 25, 25, 0.95);
+  color: white;
+  padding: 20px 40px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  z-index: 1000;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  display: none;
+}
+
+.cart-toast.show {
+  display: block;
+  animation: toastFadeIn 0.3s ease, toastFadeOut 0.3s ease 2.7s;
+}
+
+@keyframes toastFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes toastFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

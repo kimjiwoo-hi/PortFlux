@@ -10,6 +10,7 @@ import "./BoardLookupRead.css";
 import downloadIcon from "../assets/Downloadcloud.png";
 import bookmarkIcon from "../assets/Bookmark.png";
 import bookmarkFilledIcon from "../assets/FilldBookmark.png";
+import { MoreHorizontal } from "lucide-react";
 
 const BoardLookupRead = () => {
   const { postId } = useParams();
@@ -34,6 +35,8 @@ const BoardLookupRead = () => {
   const [isSaved, setIsSaved] = useState(false);
   const [showSaveToast, setShowSaveToast] = useState(false);
   const [saveToastMessage, setSaveToastMessage] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
 
   // 게시글 데이터 로드
   useEffect(() => {
@@ -147,6 +150,66 @@ const BoardLookupRead = () => {
     checkSaveStatus();
   }, [postId]);
 
+  // 메뉴 외부 클릭 감지
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        menuOpen &&
+        menuRef.current &&
+        !menuRef.current.contains(event.target)
+      ) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
+
+  // 내 게시글인지 확인
+  const isMyPost = () => {
+    if (!postData || !loggedInUser) return false;
+    return loggedInUser.userNum === postData.userNum;
+  };
+
+  // 게시글 수정
+  const handleEdit = () => {
+    navigate("/board/write", {
+      state: {
+        postToEdit: {
+          postId: postData.postId,
+          title: postData.title,
+          content: postData.content,
+          tags: postData.tags,
+          price: postData.price,
+          postFile: postData.postFile,
+        },
+      },
+    });
+  };
+
+  // 게시글 삭제
+  const handleDelete = async () => {
+    if (!window.confirm("정말로 이 게시글을 삭제하시겠습니까?")) return;
+
+    try {
+      const response = await axios.delete(
+        `http://localhost:8080/api/boardlookup/posts/${postId}`,
+        {
+          params: { userNum: loggedInUser.userNum },
+          withCredentials: true,
+        }
+      );
+
+      if (response.data.success) {
+        alert("게시글이 삭제되었습니다.");
+        navigate("/");
+      }
+    } catch (err) {
+      console.error("삭제 실패:", err);
+      alert(err.response?.data?.message || "게시글 삭제에 실패했습니다.");
+    }
+  };
+
   // 좋아요 토글
   const handleLikeToggle = async () => {
     const storedUser =
@@ -232,7 +295,7 @@ const BoardLookupRead = () => {
     }
   };
 
-  // 장바구니 추가
+  // ✅✅✅ 최종 수정된 장바구니 추가 함수
   const handleAddToCart = async () => {
     const storedUser =
       localStorage.getItem("user") || sessionStorage.getItem("user");
@@ -245,23 +308,53 @@ const BoardLookupRead = () => {
       return;
     }
 
+    const user = JSON.parse(storedUser);
+
     try {
-      await axios.post(
-        `http://localhost:8080/api/cart/${loggedInUser.userNum}/items`,
-        { productId: postId },
+      console.log("장바구니 추가 요청:", {
+        url: `http://localhost:8080/api/cart/items`,
+        userNum: user.userNum,
+        productId: postId,
+      });
+
+      // ✅ 중요: http://localhost:8080 전체 경로 포함!
+      const response = await axios.post(
+        `http://localhost:8080/api/cart/items`,
+        { productId: parseInt(postId) }, // ✅ postId를 숫자로 변환
         {
           withCredentials: true,
           headers: {
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         }
       );
+
+      console.log("장바구니 추가 성공:", response.data);
       setShowCartToast(true);
       setTimeout(() => setShowCartToast(false), 3000);
     } catch (err) {
-      if (err.response?.status === 409)
+      console.error("장바구니 추가 실패:", err);
+      console.error("에러 상세:", {
+        status: err.response?.status,
+        data: err.response?.data,
+        message: err.message,
+      });
+
+      if (err.response?.status === 409) {
         alert("이미 장바구니에 담긴 항목입니다.");
-      else alert("장바구니 추가에 실패했습니다.");
+      } else if (err.response?.status === 404) {
+        alert("API 엔드포인트를 찾을 수 없습니다. 백엔드 서버를 확인해주세요.");
+      } else if (err.response?.status === 401) {
+        alert("로그인이 필요합니다.");
+        navigate("/login");
+      } else {
+        alert(
+          `장바구니 추가에 실패했습니다: ${
+            err.response?.data?.message || err.message
+          }`
+        );
+      }
     }
   };
 
@@ -289,14 +382,12 @@ const BoardLookupRead = () => {
       if (response.data.success) {
         setIsSaved(response.data.isSaved);
 
-        // ✅ 토스트 메시지 설정
         if (response.data.isSaved) {
           setSaveToastMessage("게시글이 저장되었습니다! 🔖");
         } else {
           setSaveToastMessage("저장이 취소되었습니다.");
         }
 
-        // ✅ 토스트 표시
         setShowSaveToast(true);
         setTimeout(() => setShowSaveToast(false), 3000);
       }
@@ -482,6 +573,20 @@ const BoardLookupRead = () => {
         </div>
       </div>
 
+      <div className="header-right">
+
+        {isMyPost() && (
+          <div className="post-author-actions">
+            <button className="edit-btn" onClick={handleEdit}>
+              수정
+            </button>
+            <button className="delete-btn" onClick={handleDelete}>
+              삭제
+            </button>
+          </div>
+        )}
+      </div>
+
       <div className="main-content">
         <div className="pdf-viewer" onScroll={handlePdfScroll}>
           <div className="pdf-page">
@@ -627,7 +732,9 @@ const BoardLookupRead = () => {
           className="sidebar-icon bookmark-icon"
           onClick={handleToggleSave}
           style={{
-            backgroundColor: isSaved ? "#FFD700" : "rgba(255, 255, 255, 0.95)",
+            backgroundColor: isSaved
+              ? "#ffffffff"
+              : "rgba(255, 255, 255, 0.95)",
           }}
         >
           <img
@@ -651,7 +758,6 @@ const BoardLookupRead = () => {
         장바구니에 담겼습니다! 🛒
       </div>
 
-      {/* ✅ 저장 토스트 추가 */}
       <div className={`cart-toast ${showSaveToast ? "show" : ""}`}>
         {saveToastMessage}
       </div>
