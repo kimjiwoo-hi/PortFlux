@@ -113,7 +113,7 @@ function CartPage() {
 
     const token = localStorage.getItem("token") || sessionStorage.getItem("token");
     const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
-    
+
     if (!storedUser) {
       alert("로그인이 필요합니다.");
       navigate("/login");
@@ -123,35 +123,35 @@ function CartPage() {
     const user = JSON.parse(storedUser);
 
     try {
+      // cartItems를 주문 형식으로 변환
+      const orderItems = cartItems.map(item => ({
+        productId: item.postId,
+        productName: item.title,
+        unitPrice: item.price,
+        qty: 1
+      }));
+
       // 1. 백엔드에 주문 생성 요청 (결제 전 'CREATED' 상태의 주문)
       const orderResponse = await axios.post(
         '/api/orders',
         {
           items: orderItems
         },
-        { 
+        {
           withCredentials: true,
-          headers: { 'Authorization': `Bearer ${token}` } 
+          headers: { 'Authorization': `Bearer ${token}` }
         }
       );
 
       console.log("주문 생성 완료:", orderResponse.data);
 
-      // 주문 완료 후 장바구니 비우기
-      for (const item of cartItems) {
-        await axios.delete(
-          `/api/cart/items/${item.cartId}`,
-          {
-            withCredentials: true,
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          }
-        );
-      }
-
-      // OrderResultPage로 이동 (merchant_uid 전달)
-      navigate(`/order-result?merchant_uid=${orderResponse.data.merchantUid}`);
+      // 2. 결제 페이지로 이동 (장바구니는 결제 성공 후에 비움)
+      // merchantUid를 state로 전달하여 PaymentPage에서 사용
+      navigate('/payment', {
+        state: {
+          merchantUid: orderResponse.data.merchantUid
+        }
+      });
 
     } catch (err) {
       console.error("주문 생성 실패:", err);
