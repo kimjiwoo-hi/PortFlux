@@ -1,6 +1,6 @@
 package com.portflux.backend.service;
 
-import com.portflux.backend.beans.BoardLookupPostDto;
+import com.portflux.backend.dto.BoardLookupPostDto;
 import com.portflux.backend.beans.UserBean;
 import com.portflux.backend.mapper.BoardLookupMapper;
 import com.portflux.backend.mapper.UserMapper;

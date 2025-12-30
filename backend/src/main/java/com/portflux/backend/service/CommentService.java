@@ -1,6 +1,6 @@
 package com.portflux.backend.service;
 
-import com.portflux.backend.beans.CommentDto;
+import com.portflux.backend.dto.CommentDto;
 import com.portflux.backend.beans.UserBean;
 import com.portflux.backend.mapper.CommentMapper;
 import com.portflux.backend.mapper.UserMapper;
