@@ -129,9 +129,12 @@ const UserProfile = () => {
         // 본인인 경우 저장한 게시글 조회
         if (owner) {
           try {
-            const savedResponse = await axios.get('/api/post-save/my-saved-posts', {
-              withCredentials: true
-            });
+            const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+            const user = JSON.parse(storedUser);
+            const savedResponse = await axios.get(
+              `http://localhost:8080/api/boardlookup/user/${user.userNum}/saved/posts`,
+              { withCredentials: true }
+            );
             setSavedPosts(savedResponse.data);
           } catch (err) {
             console.error("저장한 게시글 조회 실패:", err);
