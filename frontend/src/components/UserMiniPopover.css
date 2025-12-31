@@ -15,6 +15,11 @@
               transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* 위로 나타날 때 */
+.user-mini-popover.show-above {
+  transform: translateY(10px);
+}
+
 .user-mini-popover.visible {
   opacity: 1;
   visibility: visible;
@@ -130,7 +135,7 @@
   background: #5568d3;
 }
 
-/* 말풍선 삼각형 */
+/* 말풍선 삼각형 - 상단 (기본) */
 .user-mini-popover::before {
   content: "";
   position: absolute;
@@ -143,4 +148,12 @@
   border-right: 10px solid transparent;
   border-bottom: 10px solid white;
   z-index: 10000;
+}
+
+/* 말풍선 삼각형 - 하단 (위로 나타날 때) */
+.user-mini-popover.show-above::before {
+  top: auto;
+  bottom: -8px;
+  border-bottom: none;
+  border-top: 10px solid white;
 }

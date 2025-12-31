@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./UserMiniPopover.css";
 import { useNavigate } from "react-router-dom";
 import UserDefaultIcon from "../assets/user_default_icon.png";
@@ -13,6 +13,18 @@ const UserMiniPopover = ({ nickname, isVisible, position, onMouseEnter, onMouseL
   });
   const [postCount, setPostCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const popoverRef = useRef(null);
+
+  // Popover 위치 계산 - 렌더링 중 계산
+  const showAbove = (() => {
+    if (isVisible && position) {
+      const viewportHeight = window.innerHeight;
+      const spaceBelow = viewportHeight - position.top;
+      const popoverHeight = 350; // 대략적인 mini popover 높이
+      return spaceBelow < popoverHeight;
+    }
+    return false;
+  })();
 
   useEffect(() => {
     if (isVisible && nickname) {
@@ -117,9 +129,11 @@ const UserMiniPopover = ({ nickname, isVisible, position, onMouseEnter, onMouseL
 
   return (
     <div
-      className={`user-mini-popover ${isVisible ? "visible" : ""}`}
+      ref={popoverRef}
+      className={`user-mini-popover ${isVisible ? "visible" : ""} ${showAbove ? "show-above" : ""}`}
       style={{
-        top: position?.top || 0,
+        top: showAbove ? 'auto' : position?.top || 0,
+        bottom: showAbove ? `calc(100vh - ${position?.top}px + 30px)` : 'auto',
         left: position?.left || 0,
       }}
       onClick={handleProfileClick}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./UserProfilePopover.css";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import UserDefaultIcon from "../assets/user_default_icon.png";
@@ -16,8 +16,23 @@ const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
     userBanner: null
   });
   const [postCount, setPostCount] = useState(0);
+  const [showAbove, setShowAbove] = useState(false);
+  const popoverRef = useRef(null);
 
   const USER_ROLE = localStorage.getItem("role") || sessionStorage.getItem("role") || "USER";
+
+  // Popover 위치 계산
+  useEffect(() => {
+    if (isOpen && popoverRef.current) {
+      const rect = popoverRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const spaceBelow = viewportHeight - rect.top;
+      const popoverHeight = 600; // 대략적인 popover 높이
+
+      // 아래 공간이 부족하면 위로 표시
+      setShowAbove(spaceBelow < popoverHeight);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -117,7 +132,7 @@ const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
   };
 
   return (
-    <div className={`profile-popover ${isOpen ? "active" : ""}`}>
+    <div ref={popoverRef} className={`profile-popover ${isOpen ? "active" : ""} ${showAbove ? "show-above" : ""}`}>
       <div className="popover-header">
         <div className="header-bg" style={getBannerStyle()}></div>
         <img src={getProfileImage()} alt="프로필" className="popover-avatar" />
