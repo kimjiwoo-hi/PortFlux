@@ -78,4 +78,27 @@
             c.comment_created_at DESC
     </select>
 
+    <select id="findCommentsByNickname" parameterType="string" resultType="com.portflux.backend.dto.CommentDto">
+        SELECT
+            c.comment_id AS commentId,
+            c.post_id AS postId,
+            c.user_num AS userNum,
+            u.user_nickname AS userNickname,
+            u.user_image AS userImage,
+            c.comment_content AS commentContent,
+            c.comment_created_at AS commentCreatedAt,
+            p.title AS postTitle,
+            p.board_type AS boardType
+        FROM
+            POST_COMMENT c
+        JOIN
+            USERS u ON c.user_num = u.user_num
+        JOIN
+            POST p ON c.post_id = p.post_id
+        WHERE
+            u.user_nickname = #{nickname}
+        ORDER BY
+            c.comment_created_at DESC
+    </select>
+
 </mapper>

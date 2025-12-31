@@ -370,6 +370,48 @@ public class BoardLookupController {
         }
     }
 
+    /**
+     * 닉네임으로 사용자의 게시글 목록 조회 API
+     */
+    @GetMapping("/user/nickname/{nickname}/posts")
+    public ResponseEntity<List<BoardLookupPostDto>> getPostsByNickname(@PathVariable String nickname) {
+        try {
+            List<BoardLookupPostDto> posts = boardLookupService.getPostsByNickname(nickname);
+
+            // 각 게시글에 PDF 이미지 목록 추가 (썸네일용)
+            for (BoardLookupPostDto post : posts) {
+                Path imageDir = Paths.get(uploadDir, "pdf", "post_" + post.getPostId());
+                if (Files.exists(imageDir)) {
+                    List<String> images = Files.list(imageDir)
+                            .filter(p -> p.toString().endsWith(".jpg"))
+                            .sorted()
+                            .map(p -> "/uploads/pdf/post_" + post.getPostId() + "/" + p.getFileName())
+                            .toList();
+                    post.setPdfImages(images);
+                }
+            }
+
+            return ResponseEntity.ok(posts);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * 닉네임으로 사용자의 댓글 목록 조회 API
+     */
+    @GetMapping("/user/nickname/{nickname}/comments")
+    public ResponseEntity<List<CommentDto>> getCommentsByNickname(@PathVariable String nickname) {
+        try {
+            List<CommentDto> comments = commentService.getCommentsByNickname(nickname);
+            return ResponseEntity.ok(comments);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     // ======== Private Methods ========
 
     private boolean isValidFileExtension(String filename) {

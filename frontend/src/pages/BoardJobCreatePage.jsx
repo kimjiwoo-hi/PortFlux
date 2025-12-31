@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { createJob } from "../api/jobApi";
+import { createJob, isLoggedIn, isCompanyUser } from "../api/jobApi";
 import { careerTypes, careerYears } from "../database/careerOptions";
 import { educationLevels } from "../database/educationOptions";
 import { mainRegions, getSubRegions } from "../database/regions";
@@ -39,11 +39,15 @@ const BoardJobCreatePage = () => {
 
   // 로그인 확인
   useEffect(() => {
-    const user = localStorage.getItem("user") || sessionStorage.getItem("user");
-
-    if (!user) {
+    if (!isLoggedIn()) {
       alert("로그인이 필요합니다.");
       navigate("/login", { state: { from: "/boardjob/create" } });
+      return;
+    }
+
+    if (!isCompanyUser()) {
+      alert("기업 회원만 채용공고를 등록할 수 있습니다.");
+      navigate("/boardjob");
     }
   }, [navigate]);
 

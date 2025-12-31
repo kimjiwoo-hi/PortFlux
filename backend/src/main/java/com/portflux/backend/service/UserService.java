@@ -35,15 +35,27 @@ public class UserService implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+        // 1. 먼저 일반 사용자 테이블에서 검색
         UserBean user = userRepository.findByUserId(userId);
-        if (user == null) {
-            throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + userId);
+        if (user != null) {
+            return new org.springframework.security.core.userdetails.User(
+                user.getUserId(),
+                user.getUserPw(),
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+            );
         }
-        return new org.springframework.security.core.userdetails.User(
-            user.getUserId(),
-            user.getUserPw(),
-            Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
-        );
+
+        // 2. 일반 사용자가 없으면 기업 사용자 테이블에서 검색
+        CompanyUserBean company = companyUserMapper.getCompanyUserInfo(userId);
+        if (company != null) {
+            return new org.springframework.security.core.userdetails.User(
+                company.getCompanyId(),
+                company.getCompanyPassword(),
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_COMPANY"))
+            );
+        }
+
+        throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + userId);
     }
 
     @Transactional
