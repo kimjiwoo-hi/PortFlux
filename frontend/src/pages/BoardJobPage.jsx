@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { getJobs, getJobCountByRegion } from "../api/jobApi";
+import {
+  getJobs,
+  getJobCountByRegion,
+  isCompanyUser,
+  isLoggedIn,
+  toggleBookmark,
+} from "../api/jobApi";
 import {
   mainRegions,
   getSubRegions,
@@ -37,8 +43,11 @@ const BoardJobPage = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [regionCounts, setRegionCounts] = useState({});
 
-  // ★ [추가] 기업회원 여부 상태
+  // 기업회원 여부 상태
   const [isCompany, setIsCompany] = useState(false);
+
+  // 북마크 로딩 상태 (postId별)
+  const [bookmarkLoading, setBookmarkLoading] = useState({});
 
   // 페이징
   const [currentPage, setCurrentPage] = useState(0);
@@ -102,31 +111,9 @@ const BoardJobPage = () => {
     setSearchParams(params, { replace: true });
   }, [filters.keyword, sortType, currentPage, setSearchParams]);
 
-  // ★ [추가] 기업회원 확인 로직
+  // 기업회원 확인 로직 (jobApi의 isCompanyUser 유틸리티 사용)
   useEffect(() => {
-    const userStr =
-      localStorage.getItem("user") || sessionStorage.getItem("user");
-
-    if (userStr) {
-      try {
-        const user = JSON.parse(userStr);
-
-        // 기업회원 판단 로직
-        // 1순위: companyNum 필드가 있으면 기업회원
-        // 2순위: userType이 'COMPANY'이면 기업회원
-        const isCompanyUser =
-          !!user.companyNum ||
-          user.userType === "COMPANY" ||
-          user.userType === "company";
-
-        setIsCompany(isCompanyUser);
-      } catch (e) {
-        console.error("사용자 정보 파싱 실패:", e);
-        setIsCompany(false);
-      }
-    } else {
-      setIsCompany(false);
-    }
+    setIsCompany(isCompanyUser());
   }, []);
 
   // 지역별 공고 수 조회
@@ -163,6 +150,53 @@ const BoardJobPage = () => {
   useEffect(() => {
     fetchJobs();
   }, [fetchJobs]);
+
+  // 북마크 토글 핸들러
+  const handleBookmarkToggle = useCallback(
+    async (e, postId) => {
+      e.stopPropagation(); // 카드 클릭 이벤트 전파 방지
+
+      // 로그인 여부 확인
+      if (!isLoggedIn()) {
+        alert("로그인이 필요합니다.");
+        navigate("/login", { state: { from: "/boardjob" } });
+        return;
+      }
+
+      // 이미 로딩 중이면 무시
+      if (bookmarkLoading[postId]) return;
+
+      try {
+        setBookmarkLoading((prev) => ({ ...prev, [postId]: true }));
+
+        const result = await toggleBookmark(postId);
+
+        // 성공 시 해당 job의 isBookmarked 상태 업데이트
+        setJobs((prevJobs) =>
+          prevJobs.map((job) =>
+            job.postId === postId
+              ? { ...job, isBookmarked: result.bookmarked }
+              : job
+          )
+        );
+      } catch (error) {
+        console.error("북마크 처리 실패:", error);
+
+        if (
+          error.message?.includes("401") ||
+          error.message?.includes("로그인")
+        ) {
+          alert("로그인이 필요합니다.");
+          navigate("/login", { state: { from: "/boardjob" } });
+        } else {
+          alert("북마크 처리 중 오류가 발생했습니다.");
+        }
+      } finally {
+        setBookmarkLoading((prev) => ({ ...prev, [postId]: false }));
+      }
+    },
+    [bookmarkLoading, navigate]
+  );
 
   // 필터 변경 핸들러 (배열 토글)
   const handleFilterChange = useCallback((filterName, value) => {
@@ -230,7 +264,7 @@ const BoardJobPage = () => {
     [navigate]
   );
 
-  // ★ [수정] 작성 페이지 이동
+  // 작성 페이지 이동
   const handleCreate = useCallback(() => {
     navigate("/boardjob/create");
   }, [navigate]);
@@ -422,7 +456,7 @@ const BoardJobPage = () => {
           <span className="total-count">총 {totalElements}건</span>
         </div>
 
-        {/* ★ [수정] 기업회원일 때만 버튼 표시 */}
+        {/* 기업회원일 때만 버튼 표시 */}
         {isCompany && (
           <button className="btn-create-job" onClick={handleCreate}>
             + 채용공고 등록
@@ -957,12 +991,15 @@ const BoardJobPage = () => {
               <div className="job-card-actions">
                 <button
                   className={`btn-bookmark ${job.isBookmarked ? "active" : ""}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // TODO: 북마크 토글 API 호출
-                  }}
+                  onClick={(e) => handleBookmarkToggle(e, job.postId)}
+                  disabled={bookmarkLoading[job.postId]}
+                  title={job.isBookmarked ? "북마크 해제" : "북마크 추가"}
                 >
-                  {job.isBookmarked ? "★" : "☆"}
+                  {bookmarkLoading[job.postId]
+                    ? "..."
+                    : job.isBookmarked
+                    ? "★"
+                    : "☆"}
                 </button>
               </div>
             </div>
