@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "./UserProfilePopover.css";
 import { Link, useLocation } from "react-router-dom";
 import UserDefaultIcon from "../assets/user_default_icon.png";
 import { fetchUserInfo, getCachedUserInfo } from "../utils/userInfoCache";
 
-const UserProfilePopover = ({ isOpen, onLogout }) => {
+const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
   const location = useLocation();
   const [userInfo, setUserInfo] = useState({
     userName: "",
@@ -13,7 +13,6 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
     userImage: null,
     userBanner: null
   });
-  const [isLoading, setIsLoading] = useState(false);
 
   const USER_ROLE = localStorage.getItem("role") || sessionStorage.getItem("role") || "USER";
 
@@ -28,7 +27,6 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
         }
 
         // 캐시가 없으면 API 호출
-        setIsLoading(true);
         try {
           const info = await fetchUserInfo();
           setUserInfo(info);
@@ -41,8 +39,6 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
             userNickname: storage.getItem("userNickname") || "사용자",
             userEmail: userId || ""
           }));
-        } finally {
-          setIsLoading(false);
         }
       };
 
@@ -66,8 +62,24 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
     return { backgroundImage: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" };
   };
 
-  const handleMenuClick = (path) => () => {
-    if (location.pathname === path) {
+  const handleMenuClick = (path) => (e) => {
+    const myPagePath = USER_ROLE === "COMPANY" ? "/company/mypage" : `/mypage/${userInfo.userNickname}`;
+    const isOnMyPage = location.pathname.startsWith('/mypage/');
+    const isSamePath = location.pathname === path;
+
+    // 내 정보 보기를 클릭했고 이미 마이페이지에 있는 경우
+    if (path === myPagePath && isOnMyPage) {
+      e.preventDefault();
+      onClose?.();
+      window.location.reload();
+      return;
+    }
+
+    // Popover 닫기
+    onClose?.();
+
+    // 같은 경로면 리프레시
+    if (isSamePath) {
       window.location.reload();
     }
   };
@@ -90,7 +102,10 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
       </div>
 
       <div className="menu-list">
-        <Link to={USER_ROLE === "COMPANY" ? "/company/mypage" : "/mypage/myinfo"} onClick={handleMenuClick(USER_ROLE === "COMPANY" ? "/company/mypage" : "/mypage/myinfo")}>
+        <Link
+          to={USER_ROLE === "COMPANY" ? "/company/mypage" : `/mypage/${userInfo.userNickname}`}
+          onClick={handleMenuClick(USER_ROLE === "COMPANY" ? "/company/mypage" : `/mypage/${userInfo.userNickname}`)}
+        >
           <button className="menu-item">{USER_ROLE === "COMPANY" ? "기업 정보 관리" : "내 정보 보기"}</button>
         </Link>
         <Link to="/cart" onClick={handleMenuClick("/cart")}><button className="menu-item">장바구니</button></Link>
