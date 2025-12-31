@@ -49,6 +49,21 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    // Generate a token with additional user information
+    public String generateToken(String userId, String userType, Long userNum) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
+
+        return Jwts.builder()
+                .setSubject(userId)
+                .claim("userType", userType)  // USER or COMPANY
+                .claim("userNum", userNum)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(jwtSecretKey, SignatureAlgorithm.HS512)
+                .compact();
+    }
+
     // Get user ID from the token
     public String getUserIdFromToken(String token) {
         Claims claims = Jwts.parserBuilder()
@@ -58,6 +73,45 @@ public class JwtTokenProvider {
                 .getBody();
 
         return claims.getSubject();
+    }
+
+    // Get user type from the token
+    public String getUserTypeFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(jwtSecretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.get("userType", String.class);
+    }
+
+    // Get user number from the token
+    public Long getUserNumFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(jwtSecretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        Object userNumObj = claims.get("userNum");
+        if (userNumObj == null) return null;
+
+        if (userNumObj instanceof Integer) {
+            return ((Integer) userNumObj).longValue();
+        } else if (userNumObj instanceof Long) {
+            return (Long) userNumObj;
+        }
+        return null;
+    }
+
+    // Get all claims from token
+    public Claims getAllClaimsFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(jwtSecretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
     // Validate the token

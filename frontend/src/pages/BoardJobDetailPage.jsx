@@ -1,6 +1,11 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getJobDetail, toggleBookmark, deleteJob } from "../api/jobApi";
+import {
+  getJobDetail,
+  toggleBookmark,
+  deleteJob,
+  isLoggedIn,
+} from "../api/jobApi";
 import { getEducationLabel } from "../database/educationOptions";
 import { getRegionLabel } from "../database/regions";
 import { formatSalary, getJobStatusLabel } from "../database/jobFilterOptions";
@@ -17,12 +22,20 @@ const BoardJobDetailPage = () => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [bookmarkLoading, setBookmarkLoading] = useState(false);
 
+  // 중복 호출 방지용 ref
+  const fetchedRef = useRef(false);
+
   // 채용공고 상세 정보 로드
   useEffect(() => {
+    // StrictMode 중복 호출 방지
+    if (fetchedRef.current) return;
+
     const fetchJobDetail = async () => {
       try {
         setLoading(true);
         setError(null);
+        fetchedRef.current = true;
+
         const data = await getJobDetail(postId);
 
         // getJobDetail이 이미 { ...job, isOwner } 형태로 반환
@@ -50,13 +63,20 @@ const BoardJobDetailPage = () => {
   const handleBookmark = useCallback(async () => {
     if (bookmarkLoading) return;
 
+    // 로그인 여부 사전 체크
+    if (!isLoggedIn()) {
+      alert("로그인이 필요합니다.");
+      navigate("/login", { state: { from: `/boardjob/${postId}` } });
+      return;
+    }
+
     try {
       setBookmarkLoading(true);
       const result = await toggleBookmark(postId);
       setIsBookmarked(result.bookmarked);
     } catch (err) {
       console.error("북마크 처리 실패:", err);
-      if (err.message?.includes("401")) {
+      if (err.message?.includes("401") || err.message?.includes("로그인")) {
         alert("로그인이 필요합니다.");
         navigate("/login", { state: { from: `/boardjob/${postId}` } });
       } else {
@@ -65,7 +85,7 @@ const BoardJobDetailPage = () => {
     } finally {
       setBookmarkLoading(false);
     }
-  }, [postId, bookmarkLoading, navigate]);
+  }, [postId, bookmarkLoading, navigate, isLoggedIn]);
 
   // 수정 페이지로 이동
   const handleEdit = useCallback(() => {
@@ -96,11 +116,6 @@ const BoardJobDetailPage = () => {
   const handleBack = useCallback(() => {
     navigate("/boardjob");
   }, [navigate]);
-
-  // 지원하기 (임시)
-  const handleApply = useCallback(() => {
-    alert("지원하기 기능은 준비 중입니다.");
-  }, []);
 
   // 공유하기
   const handleShare = useCallback(() => {
@@ -419,7 +434,7 @@ const BoardJobDetailPage = () => {
           </div>
         </div>
 
-        {/* 우측: 지원 사이드바 */}
+        {/* 우측: 사이드바 */}
         <div className="apply-sidebar">
           <div className="apply-card">
             <div className="apply-card-header">
@@ -448,15 +463,6 @@ const BoardJobDetailPage = () => {
 
             {!isOwner && (
               <div className="apply-actions">
-                {!isExpired ? (
-                  <button onClick={handleApply} className="btn-apply-main">
-                    지원하기
-                  </button>
-                ) : (
-                  <button className="btn-apply-main disabled" disabled>
-                    마감된 공고
-                  </button>
-                )}
                 <button
                   onClick={handleBookmark}
                   className={`btn-apply-bookmark ${
