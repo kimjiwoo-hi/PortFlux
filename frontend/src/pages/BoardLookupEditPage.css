@@ -1,0 +1,77 @@
+.board-lookup-edit-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  
+  .board-lookup-edit-container h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+  }
+  
+  .board-lookup-edit-form .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .board-lookup-edit-form .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+  }
+  
+  .board-lookup-edit-form .form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+  }
+  
+  .board-lookup-edit-form .form-control:focus {
+    outline: none;
+    border-color: #007bff;
+  }
+  
+  .board-lookup-edit-form textarea.form-control {
+    height: 200px;
+    resize: vertical;
+  }
+  
+  .board-lookup-edit-form .file-input-group {
+    display: flex;
+    align-items: center;
+  }
+  
+  .board-lookup-edit-form .file-input-group .form-control-file {
+    flex-grow: 1;
+  }
+  
+  .board-lookup-edit-form .current-file {
+    margin-top: 10px;
+    font-style: italic;
+    color: #777;
+  }
+  
+  .board-lookup-edit-form .submit-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .board-lookup-edit-form .submit-btn:hover {
+    background-color: #0056b3;
+  }
+  

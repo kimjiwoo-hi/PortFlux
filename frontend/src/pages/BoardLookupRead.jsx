@@ -10,7 +10,7 @@ import "./BoardLookupRead.css";
 import downloadIcon from "../assets/Downloadcloud.png";
 import bookmarkIcon from "../assets/Bookmark.png";
 import bookmarkFilledIcon from "../assets/FilldBookmark.png";
-import { MoreHorizontal } from "lucide-react";
+import user_default_icon from "../assets/user_default_icon.png";
 
 const BoardLookupRead = () => {
   const { postId } = useParams();
@@ -35,23 +35,31 @@ const BoardLookupRead = () => {
   const [isSaved, setIsSaved] = useState(false);
   const [showSaveToast, setShowSaveToast] = useState(false);
   const [saveToastMessage, setSaveToastMessage] = useState("");
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef(null);
   const bottomRef = useRef(null);
-  const [showBottomActions, setShowBottomActions] = useState(false);
+  const [setShowBottomActions] = useState(false);
 
   // 게시글 데이터 로드
   useEffect(() => {
     const fetchPostData = async () => {
       try {
         setLoading(true);
+        const timestamp = new Date().getTime();
         const response = await axios.get(
-          `http://localhost:8080/api/boardlookup/${postId}`,
-          { withCredentials: true }
+          `http://localhost:8080/api/boardlookup/${postId}?_t=${timestamp}`,
+          {
+            withCredentials: true,
+            headers: {
+              "Cache-Control": "no-cache",
+              Pragma: "no-cache",
+              Expires: "0",
+            },
+          }
         );
 
         if (response.data) {
-          setPostData(response.data.post || response.data);
+          const postData = response.data.post || response.data;
+
+          setPostData(postData);
           setComments(response.data.comments || []);
 
           const storedUser =
@@ -83,27 +91,23 @@ const BoardLookupRead = () => {
     if (postId) fetchPostData();
   }, [postId]);
 
-  // ✅ 수정된 IntersectionObserver - threshold 낮추고 rootMargin 추가
   useEffect(() => {
     if (!bottomRef.current) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        console.log("IntersectionObserver:", entry.isIntersecting); // 디버깅용
         setShowBottomActions(entry.isIntersecting);
       },
-      { 
-        threshold: 0.1,  // 0.8 → 0.1로 변경 (10%만 보여도 감지)
-        rootMargin: "0px 0px 100px 0px"  // 하단 100px 여유 추가
+      {
+        threshold: 0.1,
+        rootMargin: "0px 0px 100px 0px",
       }
     );
 
     observer.observe(bottomRef.current);
-
     return () => observer.disconnect();
   }, []);
 
-  // 스크롤 이벤트
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -120,7 +124,6 @@ const BoardLookupRead = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 구매 상태 확인
   useEffect(() => {
     const checkPurchaseStatus = async () => {
       const storedUser =
@@ -146,7 +149,6 @@ const BoardLookupRead = () => {
     checkPurchaseStatus();
   }, [postId]);
 
-  // 저장 상태 확인
   useEffect(() => {
     const checkSaveStatus = async () => {
       const storedUser =
@@ -172,44 +174,10 @@ const BoardLookupRead = () => {
     checkSaveStatus();
   }, [postId]);
 
-  // 메뉴 외부 클릭 감지
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        menuOpen &&
-        menuRef.current &&
-        !menuRef.current.contains(event.target)
-      ) {
-        setMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [menuOpen]);
-
-  // 내 게시글인지 확인
-  const isMyPost = () => {
-    if (!postData || !loggedInUser) return false;
-    return loggedInUser.userNum === postData.userNum;
-  };
-
-  // 게시글 수정
   const handleEdit = () => {
-    navigate("/board/write", {
-      state: {
-        postToEdit: {
-          postId: postData.postId,
-          title: postData.title,
-          content: postData.content,
-          tags: postData.tags,
-          price: postData.price,
-          postFile: postData.postFile,
-        },
-      },
-    });
+    navigate(`/board/lookup/edit/${postId}`);
   };
 
-  // 게시글 삭제
   const handleDelete = async () => {
     if (!window.confirm("정말로 이 게시글을 삭제하시겠습니까?")) return;
 
@@ -232,7 +200,6 @@ const BoardLookupRead = () => {
     }
   };
 
-  // 좋아요 토글
   const handleLikeToggle = async () => {
     const storedUser =
       localStorage.getItem("user") || sessionStorage.getItem("user");
@@ -262,22 +229,18 @@ const BoardLookupRead = () => {
     }
   };
 
-  // 팔로우 토글
   const handleFollowToggle = () => setIsFollowing(!isFollowing);
 
-  // 댓글창 토글
   const handleCommentToggle = () => {
     setShowComments(!showComments);
     setShowAISummary(false);
   };
 
-  // AI 요약 토글
   const handleAISummaryToggle = () => {
     setShowAISummary(!showAISummary);
     setShowComments(false);
   };
 
-  // PDF 다운로드
   const handleDownload = async () => {
     const storedUser =
       localStorage.getItem("user") || sessionStorage.getItem("user");
@@ -317,7 +280,6 @@ const BoardLookupRead = () => {
     }
   };
 
-  // 장바구니 추가
   const handleAddToCart = async () => {
     const storedUser =
       localStorage.getItem("user") || sessionStorage.getItem("user");
@@ -331,14 +293,12 @@ const BoardLookupRead = () => {
     }
 
     const user = JSON.parse(storedUser);
-
     try {
       console.log("장바구니 추가 요청:", {
         url: `http://localhost:8080/api/cart/items`,
         userNum: user.userNum,
         productId: postId,
       });
-
       const response = await axios.post(
         `http://localhost:8080/api/cart/items`,
         { productId: parseInt(postId) },
@@ -350,22 +310,16 @@ const BoardLookupRead = () => {
           },
         }
       );
-
       console.log("장바구니 추가 성공:", response.data);
       setShowCartToast(true);
       setTimeout(() => setShowCartToast(false), 3000);
     } catch (err) {
       console.error("장바구니 추가 실패:", err);
-      console.error("에러 상세:", {
-        status: err.response?.status,
-        data: err.response?.data,
-        message: err.message,
-      });
 
       if (err.response?.status === 409) {
         alert("이미 장바구니에 담긴 항목입니다.");
       } else if (err.response?.status === 404) {
-        alert("API 엔드포인트를 찾을 수 없습니다. 백엔드 서버를 확인해주세요.");
+        alert("API 엔드포인트를 찾을 수 없습니다.");
       } else if (err.response?.status === 401) {
         alert("로그인이 필요합니다.");
         navigate("/login");
@@ -379,7 +333,6 @@ const BoardLookupRead = () => {
     }
   };
 
-  // 북마크 토글
   const handleToggleSave = async () => {
     const storedUser =
       localStorage.getItem("user") || sessionStorage.getItem("user");
@@ -418,7 +371,6 @@ const BoardLookupRead = () => {
     }
   };
 
-  // 댓글 작성
   const handleCommentSubmit = async () => {
     if (!newComment.trim()) return;
 
@@ -448,7 +400,6 @@ const BoardLookupRead = () => {
     }
   };
 
-  // 댓글 삭제
   const handleDeleteComment = async (commentId) => {
     if (window.confirm("정말로 이 댓글을 삭제하시겠습니까?")) {
       try {
@@ -469,22 +420,10 @@ const BoardLookupRead = () => {
     }
   };
 
-  // PDF 페이지 스크롤
   const handlePdfScroll = (e) => {
     const { scrollTop, scrollHeight, clientHeight } = e.target;
     if (scrollTop + clientHeight >= scrollHeight - 10)
       setCurrentPage((p) => p + 1);
-  };
-
-  // 오버레이 클릭
-  const handleOverlayClick = () => {
-    setShowComments(false);
-    setShowAISummary(false);
-  };
-
-  // 배경 클릭
-  const handleBackgroundClick = (e) => {
-    if (e.target === e.currentTarget) navigate("/");
   };
 
   if (loading)
@@ -519,7 +458,6 @@ const BoardLookupRead = () => {
       </div>
     );
 
-  // 태그 배열 처리
   let tagsArray = [];
   try {
     tagsArray =
@@ -530,19 +468,16 @@ const BoardLookupRead = () => {
     console.error("태그 파싱 실패:", e);
   }
 
-  const userImageSrc = postData.userImage
-    ? `data:image/jpeg;base64,${btoa(
-        String.fromCharCode(...new Uint8Array(postData.userImage))
-      )}`
-    : null;
+  const userImageSrc = postData.userImageBase64
+    ? `data:image/jpeg;base64,${postData.userImageBase64}`
+    : user_default_icon;
 
   return (
-    <div className="board-lookup-read" onClick={handleBackgroundClick}>
+    <div className="board-lookup-read">
       <div
         className={`overlay-background ${
           showComments || showAISummary ? "active" : ""
         }`}
-        onClick={handleOverlayClick}
       />
 
       <div className={`post-header ${!headerVisible ? "hidden" : ""}`}>
@@ -551,15 +486,20 @@ const BoardLookupRead = () => {
             <div className="profile-left">
               <div className="profile-top">
                 <div
-                  className="profile-image"
+                  className="user_default_icon"
                   onClick={() => navigate(`/user/${postData.userNum}`)}
-                  style={{ cursor: "pointer", width: "40px", height: "40px" }}
+                  style={{ cursor: "pointer" }}
                 >
-                  {userImageSrc ? (
-                    <img src={userImageSrc} alt="profile" />
-                  ) : (
-                    <div className="default-profile">👤</div>
-                  )}
+                  <img
+                    src={userImageSrc}
+                    alt="profile"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                    }}
+                  />
                   <button
                     className={`follow-btn ${isFollowing ? "following" : ""}`}
                     onClick={(e) => {
@@ -698,17 +638,6 @@ const BoardLookupRead = () => {
       </div>
 
       <div className={`sidebar ${!sidebarVisible ? "hidden" : ""}`}>
-        <div className="sidebar-icon profile-icon">
-          {userImageSrc ? (
-            <img
-              src={userImageSrc}
-              alt="프로필"
-              className="profile-mini-image"
-            />
-          ) : (
-            <div className="default-profile-mini">👤</div>
-          )}
-        </div>
         <div
           className={`sidebar-icon heart-icon ${isLiked ? "liked" : ""}`}
           onClick={handleLikeToggle}
@@ -786,11 +715,9 @@ const BoardLookupRead = () => {
             </p>
           ) : (
             comments.map((comment) => {
-              const commentUserImageSrc = comment.userImage
-                ? `data:image/jpeg;base64,${btoa(
-                    String.fromCharCode(...new Uint8Array(comment.userImage))
-                  )}`
-                : null;
+              const commentUserImageSrc = comment.userImageBase64
+                ? `data:image/jpeg;base64,${comment.userImageBase64}`
+                : user_default_icon;
 
               return (
                 <div key={comment.commentId} className="comment-item">
@@ -800,15 +727,11 @@ const BoardLookupRead = () => {
                       onClick={() => navigate(`/user/${comment.userNum}`)}
                       style={{ cursor: "pointer" }}
                     >
-                      {commentUserImageSrc ? (
-                        <img
-                          src={commentUserImageSrc}
-                          alt={comment.userNickname}
-                          className="comment-profile-pic"
-                        />
-                      ) : (
-                        <div className="comment-default-pic">👤</div>
-                      )}
+                      <img
+                        src={commentUserImageSrc}
+                        alt={comment.userNickname}
+                        className="comment-profile-pic"
+                      />
                       <span className="comment-nickname">
                         {comment.userNickname}
                       </span>
@@ -874,27 +797,26 @@ const BoardLookupRead = () => {
         </div>
       </div>
 
-      {/* ✅ 게시물 끝 감지용 요소 - 충분한 높이 확보 */}
-      <div 
-        ref={bottomRef} 
-        style={{ 
-          height: '200px', 
-          width: '100%',
-          pointerEvents: 'none'
-        }} 
+      <div
+        ref={bottomRef}
+        style={{
+          height: "200px",
+          width: "100%",
+          pointerEvents: "none",
+        }}
       />
 
-      {/* ✅ 수정/삭제 버튼 - 조건부 렌더링 개선 */}
-      {isMyPost() && showBottomActions && (
-        <div className="post-bottom-actions">
-          <button className="edit-btn" onClick={handleEdit}>
-            수정
-          </button>
-          <button className="delete-btn" onClick={handleDelete}>
-            삭제
-          </button>
-        </div>
-      )}
+      {loggedInUser &&
+        Number(loggedInUser.userNum) === Number(postData.userNum) && (
+          <div className="post-bottom-actions">
+            <button className="edit-btn" onClick={handleEdit}>
+              수정
+            </button>
+            <button className="delete-btn" onClick={handleDelete}>
+              삭제
+            </button>
+          </div>
+        )}
     </div>
   );
 };
