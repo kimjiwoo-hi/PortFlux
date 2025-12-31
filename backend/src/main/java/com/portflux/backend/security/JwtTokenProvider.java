@@ -1,15 +1,22 @@
 package com.portflux.backend.security;
 
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+
+import javax.crypto.SecretKey;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtTokenProvider {
@@ -44,7 +51,22 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // 토큰에서 아이디 추출
+    // Generate a token with additional user information
+    public String generateToken(String userId, String userType, Long userNum) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
+
+        return Jwts.builder()
+                .setSubject(userId)
+                .claim("userType", userType)  // USER or COMPANY
+                .claim("userNum", userNum)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(jwtSecretKey, SignatureAlgorithm.HS512)
+                .compact();
+    }
+
+    // Get user ID from the token
     public String getUserIdFromToken(String token) {
         // parserBuilder() 대신 최신 버전 호환을 위해 parser()를 지원하는 형태로 작성
         Claims claims = Jwts.parserBuilder()
@@ -56,7 +78,46 @@ public class JwtTokenProvider {
         return claims.getSubject();
     }
 
-    // 토큰 유효성 검증
+    // Get user type from the token
+    public String getUserTypeFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(jwtSecretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.get("userType", String.class);
+    }
+
+    // Get user number from the token
+    public Long getUserNumFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(jwtSecretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        Object userNumObj = claims.get("userNum");
+        if (userNumObj == null) return null;
+
+        if (userNumObj instanceof Integer) {
+            return ((Integer) userNumObj).longValue();
+        } else if (userNumObj instanceof Long) {
+            return (Long) userNumObj;
+        }
+        return null;
+    }
+
+    // Get all claims from token
+    public Claims getAllClaimsFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(jwtSecretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    // Validate the token
     public boolean validateToken(String authToken) {
         try {
             Jwts.parserBuilder()
