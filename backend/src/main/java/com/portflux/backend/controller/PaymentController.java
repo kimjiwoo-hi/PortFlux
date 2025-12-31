@@ -51,6 +51,76 @@ public class PaymentController {
     }
 
     /**
+     * 포트원 웹훅 수신 엔드포인트
+     * 포트원 서버가 결제 완료 시 이 엔드포인트로 POST 요청을 보냄
+     * 클라이언트 콜백과 별개로 서버 간 통신으로 결제 결과를 100% 보장
+     */
+    @PostMapping("/webhook")
+    public ResponseEntity<?> handleWebhook(@RequestBody WebhookRequest webhookReq) {
+        try {
+            log.info("Webhook received: imp_uid={}, merchant_uid={}, status={}",
+                    webhookReq.getImp_uid(), webhookReq.getMerchant_uid(), webhookReq.getStatus());
+
+            // 입력값 검증
+            if (webhookReq.getImp_uid() == null || webhookReq.getImp_uid().isEmpty()) {
+                log.warn("Webhook validation failed: imp_uid is missing");
+                return ResponseEntity.badRequest().body(
+                        new ErrorResponse("INVALID_WEBHOOK", "imp_uid is required")
+                );
+            }
+
+            if (webhookReq.getMerchant_uid() == null || webhookReq.getMerchant_uid().isEmpty()) {
+                log.warn("Webhook validation failed: merchant_uid is missing");
+                return ResponseEntity.badRequest().body(
+                        new ErrorResponse("INVALID_WEBHOOK", "merchant_uid is required")
+                );
+            }
+
+            // 결제 상태가 'paid'인 경우에만 처리 (결제 완료)
+            if ("paid".equals(webhookReq.getStatus())) {
+                try {
+                    // 중복 처리 방지: 이미 처리된 결제인지 확인
+                    PaymentRecord existingPayment = paymentService.findByImpUid(webhookReq.getImp_uid());
+
+                    if (existingPayment != null) {
+                        log.info("Payment already processed: imp_uid={}", webhookReq.getImp_uid());
+                        return ResponseEntity.ok(new WebhookResponse("success", "Already processed"));
+                    }
+
+                    // 결제 검증 및 저장
+                    PaymentRecord payment = paymentService.confirmPayment(
+                            webhookReq.getImp_uid(),
+                            webhookReq.getMerchant_uid()
+                    );
+
+                    log.info("Webhook payment processed successfully: paymentId={}, status={}",
+                            payment.getId(), payment.getStatus());
+
+                    return ResponseEntity.ok(new WebhookResponse("success", "Payment processed"));
+
+                } catch (IllegalStateException e) {
+                    // 이미 처리된 결제이거나 상태가 맞지 않는 경우
+                    log.warn("Payment state error in webhook: {}", e.getMessage());
+                    return ResponseEntity.ok(new WebhookResponse("success", "Already handled"));
+                } catch (Exception e) {
+                    log.error("Error processing webhook payment", e);
+                    // 웹훅은 실패해도 200 응답을 보내야 포트원이 재시도하지 않음
+                    return ResponseEntity.ok(new WebhookResponse("error", e.getMessage()));
+                }
+            } else {
+                // 결제 실패, 취소 등의 상태
+                log.info("Webhook received with non-paid status: status={}", webhookReq.getStatus());
+                return ResponseEntity.ok(new WebhookResponse("success", "Non-paid status received"));
+            }
+
+        } catch (Exception e) {
+            log.error("Unexpected error in webhook handler", e);
+            // 웹훅은 항상 200 응답
+            return ResponseEntity.ok(new WebhookResponse("error", "Internal error"));
+        }
+    }
+
+    /**
      * 결제 검증 및 확인
      * 프론트에서 아임포트 결제 후 imp_uid를 받아 서버에서 검증
      */
@@ -70,14 +140,9 @@ public class PaymentController {
                         new ErrorResponse("INVALID_MERCHANT_UID", "merchantUid is required")
                 );
             }
-            if (req.getAmount() == null || req.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-                return ResponseEntity.badRequest().body(
-                        new ErrorResponse("INVALID_AMOUNT", "amount must be greater than 0")
-                );
-            }
 
             // 결제 확인 (아임포트 서버 검증 포함)
-            PaymentRecord payment = paymentService.confirmPayment(req.getImpUid(), req.getMerchantUid(), req.getAmount());
+            PaymentRecord payment = paymentService.confirmPayment(req.getImpUid(), req.getMerchantUid());
 
             ConfirmResponse res = new ConfirmResponse();
             res.setPaymentId(payment.getId());
@@ -108,10 +173,27 @@ public class PaymentController {
     }
 
     @Data
+    public static class WebhookRequest {
+        private String imp_uid;        // 포트원 결제 고유번호
+        private String merchant_uid;   // 가맹점 주문번호
+        private String status;         // 결제 상태 (paid, failed, cancelled 등)
+    }
+
+    @Data
+    public static class WebhookResponse {
+        private String status;
+        private String message;
+
+        public WebhookResponse(String status, String message) {
+            this.status = status;
+            this.message = message;
+        }
+    }
+
+    @Data
     public static class ConfirmRequest {
         private String impUid;
         private String merchantUid;
-        private BigDecimal amount;
     }
 
     @Data

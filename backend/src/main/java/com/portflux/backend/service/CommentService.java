@@ -99,4 +99,13 @@ public class CommentService {
     public List<CommentDto> getCommentsByUserNum(int userNum) {
         return commentMapper.findCommentsByUserNum(userNum);
     }
+
+    /**
+     * 닉네임으로 사용자의 댓글 목록 조회
+     * @param nickname 사용자 닉네임
+     * @return List<CommentDto>
+     */
+    public List<CommentDto> getCommentsByNickname(String nickname) {
+        return commentMapper.findCommentsByNickname(nickname);
+    }
 }

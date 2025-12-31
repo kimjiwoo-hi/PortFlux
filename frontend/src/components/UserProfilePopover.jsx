@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "./UserProfilePopover.css";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import UserDefaultIcon from "../assets/user_default_icon.png";
 import { fetchUserInfo, getCachedUserInfo } from "../utils/userInfoCache";
+import axios from "axios";
 
-const UserProfilePopover = ({ isOpen, onLogout }) => {
+const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState({
     userName: "",
     userNickname: "",
@@ -13,7 +15,7 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
     userImage: null,
     userBanner: null
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [postCount, setPostCount] = useState(0);
 
   const USER_ROLE = localStorage.getItem("role") || sessionStorage.getItem("role") || "USER";
 
@@ -24,25 +26,45 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
         const cachedInfo = getCachedUserInfo();
         if (cachedInfo) {
           setUserInfo(cachedInfo);
+          // 게시글 수 조회
+          if (cachedInfo.userNickname) {
+            loadPostCount(cachedInfo.userNickname);
+          }
           return;
         }
 
         // 캐시가 없으면 API 호출
-        setIsLoading(true);
         try {
           const info = await fetchUserInfo();
           setUserInfo(info);
+          // 게시글 수 조회
+          if (info.userNickname) {
+            loadPostCount(info.userNickname);
+          }
         } catch (error) {
           console.error("User info fetch error:", error);
           const storage = localStorage.getItem("isLoggedIn") ? localStorage : sessionStorage;
           const userId = storage.getItem("userId");
+          const nickname = storage.getItem("userNickname");
           setUserInfo(prev => ({
             ...prev,
-            userNickname: storage.getItem("userNickname") || "사용자",
+            userNickname: nickname || "사용자",
             userEmail: userId || ""
           }));
-        } finally {
-          setIsLoading(false);
+          // 게시글 수 조회
+          if (nickname) {
+            loadPostCount(nickname);
+          }
+        }
+      };
+
+      const loadPostCount = async (nickname) => {
+        try {
+          const response = await axios.get(`/api/boardlookup/user/nickname/${nickname}/posts`);
+          setPostCount(response.data.length || 0);
+        } catch (error) {
+          console.error("게시글 수 조회 실패:", error);
+          setPostCount(0);
         }
       };
 
@@ -66,10 +88,32 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
     return { backgroundImage: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" };
   };
 
-  const handleMenuClick = (path) => () => {
-    if (location.pathname === path) {
+  const handleMenuClick = (path) => (e) => {
+    const myPagePath = USER_ROLE === "COMPANY" ? "/company/mypage" : `/mypage/${userInfo.userNickname}`;
+    const isOnMyPage = location.pathname.startsWith('/mypage/');
+    const isSamePath = location.pathname === path;
+
+    // 내 정보 보기를 클릭했고 이미 마이페이지에 있는 경우
+    if (path === myPagePath && isOnMyPage) {
+      e.preventDefault();
+      onClose?.();
+      window.location.reload();
+      return;
+    }
+
+    // Popover 닫기
+    onClose?.();
+
+    // 같은 경로면 리프레시
+    if (isSamePath) {
       window.location.reload();
     }
+  };
+
+  const handlePostsClick = () => {
+    const myPagePath = `/mypage/${userInfo.userNickname}`;
+    onClose?.();
+    navigate(myPagePath, { state: { activeTab: 'posts' } });
   };
 
   return (
@@ -82,7 +126,14 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
       </div>
 
       <div className="stats-container">
-        <div className="stat-item"><div className="stat-number">0</div><div className="stat-label">게시글</div></div>
+        <div
+          className="stat-item clickable"
+          onClick={handlePostsClick}
+          style={{ cursor: 'pointer' }}
+        >
+          <div className="stat-number">{postCount}</div>
+          <div className="stat-label">게시글</div>
+        </div>
         <div className="stat-divider"></div>
         <div className="stat-item"><div className="stat-number">0</div><div className="stat-label">팔로워</div></div>
         <div className="stat-divider"></div>
@@ -90,7 +141,10 @@ const UserProfilePopover = ({ isOpen, onLogout }) => {
       </div>
 
       <div className="menu-list">
-        <Link to={USER_ROLE === "COMPANY" ? "/company/mypage" : "/mypage/myinfo"} onClick={handleMenuClick(USER_ROLE === "COMPANY" ? "/company/mypage" : "/mypage/myinfo")}>
+        <Link
+          to={USER_ROLE === "COMPANY" ? "/company/mypage" : `/mypage/${userInfo.userNickname}`}
+          onClick={handleMenuClick(USER_ROLE === "COMPANY" ? "/company/mypage" : `/mypage/${userInfo.userNickname}`)}
+        >
           <button className="menu-item">{USER_ROLE === "COMPANY" ? "기업 정보 관리" : "내 정보 보기"}</button>
         </Link>
         <Link to="/cart" onClick={handleMenuClick("/cart")}><button className="menu-item">장바구니</button></Link>

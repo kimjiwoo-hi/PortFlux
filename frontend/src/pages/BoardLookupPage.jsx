@@ -18,6 +18,8 @@ function BoardLookupPage() {
   const navigate = useNavigate();
   const [showSaveToast, setShowSaveToast] = useState(false);
   const [saveToastMessage, setSaveToastMessage] = useState("");
+  // ✅ 장바구니 토스트 state 추가
+  const [showCartToast, setShowCartToast] = useState(false);
 
   // 게시글 목록 로드
   useEffect(() => {
@@ -56,8 +58,8 @@ function BoardLookupPage() {
             title: post.title,
             author: post.userNickname,
             imageUrl: imageUrl,
-            price: post.price,
-            likes: 0,
+            price: post.price, // Add price
+            likes: 0, // TODO: 좋아요 기능 추가 시 구현
             views: post.viewCnt,
             isLiked: false,
             tags: tagsArray,
@@ -152,29 +154,26 @@ function BoardLookupPage() {
     navigate("/board/write");
   };
 
+  // ✅ 장바구니 추가 - 토스트 메시지 포함
   const handleAddToCart = async (e, post) => {
     e.stopPropagation();
 
-    const storedUser =
-      localStorage.getItem("user") || sessionStorage.getItem("user");
     const token =
       localStorage.getItem("token") || sessionStorage.getItem("token");
 
-    if (!storedUser) {
+    if (!token) {
       alert("로그인이 필요합니다.");
       navigate("/login");
       return;
     }
 
-    // ✅ 이 줄 추가!
-    const loggedInUser = JSON.parse(storedUser);
     try {
       const requestData = {
         productId: post.id,
       };
 
       await axios.post(
-        `http://localhost:8080/api/cart/${loggedInUser.userNum}/items`,
+        `http://localhost:8080/api/cart/items`,
         requestData,
         {
           withCredentials: true,
@@ -184,15 +183,20 @@ function BoardLookupPage() {
         }
       );
 
-      alert("장바구니에 담겼습니다.");
+      // ✅ alert 대신 토스트 표시
+      setShowCartToast(true);
+      setTimeout(() => setShowCartToast(false), 3000);
     } catch (err) {
       console.error("장바구니 추가 실패:", err);
 
       if (err.response?.status === 409) {
         alert("이미 장바구니에 담긴 항목입니다.");
+      } else if (err.response?.status === 401) {
+        alert("로그인이 필요합니다.");
+        navigate("/login");
       } else {
         alert(
-          `장바구니 추가에 실패했습니다: ${err.response?.data || err.message}`
+          `장바구니 추가에 실패했습니다: ${err.response?.data?.message || err.message}`
         );
       }
     }
@@ -235,7 +239,6 @@ function BoardLookupPage() {
           return newSet;
         });
 
-        // ✅ 토스트 표시
         setShowSaveToast(true);
         setTimeout(() => setShowSaveToast(false), 3000);
       }
@@ -298,6 +301,10 @@ function BoardLookupPage() {
           <div className={`cart-toast ${showSaveToast ? "show" : ""}`}>
             {saveToastMessage}
           </div>
+          {/* ✅ 장바구니 토스트 추가 */}
+          <div className={`cart-toast ${showCartToast ? "show" : ""}`}>
+            장바구니에 담겼습니다! 🛒
+          </div>
         </div>
         <div className="tag-categories-container">
           {Object.entries(filteredTagData).map(([category, tags]) => (
@@ -335,55 +342,61 @@ function BoardLookupPage() {
             <div
               key={post.id}
               className="board-item"
-              onClick={() => handlePostClick(post.id)}
               onMouseEnter={() => setHoveredPostId(post.id)}
               onMouseLeave={() => setHoveredPostId(null)}
             >
-              {hoveredPostId === post.id && (
-                <div className="hover-actions-container">
-                  <span className="post-price-on-hover">
-                    {post.price.toLocaleString()}₩
-                  </span>
-                  <button
-                    className="cart-hover-button"
-                    onClick={(e) => handleAddToCart(e, post)}
-                  >
-                    <img src={cartIcon} alt="Add to cart" />
-                  </button>
-                  <button
-                    className="cart-hover-button bookmark-button"
-                    onClick={(e) => handleToggleSave(e, post)}
-                    style={{
-                      backgroundColor: savedPosts.has(post.id)
-                        ? "#FFD700"
-                        : "rgba(255, 255, 255, 0.9)",
-                    }}
-                  >
-                    <img
-                      src={
-                        savedPosts.has(post.id)
-                          ? bookmarkFilledIcon
-                          : bookmarkIcon
-                      }
-                      alt="Save"
-                    />
-                  </button>
-                </div>
-              )}
-              <img
-                src={post.imageUrl}
-                alt={post.title}
-                className="board-item-thumbnail"
-              />
+              <div style={{ position: 'relative' }}>
+                {hoveredPostId === post.id && (
+                  <div className="hover-actions-container">
+                    <span className="post-price-on-hover">
+                      {post.price.toLocaleString()}₩
+                    </span>
+                    <button
+                      className="cart-hover-button"
+                      onClick={(e) => handleAddToCart(e, post)}
+                    >
+                      <img src={cartIcon} alt="Add to cart" />
+                    </button>
+                    <button
+                      className="cart-hover-button bookmark-button"
+                      onClick={(e) => handleToggleSave(e, post)}
+                      style={{
+                        backgroundColor: savedPosts.has(post.id)
+                          ? "#ffffffff"
+                          : "rgba(255, 255, 255, 0.9)",
+                      }}
+                    >
+                      <img
+                        src={
+                          savedPosts.has(post.id)
+                            ? bookmarkFilledIcon
+                            : bookmarkIcon
+                        }
+                        alt="Save"
+                      />
+                    </button>
+                  </div>
+                )}
+                <img
+                  src={post.imageUrl}
+                  alt={post.title}
+                  className="board-item-thumbnail"
+                  onClick={() => handlePostClick(post.id)}
+                />
+              </div>
               <div className="board-item-info">
-                <h4 className="info-title">{post.title}</h4>
-                <a
-                  href={`/profile/${post.author}`}
+                <h4
+                  className="info-title"
+                  onClick={() => handlePostClick(post.id)}
+                >
+                  {post.title}
+                </h4>
+                <span
                   className="info-author"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={() => navigate(`/mypage/${post.author}`)}
                 >
                   {post.author}
-                </a>
+                </span>
               </div>
             </div>
           )

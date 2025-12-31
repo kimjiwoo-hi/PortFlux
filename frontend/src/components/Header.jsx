@@ -142,7 +142,11 @@ const Header = () => {
                 style={{ cursor: "pointer" }}
               />
               <div ref={popoverRef}>
-                <UserProfilePopover isOpen={isPopoverOpen} onLogout={handleLogout} />
+                <UserProfilePopover
+                  isOpen={isPopoverOpen}
+                  onLogout={handleLogout}
+                  onClose={() => setIsPopoverOpen(false)}
+                />
               </div>
             </div>
           )}
