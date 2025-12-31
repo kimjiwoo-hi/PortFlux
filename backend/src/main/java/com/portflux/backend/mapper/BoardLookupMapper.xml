@@ -117,7 +117,7 @@
             title = #{title},
             content = #{content},
             price = #{price},
-            ai_summary = #{aiSummary},
+            ai_summary = #{aiSummary, jdbcType=VARCHAR},
             <if test="postFile != null">
                 post_file = #{postFile},
             </if>

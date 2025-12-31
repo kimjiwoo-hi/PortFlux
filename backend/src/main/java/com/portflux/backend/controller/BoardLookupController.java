@@ -236,8 +236,7 @@ public class BoardLookupController {
     public ResponseEntity<Map<String, Object>> updatePost(
             @PathVariable int postId,
             @ModelAttribute BoardLookupPostDto postDto,
-            @RequestParam(value = "file", required = false) MultipartFile file,
-            @RequestParam Long userNum
+            @RequestParam(value = "file", required = false) MultipartFile file
     ) {
         try {
             postDto.setPostId(postId);
@@ -247,7 +246,11 @@ public class BoardLookupController {
                 postDto.setPostFile(fileName);
             }
 
-            BoardLookupPostDto updatedPost = boardLookupService.updatePost(postDto, userNum);
+            if (postDto.getUserNum() == null) {
+                return ResponseEntity.status(400).body(Map.of("success", false, "message", "User number is required."));
+            }
+
+            BoardLookupPostDto updatedPost = boardLookupService.updatePost(postDto, postDto.getUserNum().longValue());
             return ResponseEntity.ok(Map.of("success", true, "post", updatedPost));
 
         } catch (NoSuchElementException e) {

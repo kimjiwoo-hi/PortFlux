@@ -20,6 +20,7 @@ import BoardJobEditPage from "./pages/BoardJobEditPage.jsx";
 import BoardLookup from "./pages/BoardLookupPage.jsx";
 import BoardLookupWrite from "./pages/BoardLookupWritePage.jsx";
 import BoardLookupRead from "./pages/BoardLookupRead.jsx";
+import BoardLookupEditPage from "./pages/BoardLookupEditPage.jsx";
 import Cart from "./pages/CartPage.jsx";
 import Chat from "./pages/ChattingPage.jsx";
 import MyPage from "./pages/MyPage.jsx";
@@ -52,6 +53,10 @@ const router = createBrowserRouter([
       {
         path: "/board/lookup/:postId",
         element: <BoardLookupRead />,
+      },
+      {
+        path: "/board/lookup/edit/:postId",
+        element: <BoardLookupEditPage />,
       },
     ],
   },
