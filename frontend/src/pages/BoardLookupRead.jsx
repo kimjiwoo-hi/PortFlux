@@ -37,6 +37,8 @@ const BoardLookupRead = () => {
   const [saveToastMessage, setSaveToastMessage] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  const bottomRef = useRef(null);
+  const [showBottomActions, setShowBottomActions] = useState(false);
 
   // 게시글 데이터 로드
   useEffect(() => {
@@ -80,6 +82,26 @@ const BoardLookupRead = () => {
 
     if (postId) fetchPostData();
   }, [postId]);
+
+  // ✅ 수정된 IntersectionObserver - threshold 낮추고 rootMargin 추가
+  useEffect(() => {
+    if (!bottomRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        console.log("IntersectionObserver:", entry.isIntersecting); // 디버깅용
+        setShowBottomActions(entry.isIntersecting);
+      },
+      { 
+        threshold: 0.1,  // 0.8 → 0.1로 변경 (10%만 보여도 감지)
+        rootMargin: "0px 0px 100px 0px"  // 하단 100px 여유 추가
+      }
+    );
+
+    observer.observe(bottomRef.current);
+
+    return () => observer.disconnect();
+  }, []);
 
   // 스크롤 이벤트
   useEffect(() => {
@@ -295,7 +317,7 @@ const BoardLookupRead = () => {
     }
   };
 
-  // ✅✅✅ 최종 수정된 장바구니 추가 함수
+  // 장바구니 추가
   const handleAddToCart = async () => {
     const storedUser =
       localStorage.getItem("user") || sessionStorage.getItem("user");
@@ -317,10 +339,9 @@ const BoardLookupRead = () => {
         productId: postId,
       });
 
-      // ✅ 중요: http://localhost:8080 전체 경로 포함!
       const response = await axios.post(
         `http://localhost:8080/api/cart/items`,
-        { productId: parseInt(postId) }, // ✅ postId를 숫자로 변환
+        { productId: parseInt(postId) },
         {
           withCredentials: true,
           headers: {
@@ -358,7 +379,7 @@ const BoardLookupRead = () => {
     }
   };
 
-  // 북마크 토글 핸들러
+  // 북마크 토글
   const handleToggleSave = async () => {
     const storedUser =
       localStorage.getItem("user") || sessionStorage.getItem("user");
@@ -455,12 +476,13 @@ const BoardLookupRead = () => {
       setCurrentPage((p) => p + 1);
   };
 
-  // 오버레이 및 배경 클릭
+  // 오버레이 클릭
   const handleOverlayClick = () => {
     setShowComments(false);
     setShowAISummary(false);
   };
 
+  // 배경 클릭
   const handleBackgroundClick = (e) => {
     if (e.target === e.currentTarget) navigate("/");
   };
@@ -571,20 +593,6 @@ const BoardLookupRead = () => {
             </span>
           ))}
         </div>
-      </div>
-
-      <div className="header-right">
-
-        {isMyPost() && (
-          <div className="post-author-actions">
-            <button className="edit-btn" onClick={handleEdit}>
-              수정
-            </button>
-            <button className="delete-btn" onClick={handleDelete}>
-              삭제
-            </button>
-          </div>
-        )}
       </div>
 
       <div className="main-content">
@@ -865,6 +873,28 @@ const BoardLookupRead = () => {
           </div>
         </div>
       </div>
+
+      {/* ✅ 게시물 끝 감지용 요소 - 충분한 높이 확보 */}
+      <div 
+        ref={bottomRef} 
+        style={{ 
+          height: '200px', 
+          width: '100%',
+          pointerEvents: 'none'
+        }} 
+      />
+
+      {/* ✅ 수정/삭제 버튼 - 조건부 렌더링 개선 */}
+      {isMyPost() && showBottomActions && (
+        <div className="post-bottom-actions">
+          <button className="edit-btn" onClick={handleEdit}>
+            수정
+          </button>
+          <button className="delete-btn" onClick={handleDelete}>
+            삭제
+          </button>
+        </div>
+      )}
     </div>
   );
 };
