@@ -39,9 +39,13 @@ public class UserLoginController {
             // Service 로직 호출 (전달받은 type에 따라 USER/COMPANY 분기 처리됨)
             Map<String, Object> result = userService.login(loginBean, type);
 
-            // 토큰 생성을 위한 아이디 추출 (UserBean의 userId 혹은 CompanyUserBean의 companyId)
+            // 토큰 생성을 위한 정보 추출
             String loginId = (String) result.get("id");
-            String token = jwtTokenProvider.generateToken(loginId);
+            Long userNum = ((Number) result.get("num")).longValue();
+            String userType = "USER".equals(type) ? "USER" : "COMPANY";
+
+            // userType과 userNum을 포함한 JWT 토큰 생성
+            String token = jwtTokenProvider.generateToken(loginId, userType, userNum);
 
             // 프론트엔드 응답 데이터 구성
             Map<String, Object> response = new HashMap<>();
@@ -58,6 +62,7 @@ public class UserLoginController {
             }
 
             System.out.println(">>> 로그인 성공: " + loginId);
+            System.out.println(">>> JWT 토큰 생성: userType=" + userType + ", userNum=" + userNum);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             // 로그인 실패 시 400 에러와 함께 메시지 전달
