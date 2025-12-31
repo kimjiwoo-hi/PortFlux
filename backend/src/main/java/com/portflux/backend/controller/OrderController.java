@@ -72,6 +72,56 @@ public class OrderController {
         private BigDecimal amount;
     }
 
+    /**
+     * merchantUid로 주문 정보 조회 (결제 페이지용)
+     */
+    @GetMapping("/{merchantUid}")
+    public ResponseEntity<OrderDetailResponse> getOrderByMerchantUid(
+            @PathVariable String merchantUid,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        Order order = orderService.findByMerchantUid(merchantUid);
+
+        if (order == null) {
+            return ResponseEntity.status(404).build();
+        }
+
+        // 현재 로그인한 사용자 조회
+        UserBean user = userRepository.findByUserId(userDetails.getUsername());
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        // 주문자 검증 (본인의 주문만 조회 가능)
+        if (!order.getUserId().equals(Long.valueOf(user.getUserNum()))) {
+            return ResponseEntity.status(403).build();
+        }
+
+        // 주문 상품 목록 변환
+        List<OrderItemDetail> itemDetails = order.getItems().stream()
+                .map(item -> {
+                    OrderItemDetail detail = new OrderItemDetail();
+                    detail.setProductId(item.getProductId());
+                    detail.setProductName(item.getProductName());
+                    detail.setUnitPrice(item.getUnitPrice());
+                    detail.setQty(item.getQty());
+                    return detail;
+                })
+                .collect(Collectors.toList());
+
+        // 응답 객체 생성
+        OrderDetailResponse response = new OrderDetailResponse();
+        response.setMerchantUid(order.getMerchantUid());
+        response.setTotalAmount(order.getTotalAmount());
+        response.setStatus(order.getStatus());
+        response.setItems(itemDetails);
+        response.setBuyerName(user.getUserNickname());
+        response.setBuyerEmail(user.getUserId()); // 이메일로 사용
+        response.setBuyerTel(user.getUserPhone() != null ? user.getUserPhone() : "010-0000-0000");
+
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/user")
     public ResponseEntity<List<OrderResponse>> getUserOrders(@AuthenticationPrincipal UserDetails userDetails) {
         UserBean user = userRepository.findByUserId(userDetails.getUsername());
@@ -123,6 +173,25 @@ public class OrderController {
 
     @Data
     public static class OrderItemResponse {
+        private Long productId;
+        private String productName;
+        private BigDecimal unitPrice;
+        private Integer qty;
+    }
+
+    @Data
+    public static class OrderDetailResponse {
+        private String merchantUid;
+        private BigDecimal totalAmount;
+        private String status;
+        private List<OrderItemDetail> items;
+        private String buyerName;
+        private String buyerEmail;
+        private String buyerTel;
+    }
+
+    @Data
+    public static class OrderItemDetail {
         private Long productId;
         private String productName;
         private BigDecimal unitPrice;
