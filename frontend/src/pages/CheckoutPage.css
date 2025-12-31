@@ -1,0 +1,128 @@
+.checkout-page {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.checkout-container {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 30px;
+  max-width: 500px;
+  width: 100%;
+  margin-top: 50px;
+}
+
+.checkout-container h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.order-summary,
+.payment-method-selection {
+  margin-bottom: 30px;
+  padding: 20px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+}
+
+.order-summary h2,
+.payment-method-selection h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 10px;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 15px;
+  color: #555;
+}
+
+.total-amount {
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  padding-top: 15px;
+  margin-top: 15px;
+  border-top: 1px dashed #eee;
+}
+
+.payment-options {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.payment-option-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 15px 20px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  color: #555;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.payment-option-btn:hover {
+  border-color: #a0a0a0;
+  background-color: #f0f0f0;
+}
+
+.payment-option-btn.selected {
+  border-color: #007bff; /* Primary brand color */
+  background-color: #e7f3ff;
+  color: #007bff;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+}
+
+.btn-payment {
+  width: 100%;
+  padding: 18px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 24px;
+  transition: all 0.2s;
+}
+
+.btn-payment:hover {
+  background-color: #555;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.btn-payment:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.loading-container,
+.error-container {
+  text-align: center;
+  padding: 50px 20px;
+}

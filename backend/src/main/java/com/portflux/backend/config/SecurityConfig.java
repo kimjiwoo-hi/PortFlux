@@ -42,7 +42,7 @@ public class SecurityConfig {
                     }
                 }))
 
-                // 2. CSRF 비활성화
+                // 2. CSRF 비활성화 (POST/PUT 요청 시 403 에러 방지 핵심)
                 .csrf(csrf -> csrf.disable())
 
                 // 3. 세션 설정 (Stateless)
@@ -74,7 +74,7 @@ public class SecurityConfig {
 
                         // 그 외 모든 요청은 인증 필요
                         .anyRequest().authenticated())
-                
+
                 // 5. JWT 필터 추가
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

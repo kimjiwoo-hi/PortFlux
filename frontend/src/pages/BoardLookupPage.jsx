@@ -58,8 +58,8 @@ function BoardLookupPage() {
             title: post.title,
             author: post.userNickname,
             imageUrl: imageUrl,
-            price: post.price,
-            likes: 0,
+            price: post.price, // Add price
+            likes: 0, // TODO: 좋아요 기능 추가 시 구현
             views: post.viewCnt,
             isLiked: false,
             tags: tagsArray,

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "ORDERS")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,6 +27,9 @@ public class Order {
     private BigDecimal totalAmount;
 
     private String status; // CREATED, PENDING, PAID, CANCELLED
+
+    @Column(name = "imp_uid") // 아임포트 거래 고유 ID 컬럼 명시
+    private String impUid; // 아임포트 거래 고유 ID
 
     private LocalDateTime createdAt = LocalDateTime.now();
 

@@ -7,13 +7,27 @@ export default function OrderResultPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
+  // 쿼리 파라미터 추출 (모바일 리다이렉트 지원)
   const merchantUid = searchParams.get("merchant_uid");
+  const impUid = searchParams.get("imp_uid");
+  const errorCode = searchParams.get("error_code");
+  const errorMsg = searchParams.get("error_msg");
+
   const [orderData, setOrderData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchOrderResult = async () => {
+    const handlePaymentResult = async () => {
+      // 1. 결제 실패 체크 (모바일 리다이렉트 시 error_code 존재)
+      if (errorCode) {
+        console.error("결제 실패:", errorCode, errorMsg);
+        setError(`결제에 실패하였습니다. ${errorMsg || "알 수 없는 오류"}`);
+        setLoading(false);
+        return;
+      }
+
+      // 2. merchant_uid 필수 체크
       if (!merchantUid) {
         setError("잘못된 접근입니다. 주문번호가 없습니다.");
         setLoading(false);
@@ -21,6 +35,51 @@ export default function OrderResultPage() {
       }
 
       try {
+        // 3. 모바일 리다이렉트로 온 경우 (imp_uid 존재) → 백엔드 검증 필요
+        if (impUid) {
+          console.log("모바일 결제 리다이렉트 감지: imp_uid =", impUid);
+
+          const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+
+          try {
+            // 백엔드 결제 검증 요청
+            await axios.post(
+              "/api/payments/confirm",
+              {
+                impUid: impUid,
+                merchantUid: merchantUid,
+              },
+              {
+                withCredentials: true,
+                headers: { 'Authorization': `Bearer ${token}` }
+              }
+            );
+            console.log("모바일 결제 검증 성공");
+
+            // 장바구니 비우기
+            const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+            if (storedUser) {
+              const user = JSON.parse(storedUser);
+              try {
+                await axios.delete(
+                  `/api/cart/${user.userNum}/empty`,
+                  {
+                    withCredentials: true,
+                    headers: { 'Authorization': `Bearer ${token}` }
+                  }
+                );
+                console.log("장바구니 비우기 성공");
+              } catch (err) {
+                console.error("장바구니 비우기 실패:", err);
+              }
+            }
+          } catch (err) {
+            console.error("모바일 결제 검증 실패:", err);
+            // 검증 실패해도 주문 정보는 표시 (사용자 안내용)
+          }
+        }
+
+        // 4. 주문 결과 조회
         const response = await axios.get(
           `/api/payments/result?merchantUid=${encodeURIComponent(merchantUid)}`,
           { withCredentials: true }
@@ -36,8 +95,8 @@ export default function OrderResultPage() {
       }
     };
 
-    fetchOrderResult();
-  }, [merchantUid]);
+    handlePaymentResult();
+  }, [merchantUid, impUid, errorCode, errorMsg]);
 
   if (loading) {
     return (

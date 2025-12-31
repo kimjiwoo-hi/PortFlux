@@ -22,6 +22,8 @@ import BoardLookupWrite from "./pages/BoardLookupWritePage.jsx";
 import BoardLookupRead from "./pages/BoardLookupRead.jsx";
 import BoardLookupEditPage from "./pages/BoardLookupEditPage.jsx";
 import Cart from "./pages/CartPage.jsx";
+// ★ 신규 추가: 결제 페이지 임포트
+import PaymentPage from "./pages/PaymentPage.jsx"; 
 import Chat from "./pages/ChattingPage.jsx";
 import MyPage from "./pages/MyPage.jsx";
 import OrderResultPage from "./pages/OrderResultPage.jsx";
@@ -87,6 +89,11 @@ const router = createBrowserRouter([
         path: "/cart",
         element: <Cart />,
       },
+      // ★ 신규 추가: 결제 페이지 경로 등록
+      {
+        path: "/payment",
+        element: <PaymentPage />,
+      },
       {
         path: "/chat",
         element: <Chat />,
@@ -95,10 +102,6 @@ const router = createBrowserRouter([
         path: "/mypage",
         element: <MyPage />,
         children: [
-          {
-            path: "myinfo",
-            element: <MyInfo />,
-          },
           {
             path: "myposts",
             element: <MyPosts />,
