@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import "./UserProfilePopover.css";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import UserDefaultIcon from "../assets/user_default_icon.png";
 import { fetchUserInfo, getCachedUserInfo } from "../utils/userInfoCache";
+import axios from "axios";
 
 const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState({
     userName: "",
     userNickname: "",
@@ -13,6 +15,7 @@ const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
     userImage: null,
     userBanner: null
   });
+  const [postCount, setPostCount] = useState(0);
 
   const USER_ROLE = localStorage.getItem("role") || sessionStorage.getItem("role") || "USER";
 
@@ -23,6 +26,10 @@ const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
         const cachedInfo = getCachedUserInfo();
         if (cachedInfo) {
           setUserInfo(cachedInfo);
+          // 게시글 수 조회
+          if (cachedInfo.userNickname) {
+            loadPostCount(cachedInfo.userNickname);
+          }
           return;
         }
 
@@ -30,15 +37,34 @@ const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
         try {
           const info = await fetchUserInfo();
           setUserInfo(info);
+          // 게시글 수 조회
+          if (info.userNickname) {
+            loadPostCount(info.userNickname);
+          }
         } catch (error) {
           console.error("User info fetch error:", error);
           const storage = localStorage.getItem("isLoggedIn") ? localStorage : sessionStorage;
           const userId = storage.getItem("userId");
+          const nickname = storage.getItem("userNickname");
           setUserInfo(prev => ({
             ...prev,
-            userNickname: storage.getItem("userNickname") || "사용자",
+            userNickname: nickname || "사용자",
             userEmail: userId || ""
           }));
+          // 게시글 수 조회
+          if (nickname) {
+            loadPostCount(nickname);
+          }
+        }
+      };
+
+      const loadPostCount = async (nickname) => {
+        try {
+          const response = await axios.get(`/api/boardlookup/user/nickname/${nickname}/posts`);
+          setPostCount(response.data.length || 0);
+        } catch (error) {
+          console.error("게시글 수 조회 실패:", error);
+          setPostCount(0);
         }
       };
 
@@ -84,6 +110,12 @@ const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
     }
   };
 
+  const handlePostsClick = () => {
+    const myPagePath = `/mypage/${userInfo.userNickname}`;
+    onClose?.();
+    navigate(myPagePath, { state: { activeTab: 'posts' } });
+  };
+
   return (
     <div className={`profile-popover ${isOpen ? "active" : ""}`}>
       <div className="popover-header">
@@ -94,7 +126,14 @@ const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
       </div>
 
       <div className="stats-container">
-        <div className="stat-item"><div className="stat-number">0</div><div className="stat-label">게시글</div></div>
+        <div
+          className="stat-item clickable"
+          onClick={handlePostsClick}
+          style={{ cursor: 'pointer' }}
+        >
+          <div className="stat-number">{postCount}</div>
+          <div className="stat-label">게시글</div>
+        </div>
         <div className="stat-divider"></div>
         <div className="stat-item"><div className="stat-number">0</div><div className="stat-label">팔로워</div></div>
         <div className="stat-divider"></div>
