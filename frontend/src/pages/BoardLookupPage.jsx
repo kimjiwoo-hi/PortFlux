@@ -3,10 +3,11 @@ import SearchIcon from "../assets/search.png";
 import cartIcon from "../assets/cartIcon.png";
 import bookmarkIcon from "../assets/Bookmark.png";
 import bookmarkFilledIcon from "../assets/FilldBookmark.png";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { tagData, tagSearchMap } from "../database/taglist";
 import axios from "axios";
+import UserMiniPopover from "../components/UserMiniPopover";
 
 function BoardLookupPage() {
   const [selectedTags, setSelectedTags] = useState({});
@@ -20,6 +21,31 @@ function BoardLookupPage() {
   const [saveToastMessage, setSaveToastMessage] = useState("");
   // ✅ 장바구니 토스트 state 추가
   const [showCartToast, setShowCartToast] = useState(false);
+  // 사용자 프로필 popover state
+  const [hoveredAuthor, setHoveredAuthor] = useState(null);
+  const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });
+  const authorRefs = useRef({});
+  const popoverHoverTimeout = useRef(null);
+  const [isPopoverHovered, setIsPopoverHovered] = useState(false);
+  const currentAuthorRef = useRef(null);
+
+  // 스크롤 시 팝오버 위치 업데이트
+  useEffect(() => {
+    const updatePopoverPosition = () => {
+      if (hoveredAuthor && currentAuthorRef.current) {
+        const rect = currentAuthorRef.current.getBoundingClientRect();
+        setPopoverPosition({
+          top: rect.bottom + 10,
+          left: rect.left + rect.width / 2 - 130,
+        });
+      }
+    };
+
+    if (hoveredAuthor) {
+      window.addEventListener('scroll', updatePopoverPosition, true);
+      return () => window.removeEventListener('scroll', updatePopoverPosition, true);
+    }
+  }, [hoveredAuthor]);
 
   // 게시글 목록 로드
   useEffect(() => {
@@ -252,6 +278,56 @@ function BoardLookupPage() {
     navigate(`/board/lookup/${postId}`);
   };
 
+  // 작성자 닉네임 호버 핸들러
+  const handleAuthorMouseEnter = (e, author) => {
+    if (popoverHoverTimeout.current) {
+      clearTimeout(popoverHoverTimeout.current);
+    }
+
+    // Store the current author element reference
+    currentAuthorRef.current = e.currentTarget;
+
+    // Calculate new position (viewport-relative for fixed positioning)
+    const rect = e.currentTarget.getBoundingClientRect();
+    const newPosition = {
+      top: rect.bottom + 10, // viewport-relative position
+      left: rect.left + rect.width / 2 - 130, // popover 중앙 정렬
+    };
+
+    // If switching to different user, hide first then update position
+    if (hoveredAuthor && hoveredAuthor !== author) {
+      setHoveredAuthor(null);
+      setTimeout(() => {
+        setPopoverPosition(newPosition);
+        setHoveredAuthor(author);
+      }, 50);
+    } else {
+      setPopoverPosition(newPosition);
+      setHoveredAuthor(author);
+    }
+  };
+
+  const handleAuthorMouseLeave = () => {
+    if (!isPopoverHovered) {
+      popoverHoverTimeout.current = setTimeout(() => {
+        setHoveredAuthor(null);
+      }, 100);
+    }
+  };
+
+  const handlePopoverMouseEnter = () => {
+    if (popoverHoverTimeout.current) {
+      clearTimeout(popoverHoverTimeout.current);
+    }
+    setIsPopoverHovered(true);
+  };
+
+  const handlePopoverMouseLeave = () => {
+    setIsPopoverHovered(false);
+    setHoveredAuthor(null);
+    currentAuthorRef.current = null;
+  };
+
   const filteredPosts = posts.filter((post) => {
     const selectedTagsList = Object.values(selectedTags).flat();
     if (selectedTagsList.length === 0) return true;
@@ -393,7 +469,13 @@ function BoardLookupPage() {
                 </h4>
                 <span
                   className="info-author"
-                  onClick={() => navigate(`/mypage/${post.author}`)}
+                  ref={(el) => (authorRefs.current[post.id] = el)}
+                  onMouseEnter={(e) => handleAuthorMouseEnter(e, post.author)}
+                  onMouseLeave={handleAuthorMouseLeave}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/mypage/${post.author}`);
+                  }}
                 >
                   {post.author}
                 </span>
@@ -402,6 +484,15 @@ function BoardLookupPage() {
           )
         )}
       </main>
+
+      {/* 사용자 프로필 미니 팝오버 */}
+      <UserMiniPopover
+        nickname={hoveredAuthor}
+        isVisible={!!hoveredAuthor}
+        position={popoverPosition}
+        onMouseEnter={handlePopoverMouseEnter}
+        onMouseLeave={handlePopoverMouseLeave}
+      />
     </div>
   );
 }
