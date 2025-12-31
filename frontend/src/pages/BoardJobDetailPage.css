@@ -167,13 +167,15 @@
 }
 
 .btn-owner {
-  padding: 8px 16px;
+  padding: 8px 20px;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  min-width: 70px;
+  text-align: center;
 }
 
 .btn-edit {
