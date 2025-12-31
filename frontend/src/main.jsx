@@ -98,6 +98,10 @@ const router = createBrowserRouter([
         element: <MyPage />,
         children: [
           {
+            path: "myinfo",
+            element: <MyInfo />,
+          },
+          {
             path: "myposts",
             element: <MyPosts />,
           },

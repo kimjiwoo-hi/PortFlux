@@ -556,4 +556,37 @@ public ResponseEntity<List<Integer>> getSavedPostIds(@PathVariable int userNum) 
         return ResponseEntity.internalServerError().build();
     }
 }
+
+/**
+ * 사용자의 저장된 게시글 상세 목록 조회
+ */
+@GetMapping("/user/{userNum}/saved/posts")
+public ResponseEntity<List<BoardLookupPostDto>> getSavedPosts(@PathVariable int userNum) {
+    try {
+        List<Integer> savedPostIds = postSaveMapper.findSavedPostIdsByUserNum(userNum);
+        List<BoardLookupPostDto> savedPosts = new java.util.ArrayList<>();
+
+        for (Integer postId : savedPostIds) {
+            BoardLookupPostDto post = boardLookupService.getPostById(postId);
+            if (post != null) {
+                // PDF 이미지 목록 추가
+                Path imageDir = Paths.get(uploadDir, "pdf", "post_" + postId);
+                if (Files.exists(imageDir)) {
+                    List<String> images = Files.list(imageDir)
+                            .filter(p -> p.toString().endsWith(".jpg"))
+                            .sorted()
+                            .map(p -> "/uploads/pdf/post_" + postId + "/" + p.getFileName())
+                            .toList();
+                    post.setPdfImages(images);
+                }
+                savedPosts.add(post);
+            }
+        }
+
+        return ResponseEntity.ok(savedPosts);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.internalServerError().build();
+    }
+}
 }
