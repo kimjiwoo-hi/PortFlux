@@ -1,0 +1,162 @@
+import { useState, useEffect } from "react";
+import "./UserMiniPopover.css";
+import { useNavigate } from "react-router-dom";
+import UserDefaultIcon from "../assets/user_default_icon.png";
+import axios from "axios";
+
+const UserMiniPopover = ({ nickname, isVisible, position, onMouseEnter, onMouseLeave }) => {
+  const navigate = useNavigate();
+  const [userInfo, setUserInfo] = useState({
+    userNickname: "",
+    userImage: null,
+    userBanner: null,
+  });
+  const [postCount, setPostCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (isVisible && nickname) {
+      const loadUserInfo = async () => {
+        try {
+          setLoading(true);
+          // 게시글 목록 조회로 사용자 정보와 게시글 수 한 번에 가져오기
+          const response = await axios.get(
+            `http://localhost:8080/api/boardlookup/user/nickname/${nickname}/posts`,
+            { withCredentials: true }
+          );
+
+          setPostCount(response.data.length || 0);
+
+          // 첫 번째 게시글에서 사용자 정보 추출
+          if (response.data.length > 0) {
+            const firstPost = response.data[0];
+
+            // Base64 이미지 처리 - userImage와 userBanner 필드 사용
+            let profileImage = null;
+            const imageData = firstPost.userImageBase64 || firstPost.userImage;
+            if (imageData) {
+              // data: 프리픽스가 이미 있으면 그대로 사용, 아니면 추가
+              if (imageData.startsWith('data:')) {
+                profileImage = imageData;
+              } else if (imageData.startsWith('/uploads/')) {
+                // 서버 파일 경로인 경우
+                profileImage = `http://localhost:8080${imageData}`;
+              } else {
+                // Base64 문자열인 경우
+                profileImage = `data:image/jpeg;base64,${imageData}`;
+              }
+            }
+
+            let bannerImage = null;
+            const bannerData = firstPost.userBannerBase64 || firstPost.userBanner;
+            if (bannerData) {
+              // data: 프리픽스가 이미 있으면 그대로 사용, 아니면 추가
+              if (bannerData.startsWith('data:')) {
+                bannerImage = bannerData;
+              } else if (bannerData.startsWith('/uploads/')) {
+                // 서버 파일 경로인 경우
+                bannerImage = `http://localhost:8080${bannerData}`;
+              } else {
+                // Base64 문자열인 경우
+                bannerImage = `data:image/jpeg;base64,${bannerData}`;
+              }
+            }
+
+            setUserInfo({
+              userNickname: firstPost.userNickname || nickname,
+              userImage: profileImage,
+              userBanner: bannerImage,
+            });
+          } else {
+            // 게시글이 없는 경우 기본값 설정
+            setUserInfo({
+              userNickname: nickname,
+              userImage: null,
+              userBanner: null,
+            });
+          }
+          setLoading(false);
+        } catch (error) {
+          console.error("사용자 정보 로드 실패:", error);
+          setUserInfo({
+            userNickname: nickname,
+            userImage: null,
+            userBanner: null,
+          });
+          setLoading(false);
+        }
+      };
+
+      loadUserInfo();
+    }
+  }, [isVisible, nickname]);
+
+  const getProfileImage = () => {
+    if (userInfo.userImage && userInfo.userImage.trim() !== "")
+      return userInfo.userImage;
+    return UserDefaultIcon;
+  };
+
+  const getBannerStyle = () => {
+    if (userInfo.userBanner && userInfo.userBanner.trim() !== "") {
+      return {
+        backgroundImage: `url(${userInfo.userBanner})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      };
+    }
+    return {
+      backgroundImage: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    };
+  };
+
+  const handleProfileClick = (e) => {
+    e.stopPropagation();
+    navigate(`/mypage/${nickname}`);
+  };
+
+  return (
+    <div
+      className={`user-mini-popover ${isVisible ? "visible" : ""}`}
+      style={{
+        top: position?.top || 0,
+        left: position?.left || 0,
+      }}
+      onClick={handleProfileClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
+      {loading ? (
+        <div className="mini-popover-loading">로딩 중...</div>
+      ) : (
+        <>
+          <div className="mini-popover-header">
+            <div className="mini-header-bg" style={getBannerStyle()}></div>
+            <img
+              src={getProfileImage()}
+              alt="프로필"
+              className="mini-popover-avatar"
+            />
+          </div>
+
+          <div className="mini-popover-content">
+            <div className="mini-popover-name">
+              {userInfo.userNickname || nickname}
+            </div>
+
+            <div className="mini-stats">
+              <div className="mini-stat-item">
+                <span className="mini-stat-number">{postCount}</span>
+                <span className="mini-stat-label">게시글</span>
+              </div>
+            </div>
+
+            <button className="mini-view-profile-btn">프로필 보기</button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default UserMiniPopover;

@@ -11,6 +11,7 @@ import downloadIcon from "../assets/Downloadcloud.png";
 import bookmarkIcon from "../assets/Bookmark.png";
 import bookmarkFilledIcon from "../assets/FilldBookmark.png";
 import { MoreHorizontal } from "lucide-react";
+import UserMiniPopover from "../components/UserMiniPopover";
 
 const BoardLookupRead = () => {
   const { postId } = useParams();
@@ -37,6 +38,30 @@ const BoardLookupRead = () => {
   const [saveToastMessage, setSaveToastMessage] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  // 사용자 프로필 popover state
+  const [hoveredAuthor, setHoveredAuthor] = useState(null);
+  const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });
+  const popoverHoverTimeout = useRef(null);
+  const [isPopoverHovered, setIsPopoverHovered] = useState(false);
+  const currentAuthorRef = useRef(null);
+
+  // 스크롤 시 팝오버 위치 업데이트
+  useEffect(() => {
+    const updatePopoverPosition = () => {
+      if (hoveredAuthor && currentAuthorRef.current) {
+        const rect = currentAuthorRef.current.getBoundingClientRect();
+        setPopoverPosition({
+          top: rect.bottom + 10,
+          left: rect.left + rect.width / 2 - 130,
+        });
+      }
+    };
+
+    if (hoveredAuthor) {
+      window.addEventListener('scroll', updatePopoverPosition, true);
+      return () => window.removeEventListener('scroll', updatePopoverPosition, true);
+    }
+  }, [hoveredAuthor]);
 
   // 게시글 데이터 로드
   useEffect(() => {
@@ -242,6 +267,56 @@ const BoardLookupRead = () => {
 
   // 팔로우 토글
   const handleFollowToggle = () => setIsFollowing(!isFollowing);
+
+  // 작성자 popover 핸들러
+  const handleAuthorMouseEnter = (e) => {
+    if (popoverHoverTimeout.current) {
+      clearTimeout(popoverHoverTimeout.current);
+    }
+
+    // Store the current author element reference
+    currentAuthorRef.current = e.currentTarget;
+
+    // Calculate new position (viewport-relative for fixed positioning)
+    const rect = e.currentTarget.getBoundingClientRect();
+    const newPosition = {
+      top: rect.bottom + 10, // viewport-relative position
+      left: rect.left + rect.width / 2 - 130,
+    };
+
+    // If switching to different user, hide first then update position
+    if (hoveredAuthor && hoveredAuthor !== postData.userNickname) {
+      setHoveredAuthor(null);
+      setTimeout(() => {
+        setPopoverPosition(newPosition);
+        setHoveredAuthor(postData.userNickname);
+      }, 50);
+    } else {
+      setPopoverPosition(newPosition);
+      setHoveredAuthor(postData.userNickname);
+    }
+  };
+
+  const handleAuthorMouseLeave = () => {
+    if (!isPopoverHovered) {
+      popoverHoverTimeout.current = setTimeout(() => {
+        setHoveredAuthor(null);
+      }, 100);
+    }
+  };
+
+  const handlePopoverMouseEnter = () => {
+    if (popoverHoverTimeout.current) {
+      clearTimeout(popoverHoverTimeout.current);
+    }
+    setIsPopoverHovered(true);
+  };
+
+  const handlePopoverMouseLeave = () => {
+    setIsPopoverHovered(false);
+    setHoveredAuthor(null);
+    currentAuthorRef.current = null;
+  };
 
   // 댓글창 토글
   const handleCommentToggle = () => {
@@ -551,7 +626,12 @@ const BoardLookupRead = () => {
                 <div className="profile-info">
                   <div
                     className="nickname"
-                    onClick={() => navigate(`/user/${postData.userNum}`)}
+                    onMouseEnter={handleAuthorMouseEnter}
+                    onMouseLeave={handleAuthorMouseLeave}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/mypage/${postData.userNickname}`);
+                    }}
                     style={{ cursor: "pointer" }}
                   >
                     {postData.userNickname}
@@ -865,6 +945,15 @@ const BoardLookupRead = () => {
           </div>
         </div>
       </div>
+
+      {/* 사용자 프로필 미니 팝오버 */}
+      <UserMiniPopover
+        nickname={hoveredAuthor}
+        isVisible={!!hoveredAuthor}
+        position={popoverPosition}
+        onMouseEnter={handlePopoverMouseEnter}
+        onMouseLeave={handlePopoverMouseLeave}
+      />
     </div>
   );
 };
