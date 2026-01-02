@@ -129,12 +129,36 @@ const UserProfile = () => {
         // 본인인 경우 저장한 게시글 조회
         if (owner) {
           try {
-            const savedResponse = await axios.get('/api/post-save/my-saved-posts', {
-              withCredentials: true
-            });
-            setSavedPosts(savedResponse.data);
+            const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+            const user = JSON.parse(storedUser);
+            const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+            
+            const savedIdsResponse = await axios.get(
+              `/api/boardlookup/user/${user.userNum}/saved`,
+              {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+                withCredentials: true
+              }
+            );
+
+            // ID 배열을 받아서 각 게시글 상세 정보 가져오기
+            if (savedIdsResponse.data && savedIdsResponse.data.length > 0) {
+              const postDetailsPromises = savedIdsResponse.data.map((postId) =>
+                axios.get(`/api/boardlookup/${postId}`, {
+                  headers: token ? { Authorization: `Bearer ${token}` } : {},
+                  withCredentials: true,
+                })
+              );
+
+              const postDetailsResponses = await Promise.all(postDetailsPromises);
+              const posts = postDetailsResponses.map((res) => res.data.post || res.data);
+              setSavedPosts(posts);
+            } else {
+              setSavedPosts([]);
+            }
           } catch (err) {
             console.error("저장한 게시글 조회 실패:", err);
+            setSavedPosts([]);
           }
         }
 
