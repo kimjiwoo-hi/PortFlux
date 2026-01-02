@@ -2,7 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import "./UserMiniPopover.css";
 import { useNavigate } from "react-router-dom";
 import UserDefaultIcon from "../assets/user_default_icon.png";
+import { getFollowers, getFollowing } from "../api/api";
 import axios from "axios";
+import FollowListPopover from "./FollowListPopover";
 
 const UserMiniPopover = ({ nickname, isVisible, position, onMouseEnter, onMouseLeave }) => {
   const navigate = useNavigate();
@@ -10,10 +12,19 @@ const UserMiniPopover = ({ nickname, isVisible, position, onMouseEnter, onMouseL
     userNickname: "",
     userImage: null,
     userBanner: null,
+    userNum: null,
   });
   const [postCount, setPostCount] = useState(0);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const popoverRef = useRef(null);
+
+  // 팔로우 리스트 팝오버
+  const [showFollowPopover, setShowFollowPopover] = useState(false);
+  const [followPopoverTab, setFollowPopoverTab] = useState('followers');
+  const followersRef = useRef(null);
+  const followingRef = useRef(null);
 
   // Popover 위치 계산 - 렌더링 중 계산
   const showAbove = (() => {
@@ -78,7 +89,13 @@ const UserMiniPopover = ({ nickname, isVisible, position, onMouseEnter, onMouseL
               userNickname: firstPost.userNickname || nickname,
               userImage: profileImage,
               userBanner: bannerImage,
+              userNum: firstPost.userNum,
             });
+
+            // 팔로워/팔로잉 수 조회
+            if (firstPost.userNum) {
+              loadFollowCounts(firstPost.userNum);
+            }
           } else {
             // 게시글이 없는 경우 기본값 설정
             setUserInfo({
@@ -96,6 +113,21 @@ const UserMiniPopover = ({ nickname, isVisible, position, onMouseEnter, onMouseL
             userBanner: null,
           });
           setLoading(false);
+        }
+      };
+
+      const loadFollowCounts = async (userNum) => {
+        try {
+          const [followersRes, followingRes] = await Promise.all([
+            getFollowers(userNum),
+            getFollowing(userNum)
+          ]);
+          setFollowersCount(followersRes.data.count || 0);
+          setFollowingCount(followingRes.data.count || 0);
+        } catch (error) {
+          console.error("팔로우 수 조회 실패:", error);
+          setFollowersCount(0);
+          setFollowingCount(0);
         }
       };
 
@@ -163,11 +195,47 @@ const UserMiniPopover = ({ nickname, isVisible, position, onMouseEnter, onMouseL
                 <span className="mini-stat-number">{postCount}</span>
                 <span className="mini-stat-label">게시글</span>
               </div>
+              <div
+                className="mini-stat-item clickable"
+                ref={followersRef}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFollowPopoverTab('followers');
+                  setShowFollowPopover(true);
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <span className="mini-stat-number">{followersCount}</span>
+                <span className="mini-stat-label">팔로워</span>
+              </div>
+              <div
+                className="mini-stat-item clickable"
+                ref={followingRef}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFollowPopoverTab('following');
+                  setShowFollowPopover(true);
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <span className="mini-stat-number">{followingCount}</span>
+                <span className="mini-stat-label">팔로잉</span>
+              </div>
             </div>
 
             <button className="mini-view-profile-btn">프로필 보기</button>
           </div>
         </>
+      )}
+
+      {/* 팔로우 리스트 팝오버 */}
+      {showFollowPopover && userInfo.userNum && (
+        <FollowListPopover
+          userNum={userInfo.userNum}
+          initialTab={followPopoverTab}
+          onClose={() => setShowFollowPopover(false)}
+          anchorEl={followPopoverTab === 'followers' ? followersRef.current : followingRef.current}
+        />
       )}
     </div>
   );

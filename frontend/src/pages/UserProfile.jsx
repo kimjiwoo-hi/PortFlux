@@ -1,9 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "./UserProfile.css";
 import UserDefaultIcon from "../assets/user_default_icon.png";
 import { updateUserInfoCache } from "../utils/userInfoCache";
+import { follow, unfollow, isFollowing as checkFollowing, getFollowers, getFollowing } from "../api/api";
+import FollowListPopover from "../components/FollowListPopover";
 
 const UserProfile = () => {
   const { userNum, nickname } = useParams();
@@ -20,6 +22,12 @@ const UserProfile = () => {
   const [error, setError] = useState("");
   const [isOwner, setIsOwner] = useState(false);
 
+  // 팔로우 관련 상태
+  const [isFollowingUser, setIsFollowingUser] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [followLoading, setFollowLoading] = useState(false);
+
   // 편집 모드
   const [isEditing, setIsEditing] = useState(false);
   const [editedInfo, setEditedInfo] = useState({});
@@ -34,6 +42,12 @@ const UserProfile = () => {
     newPassword: "",
     confirmPassword: "",
   });
+
+  // 팔로우 리스트 팝오버
+  const [showFollowPopover, setShowFollowPopover] = useState(false);
+  const [followPopoverTab, setFollowPopoverTab] = useState('followers');
+  const followersRef = useRef(null);
+  const followingRef = useRef(null);
 
   // 본인 여부 확인
   const checkIsOwner = useCallback(() => {
@@ -141,6 +155,11 @@ const UserProfile = () => {
           }
         }
 
+        // 팔로우 정보 조회
+        if (userInfo?.userNum) {
+          await loadFollowInfo(userInfo.userNum, !owner);
+        }
+
         setLoading(false);
       } catch (err) {
         console.error(err);
@@ -153,6 +172,54 @@ const UserProfile = () => {
       fetchUserProfile();
     }
   }, [userNum, nickname, checkIsOwner]);
+
+  // 팔로우 정보 로드
+  const loadFollowInfo = async (targetUserNum, checkIsFollowing) => {
+    try {
+      const [followersRes, followingRes] = await Promise.all([
+        getFollowers(targetUserNum),
+        getFollowing(targetUserNum)
+      ]);
+
+      setFollowersCount(followersRes.data.count || 0);
+      setFollowingCount(followingRes.data.count || 0);
+
+      // 다른 사용자의 프로필인 경우 팔로우 여부 확인
+      if (checkIsFollowing) {
+        const followingStatus = await checkFollowing(targetUserNum);
+        setIsFollowingUser(followingStatus.data.following);
+      }
+    } catch (error) {
+      console.error("팔로우 정보 조회 실패:", error);
+      setFollowersCount(0);
+      setFollowingCount(0);
+      setIsFollowingUser(false);
+    }
+  };
+
+  // 팔로우/언팔로우 토글
+  const handleFollowToggle = async () => {
+    if (!userInfo?.userNum) return;
+
+    setFollowLoading(true);
+    try {
+      if (isFollowingUser) {
+        await unfollow(userInfo.userNum);
+        setIsFollowingUser(false);
+        setFollowersCount(prev => Math.max(0, prev - 1));
+      } else {
+        await follow(userInfo.userNum);
+        setIsFollowingUser(true);
+        setFollowersCount(prev => prev + 1);
+      }
+    } catch (error) {
+      console.error("팔로우 토글 실패:", error);
+      // 에러 발생 시 상태 롤백
+      await loadFollowInfo(userInfo.userNum, !isOwner);
+    } finally {
+      setFollowLoading(false);
+    }
+  };
 
   const handlePostClick = (postId, boardType) => {
     if (boardType === 'free') {
@@ -475,6 +542,45 @@ const UserProfile = () => {
           </div>
           <div className="profile-info">
             <h2 className="profile-nickname">{userInfo?.userNickname}</h2>
+
+            {/* 팔로우 통계 */}
+            <div className="profile-stats">
+              <div
+                className="stat-item clickable"
+                ref={followersRef}
+                onClick={() => {
+                  setFollowPopoverTab('followers');
+                  setShowFollowPopover(true);
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <span className="stat-number">{followersCount}</span>
+                <span className="stat-label">팔로워</span>
+              </div>
+              <div
+                className="stat-item clickable"
+                ref={followingRef}
+                onClick={() => {
+                  setFollowPopoverTab('following');
+                  setShowFollowPopover(true);
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <span className="stat-number">{followingCount}</span>
+                <span className="stat-label">팔로잉</span>
+              </div>
+            </div>
+
+            {/* 팔로우 버튼 (다른 사용자의 프로필일 때만 표시) */}
+            {!isOwner && (
+              <button
+                className={`follow-button ${isFollowingUser ? 'following' : ''}`}
+                onClick={handleFollowToggle}
+                disabled={followLoading}
+              >
+                {followLoading ? '처리 중...' : isFollowingUser ? '팔로잉' : '팔로우'}
+              </button>
+            )}
           </div>
         </div>
 
@@ -758,6 +864,16 @@ const UserProfile = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 팔로우 리스트 팝오버 */}
+      {showFollowPopover && userInfo?.userNum && (
+        <FollowListPopover
+          userNum={userInfo.userNum}
+          initialTab={followPopoverTab}
+          onClose={() => setShowFollowPopover(false)}
+          anchorEl={followPopoverTab === 'followers' ? followersRef.current : followingRef.current}
+        />
       )}
     </div>
   );
