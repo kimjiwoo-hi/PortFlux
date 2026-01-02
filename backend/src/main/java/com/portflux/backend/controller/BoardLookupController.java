@@ -5,7 +5,7 @@ import com.portflux.backend.dto.CommentDto;
 import com.portflux.backend.service.BoardLookupService;
 import com.portflux.backend.service.LikeService;
 import com.portflux.backend.service.CommentService;
-import com.portflux.backend.service.PdfImageService;
+import com.portflux.backend.service.FileImageService;  // ⭐ 하나만!
 import com.portflux.backend.service.PostSaveService;
 import com.portflux.backend.mapper.PostSaveMapper;
 
@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-
 
 import java.io.File;
 import java.io.IOException;
@@ -39,7 +38,7 @@ public class BoardLookupController {
 
     private final BoardLookupService boardLookupService;
     private final CommentService commentService;
-    private final PdfImageService pdfImageService;
+    private final FileImageService fileImageService;  // ⭐ 하나만!
     private final LikeService likeService;
     private final PostSaveService postSaveService;
     private final PostSaveMapper postSaveMapper;
@@ -51,14 +50,14 @@ public class BoardLookupController {
     public BoardLookupController(
             BoardLookupService boardLookupService,
             CommentService commentService,
-            PdfImageService pdfImageService,
+            FileImageService fileImageService,  // ⭐ 하나만!
             LikeService likeService,
             PostSaveService postSaveService,
             PostSaveMapper postSaveMapper
     ) {
         this.boardLookupService = boardLookupService;
         this.commentService = commentService;
-        this.pdfImageService = pdfImageService;
+        this.fileImageService = fileImageService;  // ⭐ 하나만!
         this.likeService = likeService;
         this.postSaveService = postSaveService;
         this.postSaveMapper = postSaveMapper;
@@ -162,7 +161,7 @@ public class BoardLookupController {
                     post.setPdfImages(images);
                 }
                 
-                // ✅ 좋아요 수 추가
+                // 좋아요 수 추가
                 int likeCount = likeService.getLikeCount(post.getPostId());
                 post.setLikeCnt(likeCount);
             }
@@ -173,8 +172,6 @@ public class BoardLookupController {
             return ResponseEntity.internalServerError().build();
         }
     }
-
-
 
     /**
      * 게시글 작성 API (파일 업로드 포함)
@@ -193,7 +190,7 @@ public class BoardLookupController {
                 String originalFilename = file.getOriginalFilename();
                 if (originalFilename == null || !isValidFileExtension(originalFilename)) {
                     return ResponseEntity.badRequest().body(
-                            Map.of("success", false, "message", "허용되지 않는 파일 형식입니다. PDF 파일만 업로드할 수 있습니다.")
+                            Map.of("success", false, "message", "허용되지 않는 파일 형식입니다. PDF 또는 PPT 파일만 업로드할 수 있습니다.")
                     );
                 }
                 String fileName = saveFile(file);
@@ -210,16 +207,16 @@ public class BoardLookupController {
             // 3. DB 저장 (postId 생성)
             boardLookupService.createPost(postDto);
 
-            System.out.println("=== PDF 변환 시작 ===");
+            System.out.println("=== 파일 변환 시작 ===");
             System.out.println("PostId: " + postDto.getPostId());
             System.out.println("File: " + file.getOriginalFilename());
 
-            // 4. PDF → 이미지 변환
-            List<String> pdfImages = pdfImageService.convertPdfToImages(file, postDto.getPostId());
-            postDto.setPdfImages(pdfImages);
+            // 4. 파일 → 이미지 변환 (PDF/PPT 지원)
+            List<String> fileImages = fileImageService.convertFileToImages(file, postDto.getPostId());
+            postDto.setPdfImages(fileImages);
 
-            System.out.println("=== PDF 변환 완료 ===");
-            System.out.println("이미지 개수: " + pdfImages.size());
+            System.out.println("=== 파일 변환 완료 ===");
+            System.out.println("이미지 개수: " + fileImages.size());
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
@@ -345,9 +342,7 @@ public class BoardLookupController {
         try {
             List<BoardLookupPostDto> posts = boardLookupService.getPostsByUserNum(userNum);
 
-            // 각 게시글에 PDF 이미지 목록 및 좋아요 수 추가
             for (BoardLookupPostDto post : posts) {
-                // PDF 이미지 추가
                 Path imageDir = Paths.get(uploadDir, "pdf", "post_" + post.getPostId());
                 if (Files.exists(imageDir)) {
                     List<String> images = Files.list(imageDir)
@@ -358,7 +353,6 @@ public class BoardLookupController {
                     post.setPdfImages(images);
                 }
                 
-                // ✅ 좋아요 수 추가
                 int likeCount = likeService.getLikeCount(post.getPostId());
                 post.setLikeCnt(likeCount);
             }
@@ -392,9 +386,7 @@ public class BoardLookupController {
         try {
             List<BoardLookupPostDto> posts = boardLookupService.getPostsByNickname(nickname);
 
-            // 각 게시글에 PDF 이미지 목록 및 좋아요 수 추가
             for (BoardLookupPostDto post : posts) {
-                // PDF 이미지 추가
                 Path imageDir = Paths.get(uploadDir, "pdf", "post_" + post.getPostId());
                 if (Files.exists(imageDir)) {
                     List<String> images = Files.list(imageDir)
@@ -405,7 +397,6 @@ public class BoardLookupController {
                     post.setPdfImages(images);
                 }
                 
-                // ✅ 좋아요 수 추가
                 int likeCount = likeService.getLikeCount(post.getPostId());
                 post.setLikeCnt(likeCount);
             }
@@ -458,7 +449,7 @@ public class BoardLookupController {
     }
 
     /**
-     * PDF 다운로드 API
+     * 파일 다운로드 API (PDF/PPT)
      */
     @GetMapping("/{postId}/download")
     public ResponseEntity<?> downloadPdf(
@@ -557,7 +548,9 @@ public class BoardLookupController {
 
     private boolean isValidFileExtension(String filename) {
         String lowerCaseFilename = filename.toLowerCase();
-        return lowerCaseFilename.endsWith(".pdf");
+        return lowerCaseFilename.endsWith(".pdf")
+            || lowerCaseFilename.endsWith(".ppt")
+            || lowerCaseFilename.endsWith(".pptx");
     }
 
     private String saveFile(MultipartFile file) throws IOException {

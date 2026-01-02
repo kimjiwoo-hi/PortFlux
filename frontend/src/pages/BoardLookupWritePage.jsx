@@ -42,13 +42,13 @@ export default function BoardLookupWritePage() {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const allowedExtensions = [".pdf"];
+      const allowedExtensions = [".pdf", ".ppt", ".pptx"];
       const fileExtension = `.${file.name.split(".").pop()}`;
 
       if (allowedExtensions.includes(fileExtension.toLowerCase())) {
         setSelectedFile(file);
       } else {
-        alert("PDF 파일만 업로드할 수 있습니다.");
+        alert("PDF 또는 PPT 파일만 업로드할 수 있습니다.");
         e.target.value = null;
         setSelectedFile(null);
       }
@@ -221,12 +221,12 @@ export default function BoardLookupWritePage() {
               {!selectedFile ? (
                 <div className="upload-placeholder">
                   <Upload className="upload-icon" />
-                  <p className="upload-text">파일 업로드 (PDF)</p>
+                  <p className="upload-text">파일 업로드 (PDF, PPT)</p>
                   <label className="file-select-button">
                     파일 선택
                     <input
                       type="file"
-                      accept=".pdf"
+                      accept=".pdf,.ppt,.pptx"
                       onChange={handleImageUpload}
                       className="file-input"
                     />
@@ -240,7 +240,7 @@ export default function BoardLookupWritePage() {
                   <div className="pdf-info">
                     <div className="pdf-success">
                       <CheckCircle size={20} color="#10b981" />
-                      <span>PDF 업로드 완료</span>
+                      <span>파일 업로드 완료</span>
                     </div>
                     <p className="pdf-filename">{selectedFile.name}</p>
                     <p className="pdf-filesize">
@@ -283,7 +283,7 @@ export default function BoardLookupWritePage() {
               )}
             </div>
             <div className="feature-description">
-              <p>• PDF 업로드 후 자동으로 페이지별 이미지 변환</p>
+              <p>• PDF/PPT 업로드 후 자동으로 페이지별 이미지 변환</p>
               <p>• AI가 PDF 내용을 분석하여 '내용'에 요약 제공</p>
               <p>• 태그를 추가하여 검색 최적화</p>
             </div>
@@ -363,7 +363,7 @@ export default function BoardLookupWritePage() {
                 step="100"
               />
             </div>
-            
+
             <button
               onClick={handleSubmit}
               disabled={!selectedFile || !title || !price || isUploading}

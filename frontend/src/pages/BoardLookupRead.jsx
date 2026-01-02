@@ -147,8 +147,8 @@ const BoardLookupRead = () => {
             withCredentials: true,
           }
         );
-        console.log('Save status response:', response.data); // 디버깅용
-        setIsSaved(response.data.isSaved === true);  // 명시적 비교
+        console.log('Save status response:', response.data);
+        setIsSaved(response.data.isSaved === true);
       } catch (err) {
         console.error("저장 상태 확인 실패:", err);
       }
@@ -327,7 +327,7 @@ const BoardLookupRead = () => {
     const loggedInUser = JSON.parse(storedUser);
 
     try {
-      console.log('Toggling save for post:', postId); // 디버깅용
+      console.log('Toggling save for post:', postId);
       
       const response = await axios.post(
         `http://localhost:8080/api/boardlookup/${postId}/save`,
@@ -338,10 +338,10 @@ const BoardLookupRead = () => {
         }
       );
 
-      console.log('Save toggle response:', response.data); // 디버깅용
+      console.log('Save toggle response:', response.data);
 
       if (response.data.success) {
-        setIsSaved(response.data.isSaved === true);  // 명시적 비교
+        setIsSaved(response.data.isSaved === true);
 
         if (response.data.isSaved === true) {
           setSaveToastMessage("게시글이 저장되었습니다! 🔖");
@@ -354,7 +354,7 @@ const BoardLookupRead = () => {
       }
     } catch (err) {
       console.error("저장 실패:", err);
-      console.error("Error response:", err.response?.data); // 디버깅용
+      console.error("Error response:", err.response?.data);
       alert("저장 처리에 실패했습니다.");
     }
   };
@@ -529,44 +529,91 @@ const BoardLookupRead = () => {
                 (() => {
                   const isPdf = /\.pdf$/i.test(postData.postFile);
                   const isPpt = /\.(ppt|pptx)$/i.test(postData.postFile);
-                  const fileUrl = `/uploads/${postData.postFile}`;
-
-                  if (isPdf && Array.isArray(postData.pdfImages)) {
+                  
+                  // ⭐ PDF 또는 PPT 미리보기
+                  if ((isPdf || isPpt) && Array.isArray(postData.pdfImages) && postData.pdfImages.length > 0) {
                     return (
-                      <div className="pdf-image-wrapper">
-                        {postData.pdfImages.map((imgUrl, index) => {
-                          const fullImageUrl = imgUrl.startsWith("http")
-                            ? imgUrl
-                            : `http://localhost:8080${imgUrl}`;
+                      <div className="pdf-preview-container">
+                        <h3 className="preview-title" style={{ 
+                          fontSize: "1.5rem", 
+                          fontWeight: "600", 
+                          marginBottom: "1.5rem",
+                          color: "#1f2937",
+                          borderBottom: "2px solid #3b82f6",
+                          paddingBottom: "0.5rem"
+                        }}>
+                          {isPdf ? 'PDF 미리보기' : 'PPT 미리보기'}
+                        </h3>
+                        <div className="pdf-image-wrapper">
+                          {postData.pdfImages.map((imgUrl, index) => {
+                            const fullImageUrl = imgUrl.startsWith("http")
+                              ? imgUrl
+                              : `http://localhost:8080${imgUrl}`;
 
-                          return (
-                            <img
-                              key={index}
-                              src={fullImageUrl}
-                              alt={`pdf-${index}`}
-                              className="pdf-page-image"
-                              loading="lazy"
-                              onError={(e) => {
-                                console.error(
-                                  `이미지 로드 실패: ${fullImageUrl}`
-                                );
-                                e.target.src =
-                                  "https://via.placeholder.com/800x600?text=Image+Load+Failed";
-                              }}
-                            />
-                          );
-                        })}
+                            return (
+                              <div key={index} className="pdf-page-item" style={{
+                                marginBottom: "2rem",
+                                background: "#fff",
+                                borderRadius: "8px",
+                                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                                overflow: "hidden",
+                                transition: "transform 0.2s"
+                              }}>
+                                <img
+                                  src={fullImageUrl}
+                                  alt={`${isPdf ? 'PDF 페이지' : 'PPT 슬라이드'} ${index + 1}`}
+                                  className="pdf-page-image"
+                                  loading="lazy"
+                                  style={{
+                                    width: "100%",
+                                    height: "auto",
+                                    display: "block"
+                                  }}
+                                  onError={(e) => {
+                                    console.error(`이미지 로드 실패: ${fullImageUrl}`);
+                                    e.target.src = "https://via.placeholder.com/800x600?text=Image+Load+Failed";
+                                  }}
+                                />
+                                <p className="page-number" style={{
+                                  textAlign: "center",
+                                  padding: "0.75rem",
+                                  background: "#f3f4f6",
+                                  fontWeight: "500",
+                                  color: "#6b7280",
+                                  margin: 0
+                                }}>
+                                  {isPdf ? '페이지' : '슬라이드'} {index + 1}
+                                </p>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     );
-                  } else if (isPpt) {
+                  } 
+                  // ⭐ 미리보기가 없는 경우
+                  else if (isPpt) {
                     return (
-                      <div style={{ textAlign: "center", padding: "50px" }}>
-                        <h3 style={{ color: "#191919", marginBottom: "20px" }}>
-                          미리보기를 지원하지 않습니다.
+                      <div className="no-preview" style={{ 
+                        background: "#f9fafb",
+                        border: "2px dashed #d1d5db",
+                        borderRadius: "12px",
+                        padding: "3rem",
+                        textAlign: "center"
+                      }}>
+                        <h3 style={{ color: "#191919", marginBottom: "1rem" }}>
+                          PPT 파일 미리보기 준비 중...
                         </h3>
-                        <a href={fileUrl} download className="download-button">
-                          {postData.postFile} 다운로드
-                        </a>
+                        <p style={{ color: "#6b7280", marginBottom: "1rem" }}>
+                          이미지 변환이 완료되면 자동으로 표시됩니다.
+                        </p>
+                        <p className="file-type-info" style={{
+                          fontSize: "0.875rem",
+                          color: "#9ca3af",
+                          fontStyle: "italic"
+                        }}>
+                          파일: {postData.postFile}
+                        </p>
                       </div>
                     );
                   } else {
