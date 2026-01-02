@@ -55,7 +55,7 @@
     </select>
 
     <select id="getCompanyUserInfo" parameterType="String" resultType="com.portflux.backend.beans.CompanyUserBean">
-        SELECT 
+        SELECT
             company_num AS companyNum,
             company_id AS companyId,
             business_number AS businessNumber,
@@ -68,5 +68,26 @@
         FROM COMPANY
         WHERE company_id = #{companyId}
     </select>
+
+    <select id="findByCompanyNameAndEmail" resultType="com.portflux.backend.beans.CompanyUserBean">
+        SELECT
+            company_num AS companyNum,
+            company_id AS companyId,
+            business_number AS businessNumber,
+            company_password AS companyPassword,
+            company_name AS companyName,
+            company_phone AS companyPhone,
+            company_email AS companyEmail,
+            drawn_company AS drawnCompany,
+            company_create_at AS companyCreateAt
+        FROM COMPANY
+        WHERE company_name = #{companyName} AND company_email = #{email}
+    </select>
+
+    <update id="updateCompanyPassword">
+        UPDATE COMPANY
+        SET company_password = #{newPassword}
+        WHERE company_id = #{companyId}
+    </update>
 
 </mapper>
