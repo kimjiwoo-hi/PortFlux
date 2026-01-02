@@ -511,41 +511,41 @@ public class BoardLookupController {
         }
     }
 
-    /**
-     * 저장 상태 확인 API
-     */
-    @GetMapping("/{postId}/save/check")
-    public ResponseEntity<Map<String, Object>> checkSaveStatus(
-            @PathVariable int postId,
-            @RequestParam Long userNum
-    ) {
-        try {
-            boolean isSaved = postSaveService.isSaved(userNum, postId);
-            return ResponseEntity.ok(Map.of("isSaved", isSaved));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(
-                Map.of("success", false, "message", e.getMessage())
-            );
-        }
+/**
+ * 저장 상태 확인 API
+ */
+@GetMapping("/{postId}/save/check")
+public ResponseEntity<Map<String, Object>> checkSaveStatus(
+        @PathVariable int postId,
+        @RequestParam Long userNum
+) {
+    try {
+        boolean isSaved = postSaveService.isSaved(userNum, postId);
+        return ResponseEntity.ok(Map.of("isSaved", isSaved));
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.badRequest().body(
+            Map.of("success", false, "message", e.getMessage())
+        );
     }
+}
+/**
+ * 사용자의 저장된 게시글 ID 목록 조회
+ */
+@GetMapping("/user/{userNum}/saved")
+public ResponseEntity<List<Integer>> getSavedPostIds(@PathVariable int userNum) {
+    try {
+        List<Integer> savedPostIds = postSaveMapper.findSavedPostIdsByUserNum(userNum);
+        return ResponseEntity.ok(savedPostIds);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.internalServerError().build();
+    }
+}
 
     /**
-     * 사용자의 저장된 게시글 ID 목록 조회
+     * 파일 확장자 검증
      */
-    @GetMapping("/user/{userNum}/saved")
-    public ResponseEntity<List<Integer>> getSavedPostIds(@PathVariable int userNum) {
-        try {
-            List<Integer> savedPostIds = postSaveMapper.findSavedPostIdsByUserNum(userNum);
-            return ResponseEntity.ok(savedPostIds);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().build();
-        }
-    }
-
-    // ======== Private Methods ========
-
     private boolean isValidFileExtension(String filename) {
         String lowerCaseFilename = filename.toLowerCase();
         return lowerCaseFilename.endsWith(".pdf")
@@ -553,22 +553,22 @@ public class BoardLookupController {
             || lowerCaseFilename.endsWith(".pptx");
     }
 
+    /**
+     * 파일 저장
+     */
     private String saveFile(MultipartFile file) throws IOException {
-        File uploadDirectory = new File(uploadDir);
-        if (!uploadDirectory.exists()) {
-            uploadDirectory.mkdirs();
-        }
-
         String originalFilename = file.getOriginalFilename();
-        String extension = "";
-        if (originalFilename != null && originalFilename.contains(".")) {
-            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String savedFilename = UUID.randomUUID().toString() + extension;
+
+        File uploadDirFile = new File(uploadDir);
+        if (!uploadDirFile.exists()) {
+            uploadDirFile.mkdirs();
         }
 
-        String uniqueFilename = UUID.randomUUID() + extension;
-        Path filePath = Paths.get(uploadDir, uniqueFilename);
-        Files.write(filePath, file.getBytes());
+        Path filePath = Paths.get(uploadDir, savedFilename);
+        file.transferTo(filePath.toFile());
 
-        return uniqueFilename;
+        return savedFilename;
     }
 }
