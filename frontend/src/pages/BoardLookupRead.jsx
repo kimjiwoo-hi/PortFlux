@@ -37,6 +37,7 @@ const BoardLookupRead = () => {
   const [saveToastMessage, setSaveToastMessage] = useState("");
   const bottomRef = useRef(null);
 
+  
   // 게시글 데이터 로드
   useEffect(() => {
     const fetchPostData = async () => {
