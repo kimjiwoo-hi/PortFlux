@@ -208,8 +208,8 @@ const UserProfile = () => {
     try {
       const dataToSave = {
         ...editedInfo,
-        userImage: editedInfo.userImage === UserDefaultIcon ? "" : editedInfo.userImage,
-        userBanner: editedInfo.userBanner === getDefaultBanner() ? "" : editedInfo.userBanner,
+        userImage: editedInfo.userImage === "" ? "" : editedInfo.userImage,
+        userBanner: editedInfo.userBanner === "" ? "" : editedInfo.userBanner,
       };
 
       const token = localStorage.getItem("token") || sessionStorage.getItem("token");
@@ -226,21 +226,28 @@ const UserProfile = () => {
         }
       );
 
-      setFullUserInfo(editedInfo);
+      // 저장된 데이터로 상태 업데이트 (빈 문자열은 그대로 유지)
+      const updatedInfo = {
+        ...editedInfo,
+        userImage: editedInfo.userImage || "",
+        userBanner: editedInfo.userBanner || ""
+      };
+
+      setFullUserInfo(updatedInfo);
       setUserInfo({
-        userNum: editedInfo.userNum,
-        userNickname: editedInfo.userNickname,
-        userImage: editedInfo.userImage,
-        userBanner: editedInfo.userBanner
+        userNum: updatedInfo.userNum,
+        userNickname: updatedInfo.userNickname,
+        userImage: updatedInfo.userImage,
+        userBanner: updatedInfo.userBanner
       });
 
       // 캐시 업데이트
       updateUserInfoCache({
-        userName: editedInfo.userName,
-        userNickname: editedInfo.userNickname,
-        userEmail: editedInfo.userEmail,
-        userImage: editedInfo.userImage,
-        userBanner: editedInfo.userBanner
+        userName: updatedInfo.userName,
+        userNickname: updatedInfo.userNickname,
+        userEmail: updatedInfo.userEmail,
+        userImage: updatedInfo.userImage,
+        userBanner: updatedInfo.userBanner
       });
 
       setIsEditing(false);
@@ -281,10 +288,10 @@ const UserProfile = () => {
 
   // 프로필 이미지 삭제
   const handleProfileImageDelete = () => {
-    setProfilePreview(UserDefaultIcon);
+    setProfilePreview(null);
     setEditedInfo((prev) => ({
       ...prev,
-      userImage: UserDefaultIcon,
+      userImage: "",
     }));
   };
 
@@ -433,13 +440,12 @@ const UserProfile = () => {
           <div className="myinfo-profile-container">
             <img
               src={
-                profilePreview
-                  ? profilePreview
-                  : isEditing && editedInfo.userImage && editedInfo.userImage.trim() !== ""
+                profilePreview ||
+                (isEditing && editedInfo.userImage && editedInfo.userImage.trim() !== ""
                   ? editedInfo.userImage
-                  : userInfo?.userImage && userInfo.userImage.trim() !== ""
+                  : !isEditing && userInfo?.userImage && userInfo.userImage.trim() !== ""
                   ? (userInfo.userImage.startsWith('data:') ? userInfo.userImage : `data:image/jpeg;base64,${userInfo.userImage}`)
-                  : UserDefaultIcon
+                  : UserDefaultIcon)
               }
               alt="프로필"
               className="myinfo-profile-image"
@@ -454,7 +460,8 @@ const UserProfile = () => {
                     style={{ display: "none" }}
                   />
                 </label>
-                {(profilePreview || (editedInfo.userImage && editedInfo.userImage.trim() !== "")) && (
+                {((profilePreview && profilePreview !== UserDefaultIcon) ||
+                  (editedInfo.userImage && editedInfo.userImage.trim() !== "")) && (
                   <button
                     className="image-delete-btn profile-delete"
                     onClick={handleProfileImageDelete}
