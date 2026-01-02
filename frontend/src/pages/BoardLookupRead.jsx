@@ -37,8 +37,6 @@ const BoardLookupRead = () => {
   const [isSaved, setIsSaved] = useState(false);
   const [showSaveToast, setShowSaveToast] = useState(false);
   const [saveToastMessage, setSaveToastMessage] = useState("");
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef(null);
   // 사용자 프로필 popover state
   const [hoveredAuthor, setHoveredAuthor] = useState(null);
   const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });

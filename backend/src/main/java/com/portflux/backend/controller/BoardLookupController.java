@@ -551,4 +551,32 @@ public ResponseEntity<List<Integer>> getSavedPostIds(@PathVariable int userNum) 
         return ResponseEntity.internalServerError().build();
     }
 }
+
+    /**
+     * 파일 확장자 검증
+     */
+    private boolean isValidFileExtension(String filename) {
+        if (filename == null) return false;
+        String lowerFilename = filename.toLowerCase();
+        return lowerFilename.endsWith(".pdf");
+    }
+
+    /**
+     * 파일 저장
+     */
+    private String saveFile(MultipartFile file) throws IOException {
+        String originalFilename = file.getOriginalFilename();
+        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String savedFilename = UUID.randomUUID().toString() + extension;
+
+        File uploadDirFile = new File(uploadDir);
+        if (!uploadDirFile.exists()) {
+            uploadDirFile.mkdirs();
+        }
+
+        Path filePath = Paths.get(uploadDir, savedFilename);
+        file.transferTo(filePath.toFile());
+
+        return savedFilename;
+    }
 }

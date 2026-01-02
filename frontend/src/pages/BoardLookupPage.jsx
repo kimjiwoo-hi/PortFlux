@@ -3,7 +3,7 @@ import SearchIcon from "../assets/search.png";
 import cartIcon from "../assets/cartIcon.png";
 import bookmarkIcon from "../assets/Bookmark.png";
 import bookmarkFilledIcon from "../assets/FilldBookmark.png";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { tagData, tagSearchMap } from "../database/taglist";
 import axios from "axios";
@@ -23,7 +23,6 @@ function BoardLookupPage() {
   // 사용자 프로필 popover state
   const [hoveredAuthor, setHoveredAuthor] = useState(null);
   const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });
-  const authorRefs = useRef({});
   const popoverHoverTimeout = useRef(null);
   const [isPopoverHovered, setIsPopoverHovered] = useState(false);
   const currentAuthorRef = useRef(null);
@@ -472,6 +471,8 @@ function BoardLookupPage() {
                 <span
                   className="info-author"
                   onClick={() => navigate(`/mypage/${post.author}`)}
+                  onMouseEnter={(e) => handleAuthorMouseEnter(e, post.author)}
+                  onMouseLeave={handleAuthorMouseLeave}
                 >
                   {post.author}
                 </span>
