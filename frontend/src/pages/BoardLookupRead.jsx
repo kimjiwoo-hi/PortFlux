@@ -147,7 +147,8 @@ const BoardLookupRead = () => {
             withCredentials: true,
           }
         );
-        setIsSaved(response.data.isSaved);
+        console.log('Save status response:', response.data); // 디버깅용
+        setIsSaved(response.data.isSaved === true);  // 명시적 비교
       } catch (err) {
         console.error("저장 상태 확인 실패:", err);
       }
@@ -326,6 +327,8 @@ const BoardLookupRead = () => {
     const loggedInUser = JSON.parse(storedUser);
 
     try {
+      console.log('Toggling save for post:', postId); // 디버깅용
+      
       const response = await axios.post(
         `http://localhost:8080/api/boardlookup/${postId}/save`,
         null,
@@ -335,10 +338,12 @@ const BoardLookupRead = () => {
         }
       );
 
-      if (response.data.success) {
-        setIsSaved(response.data.isSaved);
+      console.log('Save toggle response:', response.data); // 디버깅용
 
-        if (response.data.isSaved) {
+      if (response.data.success) {
+        setIsSaved(response.data.isSaved === true);  // 명시적 비교
+
+        if (response.data.isSaved === true) {
           setSaveToastMessage("게시글이 저장되었습니다! 🔖");
         } else {
           setSaveToastMessage("저장이 취소되었습니다.");
@@ -349,6 +354,7 @@ const BoardLookupRead = () => {
       }
     } catch (err) {
       console.error("저장 실패:", err);
+      console.error("Error response:", err.response?.data); // 디버깅용
       alert("저장 처리에 실패했습니다.");
     }
   };

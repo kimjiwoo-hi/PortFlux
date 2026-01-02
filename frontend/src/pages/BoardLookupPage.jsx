@@ -97,13 +97,15 @@ function BoardLookupPage() {
               withCredentials: true,
             }
           );
-          if (response.data.isSaved) {
+          console.log(`Post ${post.id} save status:`, response.data); // 디버깅용
+          if (response.data.isSaved === true) {  // 명시적 비교
             savedPostIds.add(post.id);
           }
         } catch (err) {
           console.error(`저장 상태 확인 실패 (postId: ${post.id}):`, err);
         }
       }
+      console.log('Saved post IDs:', Array.from(savedPostIds)); // 디버깅용
       setSavedPosts(savedPostIds);
     };
 
@@ -215,6 +217,8 @@ function BoardLookupPage() {
     const loggedInUser = JSON.parse(storedUser);
 
     try {
+      console.log('Toggling save for post:', post.id); // 디버깅용
+      
       const response = await axios.post(
         `http://localhost:8080/api/boardlookup/${post.id}/save`,
         null,
@@ -224,16 +228,19 @@ function BoardLookupPage() {
         }
       );
 
+      console.log('Save toggle response:', response.data); // 디버깅용
+
       if (response.data.success) {
         setSavedPosts((prev) => {
           const newSet = new Set(prev);
-          if (response.data.isSaved) {
+          if (response.data.isSaved === true) {  // 명시적 비교
             newSet.add(post.id);
             setSaveToastMessage("게시글이 저장되었습니다! 🔖");
           } else {
             newSet.delete(post.id);
             setSaveToastMessage("저장이 취소되었습니다.");
           }
+          console.log('Updated saved posts:', Array.from(newSet)); // 디버깅용
           return newSet;
         });
 
@@ -242,6 +249,7 @@ function BoardLookupPage() {
       }
     } catch (err) {
       console.error("저장 실패:", err);
+      console.error("Error response:", err.response?.data); // 디버깅용
       alert("저장 처리에 실패했습니다.");
     }
   };

@@ -174,6 +174,8 @@ public class BoardLookupController {
         }
     }
 
+
+
     /**
      * 게시글 작성 API (파일 업로드 포함)
      */
