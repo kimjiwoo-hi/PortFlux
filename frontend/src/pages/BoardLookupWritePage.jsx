@@ -363,7 +363,7 @@ export default function BoardLookupWritePage() {
                 step="100"
               />
             </div>
-
+            
             <button
               onClick={handleSubmit}
               disabled={!selectedFile || !title || !price || isUploading}
