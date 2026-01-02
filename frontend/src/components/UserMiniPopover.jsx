@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import "./UserMiniPopover.css";
 import { useNavigate } from "react-router-dom";
 import UserDefaultIcon from "../assets/user_default_icon.png";
-import { getFollowers, getFollowing } from "../api/api";
+import { getFollowers, getFollowing, follow, unfollow, isFollowing as checkFollowing } from "../api/api";
 import axios from "axios";
 import FollowListPopover from "./FollowListPopover";
 
@@ -19,6 +20,11 @@ const UserMiniPopover = ({ nickname, isVisible, position, onMouseEnter, onMouseL
   const [followingCount, setFollowingCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const popoverRef = useRef(null);
+
+  // 팔로우 상태
+  const [isOwner, setIsOwner] = useState(false);
+  const [isFollowingUser, setIsFollowingUser] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
 
   // 팔로우 리스트 팝오버
   const [showFollowPopover, setShowFollowPopover] = useState(false);
@@ -92,9 +98,26 @@ const UserMiniPopover = ({ nickname, isVisible, position, onMouseEnter, onMouseL
               userNum: firstPost.userNum,
             });
 
-            // 팔로워/팔로잉 수 조회
+            // 본인 여부 확인
+            const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+            if (storedUser) {
+              const user = JSON.parse(storedUser);
+              const currentUserNickname = user.userNickname || localStorage.getItem("userNickname") || sessionStorage.getItem("userNickname");
+              setIsOwner(currentUserNickname === nickname);
+            }
+
+            // 팔로워/팔로잉 수 조회 및 팔로우 상태 확인
             if (firstPost.userNum) {
               loadFollowCounts(firstPost.userNum);
+
+              // 다른 사용자인 경우 팔로우 상태 확인
+              if (storedUser) {
+                const user = JSON.parse(storedUser);
+                const currentUserNickname = user.userNickname || localStorage.getItem("userNickname") || sessionStorage.getItem("userNickname");
+                if (currentUserNickname !== nickname) {
+                  checkFollowStatus(firstPost.userNum);
+                }
+              }
             }
           } else {
             // 게시글이 없는 경우 기본값 설정
@@ -131,9 +154,42 @@ const UserMiniPopover = ({ nickname, isVisible, position, onMouseEnter, onMouseL
         }
       };
 
+      const checkFollowStatus = async (userNum) => {
+        try {
+          const res = await checkFollowing(userNum);
+          setIsFollowingUser(res.data.following || false);
+        } catch (error) {
+          console.error("팔로우 상태 확인 실패:", error);
+          setIsFollowingUser(false);
+        }
+      };
+
       loadUserInfo();
     }
   }, [isVisible, nickname]);
+
+  // 팔로우/언팔로우 토글
+  const handleFollowToggle = async (e) => {
+    e.stopPropagation();
+    if (!userInfo?.userNum) return;
+
+    setFollowLoading(true);
+    try {
+      if (isFollowingUser) {
+        await unfollow(userInfo.userNum);
+        setIsFollowingUser(false);
+        setFollowersCount(prev => Math.max(0, prev - 1));
+      } else {
+        await follow(userInfo.userNum);
+        setIsFollowingUser(true);
+        setFollowersCount(prev => prev + 1);
+      }
+    } catch (error) {
+      console.error("팔로우 토글 실패:", error);
+    } finally {
+      setFollowLoading(false);
+    }
+  };
 
   const getProfileImage = () => {
     if (userInfo.userImage && userInfo.userImage.trim() !== "")
@@ -160,84 +216,97 @@ const UserMiniPopover = ({ nickname, isVisible, position, onMouseEnter, onMouseL
   };
 
   return (
-    <div
-      ref={popoverRef}
-      className={`user-mini-popover ${isVisible ? "visible" : ""} ${showAbove ? "show-above" : ""}`}
-      style={{
-        top: showAbove ? 'auto' : position?.top || 0,
-        bottom: showAbove ? `calc(100vh - ${position?.top}px + 30px)` : 'auto',
-        left: position?.left || 0,
-      }}
-      onClick={handleProfileClick}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-    >
-      {loading ? (
-        <div className="mini-popover-loading">로딩 중...</div>
-      ) : (
-        <>
-          <div className="mini-popover-header">
-            <div className="mini-header-bg" style={getBannerStyle()}></div>
-            <img
-              src={getProfileImage()}
-              alt="프로필"
-              className="mini-popover-avatar"
-            />
-          </div>
-
-          <div className="mini-popover-content">
-            <div className="mini-popover-name">
-              {userInfo.userNickname || nickname}
+    <>
+      <div
+        ref={popoverRef}
+        className={`user-mini-popover ${isVisible ? "visible" : ""} ${showAbove ? "show-above" : ""}`}
+        style={{
+          top: showAbove ? 'auto' : position?.top || 0,
+          bottom: showAbove ? `calc(100vh - ${position?.top}px + 30px)` : 'auto',
+          left: position?.left || 0,
+        }}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+      >
+        {loading ? (
+          <div className="mini-popover-loading">로딩 중...</div>
+        ) : (
+          <>
+            <div className="mini-popover-header">
+              <div className="mini-header-bg" style={getBannerStyle()}></div>
+              <img
+                src={getProfileImage()}
+                alt="프로필"
+                className="mini-popover-avatar"
+              />
             </div>
 
-            <div className="mini-stats">
-              <div className="mini-stat-item">
-                <span className="mini-stat-number">{postCount}</span>
-                <span className="mini-stat-label">게시글</span>
+            <div className="mini-popover-content">
+              <div className="mini-popover-name">
+                {userInfo.userNickname || nickname}
               </div>
-              <div
-                className="mini-stat-item clickable"
-                ref={followersRef}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setFollowPopoverTab('followers');
-                  setShowFollowPopover(true);
-                }}
-                style={{ cursor: 'pointer' }}
-              >
-                <span className="mini-stat-number">{followersCount}</span>
-                <span className="mini-stat-label">팔로워</span>
+
+              <div className="mini-stats">
+                <div className="mini-stat-item">
+                  <span className="mini-stat-number">{postCount}</span>
+                  <span className="mini-stat-label">게시글</span>
+                </div>
+                <div
+                  className="mini-stat-item clickable"
+                  ref={followersRef}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFollowPopoverTab('followers');
+                    setShowFollowPopover(true);
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <span className="mini-stat-number">{followersCount}</span>
+                  <span className="mini-stat-label">팔로워</span>
+                </div>
+                <div
+                  className="mini-stat-item clickable"
+                  ref={followingRef}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFollowPopoverTab('following');
+                    setShowFollowPopover(true);
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <span className="mini-stat-number">{followingCount}</span>
+                  <span className="mini-stat-label">팔로잉</span>
+                </div>
               </div>
-              <div
-                className="mini-stat-item clickable"
-                ref={followingRef}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setFollowPopoverTab('following');
-                  setShowFollowPopover(true);
-                }}
-                style={{ cursor: 'pointer' }}
-              >
-                <span className="mini-stat-number">{followingCount}</span>
-                <span className="mini-stat-label">팔로잉</span>
-              </div>
+
+              {/* 팔로우 버튼 (다른 사용자일 때만 표시) */}
+              {!isOwner && (
+                <button
+                  className={`mini-follow-btn ${isFollowingUser ? 'following' : ''}`}
+                  onClick={handleFollowToggle}
+                  disabled={followLoading}
+                >
+                  {isFollowingUser ? '팔로잉' : '팔로우'}
+                </button>
+              )}
+
+              <button className="mini-view-profile-btn" onClick={handleProfileClick}>프로필 보기</button>
             </div>
+          </>
+        )}
+      </div>
 
-            <button className="mini-view-profile-btn">프로필 보기</button>
-          </div>
-        </>
-      )}
-
-      {/* 팔로우 리스트 팝오버 */}
-      {showFollowPopover && userInfo.userNum && (
+      {/* 팔로우 리스트 팝오버 - Portal로 렌더링 */}
+      {showFollowPopover && userInfo.userNum && createPortal(
         <FollowListPopover
           userNum={userInfo.userNum}
           initialTab={followPopoverTab}
           onClose={() => setShowFollowPopover(false)}
-          anchorEl={followPopoverTab === 'followers' ? followersRef.current : followingRef.current}
-        />
+          anchorEl={null}
+        />,
+        document.body
       )}
-    </div>
+    </>
   );
 };
 

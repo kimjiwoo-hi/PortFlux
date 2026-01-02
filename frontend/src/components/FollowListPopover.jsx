@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getFollowers, getFollowing, follow, unfollow, isFollowing as checkFollowing } from '../api/api';
+import axios from 'axios';
 import UserDefaultIcon from '../assets/user_default_icon.png';
 import './FollowListPopover.css';
 
@@ -33,8 +34,62 @@ const FollowListPopover = ({ userNum, initialTab = 'followers', onClose, anchorE
         const followersList = followersRes.data.list || [];
         const followingList = followingRes.data.list || [];
 
-        setFollowers(followersList);
-        setFollowing(followingList);
+        // 각 사용자 정보를 조회하여 보강
+        const enrichedFollowers = await Promise.all(
+          followersList.map(async (follow) => {
+            try {
+              // 게시글 목록에서 사용자 정보 추출
+              const postsRes = await axios.get(
+                `http://localhost:8080/api/boardlookup/user/${follow.followerId}/posts`,
+                { withCredentials: true }
+              );
+
+              if (postsRes.data.length > 0) {
+                const userPost = postsRes.data[0];
+                return {
+                  ...follow,
+                  userNickname: userPost.userNickname,
+                  userImage: userPost.userImageBase64
+                    ? `data:image/jpeg;base64,${userPost.userImageBase64}`
+                    : null
+                };
+              }
+              return { ...follow, userNickname: null, userImage: null };
+            } catch (error) {
+              console.error(`사용자 ${follow.followerId} 정보 조회 실패:`, error);
+              return { ...follow, userNickname: null, userImage: null };
+            }
+          })
+        );
+
+        const enrichedFollowing = await Promise.all(
+          followingList.map(async (follow) => {
+            try {
+              const postsRes = await axios.get(
+                `http://localhost:8080/api/boardlookup/user/${follow.followingId}/posts`,
+                { withCredentials: true }
+              );
+
+              if (postsRes.data.length > 0) {
+                const userPost = postsRes.data[0];
+                return {
+                  ...follow,
+                  userNickname: userPost.userNickname,
+                  userImage: userPost.userImageBase64
+                    ? `data:image/jpeg;base64,${userPost.userImageBase64}`
+                    : null
+                };
+              }
+              return { ...follow, userNickname: null, userImage: null };
+            } catch (error) {
+              console.error(`사용자 ${follow.followingId} 정보 조회 실패:`, error);
+              return { ...follow, userNickname: null, userImage: null };
+            }
+          })
+        );
+
+        setFollowers(enrichedFollowers);
+        setFollowing(enrichedFollowing);
 
         // 각 사용자에 대한 팔로우 상태 확인
         if (currentUserNum) {
@@ -70,15 +125,24 @@ const FollowListPopover = ({ userNum, initialTab = 'followers', onClose, anchorE
   // 외부 클릭 감지
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // 팝오버 내부 클릭인지 확인
       if (popoverRef.current && !popoverRef.current.contains(event.target)) {
-        if (anchorEl && !anchorEl.contains(event.target)) {
+        // anchorEl이 없거나 anchorEl 외부 클릭인 경우에만 닫기
+        if (!anchorEl || !anchorEl.contains(event.target)) {
           onClose();
         }
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    // 약간의 지연을 두고 이벤트 리스너 등록 (팝오버가 열릴 때의 클릭 이벤트와 겹치지 않도록)
+    const timer = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, [onClose, anchorEl]);
 
   const handleFollow = async (targetUserNum) => {
@@ -99,23 +163,11 @@ const FollowListPopover = ({ userNum, initialTab = 'followers', onClose, anchorE
     }
   };
 
-  const handleUserClick = (userId, userNickname) => {
+  const handleUserClick = (userNickname) => {
     onClose();
     if (userNickname) {
       navigate(`/mypage/${userNickname}`);
-    } else {
-      navigate(`/user/${userId}`);
     }
-  };
-
-  const getUserImageSrc = (user) => {
-    if (user.userImageBase64) {
-      return `data:image/jpeg;base64,${user.userImageBase64}`;
-    }
-    if (user.userImage) {
-      return user.userImage;
-    }
-    return UserDefaultIcon;
   };
 
   const renderUserList = (users, isFollowerTab) => {
@@ -133,7 +185,7 @@ const FollowListPopover = ({ userNum, initialTab = 'followers', onClose, anchorE
 
     return users.map((user) => {
       const targetUserNum = isFollowerTab ? user.followerId : user.followingId;
-      const targetUserNickname = isFollowerTab ? user.followerNickname : user.followingNickname;
+      const targetUserNickname = user.userNickname;
       const isCurrentUser = String(targetUserNum) === String(currentUserNum);
       const isFollowingThis = followStates[targetUserNum] || false;
 
@@ -141,10 +193,16 @@ const FollowListPopover = ({ userNum, initialTab = 'followers', onClose, anchorE
         <div key={user.followId} className="follow-popover-user-item">
           <div
             className="follow-popover-user-info"
-            onClick={() => handleUserClick(targetUserNum, targetUserNickname)}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (targetUserNickname) {
+                handleUserClick(targetUserNickname);
+              }
+            }}
+            style={{ cursor: targetUserNickname ? 'pointer' : 'default' }}
           >
             <img
-              src={getUserImageSrc(user)}
+              src={user.userImage || UserDefaultIcon}
               alt="프로필"
               className="follow-popover-avatar"
               onError={(e) => { e.target.src = UserDefaultIcon; }}
@@ -158,7 +216,10 @@ const FollowListPopover = ({ userNum, initialTab = 'followers', onClose, anchorE
           {!isCurrentUser && (
             <button
               className={`follow-popover-btn ${isFollowingThis ? 'following' : ''}`}
-              onClick={() => isFollowingThis ? handleUnfollow(targetUserNum) : handleFollow(targetUserNum)}
+              onClick={(e) => {
+                e.stopPropagation();
+                isFollowingThis ? handleUnfollow(targetUserNum) : handleFollow(targetUserNum);
+              }}
             >
               {isFollowingThis ? '팔로잉' : '팔로우'}
             </button>
@@ -169,8 +230,8 @@ const FollowListPopover = ({ userNum, initialTab = 'followers', onClose, anchorE
   };
 
   return (
-    <div className="follow-popover-overlay">
-      <div className="follow-popover" ref={popoverRef}>
+    <div className="follow-popover-overlay" onClick={onClose}>
+      <div className="follow-popover" ref={popoverRef} onClick={(e) => e.stopPropagation()}>
         <div className="follow-popover-header">
           <div className="follow-popover-tabs">
             <button

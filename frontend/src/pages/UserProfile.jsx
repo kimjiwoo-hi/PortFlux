@@ -72,6 +72,8 @@ const UserProfile = () => {
         const owner = checkIsOwner();
         setIsOwner(owner);
 
+        let currentUserInfo = null;
+
         // 본인인 경우 전체 정보 API 호출
         if (owner) {
           const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
@@ -92,12 +94,13 @@ const UserProfile = () => {
           setFullUserInfo(fullInfoResponse.data);
           setEditedInfo(fullInfoResponse.data);
 
-          setUserInfo({
-            userNum: fullInfoResponse.data.userNum,
+          currentUserInfo = {
+            userNum: fullInfoResponse.data.userNum || user.userNum,
             userNickname: fullInfoResponse.data.userNickname,
             userImage: fullInfoResponse.data.userImage,
             userBanner: fullInfoResponse.data.userBanner
-          });
+          };
+          setUserInfo(currentUserInfo);
         }
 
         // nickname 또는 userNum으로 조회
@@ -116,27 +119,30 @@ const UserProfile = () => {
         if (!owner) {
           if (postsResponse.data.length > 0) {
             const firstPost = postsResponse.data[0];
-            setUserInfo({
+            currentUserInfo = {
               userNum: firstPost.userNum,
               userNickname: firstPost.userNickname,
               userImage: firstPost.userImageBase64,
               userBanner: firstPost.userBannerBase64 ? `data:image/jpeg;base64,${firstPost.userBannerBase64}` : null,
-            });
+            };
+            setUserInfo(currentUserInfo);
           } else if (commentsResponse.data.length > 0) {
             const firstComment = commentsResponse.data[0];
-            setUserInfo({
+            currentUserInfo = {
               userNum: firstComment.userNum,
               userNickname: firstComment.userNickname,
               userImage: firstComment.userImageBase64,
               userBanner: firstComment.userBannerBase64 ? `data:image/jpeg;base64,${firstComment.userBannerBase64}` : null,
-            });
+            };
+            setUserInfo(currentUserInfo);
           } else {
-            setUserInfo({
+            currentUserInfo = {
               userNum: userNum,
               userNickname: identifier,
               userImage: null,
               userBanner: null,
-            });
+            };
+            setUserInfo(currentUserInfo);
           }
         }
 
@@ -156,8 +162,8 @@ const UserProfile = () => {
         }
 
         // 팔로우 정보 조회
-        if (userInfo?.userNum) {
-          await loadFollowInfo(userInfo.userNum, !owner);
+        if (currentUserInfo?.userNum) {
+          await loadFollowInfo(currentUserInfo.userNum, !owner);
         }
 
         setLoading(false);
@@ -867,9 +873,9 @@ const UserProfile = () => {
       )}
 
       {/* 팔로우 리스트 팝오버 */}
-      {showFollowPopover && userInfo?.userNum && (
+      {showFollowPopover && (userInfo?.userNum || fullUserInfo?.userNum) && (
         <FollowListPopover
-          userNum={userInfo.userNum}
+          userNum={userInfo?.userNum || fullUserInfo?.userNum}
           initialTab={followPopoverTab}
           onClose={() => setShowFollowPopover(false)}
           anchorEl={followPopoverTab === 'followers' ? followersRef.current : followingRef.current}
