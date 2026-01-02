@@ -36,7 +36,6 @@ const BoardLookupRead = () => {
   const [showSaveToast, setShowSaveToast] = useState(false);
   const [saveToastMessage, setSaveToastMessage] = useState("");
   const bottomRef = useRef(null);
-  const [setShowBottomActions] = useState(false);
 
   // 게시글 데이터 로드
   useEffect(() => {
@@ -58,7 +57,6 @@ const BoardLookupRead = () => {
 
         if (response.data) {
           const postData = response.data.post || response.data;
-
           setPostData(postData);
           setComments(response.data.comments || []);
 
@@ -90,23 +88,6 @@ const BoardLookupRead = () => {
 
     if (postId) fetchPostData();
   }, [postId]);
-
-  useEffect(() => {
-    if (!bottomRef.current) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setShowBottomActions(entry.isIntersecting);
-      },
-      {
-        threshold: 0.1,
-        rootMargin: "0px 0px 100px 0px",
-      }
-    );
-
-    observer.observe(bottomRef.current);
-    return () => observer.disconnect();
-  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -510,14 +491,12 @@ const BoardLookupRead = () => {
                     {isFollowing ? "✓" : "+"}
                   </button>
                 </div>
-                <div className="profile-info">
-                  <div
-                    className="nickname"
-                    onClick={() => navigate(`/user/${postData.userNum}`)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    {postData.userNickname}
-                  </div>
+                <div
+                  className="nickname"
+                  onClick={() => navigate(`/user/${postData.userNum}`)}
+                  style={{ cursor: "pointer" }}
+                >
+                  {postData.userNickname}
                 </div>
               </div>
             </div>

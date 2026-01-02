@@ -17,6 +17,7 @@ public class BoardLookupService {
 
     private final BoardLookupMapper boardLookupMapper;
     private final UserMapper userMapper;
+    private static final int MAX_TITLE_LENGTH = 15;
 
     @Autowired
     public BoardLookupService(BoardLookupMapper boardLookupMapper, UserMapper userMapper) {
@@ -85,6 +86,7 @@ public class BoardLookupService {
      */
     @Transactional
     public void createPost(BoardLookupPostDto post) {
+        validateTitle(post.getTitle());
         boardLookupMapper.insertPost(post);
     }
 
@@ -103,6 +105,8 @@ public class BoardLookupService {
             throw new IllegalAccessException("이 게시글을 수정할 권한이 없습니다.");
         }
         
+        validateTitle(postDto.getTitle());
+
         boardLookupMapper.updatePost(postDto);
         return boardLookupMapper.findPostById(postDto.getPostId());  // ✅ 변경
     }
@@ -155,4 +159,16 @@ public boolean isPurchased(Long userNum, int postId) {
 public void incrementDownloadCount(int postId) {
     boardLookupMapper.incrementDownloadCount(postId);
 }
+
+// 제목 글자수 
+private void validateTitle(String title) {
+    if (title == null || title.trim().isEmpty()) {
+        throw new IllegalArgumentException("제목은 필수입니다.");
+    }
+
+    if (title.length() > MAX_TITLE_LENGTH) {
+        throw new IllegalArgumentException("제목은 최대 15자까지 입력 가능합니다.");
+    }
 }
+}
+
