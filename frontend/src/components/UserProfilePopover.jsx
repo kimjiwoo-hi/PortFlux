@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./UserProfilePopover.css";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import UserDefaultIcon from "../assets/user_default_icon.png";
 import { fetchUserInfo, getCachedUserInfo } from "../utils/userInfoCache";
+import { getFollowers, getFollowing } from "../api/api";
 import axios from "axios";
+import FollowListPopover from "./FollowListPopover";
 
 const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
   const location = useLocation();
@@ -16,8 +18,31 @@ const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
     userBanner: null
   });
   const [postCount, setPostCount] = useState(0);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [showAbove, setShowAbove] = useState(false);
+  const popoverRef = useRef(null);
+
+  // 팔로우 리스트 팝오버
+  const [showFollowPopover, setShowFollowPopover] = useState(false);
+  const [followPopoverTab, setFollowPopoverTab] = useState('followers');
+  const followersRef = useRef(null);
+  const followingRef = useRef(null);
 
   const USER_ROLE = localStorage.getItem("role") || sessionStorage.getItem("role") || "USER";
+
+  // Popover 위치 계산
+  useEffect(() => {
+    if (isOpen && popoverRef.current) {
+      const rect = popoverRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const spaceBelow = viewportHeight - rect.top;
+      const popoverHeight = 600; // 대략적인 popover 높이
+
+      // 아래 공간이 부족하면 위로 표시
+      setShowAbove(spaceBelow < popoverHeight);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -68,7 +93,28 @@ const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
         }
       };
 
+      const loadFollowCounts = async (userNum) => {
+        try {
+          const [followersRes, followingRes] = await Promise.all([
+            getFollowers(userNum),
+            getFollowing(userNum)
+          ]);
+          setFollowersCount(followersRes.data.count || 0);
+          setFollowingCount(followingRes.data.count || 0);
+        } catch (error) {
+          console.error("팔로우 수 조회 실패:", error);
+          setFollowersCount(0);
+          setFollowingCount(0);
+        }
+      };
+
       loadUserInfo();
+
+      // 팔로우 수 조회 (userNum 필요)
+      const userNumStr = localStorage.getItem("userNum") || sessionStorage.getItem("userNum");
+      if (userNumStr) {
+        loadFollowCounts(userNumStr);
+      }
     }
   }, [isOpen]);
 
@@ -117,7 +163,8 @@ const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
   };
 
   return (
-    <div className={`profile-popover ${isOpen ? "active" : ""}`}>
+    <>
+    <div ref={popoverRef} className={`profile-popover ${isOpen ? "active" : ""} ${showAbove ? "show-above" : ""}`}>
       <div className="popover-header">
         <div className="header-bg" style={getBannerStyle()}></div>
         <img src={getProfileImage()} alt="프로필" className="popover-avatar" />
@@ -135,9 +182,33 @@ const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
           <div className="stat-label">게시글</div>
         </div>
         <div className="stat-divider"></div>
-        <div className="stat-item"><div className="stat-number">0</div><div className="stat-label">팔로워</div></div>
+        <div
+          className="stat-item clickable"
+          ref={followersRef}
+          onClick={(e) => {
+            e.stopPropagation();
+            setFollowPopoverTab('followers');
+            setShowFollowPopover(true);
+          }}
+          style={{ cursor: 'pointer' }}
+        >
+          <div className="stat-number">{followersCount}</div>
+          <div className="stat-label">팔로워</div>
+        </div>
         <div className="stat-divider"></div>
-        <div className="stat-item"><div className="stat-number">0</div><div className="stat-label">팔로우</div></div>
+        <div
+          className="stat-item clickable"
+          ref={followingRef}
+          onClick={(e) => {
+            e.stopPropagation();
+            setFollowPopoverTab('following');
+            setShowFollowPopover(true);
+          }}
+          style={{ cursor: 'pointer' }}
+        >
+          <div className="stat-number">{followingCount}</div>
+          <div className="stat-label">팔로잉</div>
+        </div>
       </div>
 
       <div className="menu-list">
@@ -156,6 +227,20 @@ const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
         <button className="btn-logout" onClick={onLogout}>로그아웃</button>
       </div>
     </div>
+
+    {/* 팔로우 리스트 팝오버 */}
+    {showFollowPopover && (() => {
+      const userNumStr = localStorage.getItem("userNum") || sessionStorage.getItem("userNum");
+      return userNumStr ? (
+        <FollowListPopover
+          userNum={userNumStr}
+          initialTab={followPopoverTab}
+          onClose={() => setShowFollowPopover(false)}
+          anchorEl={null}
+        />
+      ) : null;
+    })()}
+    </>
   );
 };
 
