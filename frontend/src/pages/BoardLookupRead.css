@@ -301,7 +301,7 @@
   padding-top: 0; /* 패딩 제거해서 프로필과 수평 맞추기 */
 }
 
-.post-title {
+.board-lookup-read .post-title {
   font-size: 24px;
   font-weight: 600;
   color: #191919;
@@ -802,7 +802,7 @@
     padding: 12px 20px;
   }
 
-  .post-title {
+  .board-lookup-read .post-title {
     font-size: 18px;
   }
 
