@@ -5,6 +5,8 @@ import com.portflux.backend.model.OrderItem;
 import com.portflux.backend.service.OrderService;
 import com.portflux.backend.repository.UserRepository;
 import com.portflux.backend.beans.UserBean;
+import com.portflux.backend.beans.CompanyUserBean;
+import com.portflux.backend.mapper.CompanyUserMapper;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,13 +25,14 @@ import java.util.stream.Collectors;
 public class OrderController {
     private final OrderService orderService;
     private final UserRepository userRepository;
+    private final CompanyUserMapper companyUserMapper;
 
     @PostMapping
     public ResponseEntity<CreateOrderResponse> createOrder(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody CreateOrderRequest req) {
-        UserBean user = userRepository.findByUserId(userDetails.getUsername());
-        if (user == null) {
+        Long userNum = getUserNum(userDetails.getUsername());
+        if (userNum == null) {
             return ResponseEntity.status(404).build();
         }
 
@@ -42,7 +45,7 @@ public class OrderController {
             return it;
         }).collect(Collectors.toList());
 
-        Order order = orderService.createOrder(Long.valueOf(user.getUserNum()), items);
+        Order order = orderService.createOrder(userNum, items);
 
         CreateOrderResponse res = new CreateOrderResponse();
         res.setOrderId(order.getId());
@@ -74,12 +77,12 @@ public class OrderController {
 
     @GetMapping("/user")
     public ResponseEntity<List<OrderResponse>> getUserOrders(@AuthenticationPrincipal UserDetails userDetails) {
-        UserBean user = userRepository.findByUserId(userDetails.getUsername());
-        if (user == null) {
+        Long userNum = getUserNum(userDetails.getUsername());
+        if (userNum == null) {
             return ResponseEntity.status(404).build();
         }
 
-        List<Order> orders = orderService.getOrdersByUserId(Long.valueOf(user.getUserNum()));
+        List<Order> orders = orderService.getOrdersByUserId(userNum);
 
         List<OrderResponse> responses = orders.stream()
                 .map(order -> {
@@ -127,5 +130,18 @@ public class OrderController {
         private String productName;
         private BigDecimal unitPrice;
         private Integer qty;
+    }
+
+    // 일반 유저 또는 기업 유저의 userNum 가져오기
+    private Long getUserNum(String username) {
+        UserBean user = userRepository.findByUserId(username);
+        if (user != null) {
+            return Long.valueOf(user.getUserNum());
+        }
+        CompanyUserBean company = companyUserMapper.getCompanyUserInfo(username);
+        if (company != null) {
+            return company.getCompanyNum();
+        }
+        return null;
     }
 }

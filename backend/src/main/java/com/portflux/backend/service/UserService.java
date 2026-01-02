@@ -186,22 +186,31 @@ public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundExce
         return (userMapper.checkIdDuplicate(userId) + companyUserMapper.checkCompanyIdDuplicate(userId)) > 0; 
     }
 
-    public UserBean getUserInfo(String userId) { 
-        UserBean user = userMapper.getUserInfo(userId); 
-        if (user == null) {
-            CompanyUserBean company = companyUserMapper.getCompanyUserInfo(userId);
-            if (company != null) {
-                user = new UserBean();
-                if (company.getCompanyNum() != null) {
-                    user.setUserNum(company.getCompanyNum().intValue());
-                }
-                user.setUserId(company.getCompanyId());
-                user.setUserNickname(company.getCompanyName());
-                user.setUserEmail(company.getCompanyEmail());
+public UserBean getUserInfo(String userId) {
+    System.out.println(">>> UserService.getUserInfo 호출됨: " + userId);
+    
+    UserBean user = userMapper.getUserInfo(userId);
+    System.out.println(">>> userMapper.getUserInfo 결과: " + (user != null ? "찾음" : "없음"));
+    
+    if (user == null) {
+        CompanyUserBean company = companyUserMapper.getCompanyUserInfo(userId);
+        System.out.println(">>> companyUserMapper.getCompanyUserInfo 결과: " + (company != null ? "찾음" : "없음"));
+        
+        if (company != null) {
+            user = new UserBean();
+            if (company.getCompanyNum() != null) {
+                user.setUserNum(company.getCompanyNum().intValue());
             }
+            user.setUserId(company.getCompanyId());
+            user.setUserNickname(company.getCompanyName());
+            user.setUserEmail(company.getCompanyEmail());
+            System.out.println(">>> 기업회원 UserBean 변환 완료");
         }
-        return user;
     }
+    
+    System.out.println(">>> getUserInfo 최종 반환: " + (user != null ? "있음" : "없음"));
+    return user;
+}
 
     public UserBean findByNameAndEmail(String name, String email) { 
         return userMapper.findByNameAndEmail(name, email); 
