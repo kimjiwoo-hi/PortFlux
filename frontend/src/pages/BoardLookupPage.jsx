@@ -3,6 +3,8 @@ import SearchIcon from "../assets/search.png";
 import cartIcon from "../assets/cartIcon.png";
 import bookmarkIcon from "../assets/Bookmark.png";
 import bookmarkFilledIcon from "../assets/FilldBookmark.png";
+import binheartIcon from "../assets/binheart.png";
+import eyeIcon from "../assets/Eye.png";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { tagData, tagSearchMap } from "../database/taglist";
@@ -18,7 +20,6 @@ function BoardLookupPage() {
   const navigate = useNavigate();
   const [showSaveToast, setShowSaveToast] = useState(false);
   const [saveToastMessage, setSaveToastMessage] = useState("");
-  // ✅ 장바구니 토스트 state 추가
   const [showCartToast, setShowCartToast] = useState(false);
 
   // 게시글 목록 로드
@@ -58,9 +59,9 @@ function BoardLookupPage() {
             title: post.title,
             author: post.userNickname,
             imageUrl: imageUrl,
-            price: post.price, // Add price
-            likes: 0, // TODO: 좋아요 기능 추가 시 구현
-            views: post.viewCnt,
+            price: post.price,
+            likes: post.likeCnt || 0,
+            views: post.viewCnt || 0,
             isLiked: false,
             tags: tagsArray,
           };
@@ -154,7 +155,6 @@ function BoardLookupPage() {
     navigate("/board/write");
   };
 
-  // ✅ 장바구니 추가 - 토스트 메시지 포함
   const handleAddToCart = async (e, post) => {
     e.stopPropagation();
 
@@ -183,7 +183,6 @@ function BoardLookupPage() {
         }
       );
 
-      // ✅ alert 대신 토스트 표시
       setShowCartToast(true);
       setTimeout(() => setShowCartToast(false), 3000);
     } catch (err) {
@@ -202,7 +201,6 @@ function BoardLookupPage() {
     }
   };
 
-  // 북마크 토글 핸들러
   const handleToggleSave = async (e, post) => {
     e.stopPropagation();
 
@@ -297,11 +295,9 @@ function BoardLookupPage() {
           <div className="tag-search-circle">
             <img src={SearchIcon} alt="Search Icon" className="search-icon" />
           </div>
-          {/* 저장 토스트 */}
           <div className={`cart-toast ${showSaveToast ? "show" : ""}`}>
             {saveToastMessage}
           </div>
-          {/* ✅ 장바구니 토스트 추가 */}
           <div className={`cart-toast ${showCartToast ? "show" : ""}`}>
             장바구니에 담겼습니다! 🛒
           </div>
@@ -385,18 +381,30 @@ function BoardLookupPage() {
                 />
               </div>
               <div className="board-item-info">
-                <h4
-                  className="info-title"
-                  onClick={() => handlePostClick(post.id)}
-                >
-                  {post.title}
-                </h4>
-                <span
-                  className="info-author"
-                  onClick={() => navigate(`/mypage/${post.author}`)}
-                >
-                  {post.author}
-                </span>
+                <div className="info-left">
+                  <h4
+                    className="info-title"
+                    onClick={() => handlePostClick(post.id)}
+                  >
+                    {post.title}
+                  </h4>
+                  <span
+                    className="info-author"
+                    onClick={() => navigate(`/mypage/${post.author}`)}
+                  >
+                    {post.author}
+                  </span>
+                </div>
+                <div className="item-stats">
+                  <div className="stat-item">
+                    <img src={binheartIcon} alt="좋아요" style={{ width: '14px', height: '14px', opacity: 0.7 }} />
+                    <span>{post.likes}</span>
+                  </div>
+                  <div className="stat-item">
+                    <img src={eyeIcon} alt="조회수" style={{ width: '14px', height: '14px', opacity: 0.7 }} />
+                    <span>{post.views}</span>
+                  </div>
+                </div>
               </div>
             </div>
           )

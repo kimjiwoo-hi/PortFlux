@@ -8,11 +8,11 @@
   width: 231px;
   height: 734px;
   background-color: #ffffff;
-  border: 1px solid #e0e0e0; /* 더 부드러운 회색으로 변경 */
+  border: 1px solid #e0e0e0;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* 약간의 그림자 추가 */
-  box-sizing: border-box; /* 패딩을 포함하여 크기 계산 */
-  padding: 15px; /* 내부 여백 추가 */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  padding: 15px;
   display: flex;
   flex-direction: column;
 }
@@ -21,16 +21,16 @@
    검색 영역
 ================================= */
 .tag-search-area {
-  position: relative; /* 자식 요소의 기준이 되도록 */
+  position: relative;
   width: 100%;
-  margin-bottom: 15px; /* 아래 태그 컨테이너와의 간격 */
+  margin-bottom: 15px;
 }
 
 .tag-search-bar {
   width: 100%;
   height: 38px;
-  background-color: #f5f5f5; /* 배경색 변경 */
-  border: 1px solid #eeeeee; /* 테두리색 변경 */
+  background-color: #f5f5f5;
+  border: 1px solid #eeeeee;
   border-radius: 40px;
   font-size: 14px;
   padding-left: 18px;
@@ -42,13 +42,13 @@
 }
 
 .tag-search-bar:focus {
-  border-color: #3f3f3f; /* 포커스 시 테두리 색상 강조 */
+  border-color: #3f3f3f;
 }
 
 .tag-search-circle {
   position: absolute;
   top: 0;
-  right: 0; /* 오른쪽 정렬 */
+  right: 0;
   width: 38px;
   height: 38px;
   background-color: #3f3f3f;
@@ -68,136 +68,130 @@
    태그 선택 UI
 ================================= */
 .tag-categories-container {
-  flex-grow: 1; /* 남은 공간을 모두 차지하도록 설정 */
-  overflow-y: auto; /* 스크롤 가능하게 */
-
-  /* 스크롤바 숨기기 (Chrome, Safari, Edge) */
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  flex-grow: 1;
+  overflow-y: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-/* 스크롤바 숨기기 (Webkit 기반 브라우저) */
 .tag-categories-container::-webkit-scrollbar {
   display: none;
 }
 
-/* 개별 카테고리 섹션 */
 .tag-category {
   margin-bottom: 15px;
-  padding-bottom: 15px; /* 밑줄과의 간격을 위해 패딩 추가 */
+  padding-bottom: 15px;
 }
 
-/* 마지막 카테고리를 제외하고 밑줄 추가 */
 .tag-category:not(:last-child) {
-  border-bottom: 1px solid #f0f0f0; /* 얇은 밑줄 추가 */
+  border-bottom: 1px solid #f0f0f0;
 }
 
-/* 카테고리 제목 */
 .tag-category-title {
   font-size: 1rem;
-  font-weight: 600; /* 조금 더 굵게 */
+  font-weight: 600;
   color: #222;
-  margin: 0 0 12px 0; /* 상하 여백 조정 */
+  margin: 0 0 12px 0;
 }
 
-/* 태그들이 나열될 리스트 */
 .tag-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px; /* 태그 사이의 간격 */
+  gap: 8px;
 }
 
-/* 개별 태그 아이템 (체크박스를 감싸는 라벨) */
 .tag-item {
   display: inline-block;
   cursor: pointer;
 }
 
-/* 실제 체크박스는 숨김 */
 .tag-item input[type="checkbox"] {
   display: none;
 }
 
-/* 체크박스를 대신할 태그 모양의 span */
 .tag-item span {
   display: block;
-  padding: 5px 12px; /* 패딩 조정 */
-  border-radius: 16px; /* 둥근 정도 조정 */
+  padding: 5px 12px;
+  border-radius: 16px;
   background-color: #f0f0f0;
   color: #555;
-  font-size: 0.8rem; /* 폰트 크기 미세 조정 */
+  font-size: 0.8rem;
   transition: all 0.2s ease-in-out;
-  border: 1px solid transparent; /* 기본 테두리는 투명하게 */
+  border: 1px solid transparent;
 }
 
-/* 마우스를 올렸을 때 스타일 */
 .tag-item:hover span {
   background-color: #e9e9e9;
   border-color: #e0e0e0;
 }
 
-/* 체크박스가 선택되었을 때의 스타일 */
 .tag-item input[type="checkbox"]:checked + span {
   background-color: #3f3f3f;
   color: white;
   border-color: #3f3f3f;
 }
 
-
 /* =================================
    Behance 스타일 게시판 그리드
-   (게시물 전체 위치 및 개별 게시물 크기 결정)
 ================================= */
 .board-grid {
   position: absolute;
   top: 190px;
-  left: 327px; /* 317px + 10px = 327px */
+  left: calc(27px + 231px + 30px);
+  right: 27px;
   
   display: grid;
-  grid-template-columns: repeat(3, 316px);
-  column-gap: 78px; /* 73px + 5px = 78px */
-  row-gap: 75px;    /* 72px + 3px = 75px */
+  grid-template-columns: repeat(4, 1fr);
+  column-gap: 24px;
+  row-gap: 40px;
+  padding-bottom: 60px;
 }
 
-/* 개별 게시물 아이템 (크기, 그림자, 호버 효과 등) */
+/* 개별 게시물 아이템 */
 .board-item {
-  width: 316px; /* 컨테이너 너비 고정 */
-  height: auto; /* 높이를 자동으로 조정하여 콘텐츠에 맞춤 */
-  border-radius: 0; /* 둥근 모서리 제거 */
-  background-color: transparent; /* 배경색 투명 */
-  box-shadow: none; /* 그림자 제거 */
-  overflow: visible; /* 내부 콘텐츠가 자유롭게 표시 */
-  transition: none; /* 전체 박스 트랜지션 제거 */
-  cursor: default; /* 기본 커서 */
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background-color: transparent;
+  box-shadow: none;
+  overflow: visible;
+  transition: none;
+  cursor: default;
   display: flex;
   flex-direction: column;
-  gap: 12px; /* 썸네일과 정보 사이 간격 */
-}
-
-.board-item:hover {
-  transform: none; /* 호버 시 이동 효과 제거 */
-  box-shadow: none; /* 호버 시 그림자 제거 */
+  gap: 12px;
+  margin-bottom: 8px;
 }
 
 .board-item-thumbnail {
-  width: 316px; /* 이미지 너비 고정 */
-  height: 204px; /* 이미지 높이 고정 */
-  border-radius: 12px; /* 썸네일만 둥근 모서리 적용 */
+  width: 100%;
+  height: 220px;
+  border-radius: 12px;
   object-fit: cover;
-  transition: box-shadow 0.3s ease; /* 그림자 트랜지션만 유지 */
+  transition: box-shadow 0.3s ease;
   display: block;
-  cursor: pointer; /* 썸네일만 클릭 가능 표시 */
+  cursor: pointer;
 }
 
 .board-item-thumbnail:hover {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12); /* 호버 시 흐린 그림자 */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
 .board-item-info {
   display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 0;
+}
+
+.info-left {
+  display: flex;
   flex-direction: column;
-  gap: 6px; /* 제목과 작성자 사이 간격 */
-  padding: 0; /* 패딩 제거 */
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
 }
 
 .info-title {
@@ -209,15 +203,15 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  cursor: pointer; /* 클릭 가능 표시 */
-  text-decoration: none; /* 기본 밑줄 제거 */
+  cursor: pointer;
+  text-decoration: none;
   transition: text-decoration 0.2s ease;
-  display: inline-block; /* 밑줄이 텍스트 길이만큼만 표시되도록 */
-  max-width: 100%; /* 부모 너비를 넘지 않도록 */
+  display: block;
+  letter-spacing: -0.02em;
 }
 
 .info-title:hover {
-  text-decoration: underline; /* 호버 시 밑줄 */
+  text-decoration: underline;
 }
 
 .info-author {
@@ -226,65 +220,58 @@
   text-decoration: none;
   transition: all 0.2s ease;
   line-height: 1.3;
-  cursor: pointer; /* 클릭 가능 표시 */
-  display: inline-block; /* 밑줄이 텍스트 길이만큼만 표시되도록 */
-  width: fit-content; /* 텍스트 너비에 맞춤 */
+  cursor: pointer;
+  display: inline-block;
+  width: fit-content;
+  letter-spacing: -0.01em;
 }
 
 .info-author:hover {
-  color: #222; /* 호버 시 색상 진하게 */
-  text-decoration: underline; /* 호버 시 밑줄 */
+  color: #222;
+  text-decoration: underline;
 }
 
-/* 좋아요/조회수 영역은 일단 숨김 처리 (주석 처리된 JSX에 대응) */
 .item-stats {
-  display: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+  font-size: 0.8rem;
+  color: #999;
+  white-space: nowrap;
 }
 
-/* 추가 가시성 개선 */
-.board-grid {
-  padding-bottom: 60px; /* 하단 여백 추가 */
-}
-
-/* 게시물 간격 조정으로 가독성 향상 */
-.board-item {
-  margin-bottom: 8px; /* 아래 여백 추가 */
-}
-
-/* 제목 가독성 향상 */
-.info-title {
-  letter-spacing: -0.02em; /* 자간 조정 */
-}
-
-/* 작성자 정보 가독성 향상 */
-.info-author {
-  letter-spacing: -0.01em; /* 자간 조정 */
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* =================================
    '게시물 추가' 아이템 스타일
 ================================= */
 .add-new-item {
-  background-color: rgba(0, 0, 0, 0.7); /* 검정색 70% 투명도 */
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
   color: white;
   transition: background-color 0.3s ease;
+  height: 220px;
+  border-radius: 12px;
 }
 
 .add-new-item:hover {
-  background-color: rgba(0, 0, 0, 0.9); /* 호버 시 약간 더 진하게 */
+  background-color: rgba(0, 0, 0, 0.9);
 }
 
-/* '게시물 추가' 아이템 내부의 썸네일과 정보 영역은 숨김 */
 .add-new-item .board-item-thumbnail,
 .add-new-item .board-item-info {
   display: none;
 }
 
 .add-new-plus {
-  font-size: 4rem; /* 플러스 아이콘 크기 */
+  font-size: 4rem;
   font-weight: 200;
   line-height: 1;
 }
@@ -343,7 +330,7 @@
 }
 
 /* =================================
-   ✅ 토스트 메시지 스타일 (장바구니 & 저장)
+   토스트 메시지 스타일 (장바구니 & 저장)
 ================================= */
 .cart-toast {
   position: fixed;

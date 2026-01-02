@@ -3,7 +3,7 @@ package com.portflux.backend.controller;
 import com.portflux.backend.dto.BoardLookupPostDto;
 import com.portflux.backend.dto.CommentDto;
 import com.portflux.backend.service.BoardLookupService;
-import com.portflux.backend.service.LikeService;  // ✅ 추가
+import com.portflux.backend.service.LikeService;
 import com.portflux.backend.service.CommentService;
 import com.portflux.backend.service.PdfImageService;
 import com.portflux.backend.service.PostSaveService;
@@ -40,9 +40,9 @@ public class BoardLookupController {
     private final BoardLookupService boardLookupService;
     private final CommentService commentService;
     private final PdfImageService pdfImageService;
-    private final LikeService likeService;  // ✅ 추가
+    private final LikeService likeService;
     private final PostSaveService postSaveService;
-     private final PostSaveMapper postSaveMapper;
+    private final PostSaveMapper postSaveMapper;
 
     @Value("${file.upload-dir:uploads}")
     private String uploadDir;
@@ -52,17 +52,16 @@ public class BoardLookupController {
             BoardLookupService boardLookupService,
             CommentService commentService,
             PdfImageService pdfImageService,
-            LikeService likeService,  // ✅ 추가
+            LikeService likeService,
             PostSaveService postSaveService,
-            PostSaveMapper postSaveMapper 
-             // ✅ 추가
+            PostSaveMapper postSaveMapper
     ) {
         this.boardLookupService = boardLookupService;
         this.commentService = commentService;
         this.pdfImageService = pdfImageService;
-        this.likeService = likeService; 
-        this.postSaveService = postSaveService; 
-        this.postSaveMapper = postSaveMapper; // ✅ 추가
+        this.likeService = likeService;
+        this.postSaveService = postSaveService;
+        this.postSaveMapper = postSaveMapper;
     }
 
     /**
@@ -150,8 +149,9 @@ public class BoardLookupController {
         try {
             List<BoardLookupPostDto> posts = boardLookupService.getAllLookupPosts();
 
-            // 각 게시글에 PDF 이미지 목록 추가 (썸네일용)
+            // 각 게시글에 PDF 이미지 목록 및 좋아요 수 추가
             for (BoardLookupPostDto post : posts) {
+                // PDF 이미지 추가
                 Path imageDir = Paths.get(uploadDir, "pdf", "post_" + post.getPostId());
                 if (Files.exists(imageDir)) {
                     List<String> images = Files.list(imageDir)
@@ -161,6 +161,10 @@ public class BoardLookupController {
                             .toList();
                     post.setPdfImages(images);
                 }
+                
+                // ✅ 좋아요 수 추가
+                int likeCount = likeService.getLikeCount(post.getPostId());
+                post.setLikeCnt(likeCount);
             }
 
             return ResponseEntity.ok(posts);
@@ -196,7 +200,7 @@ public class BoardLookupController {
                 return ResponseEntity.badRequest().body(Map.of("message", "파일이 없습니다."));
             }
 
-            // 2. 초기값 설정 (aiSummary는 content에 통합되었으므로 제거)
+            // 2. 초기값 설정
             postDto.setAiSummary("AI 요약 대기 중...");
             postDto.setDownloadCnt(0);
             postDto.setViewCnt(0);
@@ -290,7 +294,7 @@ public class BoardLookupController {
     @PostMapping("/{postId}/like")
     public ResponseEntity<Map<String, Object>> toggleLike(
             @PathVariable int postId,
-            @RequestParam int userNum  // TODO: 실제로는 세션에서 가져오기
+            @RequestParam int userNum
     ) {
         try {
             Map<String, Object> result = likeService.toggleLike(userNum, postId);
@@ -339,8 +343,9 @@ public class BoardLookupController {
         try {
             List<BoardLookupPostDto> posts = boardLookupService.getPostsByUserNum(userNum);
 
-            // 각 게시글에 PDF 이미지 목록 추가 (썸네일용)
+            // 각 게시글에 PDF 이미지 목록 및 좋아요 수 추가
             for (BoardLookupPostDto post : posts) {
+                // PDF 이미지 추가
                 Path imageDir = Paths.get(uploadDir, "pdf", "post_" + post.getPostId());
                 if (Files.exists(imageDir)) {
                     List<String> images = Files.list(imageDir)
@@ -350,6 +355,10 @@ public class BoardLookupController {
                             .toList();
                     post.setPdfImages(images);
                 }
+                
+                // ✅ 좋아요 수 추가
+                int likeCount = likeService.getLikeCount(post.getPostId());
+                post.setLikeCnt(likeCount);
             }
 
             return ResponseEntity.ok(posts);
@@ -381,8 +390,9 @@ public class BoardLookupController {
         try {
             List<BoardLookupPostDto> posts = boardLookupService.getPostsByNickname(nickname);
 
-            // 각 게시글에 PDF 이미지 목록 추가 (썸네일용)
+            // 각 게시글에 PDF 이미지 목록 및 좋아요 수 추가
             for (BoardLookupPostDto post : posts) {
+                // PDF 이미지 추가
                 Path imageDir = Paths.get(uploadDir, "pdf", "post_" + post.getPostId());
                 if (Files.exists(imageDir)) {
                     List<String> images = Files.list(imageDir)
@@ -392,6 +402,10 @@ public class BoardLookupController {
                             .toList();
                     post.setPdfImages(images);
                 }
+                
+                // ✅ 좋아요 수 추가
+                int likeCount = likeService.getLikeCount(post.getPostId());
+                post.setLikeCnt(likeCount);
             }
 
             return ResponseEntity.ok(posts);
@@ -409,6 +423,128 @@ public class BoardLookupController {
         try {
             List<CommentDto> comments = commentService.getCommentsByNickname(nickname);
             return ResponseEntity.ok(comments);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * 사용자가 해당 게시물을 구매했는지 확인
+     */
+    @GetMapping("/{postId}/purchased")
+    public ResponseEntity<Map<String, Boolean>> checkPurchaseStatus(
+            @PathVariable int postId,
+            @RequestParam Long userNum
+    ) {
+        try {
+            System.out.println("=== 구매 상태 확인 요청 ===");
+            System.out.println("postId: " + postId);
+            System.out.println("userNum: " + userNum);
+            
+            boolean isPurchased = boardLookupService.isPurchased(userNum, postId);
+            
+            System.out.println("구매 여부: " + isPurchased);
+            System.out.println("========================");
+            
+            return ResponseEntity.ok(Map.of("isPurchased", isPurchased));
+        } catch (Exception e) {
+            System.err.println("구매 상태 확인 실패: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("isPurchased", false));
+        }
+    }
+
+    /**
+     * PDF 다운로드 API
+     */
+    @GetMapping("/{postId}/download")
+    public ResponseEntity<?> downloadPdf(
+            @PathVariable int postId,
+            @RequestParam Long userNum
+    ) {
+        try {
+            // 구매 확인
+            if (!boardLookupService.isPurchased(userNum, postId)) {
+                return ResponseEntity.status(403).body(Map.of("message", "구매하지 않은 게시물입니다."));
+            }
+
+            BoardLookupPostDto post = boardLookupService.getPostById(postId);
+            if (post == null || post.getPostFile() == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Path filePath = Paths.get(uploadDir, post.getPostFile());
+            if (!Files.exists(filePath)) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Resource resource = new UrlResource(filePath.toUri());
+            
+            // 다운로드 카운트 증가
+            boardLookupService.incrementDownloadCount(postId);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, 
+                            "attachment; filename=\"" + post.getPostFile() + "\"")
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(resource);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * 게시글 저장 토글 API
+     */
+    @PostMapping("/{postId}/save")
+    public ResponseEntity<Map<String, Object>> toggleSave(
+            @PathVariable int postId,
+            @RequestParam Long userNum
+    ) {
+        try {
+            Map<String, Object> result = postSaveService.toggleSave(userNum, postId);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "isSaved", result.get("isSaved")
+            ));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(
+                Map.of("success", false, "message", e.getMessage())
+            );
+        }
+    }
+
+    /**
+     * 저장 상태 확인 API
+     */
+    @GetMapping("/{postId}/save/check")
+    public ResponseEntity<Map<String, Object>> checkSaveStatus(
+            @PathVariable int postId,
+            @RequestParam Long userNum
+    ) {
+        try {
+            boolean isSaved = postSaveService.isSaved(userNum, postId);
+            return ResponseEntity.ok(Map.of("isSaved", isSaved));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(
+                Map.of("success", false, "message", e.getMessage())
+            );
+        }
+    }
+
+    /**
+     * 사용자의 저장된 게시글 ID 목록 조회
+     */
+    @GetMapping("/user/{userNum}/saved")
+    public ResponseEntity<List<Integer>> getSavedPostIds(@PathVariable int userNum) {
+        try {
+            List<Integer> savedPostIds = postSaveMapper.findSavedPostIdsByUserNum(userNum);
+            return ResponseEntity.ok(savedPostIds);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
@@ -440,123 +576,4 @@ public class BoardLookupController {
 
         return uniqueFilename;
     }
-    /**
- * 사용자가 해당 게시물을 구매했는지 확인
- */
-@GetMapping("/{postId}/purchased")
-public ResponseEntity<Map<String, Boolean>> checkPurchaseStatus(
-        @PathVariable int postId,
-        @RequestParam Long userNum
-) {
-    try {
-        System.out.println("=== 구매 상태 확인 요청 ===");
-        System.out.println("postId: " + postId);
-        System.out.println("userNum: " + userNum);
-        
-        boolean isPurchased = boardLookupService.isPurchased(userNum, postId);
-        
-        System.out.println("구매 여부: " + isPurchased);
-        System.out.println("========================");
-        
-        return ResponseEntity.ok(Map.of("isPurchased", isPurchased));
-    } catch (Exception e) {
-        System.err.println("구매 상태 확인 실패: " + e.getMessage());
-        e.printStackTrace();
-        return ResponseEntity.badRequest().body(Map.of("isPurchased", false));
-    }
-}
-
-/**
- * PDF 다운로드 API
- */
-@GetMapping("/{postId}/download")
-public ResponseEntity<?> downloadPdf(
-        @PathVariable int postId,
-        @RequestParam Long userNum
-) {
-    try {
-        // 구매 확인
-        if (!boardLookupService.isPurchased(userNum, postId)) {
-            return ResponseEntity.status(403).body(Map.of("message", "구매하지 않은 게시물입니다."));
-        }
-
-        BoardLookupPostDto post = boardLookupService.getPostById(postId);
-        if (post == null || post.getPostFile() == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Path filePath = Paths.get(uploadDir, post.getPostFile());
-        if (!Files.exists(filePath)) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Resource resource = new UrlResource(filePath.toUri());
-        
-        // 다운로드 카운트 증가
-        boardLookupService.incrementDownloadCount(postId);
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, 
-                        "attachment; filename=\"" + post.getPostFile() + "\"")
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(resource);
-
-    } catch (Exception e) {
-        e.printStackTrace();
-        return ResponseEntity.internalServerError().build();
-    }
-}
-/**
- * 게시글 저장 토글 API
- */
-@PostMapping("/{postId}/save")
-public ResponseEntity<Map<String, Object>> toggleSave(
-        @PathVariable int postId,
-        @RequestParam Long userNum
-) {
-    try {
-        Map<String, Object> result = postSaveService.toggleSave(userNum, postId);
-        return ResponseEntity.ok(Map.of(
-            "success", true,
-            "isSaved", result.get("isSaved")
-        ));
-    } catch (Exception e) {
-        e.printStackTrace();
-        return ResponseEntity.badRequest().body(
-            Map.of("success", false, "message", e.getMessage())
-        );
-    }
-}
-
-/**
- * 저장 상태 확인 API
- */
-@GetMapping("/{postId}/save/check")
-public ResponseEntity<Map<String, Object>> checkSaveStatus(
-        @PathVariable int postId,
-        @RequestParam Long userNum
-) {
-    try {
-        boolean isSaved = postSaveService.isSaved(userNum, postId);
-        return ResponseEntity.ok(Map.of("isSaved", isSaved));
-    } catch (Exception e) {
-        e.printStackTrace();
-        return ResponseEntity.badRequest().body(
-            Map.of("success", false, "message", e.getMessage())
-        );
-    }
-}
-/**
- * 사용자의 저장된 게시글 ID 목록 조회
- */
-@GetMapping("/user/{userNum}/saved")
-public ResponseEntity<List<Integer>> getSavedPostIds(@PathVariable int userNum) {
-    try {
-        List<Integer> savedPostIds = postSaveMapper.findSavedPostIdsByUserNum(userNum);
-        return ResponseEntity.ok(savedPostIds);
-    } catch (Exception e) {
-        e.printStackTrace();
-        return ResponseEntity.internalServerError().build();
-    }
-}
 }
