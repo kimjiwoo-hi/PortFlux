@@ -67,20 +67,65 @@ export async function confirmPayment(payload) {
 }
 
 // --- Follow APIs ---
-export async function getFollowing(userId) {
-  return api.get(`/api/follow/following/${userId}`);
+/**
+ * 특정 사용자의 팔로잉 목록 조회
+ * @param {number} userNum - 조회할 사용자 번호
+ * @returns {Promise<{count: number, list: Array}>}
+ */
+export async function getFollowing(userNum) {
+  return api.get(`/api/follow/following/${userNum}`);
 }
 
-export async function getFollowers(userId) {
-  return api.get(`/api/follow/followers/${userId}`);
+/**
+ * 특정 사용자의 팔로워 목록 조회
+ * @param {number} userNum - 조회할 사용자 번호
+ * @returns {Promise<{count: number, list: Array}>}
+ */
+export async function getFollowers(userNum) {
+  return api.get(`/api/follow/followers/${userNum}`);
 }
 
-export async function follow(followerId, followingId) {
-  return api.post(`/api/follow/${followingId}`);
+/**
+ * 팔로우하기
+ * @param {number} targetUserNum - 팔로우할 대상 사용자 번호
+ * @returns {Promise}
+ */
+export async function follow(targetUserNum) {
+  // X-USER-NUM 헤더는 인터셉터에서 자동으로 추가됨
+  const userNumStr = localStorage.getItem("userNum") || sessionStorage.getItem("userNum");
+  return api.post(`/api/follow/${targetUserNum}`, {}, {
+    headers: {
+      'X-USER-NUM': userNumStr
+    }
+  });
 }
 
-export async function unfollow(followerId, followingId) {
-  return api.delete(`/api/follow/${followingId}`);
+/**
+ * 언팔로우하기
+ * @param {number} targetUserNum - 언팔로우할 대상 사용자 번호
+ * @returns {Promise}
+ */
+export async function unfollow(targetUserNum) {
+  const userNumStr = localStorage.getItem("userNum") || sessionStorage.getItem("userNum");
+  return api.delete(`/api/follow/${targetUserNum}`, {
+    headers: {
+      'X-USER-NUM': userNumStr
+    }
+  });
+}
+
+/**
+ * 팔로우 여부 확인
+ * @param {number} targetUserNum - 확인할 대상 사용자 번호
+ * @returns {Promise<{following: boolean}>}
+ */
+export async function isFollowing(targetUserNum) {
+  const userNumStr = localStorage.getItem("userNum") || sessionStorage.getItem("userNum");
+  return api.get(`/api/follow/is-following/${targetUserNum}`, {
+    headers: {
+      'X-USER-NUM': userNumStr
+    }
+  });
 }
 
 export default api;

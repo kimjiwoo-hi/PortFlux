@@ -63,21 +63,26 @@ public class BoardLookupService {
      */
     public List<BoardLookupPostDto> getAllLookupPosts() {
         List<BoardLookupPostDto> posts = boardLookupMapper.findAllLookupPosts();
-        
-        // 각 게시글의 작성자 이미지 추가
+
+        // 각 게시글의 작성자 이미지 및 배너 추가
         for (BoardLookupPostDto post : posts) {
             UserBean author = userMapper.selectUserByNum(post.getUserNum());
             if (author != null) {
-                // 프로필 이미지
+                // 프로필 이미지 Base64 변환
                 if (author.getUserImage() != null) {
                     String base64Image = Base64.getEncoder().encodeToString(author.getUserImage());
                     post.setUserImageBase64(base64Image);
+                }
+                // 배너 이미지 Base64 변환
+                if (author.getUserBanner() != null) {
+                    String base64Banner = Base64.getEncoder().encodeToString(author.getUserBanner());
+                    post.setUserBannerBase64(base64Banner);
                 }
                 // 닉네임
                 post.setUserNickname(author.getUserNickname());
             }
         }
-        
+
         return posts;
     }
 
@@ -140,7 +145,28 @@ public class BoardLookupService {
      * 닉네임으로 사용자의 게시글 목록 조회
      */
     public List<BoardLookupPostDto> getPostsByNickname(String nickname) {
-        return boardLookupMapper.findPostsByNickname(nickname);
+        List<BoardLookupPostDto> posts = boardLookupMapper.findPostsByNickname(nickname);
+
+        // 각 게시글의 작성자 이미지 및 배너 추가
+        for (BoardLookupPostDto post : posts) {
+            UserBean author = userMapper.selectUserByNum(post.getUserNum());
+            if (author != null) {
+                // 프로필 이미지 Base64 변환
+                if (author.getUserImage() != null) {
+                    String base64Image = Base64.getEncoder().encodeToString(author.getUserImage());
+                    post.setUserImageBase64(base64Image);
+                }
+                // 배너 이미지 Base64 변환
+                if (author.getUserBanner() != null) {
+                    String base64Banner = Base64.getEncoder().encodeToString(author.getUserBanner());
+                    post.setUserBannerBase64(base64Banner);
+                }
+                // 닉네임
+                post.setUserNickname(author.getUserNickname());
+            }
+        }
+
+        return posts;
     }
 
     /**
