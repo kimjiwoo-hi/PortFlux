@@ -6,7 +6,6 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   z-index: 9999;
   overflow: hidden;
-  cursor: pointer;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);
@@ -112,7 +111,6 @@
 
 .mini-stat-item.clickable:hover {
   background: #f5f5f5;
-  transform: translateY(-2px);
   cursor: pointer;
 }
 
@@ -125,6 +123,39 @@
 .mini-stat-label {
   font-size: 12px;
   color: #888;
+}
+
+.mini-follow-btn {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #667eea;
+  border-radius: 8px;
+  background: #667eea;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 8px;
+}
+
+.mini-follow-btn:hover {
+  background: #5568d3;
+  border-color: #5568d3;
+}
+
+.mini-follow-btn.following {
+  background: white;
+  color: #667eea;
+}
+
+.mini-follow-btn.following:hover {
+  background: #f5f5f5;
+}
+
+.mini-follow-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .mini-view-profile-btn {
