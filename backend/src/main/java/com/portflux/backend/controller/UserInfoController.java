@@ -19,11 +19,11 @@ public class UserInfoController {
 
     private final UserService userService;
 
-    // 사용자 정보 조회
+    // 사용자 정보 조회 (일반 사용자 + 기업 사용자 모두 지원)
     @GetMapping("/{userId}")
     public ResponseEntity<?> getUserInfo(@PathVariable String userId) {
         try {
-            UserBean user = userService.getUserByUserId(userId);
+            UserBean user = userService.getUserInfo(userId);
             if (user == null) {
                 return ResponseEntity.badRequest().body("사용자를 찾을 수 없습니다.");
             }
