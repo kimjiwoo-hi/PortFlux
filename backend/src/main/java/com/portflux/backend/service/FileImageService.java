@@ -66,18 +66,24 @@ public class FileImageService {
     }
 
     /**
-     * PDF 파일을 페이지별 이미지로 변환
+     * PDF 파일을 페이지별 이미지로 변환 (수정됨)
      */
     private List<String> convertPdfToImages(MultipartFile pdfFile, int postId) throws IOException {
         List<String> imageUrls = new ArrayList<>();
 
         // 1. 임시 PDF 파일 저장
         File tempPdfFile = File.createTempFile("temp_pdf_", ".pdf");
-        pdfFile.transferTo(tempPdfFile);
-
+        
         try {
+            // ✅ 절대 경로로 변환
+            tempPdfFile = tempPdfFile.getAbsoluteFile();
+            pdfFile.transferTo(tempPdfFile);
+
             // 2. 이미지 저장 폴더 생성
-            Path outputDir = Paths.get(uploadDir, "pdf", "post_" + postId);
+            File uploadDirFile = new File(uploadDir);
+            uploadDirFile = uploadDirFile.getAbsoluteFile();
+            
+            Path outputDir = Paths.get(uploadDirFile.getAbsolutePath(), "pdf", "post_" + postId);
             Files.createDirectories(outputDir);
 
             // 3. PDF 문서 로드
@@ -114,18 +120,24 @@ public class FileImageService {
     }
 
     /**
-     * PPT 파일을 슬라이드별 이미지로 변환
+     * PPT 파일을 슬라이드별 이미지로 변환 (수정됨)
      */
     private List<String> convertPptToImages(MultipartFile pptFile, int postId) throws IOException {
         List<String> imageUrls = new ArrayList<>();
 
         // 1. 임시 PPT 파일 저장
         File tempPptFile = File.createTempFile("temp_ppt_", ".pptx");
-        pptFile.transferTo(tempPptFile);
-
+        
         try {
+            // ✅ 절대 경로로 변환
+            tempPptFile = tempPptFile.getAbsoluteFile();
+            pptFile.transferTo(tempPptFile);
+            
             // 2. 이미지 저장 폴더 생성
-            Path outputDir = Paths.get(uploadDir, "pdf", "post_" + postId);
+            File uploadDirFile = new File(uploadDir);
+            uploadDirFile = uploadDirFile.getAbsoluteFile();
+            
+            Path outputDir = Paths.get(uploadDirFile.getAbsolutePath(), "pdf", "post_" + postId);
             Files.createDirectories(outputDir);
 
             // 3. PPT 문서 로드
@@ -209,12 +221,21 @@ public class FileImageService {
         }
     }
 
+    /**
+     * PDF 단일 페이지 변환 (수정됨)
+     */
     private String convertSinglePdfPage(MultipartFile pdfFile, int pageNumber, int postId) throws IOException {
         File tempPdfFile = File.createTempFile("temp_pdf_", ".pdf");
-        pdfFile.transferTo(tempPdfFile);
-
+        
         try {
-            Path outputDir = Paths.get(uploadDir, "pdf", "post_" + postId);
+            // ✅ 절대 경로로 변환
+            tempPdfFile = tempPdfFile.getAbsoluteFile();
+            pdfFile.transferTo(tempPdfFile);
+
+            File uploadDirFile = new File(uploadDir);
+            uploadDirFile = uploadDirFile.getAbsoluteFile();
+            
+            Path outputDir = Paths.get(uploadDirFile.getAbsolutePath(), "pdf", "post_" + postId);
             Files.createDirectories(outputDir);
 
             try (PDDocument document = PDDocument.load(tempPdfFile)) {
@@ -237,12 +258,21 @@ public class FileImageService {
         }
     }
 
+    /**
+     * PPT 단일 페이지 변환 (수정됨)
+     */
     private String convertSinglePptPage(MultipartFile pptFile, int pageNumber, int postId) throws IOException {
         File tempPptFile = File.createTempFile("temp_ppt_", ".pptx");
-        pptFile.transferTo(tempPptFile);
-
+        
         try {
-            Path outputDir = Paths.get(uploadDir, "pdf", "post_" + postId);
+            // ✅ 절대 경로로 변환
+            tempPptFile = tempPptFile.getAbsoluteFile();
+            pptFile.transferTo(tempPptFile);
+
+            File uploadDirFile = new File(uploadDir);
+            uploadDirFile = uploadDirFile.getAbsoluteFile();
+            
+            Path outputDir = Paths.get(uploadDirFile.getAbsolutePath(), "pdf", "post_" + postId);
             Files.createDirectories(outputDir);
 
             try (XMLSlideShow ppt = new XMLSlideShow(Files.newInputStream(tempPptFile.toPath()))) {
@@ -288,7 +318,10 @@ public class FileImageService {
      * 게시글 삭제 시 이미지 폴더 삭제
      */
     public void deletePostImages(int postId) throws IOException {
-        Path imageDir = Paths.get(uploadDir, "pdf", "post_" + postId);
+        File uploadDirFile = new File(uploadDir);
+        uploadDirFile = uploadDirFile.getAbsoluteFile();
+        
+        Path imageDir = Paths.get(uploadDirFile.getAbsolutePath(), "pdf", "post_" + postId);
         
         if (Files.exists(imageDir)) {
             // 폴더 내 모든 파일 삭제
@@ -371,13 +404,16 @@ public class FileImageService {
     }
 
     /**
-     * PPT에서 텍스트 추출
+     * PPT에서 텍스트 추출 (수정됨)
      */
     private String extractTextFromPpt(MultipartFile pptFile) throws IOException {
         File tempPptFile = File.createTempFile("temp_ppt_", ".pptx");
-        pptFile.transferTo(tempPptFile);
-
+        
         try {
+            // ✅ 절대 경로로 변환
+            tempPptFile = tempPptFile.getAbsoluteFile();
+            pptFile.transferTo(tempPptFile);
+
             try (XMLSlideShow ppt = new XMLSlideShow(Files.newInputStream(tempPptFile.toPath()))) {
                 StringBuilder text = new StringBuilder();
                 
@@ -468,4 +504,91 @@ public class FileImageService {
                 .call()
                 .content();
     }
+
+    /**
+ * 저장된 파일을 이미지로 변환 (File 객체 사용)
+ */
+public List<String> convertSavedFileToImages(File file, int postId) throws IOException {
+    String filename = file.getName();
+    String lowerFilename = filename.toLowerCase();
+    
+    if (lowerFilename.endsWith(".pdf")) {
+        return convertSavedPdfToImages(file, postId);
+    } else if (lowerFilename.endsWith(".ppt") || lowerFilename.endsWith(".pptx")) {
+        return convertSavedPptToImages(file, postId);
+    } else {
+        throw new IOException("지원하지 않는 파일 형식입니다.");
+    }
+}
+
+/**
+ * 저장된 PDF 파일을 이미지로 변환
+ */
+private List<String> convertSavedPdfToImages(File pdfFile, int postId) throws IOException {
+    List<String> imageUrls = new ArrayList<>();
+
+    File uploadDirFile = new File(uploadDir);
+    uploadDirFile = uploadDirFile.getAbsoluteFile();
+    
+    Path outputDir = Paths.get(uploadDirFile.getAbsolutePath(), "pdf", "post_" + postId);
+    Files.createDirectories(outputDir);
+
+    try (PDDocument document = PDDocument.load(pdfFile)) {
+        PDFRenderer pdfRenderer = new PDFRenderer(document);
+        int pageCount = document.getNumberOfPages();
+
+        for (int page = 0; page < pageCount; page++) {
+            BufferedImage image = pdfRenderer.renderImageWithDPI(page, 200, ImageType.RGB);
+            String fileName = String.format("page_%03d.jpg", page + 1);
+            Path imagePath = outputDir.resolve(fileName);
+            ImageIO.write(image, "JPEG", imagePath.toFile());
+            String imageUrl = "/uploads/pdf/post_" + postId + "/" + fileName;
+            imageUrls.add(imageUrl);
+        }
+    }
+
+    return imageUrls;
+}
+
+/**
+ * 저장된 PPT 파일을 이미지로 변환
+ */
+private List<String> convertSavedPptToImages(File pptFile, int postId) throws IOException {
+    List<String> imageUrls = new ArrayList<>();
+
+    File uploadDirFile = new File(uploadDir);
+    uploadDirFile = uploadDirFile.getAbsoluteFile();
+    
+    Path outputDir = Paths.get(uploadDirFile.getAbsolutePath(), "pdf", "post_" + postId);
+    Files.createDirectories(outputDir);
+
+    try (XMLSlideShow ppt = new XMLSlideShow(Files.newInputStream(pptFile.toPath()))) {
+        List<XSLFSlide> slides = ppt.getSlides();
+        Dimension pageSize = ppt.getPageSize();
+
+        for (int i = 0; i < slides.size(); i++) {
+            XSLFSlide slide = slides.get(i);
+            int width = (int) (pageSize.getWidth() * 2);
+            int height = (int) (pageSize.getHeight() * 2);
+            
+            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            Graphics2D graphics = image.createGraphics();
+            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            graphics.setPaint(Color.WHITE);
+            graphics.fill(new Rectangle(0, 0, width, height));
+            graphics.scale(2, 2);
+            slide.draw(graphics);
+            graphics.dispose();
+
+            String fileName = String.format("page_%03d.jpg", i + 1);
+            Path imagePath = outputDir.resolve(fileName);
+            ImageIO.write(image, "JPEG", imagePath.toFile());
+            String imageUrl = "/uploads/pdf/post_" + postId + "/" + fileName;
+            imageUrls.add(imageUrl);
+        }
+    }
+
+    return imageUrls;
+}
 }
