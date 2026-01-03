@@ -177,21 +177,21 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
+/* =================================
+   게시물 정보 영역 (수정됨)
+================================= */
 .board-item-info {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 0;
-}
-
-.info-left {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  flex: 1;
-  min-width: 0;
+  padding: 0;
+}
+
+.info-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
 }
 
 .info-title {
@@ -208,10 +208,20 @@
   transition: text-decoration 0.2s ease;
   display: block;
   letter-spacing: -0.02em;
+  flex: 1;
+  min-width: 0;
 }
 
 .info-title:hover {
   text-decoration: underline;
+}
+
+/* 닉네임과 통계를 포함하는 행 */
+.info-row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
 }
 
 .info-author {
@@ -224,6 +234,7 @@
   display: inline-block;
   width: fit-content;
   letter-spacing: -0.01em;
+  flex-shrink: 0;
 }
 
 .info-author:hover {
@@ -231,20 +242,29 @@
   text-decoration: underline;
 }
 
-.item-stats {
+/* 좋아요와 조회수 통계 */
+.info-stats {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   gap: 4px;
-  align-items: flex-end;
   font-size: 0.8rem;
   color: #999;
   white-space: nowrap;
 }
 
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+.stat-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  opacity: 0.7;
 }
 
 /* =================================

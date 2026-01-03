@@ -3,6 +3,8 @@ import SearchIcon from "../assets/search.png";
 import cartIcon from "../assets/cartIcon.png";
 import bookmarkIcon from "../assets/Bookmark.png";
 import bookmarkFilledIcon from "../assets/FilldBookmark.png";
+import binheartIcon from "../assets/binheart.png";
+import eyeIcon from "../assets/Eye.png";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { tagData, tagSearchMap } from "../database/taglist";
@@ -462,20 +464,34 @@ function BoardLookupPage() {
                 />
               </div>
               <div className="board-item-info">
-                <h4
-                  className="info-title"
-                  onClick={() => handlePostClick(post.id)}
-                >
-                  {post.title}
-                </h4>
-                <span
-                  className="info-author"
-                  onClick={() => navigate(`/mypage/${post.author}`)}
-                  onMouseEnter={(e) => handleAuthorMouseEnter(e, post.author)}
-                  onMouseLeave={handleAuthorMouseLeave}
-                >
-                  {post.author}
-                </span>
+                <div className="info-title-row">
+                  <h4
+                    className="info-title"
+                    onClick={() => handlePostClick(post.id)}
+                  >
+                    {post.title}
+                  </h4>
+                  <div className="info-stats">
+                    <span className="stat-item">
+                      <img src={binheartIcon} alt="likes" className="stat-icon" />
+                      {post.likes}
+                    </span>
+                    <span className="stat-item">
+                      <img src={eyeIcon} alt="views" className="stat-icon" />
+                      {post.views}
+                    </span>
+                  </div>
+                </div>
+                <div className="info-row">
+                  <span
+                    className="info-author"
+                    onClick={() => navigate(`/mypage/${post.author}`)}
+                    onMouseEnter={(e) => handleAuthorMouseEnter(e, post.author)}
+                    onMouseLeave={handleAuthorMouseLeave}
+                  >
+                    {post.author}
+                  </span>
+                </div>
               </div>
             </div>
           )

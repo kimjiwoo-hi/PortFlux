@@ -180,10 +180,13 @@ export default function BoardLookupWritePage() {
       console.log("=== 업로드 시작 ===");
       console.log("파일:", selectedFile.name);
       console.log("크기:", formatFileSize(selectedFile.size));
+      console.log("제목:", title);
+      console.log("가격:", price);
 
       const response = await axios.post("/api/boardlookup/posts", formData, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
+        timeout: 300000, // 5분 타임아웃 (큰 파일 처리 시간 고려)
       });
 
       console.log("=== 업로드 응답 ===");
@@ -193,12 +196,38 @@ export default function BoardLookupWritePage() {
         alert("게시글이 등록되었습니다!");
         navigate("/");
       } else {
-        alert("게시글 등록에 실패했습니다.");
+        alert("게시글 등록에 실패했습니다: " + (response.data.message || "알 수 없는 오류"));
       }
     } catch (error) {
-      console.error("게시글 등록 오류:", error);
-      const errorMsg = error.response?.data?.message || error.message;
-      alert("게시글 등록 중 오류가 발생했습니다: " + errorMsg);
+      console.error("[Error] 게시글 등록 오류:");
+      console.error(error);
+      
+      let errorMsg = "알 수 없는 오류가 발생했습니다.";
+      
+      if (error.response) {
+        // 서버에서 응답을 받은 경우
+        console.error("응답 상태:", error.response.status);
+        console.error("응답 데이터:", error.response.data);
+        
+        if (error.response.data?.message) {
+          errorMsg = error.response.data.message;
+        } else if (error.response.status === 413) {
+          errorMsg = "파일 크기가 너무 큽니다. (최대 50MB)";
+        } else if (error.response.status === 400) {
+          errorMsg = "잘못된 요청입니다. 파일 형식을 확인해주세요.";
+        } else if (error.response.status === 500) {
+          errorMsg = "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+        }
+      } else if (error.request) {
+        // 요청은 보냈지만 응답을 받지 못한 경우
+        console.error("요청:", error.request);
+        errorMsg = "서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.";
+      } else {
+        // 요청 설정 중 오류가 발생한 경우
+        errorMsg = error.message;
+      }
+      
+      alert("게시글 등록 실패\n\n" + errorMsg);
     } finally {
       setIsUploading(false);
     }
@@ -356,7 +385,7 @@ export default function BoardLookupWritePage() {
               <input
                 type="number"
                 value={price}
-                onChange={handlePriceChange} // ✅ 여기 수정
+                onChange={handlePriceChange}
                 className="form-input"
                 placeholder="가격을 입력하세요 (100원 단위)"
                 min="0"

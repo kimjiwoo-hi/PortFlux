@@ -185,19 +185,20 @@ public class BoardLookupController {
         try {
             postDto.setUserNum(userNum);
 
-            // 1. 파일 유효성 검사 및 저장
-            if (file != null && !file.isEmpty()) {
-                String originalFilename = file.getOriginalFilename();
-                if (originalFilename == null || !isValidFileExtension(originalFilename)) {
-                    return ResponseEntity.badRequest().body(
-                            Map.of("success", false, "message", "허용되지 않는 파일 형식입니다. PDF 또는 PPT 파일만 업로드할 수 있습니다.")
-                    );
-                }
-                String fileName = saveFile(file);
-                postDto.setPostFile(fileName);
-            } else {
-                return ResponseEntity.badRequest().body(Map.of("message", "파일이 없습니다."));
+            String fileName = null;
+        // 1. 파일 유효성 검사 및 저장
+        if (file != null && !file.isEmpty()) {
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null || !isValidFileExtension(originalFilename)) {
+                return ResponseEntity.badRequest().body(
+                        Map.of("success", false, "message", "허용되지 않는 파일 형식입니다.")
+                );
             }
+            fileName = saveFile(file);  // ✅ 파일명 저장
+            postDto.setPostFile(fileName);
+        } else {
+            return ResponseEntity.badRequest().body(Map.of("message", "파일이 없습니다."));
+        }
 
             // 2. 초기값 설정
             postDto.setAiSummary("AI 요약 대기 중...");
@@ -211,25 +212,29 @@ public class BoardLookupController {
             System.out.println("PostId: " + postDto.getPostId());
             System.out.println("File: " + file.getOriginalFilename());
 
-            // 4. 파일 → 이미지 변환 (PDF/PPT 지원)
-            List<String> fileImages = fileImageService.convertFileToImages(file, postDto.getPostId());
-            postDto.setPdfImages(fileImages);
+            // 4. ✅ 저장된 파일을 사용하여 이미지 변환
+        File uploadDirFile = new File(uploadDir);
+        uploadDirFile = uploadDirFile.getAbsoluteFile();
+        File savedFile = new File(uploadDirFile, fileName);
+        
+        List<String> fileImages = fileImageService.convertSavedFileToImages(savedFile, postDto.getPostId());
+        postDto.setPdfImages(fileImages);
 
-            System.out.println("=== 파일 변환 완료 ===");
-            System.out.println("이미지 개수: " + fileImages.size());
+        System.out.println("=== 파일 변환 완료 ===");
+        System.out.println("이미지 개수: " + fileImages.size());
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("postId", postDto.getPostId());
-            response.put("message", "게시글이 등록되었습니다.");
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("postId", postDto.getPostId());
+        response.put("message", "게시글이 등록되었습니다.");
 
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(
-                    Map.of("success", false, "message", e.getMessage())
-            );
-        }
+        return ResponseEntity.ok(response);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.badRequest().body(
+                Map.of("success", false, "message", e.getMessage())
+        );
+    }
     }
 
     /**
@@ -557,18 +562,30 @@ public ResponseEntity<List<Integer>> getSavedPostIds(@PathVariable int userNum) 
      * 파일 저장
      */
     private String saveFile(MultipartFile file) throws IOException {
-        String originalFilename = file.getOriginalFilename();
-        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-        String savedFilename = UUID.randomUUID().toString() + extension;
-
-        File uploadDirFile = new File(uploadDir);
-        if (!uploadDirFile.exists()) {
-            uploadDirFile.mkdirs();
-        }
-
-        Path filePath = Paths.get(uploadDir, savedFilename);
-        file.transferTo(filePath.toFile());
-
-        return savedFilename;
+    if (file == null || file.isEmpty()) {
+        throw new IOException("파일이 비어있습니다.");
     }
+
+    String originalFilename = file.getOriginalFilename();
+    String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+    String savedFilename = UUID.randomUUID().toString() + extension;
+
+    // ✅ File 객체로 생성하면 자동으로 절대 경로로 변환됨
+    File uploadDirFile = new File(uploadDir);
+    uploadDirFile = uploadDirFile.getAbsoluteFile();
+    
+    // ✅ 디렉토리가 없으면 생성
+    if (!uploadDirFile.exists()) {
+        uploadDirFile.mkdirs();
+        System.out.println("✅ 업로드 디렉토리 생성: " + uploadDirFile.getAbsolutePath());
+    }
+
+    // ✅ 파일 저장
+    File destinationFile = new File(uploadDirFile, savedFilename);
+    file.transferTo(destinationFile);
+    
+    System.out.println("✅ 파일 저장 완료: " + destinationFile.getAbsolutePath());
+
+    return savedFilename;
+}
 }

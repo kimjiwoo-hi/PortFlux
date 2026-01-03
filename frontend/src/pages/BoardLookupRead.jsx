@@ -13,6 +13,7 @@ import bookmarkFilledIcon from "../assets/FilldBookmark.png";
 import { MoreHorizontal } from "lucide-react";
 import UserMiniPopover from "../components/UserMiniPopover";
 import user_default_icon from "../assets/user_default_icon.png";
+import { follow, unfollow, isFollowing as checkFollowing } from "../api/api";
 
 const BoardLookupRead = () => {
   const { postId } = useParams();
@@ -22,6 +23,7 @@ const BoardLookupRead = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [showAISummary, setShowAISummary] = useState(false);
   const [showCartToast, setShowCartToast] = useState(false);
@@ -37,6 +39,7 @@ const BoardLookupRead = () => {
   const [isSaved, setIsSaved] = useState(false);
   const [showSaveToast, setShowSaveToast] = useState(false);
   const [saveToastMessage, setSaveToastMessage] = useState("");
+  const [isOwner, setIsOwner] = useState(false);
   // 사용자 프로필 popover state
   const [hoveredAuthor, setHoveredAuthor] = useState(null);
   const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });
@@ -94,6 +97,10 @@ const BoardLookupRead = () => {
             const loggedInUser = JSON.parse(storedUser);
             setLoggedInUser(loggedInUser);
 
+            // 본인 게시글인지 확인
+            setIsOwner(Number(loggedInUser.userNum) === Number(postData.userNum));
+
+            // 좋아요 상태 확인
             const likeCheckResponse = await axios.get(
               `http://localhost:8080/api/boardlookup/${postId}/like/check`,
               {
@@ -104,6 +111,11 @@ const BoardLookupRead = () => {
 
             setIsLiked(likeCheckResponse.data.isLiked);
             setLikeCount(likeCheckResponse.data.totalLikes);
+
+            // 팔로우 상태 확인 (본인이 아닐 때만)
+            if (postData.userNum && Number(loggedInUser.userNum) !== Number(postData.userNum)) {
+              checkFollowStatus(postData.userNum);
+            }
           }
         }
         setLoading(false);
@@ -116,6 +128,17 @@ const BoardLookupRead = () => {
 
     if (postId) fetchPostData();
   }, [postId]);
+
+  // 팔로우 상태 확인
+  const checkFollowStatus = async (targetUserNum) => {
+    try {
+      const res = await checkFollowing(targetUserNum);
+      setIsFollowing(res.data.following || false);
+    } catch (error) {
+      console.error("팔로우 상태 확인 실패:", error);
+      setIsFollowing(false);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -239,7 +262,41 @@ const BoardLookupRead = () => {
     }
   };
 
-  const handleFollowToggle = () => setIsFollowing(!isFollowing);
+  // 팔로우 토글 핸들러
+  const handleFollowToggle = async (e) => {
+    e.stopPropagation();
+
+    if (!postData?.userNum) {
+      console.error("게시글 작성자 정보가 없습니다.");
+      return;
+    }
+
+    const storedUser =
+      localStorage.getItem("user") || sessionStorage.getItem("user");
+    if (!storedUser) {
+      alert("로그인이 필요합니다.");
+      navigate("/login");
+      return;
+    }
+
+    setFollowLoading(true);
+    try {
+      if (isFollowing) {
+        await unfollow(postData.userNum);
+        setIsFollowing(false);
+        console.log("언팔로우 성공");
+      } else {
+        await follow(postData.userNum);
+        setIsFollowing(true);
+        console.log("팔로우 성공");
+      }
+    } catch (error) {
+      console.error("팔로우 토글 실패:", error);
+      alert("팔로우 처리에 실패했습니다.");
+    } finally {
+      setFollowLoading(false);
+    }
+  };
 
   // 작성자 popover 핸들러
   const handleAuthorMouseEnter = (e) => {
@@ -552,7 +609,7 @@ const BoardLookupRead = () => {
               <div className="profile-top">
                 <div
                   className="user_default_icon"
-                  onClick={() => navigate(`/user/${postData.userNum}`)}
+                  onClick={() => navigate(`/mypage/${postData.userNickname}`)}
                   style={{ cursor: "pointer" }}
                 >
                   <img
@@ -565,24 +622,25 @@ const BoardLookupRead = () => {
                       objectFit: "cover",
                     }}
                   />
-                  <button
-                    className={`follow-btn ${isFollowing ? "following" : ""}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleFollowToggle();
-                    }}
-                  >
-                    {isFollowing ? "✓" : "+"}
-                  </button>
+                  {/* 팔로우 버튼 - 본인 게시글이 아닐 때만 표시 */}
+                  {!isOwner && (
+                    <button
+                      className={`follow-btn ${isFollowing ? "following" : ""}`}
+                      onClick={handleFollowToggle}
+                      disabled={followLoading}
+                    >
+                      {isFollowing ? "✓" : "+"}
+                    </button>
+                  )}
                 </div>
                 <div
                   className="nickname"
-                    onMouseEnter={handleAuthorMouseEnter}
-                    onMouseLeave={handleAuthorMouseLeave}
+                  onMouseEnter={handleAuthorMouseEnter}
+                  onMouseLeave={handleAuthorMouseLeave}
                   onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/mypage/${postData.userNickname}`);
-                    }}
+                    e.stopPropagation();
+                    navigate(`/mypage/${postData.userNickname}`);
+                  }}
                   style={{ cursor: "pointer" }}
                 >
                   {postData.userNickname}
@@ -839,7 +897,7 @@ const BoardLookupRead = () => {
                   <div className="comment-author">
                     <div
                       className="comment-author-profile"
-                      onClick={() => navigate(`/user/${comment.userNum}`)}
+                      onClick={() => navigate(`/mypage/${comment.userNickname}`)}
                       style={{ cursor: "pointer" }}
                     >
                       <img
