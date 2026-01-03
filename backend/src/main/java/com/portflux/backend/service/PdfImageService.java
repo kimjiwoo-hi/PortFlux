@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,9 +39,11 @@ public class PdfImageService {
     public List<String> convertPdfToImages(MultipartFile pdfFile, int postId) throws IOException {
         List<String> imageUrls = new ArrayList<>();
 
-        // 1. 임시 PDF 파일 저장
+        // 1. 임시 PDF 파일 저장 (getBytes 사용)
         File tempPdfFile = File.createTempFile("temp_pdf_", ".pdf");
-        pdfFile.transferTo(tempPdfFile);
+        try (FileOutputStream fos = new FileOutputStream(tempPdfFile)) {
+            fos.write(pdfFile.getBytes());
+        }
 
         try {
             // 2. 이미지 저장 폴더 생성
@@ -91,7 +94,9 @@ public class PdfImageService {
      */
     public String convertSinglePage(MultipartFile pdfFile, int pageNumber, int postId) throws IOException {
         File tempPdfFile = File.createTempFile("temp_pdf_", ".pdf");
-        pdfFile.transferTo(tempPdfFile);
+        try (FileOutputStream fos = new FileOutputStream(tempPdfFile)) {
+            fos.write(pdfFile.getBytes());
+        }
 
         try {
             Path outputDir = Paths.get(uploadDir, "pdf", "post_" + postId);

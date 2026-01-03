@@ -206,7 +206,7 @@
   gap: 15px;
 }
 
-.post-item {
+.mypage-container .post-item {
   padding: 20px;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -235,7 +235,7 @@
   white-space: nowrap;
 }
 
-.post-title {
+.mypage-container .post-title {
   font-size: 18px;
   font-weight: 600;
   color: #333;
@@ -267,7 +267,7 @@
   font-weight: 600;
 }
 
-.comment-item {
+.mypage-container .comment-item {
   padding: 15px 20px;
   border: 1px solid #ddd;
   border-radius: 8px;

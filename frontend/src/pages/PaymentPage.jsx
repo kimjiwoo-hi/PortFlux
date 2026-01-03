@@ -30,7 +30,7 @@ function PaymentPage() {
       try {
         // 백엔드에서 merchant_uid로 주문 정보 조회 (PaymentService에서 사용되는 API와는 다름)
         const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-        const response = await axios.get(`/api/orders/${merchantUid}`, {
+        const response = await axios.get(`http://localhost:8080/api/orders/${merchantUid}`, {
           withCredentials: true,
           headers: { 'Authorization': `Bearer ${token}` }
         });

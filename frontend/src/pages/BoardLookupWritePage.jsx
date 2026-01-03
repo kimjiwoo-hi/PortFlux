@@ -181,7 +181,7 @@ export default function BoardLookupWritePage() {
       console.log("파일:", selectedFile.name);
       console.log("크기:", formatFileSize(selectedFile.size));
 
-      const response = await axios.post("/api/boardlookup/posts", formData, {
+      const response = await axios.post("http://localhost:8080/api/boardlookup/posts", formData, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
       });

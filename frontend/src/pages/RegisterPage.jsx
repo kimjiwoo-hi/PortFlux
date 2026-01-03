@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./RegisterPage.css";
 
 function RegisterPage() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // 1. 상태 변수 선언
   const [isIndividual, setIsIndividual] = useState(true);
@@ -42,6 +43,22 @@ function RegisterPage() {
     setIsPwdMatch(null); setIsNicknameAvailable(null); setIsAuthVerified(false);
     setCodeMsg(""); setIsPhoneValid(null);
   };
+
+  // 구글 로그인에서 넘어온 경우 이메일과 이름 자동 입력
+  useEffect(() => {
+    if (location.state?.provider === 'google') {
+      if (location.state.email) {
+        setEmail(location.state.email);
+        setIsEmailValid(true);
+        setIsAuthVerified(true); // 구글 이메일은 이미 인증됨
+        setEmailMsg("구글 계정 이메일입니다.");
+        setCodeMsg("구글 계정으로 인증되었습니다.");
+      }
+      if (location.state.name) {
+        setUserName(location.state.name);
+      }
+    }
+  }, [location.state]);
 
   // 3. 핸들러 함수들
   const handleIdChange = (e) => {
