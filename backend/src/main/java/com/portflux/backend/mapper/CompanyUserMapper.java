@@ -29,4 +29,10 @@ public interface CompanyUserMapper {
 
     // 기업 정보 가져오기 (로그인 및 프로필 조회용)
     CompanyUserBean getCompanyUserInfo(String companyId);
+
+    // 기업명과 이메일로 기업 찾기 (아이디 찾기용)
+    CompanyUserBean findByCompanyNameAndEmail(@Param("companyName") String companyName, @Param("email") String email);
+
+    // 기업 비밀번호 변경
+    void updateCompanyPassword(@Param("companyId") String companyId, @Param("newPassword") String newPassword);
 }

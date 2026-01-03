@@ -183,7 +183,7 @@ export default function BoardLookupWritePage() {
       console.log("제목:", title);
       console.log("가격:", price);
 
-      const response = await axios.post("/api/boardlookup/posts", formData, {
+      const response = await axios.post("http://localhost:8080/api/boardlookup/posts", formData, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
         timeout: 300000, // 5분 타임아웃 (큰 파일 처리 시간 고려)
