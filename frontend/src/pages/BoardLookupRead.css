@@ -319,8 +319,13 @@
   padding-top: 0;
 }
 
+<<<<<<< HEAD
 .post-title {
   font-size: 58px;
+=======
+.board-lookup-read .post-title {
+  font-size: 24px;
+>>>>>>> kdh-money
   font-weight: 600;
   color: #191919;
   margin: 0 10px;
@@ -917,9 +922,112 @@
   font-weight: 700;
 }
 
+<<<<<<< HEAD
 /* =================================
    다운로드 버튼
 ================================= */
+=======
+/* 반응형 */
+@media (max-width: 1024px) {
+  .post-header {
+    padding: 15px 30px;
+  }
+
+  .sidebar {
+    right: 20px;
+    gap: 15px;
+  }
+
+  .sidebar-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .icon-image {
+    width: 20px;
+    height: 20px;
+  }
+
+  .comments-popup,
+  .ai-summary-popup {
+    right: 90px;
+    width: 380px;
+  }
+
+  .pdf-page {
+    width: 90%;
+  }
+
+  .pdf-content {
+    padding: 60px 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .post-header {
+    padding: 12px 20px;
+  }
+
+  .board-lookup-read .post-title {
+    font-size: 18px;
+  }
+
+  .sidebar {
+    position: fixed;
+    right: auto;
+    left: 50%;
+    top: auto;
+    bottom: 20px;
+    transform: translateX(-50%);
+    flex-direction: row;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.98);
+    padding: 12px;
+    border-radius: 50px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  .sidebar-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .icon-image {
+    width: 20px;
+    height: 20px;
+  }
+
+  .comments-popup,
+  .ai-summary-popup {
+    right: 20px;
+    left: 20px;
+    width: auto;
+    max-height: 60vh;
+  }
+
+  .sidebar-label {
+    display: none !important;
+  }
+
+  .pdf-page {
+    width: 95%;
+  }
+
+  .pdf-content {
+    padding: 40px 20px;
+  }
+
+  .price-badge {
+    bottom: 80px;
+    right: 20px;
+    padding: 12px 20px;
+  }
+
+  .price-value {
+    font-size: 18px;
+  }
+}
+>>>>>>> kdh-money
 .download-button {
   display: inline-block;
   padding: 12px 24px;

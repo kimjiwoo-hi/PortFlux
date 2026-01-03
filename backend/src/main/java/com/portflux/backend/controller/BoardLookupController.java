@@ -574,8 +574,10 @@ public ResponseEntity<List<Integer>> getSavedPostIds(@PathVariable int userNum) 
             uploadDirFile.mkdirs();
         }
 
-        Path filePath = Paths.get(uploadDir, savedFilename);
-        file.transferTo(filePath.toFile());
+        File destFile = new File(uploadDir, savedFilename);
+        try (java.io.FileOutputStream fos = new java.io.FileOutputStream(destFile)) {
+            fos.write(file.getBytes());
+        }
 
         return savedFilename;
     }

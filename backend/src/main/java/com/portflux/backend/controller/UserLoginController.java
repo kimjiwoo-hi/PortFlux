@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.portflux.backend.beans.UserBean;
 import com.portflux.backend.beans.UserLoginBean;
+import com.portflux.backend.beans.CompanyUserBean;
 import com.portflux.backend.security.JwtTokenProvider;
 import com.portflux.backend.service.UserService;
 
@@ -92,14 +93,29 @@ public class UserLoginController {
             if (isMember) {
                 // 기존 회원인 경우
                 UserBean user = (UserBean) result.get("user");
-                String token = jwtTokenProvider.generateToken(user.getUserId());
+                CompanyUserBean company = (CompanyUserBean) result.get("company");
 
                 Map<String, Object> response = new HashMap<>();
-                response.put("user", user);
-                response.put("token", token);
-                response.put("status", "SUCCESS");
-                response.put("role", "USER");
-                response.put("memberType", "user");
+
+                if (user != null) {
+                    // 일반 회원
+                    String token = jwtTokenProvider.generateToken(user.getUserId());
+                    response.put("user", user);
+                    response.put("token", token);
+                    response.put("status", "SUCCESS");
+                    response.put("role", "USER");
+                    response.put("memberType", "user");
+                } else if (company != null) {
+                    // 기업 회원
+                    String token = jwtTokenProvider.generateToken(company.getCompanyId());
+                    response.put("token", token);
+                    response.put("status", "SUCCESS");
+                    response.put("role", "COMPANY");
+                    response.put("memberType", "company");
+                    response.put("id", company.getCompanyId());
+                    response.put("name", company.getCompanyName());
+                    response.put("num", company.getCompanyNum());
+                }
 
                 return ResponseEntity.ok(response);
             } else {
