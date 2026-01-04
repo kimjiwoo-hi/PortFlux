@@ -2,8 +2,10 @@ package com.portflux.backend.service;
 
 import com.portflux.backend.dto.BoardLookupPostDto;
 import com.portflux.backend.beans.UserBean;
+import com.portflux.backend.beans.CompanyUserBean;
 import com.portflux.backend.mapper.BoardLookupMapper;
 import com.portflux.backend.mapper.UserMapper;
+import com.portflux.backend.mapper.CompanyUserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,44 +19,48 @@ public class BoardLookupService {
 
     private final BoardLookupMapper boardLookupMapper;
     private final UserMapper userMapper;
+    private final CompanyUserMapper companyUserMapper;
     private static final int MAX_TITLE_LENGTH = 15;
 
     @Autowired
-    public BoardLookupService(BoardLookupMapper boardLookupMapper, UserMapper userMapper) {
+    public BoardLookupService(BoardLookupMapper boardLookupMapper, UserMapper userMapper, CompanyUserMapper companyUserMapper) {
         this.boardLookupMapper = boardLookupMapper;
         this.userMapper = userMapper;
+        this.companyUserMapper = companyUserMapper;
     }
 
     /**
      * 게시글 상세 조회 (작성자 이미지 포함)
      */
     public BoardLookupPostDto getPostById(int postId) {
-        BoardLookupPostDto post = boardLookupMapper.findPostById(postId);  // ✅ 변경
-        
+        BoardLookupPostDto post = boardLookupMapper.findPostById(postId);
+
         if (post != null) {
             // 작성자 정보 조회 및 이미지 Base64 변환
             UserBean author = userMapper.selectUserByNum(post.getUserNum());
             if (author != null) {
-                // 프로필 이미지 Base64 변환
+                // 일반 회원
                 if (author.getUserImage() != null) {
                     String base64Image = Base64.getEncoder().encodeToString(author.getUserImage());
                     post.setUserImageBase64(base64Image);
                 }
-                
-                // 배너 이미지 Base64 변환
                 if (author.getUserBanner() != null) {
                     String base64Banner = Base64.getEncoder().encodeToString(author.getUserBanner());
                     post.setUserBannerBase64(base64Banner);
                 }
-                
-                // 닉네임 업데이트
                 post.setUserNickname(author.getUserNickname());
+            } else {
+                // 기업 회원 조회
+                CompanyUserBean company = companyUserMapper.getCompanyUserByNum(post.getUserNum());
+                if (company != null) {
+                    post.setUserNickname(company.getCompanyName());
+                }
             }
-            
+
             // 조회수 증가
             boardLookupMapper.incrementViewCount(postId);
         }
-        
+
         return post;
     }
 
@@ -68,6 +74,7 @@ public class BoardLookupService {
         for (BoardLookupPostDto post : posts) {
             UserBean author = userMapper.selectUserByNum(post.getUserNum());
             if (author != null) {
+                // 일반 회원
                 // 프로필 이미지 Base64 변환
                 if (author.getUserImage() != null) {
                     String base64Image = Base64.getEncoder().encodeToString(author.getUserImage());
@@ -80,6 +87,12 @@ public class BoardLookupService {
                 }
                 // 닉네임
                 post.setUserNickname(author.getUserNickname());
+            } else {
+                // 기업 회원 조회
+                CompanyUserBean company = companyUserMapper.getCompanyUserByNum(post.getUserNum());
+                if (company != null) {
+                    post.setUserNickname(company.getCompanyName());
+                }
             }
         }
 
@@ -151,6 +164,7 @@ public class BoardLookupService {
         for (BoardLookupPostDto post : posts) {
             UserBean author = userMapper.selectUserByNum(post.getUserNum());
             if (author != null) {
+                // 일반 회원
                 // 프로필 이미지 Base64 변환
                 if (author.getUserImage() != null) {
                     String base64Image = Base64.getEncoder().encodeToString(author.getUserImage());
@@ -163,6 +177,12 @@ public class BoardLookupService {
                 }
                 // 닉네임
                 post.setUserNickname(author.getUserNickname());
+            } else {
+                // 기업 회원 조회
+                CompanyUserBean company = companyUserMapper.getCompanyUserByNum(post.getUserNum());
+                if (company != null) {
+                    post.setUserNickname(company.getCompanyName());
+                }
             }
         }
 

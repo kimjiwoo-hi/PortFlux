@@ -150,7 +150,7 @@ function FindPasswordPage() {
         navigate("/login");
       } else {
         const errorText = await res.text();
-        if (errorText.includes("이전 비밀번호")) {
+        if (errorText.includes("이전 비밀번호") || errorText.includes("동일")) {
           setServerErrorMsg("이전 비밀번호로는 변경할 수 없습니다.");
         } else {
           alert("변경 실패: " + errorText);
@@ -213,7 +213,7 @@ function FindPasswordPage() {
                   value={email}
                   onChange={handleEmailChange}
                 />
-                <button className="btn-small" onClick={handleSendAuthCode}>
+                <button className="btn-small" onClick={handleSendAuthCode} disabled={isAuthVerified}>
                   인증번호
                 </button>
               </div>
@@ -263,9 +263,7 @@ function FindPasswordPage() {
               <label className="form-label">새 비밀번호</label>
               <input
                 type="password"
-                className={`find-input ${
-                  isPwdValid === false || serverErrorMsg ? "input-error" : ""
-                }`}
+                className="find-input"
                 placeholder="8~16자 (영문, 숫자, 특수문자)"
                 value={newPassword}
                 onChange={handlePasswordChange}
@@ -285,9 +283,7 @@ function FindPasswordPage() {
               <label className="form-label">새 비밀번호 확인</label>
               <input
                 type="password"
-                className={`find-input ${
-                  isPwdMatch === false ? "input-error" : ""
-                }`}
+                className="find-input"
                 placeholder="비밀번호를 다시 입력해 주세요."
                 value={confirmPassword}
                 onChange={handleConfirmChange}

@@ -65,6 +65,7 @@ public class SecurityConfig {
 
                         // 사용자 정보 조회 허용 (개발용 - 프로덕션에서는 .authenticated() 사용)
                         .requestMatchers("/api/user/info/**").permitAll()
+                        .requestMatchers("/api/company/info/**").permitAll()
 
                         // 정적 리소스 및 에러 페이지
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/error").permitAll()

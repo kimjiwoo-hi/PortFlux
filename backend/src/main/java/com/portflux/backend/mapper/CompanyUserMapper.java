@@ -35,4 +35,18 @@ public interface CompanyUserMapper {
 
     // 기업 비밀번호 변경
     void updateCompanyPassword(@Param("companyId") String companyId, @Param("newPassword") String newPassword);
+
+    // 기업 번호로 기업 정보 가져오기
+    CompanyUserBean getCompanyUserByNum(@Param("companyNum") int companyNum);
+
+    // 기업 정보 수정
+    void updateCompanyInfo(
+        @Param("companyId") String companyId,
+        @Param("companyName") String companyName,
+        @Param("companyPhone") String companyPhone,
+        @Param("companyImage") byte[] companyImage,
+        @Param("companyBanner") byte[] companyBanner,
+        @Param("updateImage") boolean updateImage,
+        @Param("updateBanner") boolean updateBanner
+    );
 }

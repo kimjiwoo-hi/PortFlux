@@ -218,6 +218,12 @@ public UserBean getUserInfo(String userId) {
 
     @Transactional
     public void updatePassword(String userId, String newPassword) {
+        // 이전 비밀번호와 동일한지 체크
+        UserBean user = userRepository.findByUserId(userId);
+        if (user != null && passwordEncoder.matches(newPassword, user.getUserPw())) {
+            throw new RuntimeException("이전 비밀번호와 동일합니다.");
+        }
+
         String encodedPassword = passwordEncoder.encode(newPassword);
         userMapper.updatePassword(userId, encodedPassword);
     }

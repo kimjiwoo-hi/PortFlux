@@ -25,20 +25,33 @@ public class UserInfoResponse {
         response.setUserEmail(user.getUserEmail());
         response.setUserPhone(user.getUserPhone());
         
-        // [수정 포인트] java.sql.Date를 LocalDateTime으로 변환
-        if (user.getUserCreateAt() != null) {
-            // Date -> LocalDate -> LocalDateTime(시간은 00:00:00으로 설정)
-            response.setUserCreateAt(user.getUserCreateAt().toLocalDate().atStartOfDay());
+        // [수정] null 체크 및 안전한 변환
+        try {
+            if (user.getUserCreateAt() != null) {
+                response.setUserCreateAt(user.getUserCreateAt().toLocalDate().atStartOfDay());
+            }
+        } catch (Exception e) {
+            // 변환 실패 시 null로 유지
+            response.setUserCreateAt(null);
         }
 
         response.setUserLevel(user.getUserLevel());
 
         // byte[]를 Base64 문자열로 변환하여 설정 (UserBean의 getter 활용)
-        if (user.getUserImage() != null && user.getUserImage().length > 0) {
-            response.setUserImage("data:image/jpeg;base64," + user.getUserImageBase64());
+        try {
+            if (user.getUserImage() != null && user.getUserImage().length > 0) {
+                response.setUserImage("data:image/jpeg;base64," + user.getUserImageBase64());
+            }
+        } catch (Exception e) {
+            // 이미지 변환 실패 시 무시
         }
-        if (user.getUserBanner() != null && user.getUserBanner().length > 0) {
-            response.setUserBanner("data:image/jpeg;base64," + user.getUserBannerBase64());
+        
+        try {
+            if (user.getUserBanner() != null && user.getUserBanner().length > 0) {
+                response.setUserBanner("data:image/jpeg;base64," + user.getUserBannerBase64());
+            }
+        } catch (Exception e) {
+            // 배너 변환 실패 시 무시
         }
 
         return response;
