@@ -159,13 +159,10 @@ function FindIdPage() {
                   {isCodeSent ? "재전송" : "인증번호"}
                 </button>
               </div>
-            </div>
 
-            {/* 인증번호 입력 + 인증하기 */}
-            {isCodeSent && (
-              <div className="form-group">
-                <label className="form-label">인증번호</label>
-                <div className="input-with-btn">
+              {/* 인증번호 입력 - 이메일 아래에 바로 표시 (비밀번호 찾기 페이지처럼) */}
+              {isCodeSent && (
+                <div className="input-with-btn" style={{ marginTop: "10px" }}>
                   <input
                     type="text"
                     className="find-input"
@@ -181,24 +178,37 @@ function FindIdPage() {
                     onClick={handleVerify}
                     disabled={isVerified}
                   >
-                    {isVerified ? "인증완료" : "인증하기"}
+                    {isVerified ? "완료" : "확인"}
                   </button>
                 </div>
-                {/* 인증 성공 메시지 */}
-                {isVerified && (
-                  <span className="error-msg" style={{ color: "#3b5bdb" }}>
-                    {" "}
-                    {/* verified-msg 대신 error-msg 재활용 또는 인라인 */}
-                    이메일 인증이 정상적으로 완료되었습니다.
-                  </span>
-                )}
-              </div>
-            )}
+              )}
+
+              {/* 인증 성공 메시지 */}
+              {isVerified && (
+                <span className="error-msg" style={{ color: "#3b5bdb" }}>
+                  이메일 인증이 정상적으로 완료되었습니다.
+                </span>
+              )}
+            </div>
 
             {/* 다음 버튼 */}
-            <button className="btn-submit" onClick={handleNext}>
-              {" "}
-              {/* btn-next -> btn-submit */}
+            <button
+              className="btn-submit"
+              onClick={handleNext}
+              style={{
+                width: '100%',
+                padding: '16px',
+                backgroundColor: '#3b5bdb',
+                background: '#3b5bdb',
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: '700',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                marginTop: '20px'
+              }}
+            >
               다음
             </button>
           </div>
@@ -206,68 +216,47 @@ function FindIdPage() {
         {/* STEP 2: 결과 확인 */}
         {step === 2 && foundId && (
           <div className="form-container">
-            {" "}
-            {/* result-container 대신 form-container 재활용 가능 */}
             <p className="info-text">
-              {" "}
-              {/* result-info-text -> info-text */}
               회원님의 정보와 일치하는 아이디입니다.
             </p>
-            {/* 결과 박스 (FindPage.css에는 없으므로 인라인 스타일 혹은 추가 필요, 여기선 기존 구조 유지하되 스타일만 맞춤) */}
-            <div
-              style={{
-                width: "100%",
-                border: "1px solid #ccc",
-                borderRadius: "4px",
-                display: "flex",
-                marginBottom: "20px",
-              }}
-            >
-              <div
-                style={{
-                  backgroundColor: "#f8f9fa",
-                  width: "100px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: "bold",
-                  color: "#333",
-                  borderRight: "1px solid #ccc",
-                  padding: "15px 0",
-                }}
-              >
-                아이디
-              </div>
-              <div
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#3b5bdb",
-                  fontWeight: "600",
-                }}
-              >
-                {foundId}
-              </div>
+            <div className="result-box">
+              <div className="result-label">아이디</div>
+              <div className="result-value">{foundId}</div>
             </div>
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div className="btn-group">
               <button
                 className="btn-submit"
-                style={{ marginTop: 0 }}
                 onClick={() => navigate("/login")}
+                style={{
+                  width: '100%',
+                  padding: '16px',
+                  backgroundColor: '#3b5bdb',
+                  background: '#3b5bdb',
+                  color: 'white',
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer'
+                }}
               >
                 로그인 하러가기
               </button>
               <button
-                className="btn-submit"
+                className="btn-submit btn-secondary"
+                onClick={() => navigate("/findpassword")}
                 style={{
-                  marginTop: 0,
-                  backgroundColor: "#fff",
-                  color: "#555",
-                  border: "1px solid #ccc",
+                  width: '100%',
+                  padding: '16px',
+                  backgroundColor: '#3b5bdb',
+                  background: '#3b5bdb',
+                  color: 'white',
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer'
                 }}
-                onClick={() => navigate("/findpassword")} // 경로 소문자로 수정
               >
                 비밀번호 찾기
               </button>

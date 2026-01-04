@@ -17,6 +17,19 @@ export default function BoardLookupWritePage() {
   const [suggestions, setSuggestions] = useState([]);
   const [expandedCategories, setExpandedCategories] = useState({});
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isNotice, setIsNotice] = useState(false); // 공지사항 여부
+  const [isAdmin, setIsAdmin] = useState(false); // 관리자 여부
+
+  // 관리자 여부 확인
+  React.useEffect(() => {
+    const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+    const role = localStorage.getItem("role") || sessionStorage.getItem("role");
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      // 관리자 판별: role이 ADMIN이거나, userId가 admin인 경우
+      setIsAdmin(role === "ADMIN" || user.userId === "admin" || user.userNickname === "관리자");
+    }
+  }, []);
 
   const allTags = useMemo(() => {
     return Object.values(tagData).flat();
@@ -176,6 +189,10 @@ export default function BoardLookupWritePage() {
       formData.append("price", parseInt(price));
       formData.append("userNum", loggedInUser.userNum);
       formData.append("tags", JSON.stringify(tags));
+      // 관리자이고 공지사항 체크시 board_type을 notice로 전송
+      if (isAdmin && isNotice) {
+        formData.append("boardType", "notice");
+      }
 
       console.log("=== 업로드 시작 ===");
       console.log("파일:", selectedFile.name);
@@ -392,6 +409,22 @@ export default function BoardLookupWritePage() {
                 step="100"
               />
             </div>
+
+            {/* 관리자 전용 공지사항 체크박스 */}
+            {isAdmin && (
+              <div className="form-group notice-checkbox-group">
+                <label className="notice-checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={isNotice}
+                    onChange={(e) => setIsNotice(e.target.checked)}
+                    className="notice-checkbox"
+                  />
+                  <span className="notice-checkbox-text">📢 공지사항으로 등록</span>
+                </label>
+                <p className="notice-hint">체크 시 공지사항으로 상단에 고정됩니다.</p>
+              </div>
+            )}
 
             <button
               onClick={handleSubmit}

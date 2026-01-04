@@ -90,4 +90,33 @@
         WHERE company_id = #{companyId}
     </update>
 
+    <select id="getCompanyUserByNum" resultType="com.portflux.backend.beans.CompanyUserBean">
+        SELECT
+            company_num AS companyNum,
+            company_id AS companyId,
+            business_number AS businessNumber,
+            company_password AS companyPassword,
+            company_name AS companyName,
+            company_phone AS companyPhone,
+            company_email AS companyEmail,
+            drawn_company AS drawnCompany,
+            company_create_at AS companyCreateAt
+        FROM COMPANY
+        WHERE company_num = #{companyNum}
+    </select>
+
+    <update id="updateCompanyInfo">
+        UPDATE COMPANY
+        SET
+            company_name = #{companyName},
+            company_phone = #{companyPhone}
+            <if test="updateImage == true">
+                , company_image = #{companyImage, jdbcType=BLOB}
+            </if>
+            <if test="updateBanner == true">
+                , company_banner = #{companyBanner, jdbcType=BLOB}
+            </if>
+        WHERE company_id = #{companyId}
+    </update>
+
 </mapper>

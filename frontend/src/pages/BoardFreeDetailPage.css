@@ -130,13 +130,14 @@
 .post-date, .cmt-date { font-size: 13px; color: #999; white-space: nowrap; }
 
 /* --- 본문 영역 --- */
-.post-content { 
-    min-height: 300px; 
-    font-size: 16px; 
-    line-height: 1.8; 
-    color: #333; 
-    margin-bottom: 50px; 
-    white-space: pre-wrap; 
+.post-content {
+    min-height: 300px;
+    font-size: 16px;
+    line-height: 1.8;
+    color: #333;
+    margin-top: 30px;
+    margin-bottom: 50px;
+    white-space: pre-wrap;
 }
 
 .post-image-area img { 
@@ -144,14 +145,14 @@
     margin-bottom: 20px; 
 }
 
-.post-attachment { 
-    margin-top: 20px; 
-    padding: 15px; 
-    background: #f8f9fa; 
-    border-radius: 8px; 
-    display: flex; 
-    align-items: center; 
-    gap: 10px; 
+.post-attachment {
+    margin-top: 40px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .download-btn { 
