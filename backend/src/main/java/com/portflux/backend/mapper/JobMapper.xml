@@ -8,6 +8,8 @@
         <result property="companyNum" column="COMPANY_NUM"/>
         <result property="companyName" column="COMPANY_NAME"/>
         <result property="companyImage" column="COMPANY_IMAGE"/>
+        <result property="companyLogo" column="COMPANY_LOGO"/>
+        <result property="companyPhone" column="COMPANY_PHONE"/>
         <result property="title" column="TITLE"/>
         <result property="content" column="CONTENT"/>
         <result property="createdAt" column="CREATED_AT"/>
@@ -147,11 +149,13 @@
     
     <!-- 채용공고 목록 조회 -->
     <select id="findJobs" parameterType="map" resultMap="JobResultMap">
-        SELECT 
+        SELECT
             p.POST_ID,
             p.COMPANY_NUM,
             c.COMPANY_NAME,
             NULL AS COMPANY_IMAGE,
+            p.COMPANY_LOGO,
+            p.COMPANY_PHONE,
             p.TITLE,
             p.CONTENT,
             p.CREATED_AT,
@@ -187,11 +191,13 @@
     
     <!-- 채용공고 상세 조회 -->
     <select id="findJobById" parameterType="long" resultMap="JobResultMap">
-        SELECT 
+        SELECT
             p.POST_ID,
             p.COMPANY_NUM,
             c.COMPANY_NAME,
             NULL AS COMPANY_IMAGE,
+            p.COMPANY_LOGO,
+            p.COMPANY_PHONE,
             p.TITLE,
             p.CONTENT,
             p.CREATED_AT,
@@ -235,7 +241,9 @@
             JOB_INDUSTRIES,
             JOB_COMPANY_TYPES,
             JOB_WORK_TYPES,
-            JOB_WORK_DAYS
+            JOB_WORK_DAYS,
+            COMPANY_LOGO,
+            COMPANY_PHONE
         ) VALUES (
             'job',
             #{job.companyNum},
@@ -253,7 +261,9 @@
             #{job.jobIndustries, typeHandler=com.portflux.backend.handler.JsonArrayTypeHandler},
             #{job.jobCompanyTypes, typeHandler=com.portflux.backend.handler.JsonArrayTypeHandler},
             #{job.jobWorkTypes, typeHandler=com.portflux.backend.handler.JsonArrayTypeHandler},
-            #{job.jobWorkDays, typeHandler=com.portflux.backend.handler.JsonArrayTypeHandler}
+            #{job.jobWorkDays, typeHandler=com.portflux.backend.handler.JsonArrayTypeHandler},
+            #{job.companyLogo},
+            #{job.companyPhone}
         )
     </insert>
     
@@ -274,7 +284,9 @@
             JOB_INDUSTRIES = #{job.jobIndustries, typeHandler=com.portflux.backend.handler.JsonArrayTypeHandler},
             JOB_COMPANY_TYPES = #{job.jobCompanyTypes, typeHandler=com.portflux.backend.handler.JsonArrayTypeHandler},
             JOB_WORK_TYPES = #{job.jobWorkTypes, typeHandler=com.portflux.backend.handler.JsonArrayTypeHandler},
-            JOB_WORK_DAYS = #{job.jobWorkDays, typeHandler=com.portflux.backend.handler.JsonArrayTypeHandler}
+            JOB_WORK_DAYS = #{job.jobWorkDays, typeHandler=com.portflux.backend.handler.JsonArrayTypeHandler},
+            COMPANY_LOGO = #{job.companyLogo},
+            COMPANY_PHONE = #{job.companyPhone}
         WHERE POST_ID = #{job.postId}
           AND BOARD_TYPE = 'job'
     </update>
@@ -324,11 +336,13 @@
     
     <!-- 북마크 목록 조회 -->
     <select id="findBookmarks" resultMap="JobResultMap">
-        SELECT 
+        SELECT
             p.POST_ID,
             p.COMPANY_NUM,
             c.COMPANY_NAME,
             NULL AS COMPANY_IMAGE,
+            p.COMPANY_LOGO,
+            p.COMPANY_PHONE,
             p.TITLE,
             p.CONTENT,
             p.CREATED_AT,
@@ -380,11 +394,13 @@
     
     <!-- 내 채용공고 목록 -->
     <select id="findMyJobs" resultMap="JobResultMap">
-        SELECT 
+        SELECT
             p.POST_ID,
             p.COMPANY_NUM,
             c.COMPANY_NAME,
             NULL AS COMPANY_IMAGE,
+            p.COMPANY_LOGO,
+            p.COMPANY_PHONE,
             p.TITLE,
             p.CONTENT,
             p.CREATED_AT,

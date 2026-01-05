@@ -129,7 +129,9 @@ public class JobService {
         job.setJobCompanyTypes(request.getJobCompanyTypes());
         job.setJobWorkTypes(request.getJobWorkTypes());
         job.setJobWorkDays(request.getJobWorkDays());
-        
+        job.setCompanyLogo(request.getCompanyLogo());
+        job.setCompanyPhone(request.getCompanyPhone());
+
         jobRepository.insertJob(job);
         
         return jobRepository.findJobById(job.getPostId());
@@ -161,7 +163,9 @@ public class JobService {
         job.setJobCompanyTypes(request.getJobCompanyTypes());
         job.setJobWorkTypes(request.getJobWorkTypes());
         job.setJobWorkDays(request.getJobWorkDays());
-        
+        job.setCompanyLogo(request.getCompanyLogo());
+        job.setCompanyPhone(request.getCompanyPhone());
+
         jobRepository.updateJob(job);
         
         return jobRepository.findJobById(postId);

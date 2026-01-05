@@ -31,11 +31,14 @@ const BoardJobCreatePage = () => {
     jobCompanyTypes: [],
     jobWorkTypes: [],
     jobWorkDays: [],
+    companyLogo: "", // 기업 로고 이미지
+    companyPhone: "", // 문의 전화번호
   });
 
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [selectedMainRegion, setSelectedMainRegion] = useState("");
+  const [logoPreview, setLogoPreview] = useState(null);
 
   // 로그인 확인
   useEffect(() => {
@@ -96,9 +99,50 @@ const BoardJobCreatePage = () => {
     setFormData((prev) => ({ ...prev, jobRegion: "" }));
   }, []);
 
+  // 로고 이미지 변경 핸들러
+  const handleLogoChange = useCallback((e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // 파일 크기 체크 (5MB 제한)
+      if (file.size > 5 * 1024 * 1024) {
+        alert("이미지 크기는 5MB를 초과할 수 없습니다.");
+        return;
+      }
+
+      // 이미지 파일만 허용
+      if (!file.type.startsWith("image/")) {
+        alert("이미지 파일만 업로드 가능합니다.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result);
+        setFormData((prev) => ({
+          ...prev,
+          companyLogo: reader.result,
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  }, []);
+
+  // 로고 이미지 삭제 핸들러
+  const handleLogoDelete = useCallback(() => {
+    setLogoPreview(null);
+    setFormData((prev) => ({
+      ...prev,
+      companyLogo: "",
+    }));
+  }, []);
+
   // 유효성 검사
   const validate = useCallback(() => {
     const newErrors = {};
+
+    if (!formData.companyPhone.trim()) {
+      newErrors.companyPhone = "문의 전화번호를 입력해주세요.";
+    }
 
     if (!formData.title.trim()) {
       newErrors.title = "채용공고 제목을 입력해주세요.";
@@ -224,6 +268,66 @@ const BoardJobCreatePage = () => {
           {/* 기본 정보 섹션 */}
           <section className="form-section">
             <h2 className="section-title">기본 정보</h2>
+
+            {/* 기업 로고 */}
+            <div className="form-group">
+              <label>기업 로고</label>
+              <div className="logo-upload-container">
+                {logoPreview ? (
+                  <div className="logo-preview-wrapper">
+                    <img
+                      src={logoPreview}
+                      alt="기업 로고 미리보기"
+                      className="logo-preview"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleLogoDelete}
+                      className="logo-delete-btn"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <label className="logo-upload-label">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoChange}
+                      style={{ display: "none" }}
+                    />
+                    <div className="logo-upload-placeholder">
+                      <span className="upload-icon">📷</span>
+                      <span className="upload-text">로고 이미지 업로드</span>
+                      <small className="upload-hint">클릭하여 이미지 선택</small>
+                    </div>
+                  </label>
+                )}
+              </div>
+              <small className="help-text">
+                권장 크기: 200x200px, 최대 5MB
+              </small>
+            </div>
+
+            {/* 문의 전화번호 */}
+            <div className="form-group">
+              <label className="required">문의 전화번호</label>
+              <input
+                type="tel"
+                name="companyPhone"
+                value={formData.companyPhone}
+                onChange={handleChange}
+                placeholder="예: 02-1234-5678 또는 010-1234-5678"
+                maxLength={20}
+                className={errors.companyPhone ? "error" : ""}
+              />
+              {errors.companyPhone && (
+                <span className="error-message">{errors.companyPhone}</span>
+              )}
+              <small className="help-text">
+                지원자가 문의할 수 있는 전화번호를 입력하세요
+              </small>
+            </div>
 
             {/* 제목 */}
             <div className="form-group">
