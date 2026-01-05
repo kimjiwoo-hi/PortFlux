@@ -17,16 +17,14 @@ export default function BoardLookupWritePage() {
   const [suggestions, setSuggestions] = useState([]);
   const [expandedCategories, setExpandedCategories] = useState({});
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [isNotice, setIsNotice] = useState(false); // 공지사항 여부
-  const [isAdmin, setIsAdmin] = useState(false); // 관리자 여부
+  const [isNotice, setIsNotice] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  // 관리자 여부 확인
   React.useEffect(() => {
     const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
     const role = localStorage.getItem("role") || sessionStorage.getItem("role");
     if (storedUser) {
       const user = JSON.parse(storedUser);
-      // 관리자 판별: role이 ADMIN이거나, userId가 admin인 경우
       setIsAdmin(role === "ADMIN" || user.userId === "admin" || user.userNickname === "관리자");
     }
   }, []);
@@ -35,20 +33,12 @@ export default function BoardLookupWritePage() {
     return Object.values(tagData).flat();
   }, []);
 
-  // price onChange 핸들러 수정
+  // 가격 onChange 핸들러 - 직접 입력 가능
   const handlePriceChange = (e) => {
     const value = e.target.value;
-    // 빈 값이면 그대로 설정
-    if (value === "") {
-      setPrice("");
-      return;
-    }
-
-    // 숫자로 변환하고 100원 단위로 반올림
-    const numValue = parseInt(value);
-    if (!isNaN(numValue)) {
-      const roundedValue = Math.round(numValue / 100) * 100;
-      setPrice(roundedValue.toString());
+    // 숫자만 입력 가능하도록
+    if (value === "" || /^\d+$/.test(value)) {
+      setPrice(value);
     }
   };
 
@@ -115,13 +105,11 @@ export default function BoardLookupWritePage() {
   };
 
   const addTag = (tagToAdd) => {
-    // ✅ 미리 정의된 태그 목록에 있는지 확인
     if (tagToAdd && !tags.includes(tagToAdd) && allTags.includes(tagToAdd)) {
       setTags([...tags, tagToAdd]);
       setTagInput("");
       setSuggestions([]);
     } else if (tagToAdd && !allTags.includes(tagToAdd)) {
-      // ✅ 정의되지 않은 태그일 경우 경고
       alert("등록되지 않은 태그입니다. 아래 목록에서 선택해주세요.");
       setTagInput("");
       setSuggestions([]);
@@ -131,7 +119,6 @@ export default function BoardLookupWritePage() {
   const handleAddTagOnEnter = (e) => {
     if (e.key === "Enter" && tagInput.trim()) {
       e.preventDefault();
-      // ✅ 자동완성 목록에서 첫 번째 항목이 있으면 그것을 선택, 없으면 입력한 값 검증
       if (suggestions.length > 0) {
         addTag(suggestions[0]);
       } else {
@@ -189,7 +176,6 @@ export default function BoardLookupWritePage() {
       formData.append("price", parseInt(price));
       formData.append("userNum", loggedInUser.userNum);
       formData.append("tags", JSON.stringify(tags));
-      // 관리자이고 공지사항 체크시 board_type을 notice로 전송
       if (isAdmin && isNotice) {
         formData.append("boardType", "notice");
       }
@@ -203,7 +189,7 @@ export default function BoardLookupWritePage() {
       const response = await axios.post("http://localhost:8080/api/boardlookup/posts", formData, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
-        timeout: 300000, // 5분 타임아웃 (큰 파일 처리 시간 고려)
+        timeout: 300000,
       });
 
       console.log("=== 업로드 응답 ===");
@@ -222,7 +208,6 @@ export default function BoardLookupWritePage() {
       let errorMsg = "알 수 없는 오류가 발생했습니다.";
       
       if (error.response) {
-        // 서버에서 응답을 받은 경우
         console.error("응답 상태:", error.response.status);
         console.error("응답 데이터:", error.response.data);
         
@@ -236,11 +221,9 @@ export default function BoardLookupWritePage() {
           errorMsg = "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
         }
       } else if (error.request) {
-        // 요청은 보냈지만 응답을 받지 못한 경우
         console.error("요청:", error.request);
         errorMsg = "서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.";
       } else {
-        // 요청 설정 중 오류가 발생한 경우
         errorMsg = error.message;
       }
       
@@ -400,17 +383,16 @@ export default function BoardLookupWritePage() {
             <div className="form-group">
               <label className="form-label">가격 (₩)</label>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
                 value={price}
                 onChange={handlePriceChange}
                 className="form-input"
-                placeholder="가격을 입력하세요 (100원 단위)"
+                placeholder="가격을 입력하세요"
                 min="0"
-                step="100"
               />
             </div>
 
-            {/* 관리자 전용 공지사항 체크박스 */}
             {isAdmin && (
               <div className="form-group notice-checkbox-group">
                 <label className="notice-checkbox-label">
