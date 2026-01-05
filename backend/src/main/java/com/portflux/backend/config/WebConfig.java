@@ -13,11 +13,11 @@ public class WebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // ✅ 수정: /uploads/pdf/** 로 접근 가능하게
         registry.addResourceHandler("/uploads/pdf/**")
-                .addResourceLocations("file:backend/uploads/pdf/");
+                .addResourceLocations("file:uploads/pdf/");
         
         // ✅ 추가: 기존 uploads 폴더도 접근 가능하게
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:backend/uploads/");
+                .addResourceLocations("file:uploads/");
     }
 }
 /* ```
