@@ -96,3 +96,8 @@ tasks.named('processResources') {
         include '**/*.xml'
     }
 }
+
+bootRun {
+    systemProperty 'file.encoding', 'UTF-8'
+    systemProperty 'oracle.jdbc.defaultNChar', 'true'
+}
