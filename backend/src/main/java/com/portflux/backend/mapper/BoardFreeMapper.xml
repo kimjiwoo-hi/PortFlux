@@ -105,9 +105,9 @@
     </update>
 
     <update id="updateBoard" parameterType="com.portflux.backend.beans.BoardFreeBean">
-        UPDATE POST SET title = #{title}, content = #{content}
-        <if test="postFile != null">, post_file = #{postFile, jdbcType=VARCHAR}</if>
-        <if test="image != null">, image = #{image, jdbcType=VARCHAR}</if>
+        UPDATE POST SET title = #{title}, content = #{content},
+        post_file = #{postFile, jdbcType=VARCHAR},
+        image = #{image, jdbcType=VARCHAR}
         WHERE post_id = #{postId}
     </update>
 

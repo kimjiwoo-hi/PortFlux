@@ -304,7 +304,7 @@ const BoardFreeDetailPage = () => {
 
         <div className="post-actions">
           <button className={`action-btn like-btn ${isLiked ? "active" : ""}`} onClick={handleLike}>
-            <ThumbsUp size={20} /><span>추천 {postData.likeCnt || 0}</span>
+            <ThumbsUp size={20} /><span>추천</span>
           </button>
           <button className="action-btn share-btn" onClick={() => setIsShareModalOpen(true)}>
             <Share2 size={20} /><span>공유</span>
