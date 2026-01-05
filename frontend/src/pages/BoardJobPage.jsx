@@ -941,8 +941,8 @@ const BoardJobPage = () => {
             >
               {/* 회사 로고 */}
               <div className="job-card-logo">
-                {job.companyImage ? (
-                  <img src={job.companyImage} alt={job.companyName} />
+                {(job.companyLogo || job.companyImage) ? (
+                  <img src={job.companyLogo || job.companyImage} alt={job.companyName} />
                 ) : (
                   <div className="logo-placeholder">
                     {job.companyName?.charAt(0) || "C"}
@@ -953,7 +953,14 @@ const BoardJobPage = () => {
               {/* 채용 정보 */}
               <div className="job-card-content">
                 <div className="job-card-header">
-                  <span className="company-name">{job.companyName}</span>
+                  <div className="company-info-wrapper">
+                    <span className="company-name">{job.companyName}</span>
+                    {job.jobCompanyTypes?.length > 0 && (
+                      <span className="company-type">
+                        {job.jobCompanyTypes[0]}
+                      </span>
+                    )}
+                  </div>
                   <div className="job-badges">
                     {job.isNew && <span className="badge badge-new">NEW</span>}
                     {job.isDeadlineSoon && (

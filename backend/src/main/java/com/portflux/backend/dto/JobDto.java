@@ -14,7 +14,9 @@ public class JobDto {
     private Long companyNum;
     private String companyName;
     private String companyImage;
-    
+    private String companyLogo; // 채용공고 전용 기업 로고
+    private String companyPhone; // 채용공고 문의 전화번호
+
     // 공통 필드
     private String title;
     private String content;
@@ -76,6 +78,22 @@ public class JobDto {
 
     public void setCompanyImage(String companyImage) {
         this.companyImage = companyImage;
+    }
+
+    public String getCompanyLogo() {
+        return companyLogo;
+    }
+
+    public void setCompanyLogo(String companyLogo) {
+        this.companyLogo = companyLogo;
+    }
+
+    public String getCompanyPhone() {
+        return companyPhone;
+    }
+
+    public void setCompanyPhone(String companyPhone) {
+        this.companyPhone = companyPhone;
     }
 
     public String getTitle() {
