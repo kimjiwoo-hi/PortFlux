@@ -17,7 +17,12 @@
       "Bash(./gradlew bootRun:*)",
       "Bash(taskkill:*)",
       "Bash(tasklist:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(.gradlew bootRun)",
+      "Bash(Select-String -Pattern \"error|exception|fail\" -Context 2,2)",
+      "Bash(Select-Object -First 50)",
+      "Bash(netstat:*)",
+      "Bash(curl:*)"
     ]
   }
 }

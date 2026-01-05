@@ -54,27 +54,32 @@ function PaymentPage() {
     }
 
     const { IMP } = window;
-    const impKey = import.meta.env.VITE_IMP_KEY || "imp77508670";
+    // 포트원 공식 테스트 가맹점 코드
+    const impKey = import.meta.env.VITE_IMP_KEY || "imp10391932";
     IMP.init(impKey);
 
-    // 결제수단별 Channel Key 설정 (포트원 V1 최신 방식)
-    const getChannelKey = () => {
+    // 결제수단별 PG 설정 (포트원 V1 방식 - 테스트 모드)
+    const getPgInfo = () => {
       switch (payMethod) {
         case "kakaopay":
-          return "channel-key-5acc4805-406d-4644-b2d0-3bf69d7dd1a5"; // 카카오페이
+          return { pg: "kakaopay.TC0ONETIME", pay_method: "card" }; // 카카오페이 테스트
         case "tosspay":
+          return { pg: "tosspay.tvivarepublica", pay_method: "card" }; // 토스페이 테스트
         case "naverpay":
+          return { pg: "naverpay", pay_method: "naverpay" }; // 네이버페이
         case "payco":
-          return "channel-key-1a093847-6a4b-4cdf-bd11-78b638b4c4c6"; // 토스페이먼츠 (간편결제 통합)
+          return { pg: "payco", pay_method: "payco" }; // 페이코
         case "card":
         default:
-          return "channel-key-ab9ad1a7-935e-4e7a-b193-f1a407168af1"; // 이니시스 신용카드
+          return { pg: "html5_inicis", pay_method: "card" }; // 이니시스 (테스트 가맹점에서 작동)
       }
     };
 
+    const pgInfo = getPgInfo();
+
     const paymentData = {
-      channelKey: getChannelKey(), // V1 최신 방식: channelKey 사용
-      pay_method: payMethod === "card" ? "card" : "easy", // 간편결제는 'easy', 카드는 'card'
+      pg: pgInfo.pg, // PG사 지정
+      pay_method: pgInfo.pay_method, // 결제 수단
       merchant_uid: orderInfo.merchantUid,
       name: orderInfo.items.length > 1 ? `${orderInfo.items[0].productName} 외 ${orderInfo.items.length - 1}건` : orderInfo.items[0].productName,
       amount: orderInfo.totalAmount,

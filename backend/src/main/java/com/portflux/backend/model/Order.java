@@ -28,9 +28,6 @@ public class Order {
 
     private String status; // CREATED, PENDING, PAID, CANCELLED
 
-    @Column(name = "imp_uid") // 아임포트 거래 고유 ID 컬럼 명시
-    private String impUid; // 아임포트 거래 고유 ID
-
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)

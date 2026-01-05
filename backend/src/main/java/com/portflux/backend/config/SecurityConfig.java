@@ -61,7 +61,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/boardlookup/**", "/api/pdf/**").permitAll()
                         .requestMatchers("/api/board/free/**", "/api/board/job/**").permitAll()
                         .requestMatchers("/uploads/**", "/api/jobs/**", "/api/follow/**").permitAll()
-                        .requestMatchers("/api/payments/result").permitAll()
+
+                        // 결제 관련 (웹훅과 결제 검증은 인증 없이 접근 가능해야 함)
+                        .requestMatchers("/api/payments/**").permitAll()
 
                         // 사용자 정보 조회 허용 (개발용 - 프로덕션에서는 .authenticated() 사용)
                         .requestMatchers("/api/user/info/**").permitAll()
