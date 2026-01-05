@@ -946,13 +946,8 @@ const UserProfile = () => {
                     name="userPhone"
                     value={isEditing ? (editedInfo.userPhone || "") : (fullUserInfo.userPhone || "")}
                     onChange={handleChange}
-<<<<<<< HEAD
-                    disabled={true}
-                    className="input-disabled"
-=======
                     disabled={!isEditing}
                     className={isEditing ? "input-editable" : "input-disabled"}
->>>>>>> b4f3cd3ddd9752f445509642abc023599ca06e9f
                   />
                 </div>
 
@@ -969,14 +964,14 @@ const UserProfile = () => {
                 )}
 
                 <div className="info-item">
-                  <label>가입일</label>
-                  <input
-                    type="text"
-                    value={formatDate(fullUserInfo.userCreateAt)}
-                    disabled
-                    className="input-disabled"
-                  />
-                </div>
+  <label>가입일</label>
+  <input
+    type="text"
+    value={formatDate(fullUserInfo.userCreateAt)}
+    disabled
+    className="input-disabled"
+  />
+</div>
               </div>
 
               {isEditing ? (
