@@ -6,14 +6,16 @@
         SELECT
             c.comment_id AS commentId,
             c.user_num AS userNum,
-            u.user_nickname AS userNickname,
+            COALESCE(u.user_nickname, cp.company_name) AS userNickname,
             u.user_image AS userImage,
             c.comment_content AS commentContent,
             c.comment_created_at AS commentCreatedAt
         FROM
             POST_COMMENT c
-        JOIN
+        LEFT JOIN
             USERS u ON c.user_num = u.user_num
+        LEFT JOIN
+            COMPANY cp ON c.user_num = cp.company_num
         WHERE
             c.post_id = #{postId}
         ORDER BY
@@ -60,7 +62,7 @@
             c.comment_id AS commentId,
             c.post_id AS postId,
             c.user_num AS userNum,
-            u.user_nickname AS userNickname,
+            COALESCE(u.user_nickname, cp.company_name) AS userNickname,
             u.user_image AS userImage,
             c.comment_content AS commentContent,
             c.comment_created_at AS commentCreatedAt,
@@ -68,8 +70,10 @@
             p.board_type AS boardType
         FROM
             POST_COMMENT c
-        JOIN
+        LEFT JOIN
             USERS u ON c.user_num = u.user_num
+        LEFT JOIN
+            COMPANY cp ON c.user_num = cp.company_num
         JOIN
             POST p ON c.post_id = p.post_id
         WHERE
@@ -83,7 +87,7 @@
             c.comment_id AS commentId,
             c.post_id AS postId,
             c.user_num AS userNum,
-            u.user_nickname AS userNickname,
+            COALESCE(u.user_nickname, cp.company_name) AS userNickname,
             u.user_image AS userImage,
             c.comment_content AS commentContent,
             c.comment_created_at AS commentCreatedAt,
@@ -91,12 +95,14 @@
             p.board_type AS boardType
         FROM
             POST_COMMENT c
-        JOIN
+        LEFT JOIN
             USERS u ON c.user_num = u.user_num
+        LEFT JOIN
+            COMPANY cp ON c.user_num = cp.company_num
         JOIN
             POST p ON c.post_id = p.post_id
         WHERE
-            u.user_nickname = #{nickname}
+            u.user_nickname = #{nickname} OR cp.company_name = #{nickname}
         ORDER BY
             c.comment_created_at DESC
     </select>

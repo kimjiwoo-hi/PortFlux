@@ -27,4 +27,5 @@ public class BoardLookupPostDto {
     private List<String> pdfImages;
     private String aiSummary;
     private String boardType;
+    private int likeCnt; 
 }

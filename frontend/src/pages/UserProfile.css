@@ -28,12 +28,11 @@
 }
 
 .profile-header {
-  padding: 0 40px 20px 40px;
+  padding: 20px 40px;
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 20px;
   border-bottom: 1px solid #eee;
-  margin-top: -60px;
   position: relative;
 }
 
@@ -53,14 +52,82 @@
 
 .profile-info {
   flex: 1;
-  padding-bottom: 10px;
+  padding-top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
 .profile-nickname {
   font-size: 28px;
   font-weight: bold;
-  margin: 0;
+  margin: 0 0 15px 0;
   color: #333;
+}
+
+/* 팔로우 통계 */
+.profile-stats {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 15px;
+}
+
+.profile-stats .stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.profile-stats .stat-item.clickable:hover {
+  background: #f5f5f5;
+  transform: translateY(-2px);
+}
+
+.profile-stats .stat-number {
+  font-size: 22px;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.profile-stats .stat-label {
+  font-size: 14px;
+  color: #666;
+}
+
+/* 팔로우 버튼 */
+.follow-button {
+  padding: 10px 30px;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  background: #667eea;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.follow-button:hover {
+  background: #5568d3;
+  border-color: #5568d3;
+}
+
+.follow-button.following {
+  background: white;
+  color: #667eea;
+}
+
+.follow-button.following:hover {
+  background: #f5f5f5;
+}
+
+.follow-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .profile-tabs {
@@ -105,7 +172,7 @@
   gap: 15px;
 }
 
-.post-item {
+.myinfo-container .post-item {
   padding: 20px;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -122,7 +189,7 @@
   align-items: center;
 }
 
-.post-title {
+.myinfo-container .post-title {
   font-size: 18px;
   font-weight: 600;
   color: #333;
@@ -165,7 +232,7 @@
   white-space: nowrap;
 }
 
-.comment-item {
+.myinfo-container .comment-item {
   padding: 15px 20px;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -303,6 +370,7 @@
   width: 140px;
   height: 140px;
   flex-shrink: 0;
+  margin-top: -80px;
 }
 
 .myinfo-profile-image {

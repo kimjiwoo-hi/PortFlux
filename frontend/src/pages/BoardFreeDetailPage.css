@@ -3,7 +3,7 @@
     width: 100%; 
     max-width: 1000px; 
     margin: 0 auto; 
-    padding: 40px 20px; 
+    padding: 40px 0; 
 }
 
 .detail-loading { 
@@ -17,6 +17,8 @@
     border-bottom: 1px solid #e8e8e8; 
     padding-bottom: 20px; 
     margin-bottom: 30px; 
+    margin-left: 0 !important;
+    padding-left: 0 !important;
 }
 
 .header-top { 
@@ -128,13 +130,14 @@
 .post-date, .cmt-date { font-size: 13px; color: #999; white-space: nowrap; }
 
 /* --- 본문 영역 --- */
-.post-content { 
-    min-height: 300px; 
-    font-size: 16px; 
-    line-height: 1.8; 
-    color: #333; 
-    margin-bottom: 50px; 
-    white-space: pre-wrap; 
+.post-content {
+    min-height: 300px;
+    font-size: 16px;
+    line-height: 1.8;
+    color: #333;
+    margin-top: 30px;
+    margin-bottom: 50px;
+    white-space: pre-wrap;
 }
 
 .post-image-area img { 
@@ -142,14 +145,14 @@
     margin-bottom: 20px; 
 }
 
-.post-attachment { 
-    margin-top: 20px; 
-    padding: 15px; 
-    background: #f8f9fa; 
-    border-radius: 8px; 
-    display: flex; 
-    align-items: center; 
-    gap: 10px; 
+.post-attachment {
+    margin-top: 40px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .download-btn { 
@@ -194,6 +197,13 @@
     margin-bottom: 30px; 
 }
 
+.comment-form { 
+    background-color: #f8f9fa; 
+    border: 1px solid #e8e8e8; 
+    border-radius: 8px; 
+    padding: 16px; 
+    margin-top: 20px; 
+}
 .comment-header { 
     display: flex; 
     align-items: center; 
@@ -248,17 +258,16 @@
 }
 .btn-reply-toggle:hover { color: #111; text-decoration: underline; }
 
-.reply-comment { 
-    display: flex; 
-    background-color: #f8f9fa; 
-    padding: 15px 20px; 
-    margin-left: 30px; 
-    border-radius: 8px; 
+.reply-comment {
+    display: flex;
+    background-color: #f8f9fa;
+    padding: 15px 20px;
+    margin-left: 30px;
+    border-radius: 8px;
     margin-top: 5px;
-    margin-bottom: 10px; 
-    border: 1px solid #eee; 
+    margin-bottom: 10px;
+    border: 1px solid #eee;
 }
-
 .reply-icon { 
     color: #adb5bd; 
     margin-right: 12px; 
@@ -346,14 +355,6 @@
     font-size: 13px; 
     cursor: pointer; 
     align-self: flex-end; 
-}
-
-.comment-form { 
-    background-color: #f8f9fa; 
-    border: 1px solid #e8e8e8; 
-    border-radius: 8px; 
-    padding: 16px; 
-    margin-top: 20px; 
 }
 
 .comment-input { 

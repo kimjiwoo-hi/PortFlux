@@ -1,9 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "./UserProfile.css";
 import UserDefaultIcon from "../assets/user_default_icon.png";
 import { updateUserInfoCache } from "../utils/userInfoCache";
+import { follow, unfollow, isFollowing as checkFollowing, getFollowers, getFollowing } from "../api/api";
+import FollowListPopover from "../components/FollowListPopover";
 
 const UserProfile = () => {
   const { userNum, nickname } = useParams();
@@ -19,6 +21,13 @@ const UserProfile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isOwner, setIsOwner] = useState(false);
+  const [isCompany, setIsCompany] = useState(false); // 기업 회원 여부
+
+  // 팔로우 관련 상태
+  const [isFollowingUser, setIsFollowingUser] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [followLoading, setFollowLoading] = useState(false);
 
   // 편집 모드
   const [isEditing, setIsEditing] = useState(false);
@@ -34,6 +43,12 @@ const UserProfile = () => {
     newPassword: "",
     confirmPassword: "",
   });
+
+  // 팔로우 리스트 팝오버
+  const [showFollowPopover, setShowFollowPopover] = useState(false);
+  const [followPopoverTab, setFollowPopoverTab] = useState('followers');
+  const followersRef = useRef(null);
+  const followingRef = useRef(null);
 
   // 본인 여부 확인
   const checkIsOwner = useCallback(() => {
@@ -58,32 +73,78 @@ const UserProfile = () => {
         const owner = checkIsOwner();
         setIsOwner(owner);
 
+        let currentUserInfo = null;
+
         // 본인인 경우 전체 정보 API 호출
         if (owner) {
           const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
           const user = JSON.parse(storedUser);
           const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+          const memberType = localStorage.getItem("memberType") || sessionStorage.getItem("memberType");
+          const companyUser = memberType === "company";
+          setIsCompany(companyUser);
 
-          const fullInfoResponse = await axios.get(
-            `/api/user/info/${user.userId}`,
-            {
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-              },
-              withCredentials: true
-            }
-          );
+          let fullInfoResponse;
+          if (companyUser) {
+            // 기업 회원
+            fullInfoResponse = await axios.get(
+              `/api/company/info/${user.userId || user.companyId}`,
+              {
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+                },
+                withCredentials: true
+              }
+            );
 
-          setFullUserInfo(fullInfoResponse.data);
-          setEditedInfo(fullInfoResponse.data);
+            const companyData = fullInfoResponse.data;
+            const normalizedData = {
+              userId: companyData.companyId,
+              userName: companyData.companyName,
+              userNickname: companyData.companyName,
+              userEmail: companyData.companyEmail,
+              userPhone: companyData.companyPhone,
+              userNum: companyData.companyNum,
+              userImage: companyData.companyImage,
+              userBanner: companyData.companyBanner,
+              userCreateAt: companyData.companyCreateAt,
+              businessNumber: companyData.businessNumber,
+              isCompany: true
+            };
+            setFullUserInfo(normalizedData);
+            setEditedInfo(normalizedData);
 
-          setUserInfo({
-            userNum: fullInfoResponse.data.userNum,
-            userNickname: fullInfoResponse.data.userNickname,
-            userImage: fullInfoResponse.data.userImage,
-            userBanner: fullInfoResponse.data.userBanner
-          });
+            currentUserInfo = {
+              userNum: companyData.companyNum,
+              userNickname: companyData.companyName,
+              userImage: companyData.companyImage,
+              userBanner: companyData.companyBanner
+            };
+          } else {
+            // 일반 회원
+            fullInfoResponse = await axios.get(
+              `/api/user/info/${user.userId}`,
+              {
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+                },
+                withCredentials: true
+              }
+            );
+
+            setFullUserInfo(fullInfoResponse.data);
+            setEditedInfo(fullInfoResponse.data);
+
+            currentUserInfo = {
+              userNum: fullInfoResponse.data.userNum || user.userNum,
+              userNickname: fullInfoResponse.data.userNickname,
+              userImage: fullInfoResponse.data.userImage,
+              userBanner: fullInfoResponse.data.userBanner
+            };
+          }
+          setUserInfo(currentUserInfo);
         }
 
         // nickname 또는 userNum으로 조회
@@ -102,40 +163,72 @@ const UserProfile = () => {
         if (!owner) {
           if (postsResponse.data.length > 0) {
             const firstPost = postsResponse.data[0];
-            setUserInfo({
+            currentUserInfo = {
               userNum: firstPost.userNum,
               userNickname: firstPost.userNickname,
               userImage: firstPost.userImageBase64,
               userBanner: firstPost.userBannerBase64 ? `data:image/jpeg;base64,${firstPost.userBannerBase64}` : null,
-            });
+            };
+            setUserInfo(currentUserInfo);
           } else if (commentsResponse.data.length > 0) {
             const firstComment = commentsResponse.data[0];
-            setUserInfo({
+            currentUserInfo = {
               userNum: firstComment.userNum,
               userNickname: firstComment.userNickname,
               userImage: firstComment.userImageBase64,
               userBanner: firstComment.userBannerBase64 ? `data:image/jpeg;base64,${firstComment.userBannerBase64}` : null,
-            });
+            };
+            setUserInfo(currentUserInfo);
           } else {
-            setUserInfo({
+            currentUserInfo = {
               userNum: userNum,
               userNickname: identifier,
               userImage: null,
               userBanner: null,
-            });
+            };
+            setUserInfo(currentUserInfo);
           }
         }
 
         // 본인인 경우 저장한 게시글 조회
         if (owner) {
           try {
-            const savedResponse = await axios.get('/api/post-save/my-saved-posts', {
-              withCredentials: true
-            });
-            setSavedPosts(savedResponse.data);
+            const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+            const user = JSON.parse(storedUser);
+            const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+
+            const savedIdsResponse = await axios.get(
+              `/api/boardlookup/user/${user.userNum}/saved`,
+              {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+                withCredentials: true
+              }
+            );
+
+            // ID 배열을 받아서 각 게시글 상세 정보 가져오기
+            if (savedIdsResponse.data && savedIdsResponse.data.length > 0) {
+              const postDetailsPromises = savedIdsResponse.data.map((postId) =>
+                axios.get(`/api/boardlookup/${postId}`, {
+                  headers: token ? { Authorization: `Bearer ${token}` } : {},
+                  withCredentials: true,
+                })
+              );
+
+              const postDetailsResponses = await Promise.all(postDetailsPromises);
+              const posts = postDetailsResponses.map((res) => res.data.post || res.data);
+              setSavedPosts(posts);
+            } else {
+              setSavedPosts([]);
+            }
           } catch (err) {
             console.error("저장한 게시글 조회 실패:", err);
+            setSavedPosts([]);
           }
+        }
+
+        // 팔로우 정보 조회
+        if (currentUserInfo?.userNum) {
+          await loadFollowInfo(currentUserInfo.userNum, !owner);
         }
 
         setLoading(false);
@@ -150,6 +243,54 @@ const UserProfile = () => {
       fetchUserProfile();
     }
   }, [userNum, nickname, checkIsOwner]);
+
+  // 팔로우 정보 로드
+  const loadFollowInfo = async (targetUserNum, checkIsFollowing) => {
+    try {
+      const [followersRes, followingRes] = await Promise.all([
+        getFollowers(targetUserNum),
+        getFollowing(targetUserNum)
+      ]);
+
+      setFollowersCount(followersRes.data.count || 0);
+      setFollowingCount(followingRes.data.count || 0);
+
+      // 다른 사용자의 프로필인 경우 팔로우 여부 확인
+      if (checkIsFollowing) {
+        const followingStatus = await checkFollowing(targetUserNum);
+        setIsFollowingUser(followingStatus.data.following);
+      }
+    } catch (error) {
+      console.error("팔로우 정보 조회 실패:", error);
+      setFollowersCount(0);
+      setFollowingCount(0);
+      setIsFollowingUser(false);
+    }
+  };
+
+  // 팔로우/언팔로우 토글
+  const handleFollowToggle = async () => {
+    if (!userInfo?.userNum) return;
+
+    setFollowLoading(true);
+    try {
+      if (isFollowingUser) {
+        await unfollow(userInfo.userNum);
+        setIsFollowingUser(false);
+        setFollowersCount(prev => Math.max(0, prev - 1));
+      } else {
+        await follow(userInfo.userNum);
+        setIsFollowingUser(true);
+        setFollowersCount(prev => prev + 1);
+      }
+    } catch (error) {
+      console.error("팔로우 토글 실패:", error);
+      // 에러 발생 시 상태 롤백
+      await loadFollowInfo(userInfo.userNum, !isOwner);
+    } finally {
+      setFollowLoading(false);
+    }
+  };
 
   const handlePostClick = (postId, boardType) => {
     if (boardType === 'free') {
@@ -206,25 +347,48 @@ const UserProfile = () => {
   // 저장
   const handleSave = async () => {
     try {
-      const dataToSave = {
-        ...editedInfo,
-        userImage: editedInfo.userImage === "" ? "" : editedInfo.userImage,
-        userBanner: editedInfo.userBanner === "" ? "" : editedInfo.userBanner,
-      };
-
       const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
-      await axios.put(
-        `/api/user/info/${fullUserInfo.userId}`,
-        dataToSave,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          withCredentials: true
-        }
-      );
+      if (isCompany) {
+        // 기업 회원 정보 저장
+        const dataToSave = {
+          companyName: editedInfo.userNickname || editedInfo.userName,
+          companyPhone: editedInfo.userPhone,
+          companyImage: editedInfo.userImage === "" ? "" : editedInfo.userImage,
+          companyBanner: editedInfo.userBanner === "" ? "" : editedInfo.userBanner,
+        };
+
+        await axios.put(
+          `/api/company/info/${fullUserInfo.userId}`,
+          dataToSave,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            withCredentials: true
+          }
+        );
+      } else {
+        // 일반 회원 정보 저장
+        const dataToSave = {
+          ...editedInfo,
+          userImage: editedInfo.userImage === "" ? "" : editedInfo.userImage,
+          userBanner: editedInfo.userBanner === "" ? "" : editedInfo.userBanner,
+        };
+
+        await axios.put(
+          `/api/user/info/${fullUserInfo.userId}`,
+          dataToSave,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            withCredentials: true
+          }
+        );
+      }
 
       // 저장된 데이터로 상태 업데이트 (빈 문자열은 그대로 유지)
       const updatedInfo = {
@@ -335,9 +499,12 @@ const UserProfile = () => {
 
     try {
       const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+      const apiUrl = isCompany
+        ? `/api/company/info/${fullUserInfo.userId}/password`
+        : `/api/user/info/${fullUserInfo.userId}/password`;
 
       await axios.put(
-        `/api/user/info/${fullUserInfo.userId}/password`,
+        apiUrl,
         {
           currentPassword: passwords.currentPassword,
           newPassword: passwords.newPassword,
@@ -472,6 +639,45 @@ const UserProfile = () => {
           </div>
           <div className="profile-info">
             <h2 className="profile-nickname">{userInfo?.userNickname}</h2>
+
+            {/* 팔로우 통계 */}
+            <div className="profile-stats">
+              <div
+                className="stat-item clickable"
+                ref={followersRef}
+                onClick={() => {
+                  setFollowPopoverTab('followers');
+                  setShowFollowPopover(true);
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <span className="stat-number">{followersCount}</span>
+                <span className="stat-label">팔로워</span>
+              </div>
+              <div
+                className="stat-item clickable"
+                ref={followingRef}
+                onClick={() => {
+                  setFollowPopoverTab('following');
+                  setShowFollowPopover(true);
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <span className="stat-number">{followingCount}</span>
+                <span className="stat-label">팔로잉</span>
+              </div>
+            </div>
+
+            {/* 팔로우 버튼 (다른 사용자의 프로필일 때만 표시) */}
+            {!isOwner && (
+              <button
+                className={`follow-button ${isFollowingUser ? 'following' : ''}`}
+                onClick={handleFollowToggle}
+                disabled={followLoading}
+              >
+                {followLoading ? '처리 중...' : isFollowingUser ? '팔로잉' : '팔로우'}
+              </button>
+            )}
           </div>
         </div>
 
@@ -570,39 +776,41 @@ const UserProfile = () => {
                   <label>아이디</label>
                   <input
                     type="text"
-                    value={fullUserInfo.userId}
+                    value={fullUserInfo.userId || ""}
                     disabled
                     className="input-disabled"
                   />
                 </div>
 
                 <div className="info-item">
-                  <label>이름</label>
+                  <label>{isCompany ? "기업명" : "이름"}</label>
                   <input
                     type="text"
-                    value={fullUserInfo.userName}
+                    value={fullUserInfo.userName || ""}
                     disabled
                     className="input-disabled"
                   />
                 </div>
 
-                <div className="info-item">
-                  <label>닉네임</label>
-                  <input
-                    type="text"
-                    name="userNickname"
-                    value={isEditing ? editedInfo.userNickname : fullUserInfo.userNickname}
-                    onChange={handleChange}
-                    disabled={!isEditing}
-                    className={isEditing ? "input-editable" : "input-disabled"}
-                  />
-                </div>
+                {!isCompany && (
+                  <div className="info-item">
+                    <label>닉네임</label>
+                    <input
+                      type="text"
+                      name="userNickname"
+                      value={isEditing ? (editedInfo.userNickname || "") : (fullUserInfo.userNickname || "")}
+                      onChange={handleChange}
+                      disabled={!isEditing}
+                      className={isEditing ? "input-editable" : "input-disabled"}
+                    />
+                  </div>
+                )}
 
                 <div className="info-item">
                   <label>이메일</label>
                   <input
                     type="email"
-                    value={fullUserInfo.userEmail}
+                    value={fullUserInfo.userEmail || ""}
                     disabled
                     className="input-disabled"
                   />
@@ -612,11 +820,25 @@ const UserProfile = () => {
                   <label>휴대폰</label>
                   <input
                     type="tel"
-                    value={fullUserInfo.userPhone}
-                    disabled
-                    className="input-disabled"
+                    name="userPhone"
+                    value={isEditing ? (editedInfo.userPhone || "") : (fullUserInfo.userPhone || "")}
+                    onChange={handleChange}
+                    disabled={!isEditing || !isCompany}
+                    className={isEditing && isCompany ? "input-editable" : "input-disabled"}
                   />
                 </div>
+
+                {isCompany && (
+                  <div className="info-item">
+                    <label>사업자번호</label>
+                    <input
+                      type="text"
+                      value={fullUserInfo.businessNumber || ""}
+                      disabled
+                      className="input-disabled"
+                    />
+                  </div>
+                )}
 
                 <div className="info-item">
                   <label>가입일</label>
@@ -755,6 +977,16 @@ const UserProfile = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 팔로우 리스트 팝오버 */}
+      {showFollowPopover && (userInfo?.userNum || fullUserInfo?.userNum) && (
+        <FollowListPopover
+          userNum={userInfo?.userNum || fullUserInfo?.userNum}
+          initialTab={followPopoverTab}
+          onClose={() => setShowFollowPopover(false)}
+          anchorEl={followPopoverTab === 'followers' ? followersRef.current : followingRef.current}
+        />
       )}
     </div>
   );
