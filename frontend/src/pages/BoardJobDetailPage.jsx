@@ -85,7 +85,7 @@ const BoardJobDetailPage = () => {
     } finally {
       setBookmarkLoading(false);
     }
-  }, [postId, bookmarkLoading, navigate, isLoggedIn]);
+  }, [postId, bookmarkLoading, navigate]);
 
   // 수정 페이지로 이동
   const handleEdit = useCallback(() => {
@@ -114,7 +114,12 @@ const BoardJobDetailPage = () => {
 
   // 목록으로 돌아가기
   const handleBack = useCallback(() => {
-    navigate("/boardjob");
+    // 이전 페이지가 boardjob이면 뒤로가기, 아니면 /boardjob으로 이동
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate("/boardjob");
+    }
   }, [navigate]);
 
   // 공유하기
