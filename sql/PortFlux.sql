@@ -377,12 +377,81 @@ INSERT INTO ADMIN_ACCOUNT (user_num, admin_id, admin_password, admin_name)
 SELECT user_num, 'admin', 'admin123!', '관리자'
 FROM USERS WHERE user_id = 'admin';
 
--- 2) COMPANY
+-- 2) COMPANY (채용공고 더미데이터용 기업회원 추가)
 INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
-VALUES ('company001', 'comp123!', '테크스타트업', '02-1234-5678', 'contact@techstartup.com', '123-45-67890');
+VALUES ('naver', 'comp123!', '네이버', '031-1234-5678', 'recruit@naver.com', '123-45-67890');
 
 INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
-VALUES ('company002', 'comp456!', '디자인에이전시', '02-9876-5432', 'hello@designagency.com', '987-65-43210');
+VALUES ('kakaobank', 'comp123!', '카카오뱅크', '02-3333-5555', 'recruit@kakaobank.com', '123-45-67891');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('woowa', 'comp123!', '우아한형제들', '1588-6060', 'recruit@woowa.com', '123-45-67892');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('samsung', 'comp123!', '삼성전자', '031-200-1114', 'recruit@samsung.com', '123-45-67893');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('hyundai', 'comp123!', '현대자동차', '02-3464-1114', 'recruit@hyundai.com', '123-45-67894');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('cjenm', 'comp123!', 'CJ ENM', '02-371-8500', 'recruit@cjenm.com', '123-45-67895');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('coupang', 'comp123!', '쿠팡', '1577-7011', 'recruit@coupang.com', '123-45-67896');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('lg', 'comp123!', 'LG전자', '02-3777-1114', 'recruit@lg.com', '123-45-67897');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('amore', 'comp123!', '아모레퍼시픽', '080-023-5454', 'recruit@amore.com', '123-45-67898');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('posco', 'comp123!', '포스코', '054-220-0114', 'recruit@posco.com', '123-45-67899');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('skhynix', 'comp123!', 'SK하이닉스', '031-5179-0114', 'recruit@skhynix.com', '123-45-67800');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('samsunghospital', 'comp123!', '삼성서울병원', '02-3410-2114', 'recruit@samsunghosp.com', '123-45-67801');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('hanmi', 'comp123!', '한미약품', '031-8059-8888', 'recruit@hanmi.com', '123-45-67802');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('shinhan', 'comp123!', '신한은행', '02-2151-0114', 'recruit@shinhan.com', '123-45-67803');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('toss', 'comp123!', '토스', '1599-4905', 'recruit@toss.im', '123-45-67804');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('daekyo', 'comp123!', '대교', '02-829-1000', 'recruit@daekyo.com', '123-45-67805');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('cjlogistics', 'comp123!', 'CJ대한통운', '1588-1255', 'recruit@cjlogistics.com', '123-45-67806');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('samsungct', 'comp123!', '삼성물산', '02-2145-3114', 'recruit@samsungct.com', '123-45-67807');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('paradise', 'comp123!', '파라다이스호텔', '051-742-2121', 'recruit@paradise.co.kr', '123-45-67808');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('starbucks', 'comp123!', '스타벅스', '1522-3232', 'recruit@starbucks.co.kr', '123-45-67809');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('daangn', 'comp123!', '당근마켓', '1661-8051', 'recruit@daangn.com', '123-45-67810');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('yanolja', 'comp123!', '야놀자', '1670-7829', 'recruit@yanolja.com', '123-45-67811');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('busanbank', 'comp123!', '부산은행', '051-809-2000', 'recruit@busanbank.co.kr', '123-45-67812');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('dgbank', 'comp123!', '대구은행', '053-756-2000', 'recruit@dgbank.co.kr', '123-45-67813');
+
+INSERT INTO COMPANY (company_id, company_password, company_name, company_phone, company_email, business_number)
+VALUES ('airport', 'comp123!', '인천공항공사', '032-741-2114', 'recruit@airport.kr', '123-45-67814');
 
 -- 3) POST
 INSERT INTO POST (board_type, user_num, title, content, price, ai_summary, download_cnt, post_file, view_cnt)
@@ -454,14 +523,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
     'job', 1, '[네이버] 시니어 백엔드 개발자 (Java/Spring)',
     '네이버 클라우드에서 시니어 백엔드 개발자를 모집합니다. MSA 아키텍처 경험자 우대. 자율 출퇴근, 간식 무제한, 최신 장비 지원.',
     'gyeonggi_seongnam', '["경력"]', '["5년", "6년", "7년", "8년", "9년"]',
     'college_4', 'N',
     6000, 9000, SYSDATE + 30, 'ACTIVE',
-    '["IT·웹·통신"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)"]'
+    '["IT·웹·통신"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)"]',
+    1250, SYSDATE - 15, '031-1234-5678'
 );
 
 INSERT INTO POST (
@@ -469,14 +540,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 1, '[카카오뱅크] 프론트엔드 개발자 (React/TypeScript)',
+    'job', 2, '[카카오뱅크] 프론트엔드 개발자 (React/TypeScript)',
     '카카오뱅크 웹 서비스 프론트엔드 개발 담당. React, TypeScript 필수. 성과급, 스톡옵션 제공.',
     'seoul_gangnam', '["경력무관", "신입"]', '[]',
     NULL, 'Y',
     4000, 7000, SYSDATE + 20, 'ACTIVE',
-    '["IT·웹·통신", "금융·보험"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)"]'
+    '["IT·웹·통신", "금융·보험"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)"]',
+    850, SYSDATE - 8, '02-3333-5555'
 );
 
 INSERT INTO POST (
@@ -484,14 +557,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 2, '[우아한형제들] 모바일 앱 개발자 (Android/iOS)',
+    'job', 3, '[우아한형제들] 모바일 앱 개발자 (Android/iOS)',
     '배달의민족 모바일 앱 개발. Kotlin, Swift 우대. 점심/저녁 제공, 재택근무 주 2회.',
     'seoul_songpa', '["경력"]', '["3년", "4년", "5년"]',
     'college_4', 'N',
     5000, 8000, SYSDATE + 25, 'ACTIVE',
-    '["IT·웹·통신", "서비스업"]', '["중견기업"]', '["정규직"]', '["주 5일(월~금)"]'
+    '["IT·웹·통신", "서비스업"]', '["중견기업"]', '["정규직"]', '["주 5일(월~금)"]',
+    2150, SYSDATE - 3, '1588-6060'
 );
 
 -- 디자인 분야
@@ -500,14 +575,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 2, '[삼성전자] UI/UX 디자이너 (신입/경력)',
+    'job', 4, '[삼성전자] UI/UX 디자이너 (신입/경력)',
     '삼성전자 모바일 사업부 UI/UX 디자이너 채용. Figma, Sketch 필수. 해외 출장 기회 제공.',
     'gyeonggi_suwon', '["경력무관", "신입", "경력"]', '["1년", "2년", "3년"]',
     'college_4', 'N',
     4500, 6500, SYSDATE + 15, 'ACTIVE',
-    '["IT·웹·통신", "제조·생산"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)"]'
+    '["IT·웹·통신", "제조·생산"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)"]',
+    620, SYSDATE - 12, '031-200-1114'
 );
 
 INSERT INTO POST (
@@ -515,14 +592,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 1, '[현대자동차] 제품 디자이너 (Industrial Design)',
+    'job', 5, '[현대자동차] 제품 디자이너 (Industrial Design)',
     '현대자동차 디자인센터 제품 디자이너. 3D 모델링 경험 필수. 자동차 디자인 포트폴리오 우대.',
     'seoul_gangnam', '["경력"]', '["3년", "4년", "5년", "6년"]',
     'college_4', 'N',
-    5000, 7500, SYSDATE + 10, 'ACTIVE',
-    '["제조·생산", "자동차·운송"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)"]'
+    5000, 7500, SYSDATE + 3, 'ACTIVE',
+    '["제조·생산", "자동차·운송"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)"]',
+    1580, SYSDATE - 5, '02-3464-1114'
 );
 
 -- 마케팅·기획 분야
@@ -531,14 +610,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 1, '[CJ ENM] 콘텐츠 마케터 (신입/경력)',
+    'job', 6, '[CJ ENM] 콘텐츠 마케터 (신입/경력)',
     'CJ ENM 디지털 마케팅팀 채용. SNS 마케팅 경험 우대. 컨텐츠 제작 및 바이럴 마케팅 담당.',
     'seoul_mapo', '["경력무관", "신입"]', '[]',
     NULL, 'Y',
     3500, 5500, SYSDATE + 18, 'ACTIVE',
-    '["미디어·광고", "엔터테인먼트"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)"]'
+    '["미디어·광고", "엔터테인먼트"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)"]',
+    420, SYSDATE - 22, '02-371-8500'
 );
 
 INSERT INTO POST (
@@ -546,14 +627,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 2, '[쿠팡] 상품 기획자 (PM)',
+    'job', 7, '[쿠팡] 상품 기획자 (PM)',
     '쿠팡 이커머스 상품 기획. 데이터 분석 능력 필수. AWS, SQL 활용 경험 우대.',
     'seoul_songpa', '["경력"]', '["2년", "3년", "4년"]',
     'college_4', 'N',
     4500, 7000, SYSDATE + 22, 'ACTIVE',
-    '["IT·웹·통신", "유통·무역"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)"]'
+    '["IT·웹·통신", "유통·무역"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)"]',
+    980, SYSDATE - 7, '1577-7011'
 );
 
 -- 영업·판매 분야
@@ -562,14 +645,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 1, '[LG전자] B2B 영업 담당자',
+    'job', 8, '[LG전자] B2B 영업 담당자',
     'LG전자 기업 영업팀 채용. 법인 영업 경험 우대. 인센티브 별도 지급, 영업차량 제공.',
     'seoul_yeongdeungpo', '["경력"]', '["3년", "4년", "5년"]',
     'college_2_3', 'N',
-    4000, 6000, SYSDATE + 12, 'ACTIVE',
-    '["제조·생산", "영업·판매"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)"]'
+    4000, 6000, SYSDATE + 4, 'ACTIVE',
+    '["제조·생산", "영업·판매"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)"]',
+    750, SYSDATE - 18, '02-3777-1114'
 );
 
 INSERT INTO POST (
@@ -577,14 +662,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 2, '[아모레퍼시픽] 뷰티 컨설턴트',
+    'job', 9, '[아모레퍼시픽] 뷰티 컨설턴트',
     '아모레퍼시픽 면세점 뷰티 컨설턴트. 외국어 능력 우대. 명품 브랜드 경험 환영.',
-    'seoul_junggu', '["경력무관"]', '[]',
+    'seoul_jung', '["경력무관"]', '[]',
     NULL, 'Y',
     2800, 4500, SYSDATE + 30, 'ACTIVE',
-    '["화장품·뷰티", "유통·무역"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)", "주 6일"]'
+    '["화장품·뷰티", "유통·무역"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)", "주 6일"]',
+    320, SYSDATE - 26, '080-023-5454'
 );
 
 -- 제조·생산 분야
@@ -593,14 +680,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 1, '[포스코] 생산관리 엔지니어',
+    'job', 10, '[포스코] 생산관리 엔지니어',
     '포스코 제철소 생산관리. 공정 최적화 및 품질관리 담당. 기숙사 제공, 3교대 근무.',
     'gyeongbuk_pohang', '["경력"]', '["5년", "6년", "7년"]',
     'college_4', 'N',
     5500, 8000, SYSDATE + 20, 'ACTIVE',
-    '["제조·생산", "철강·금속"]', '["대기업"]', '["정규직"]', '["교대근무"]'
+    '["제조·생산", "철강·금속"]', '["대기업"]', '["정규직"]', '["교대근무"]',
+    1420, SYSDATE - 9, '054-220-0114'
 );
 
 INSERT INTO POST (
@@ -608,14 +697,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 2, '[SK하이닉스] 반도체 공정 엔지니어',
+    'job', 11, '[SK하이닉스] 반도체 공정 엔지니어',
     'SK하이닉스 반도체 공정 엔지니어. 전공자 우대. 셔틀버스 운영, 중식 제공.',
     'gyeonggi_icheon', '["경력무관", "신입"]', '[]',
     NULL, 'Y',
     4500, 6500, SYSDATE + 25, 'ACTIVE',
-    '["IT·웹·통신", "제조·생산"]', '["대기업"]', '["정규직"]', '["교대근무"]'
+    '["IT·웹·통신", "제조·생산"]', '["대기업"]', '["정규직"]', '["교대근무"]',
+    1890, SYSDATE - 2, '031-5179-0114'
 );
 
 -- 의료·제약 분야
@@ -624,14 +715,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 1, '[삼성서울병원] 간호사 (신규 채용)',
+    'job', 12, '[삼성서울병원] 간호사 (신규 채용)',
     '삼성서울병원 간호사 신규 채용. 간호사 면허 필수. 3교대 가능자. 기숙사 및 학자금 지원.',
     'seoul_gangnam', '["경력무관", "신입"]', '[]',
     NULL, 'Y',
-    3800, 5500, SYSDATE + 15, 'ACTIVE',
-    '["의료·제약·복지"]', '["대기업"]', '["정규직"]', '["교대근무"]'
+    3800, 5500, SYSDATE + 6, 'ACTIVE',
+    '["의료·제약·복지"]', '["대기업"]', '["정규직"]', '["교대근무"]',
+    540, SYSDATE - 14, '02-3410-2114'
 );
 
 INSERT INTO POST (
@@ -639,14 +732,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 2, '[한미약품] 임상연구원 (CRA)',
+    'job', 13, '[한미약품] 임상연구원 (CRA)',
     '한미약품 임상연구원 채용. 약학, 간호학 전공자 우대. 국내외 임상시험 모니터링 담당.',
     'gyeonggi_hwaseong', '["경력"]', '["2년", "3년", "4년"]',
     'college_4', 'N',
     4000, 6000, SYSDATE + 18, 'ACTIVE',
-    '["의료·제약·복지"]', '["중견기업"]', '["정규직"]', '["주 5일(월~금)"]'
+    '["의료·제약·복지"]', '["중견기업"]', '["정규직"]', '["주 5일(월~금)"]',
+    280, SYSDATE - 21, '031-8059-8888'
 );
 
 -- 금융 분야
@@ -655,14 +750,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 1, '[신한은행] 디지털 금융 전문가',
+    'job', 14, '[신한은행] 디지털 금융 전문가',
     '신한은행 디지털금융부 채용. 핀테크 경험자 우대. 모바일뱅킹 서비스 기획 및 운영.',
-    'seoul_junggu', '["경력"]', '["3년", "4년", "5년", "6년"]',
+    'seoul_jung', '["경력"]', '["3년", "4년", "5년", "6년"]',
     'college_4', 'N',
     5000, 7500, SYSDATE + 20, 'ACTIVE',
-    '["금융·보험"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)"]'
+    '["금융·보험"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)"]',
+    1120, SYSDATE - 6, '02-2151-0114'
 );
 
 INSERT INTO POST (
@@ -670,14 +767,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 2, '[토스] 데이터 분석가 (Data Analyst)',
+    'job', 15, '[토스] 데이터 분석가 (Data Analyst)',
     '토스 데이터팀 분석가 채용. Python, SQL 필수. 금융 데이터 분석 및 인사이트 도출.',
     'seoul_gangnam', '["경력무관", "신입", "경력"]', '["1년", "2년", "3년"]',
     'college_4', 'N',
     4500, 7000, SYSDATE + 25, 'ACTIVE',
-    '["금융·보험", "IT·웹·통신"]', '["중견기업"]', '["정규직"]', '["주 5일(월~금)"]'
+    '["금융·보험", "IT·웹·통신"]', '["중견기업"]', '["정규직"]', '["주 5일(월~금)"]',
+    2380, SYSDATE - 1, '1599-4905'
 );
 
 -- 교육 분야
@@ -686,14 +785,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 1, '[대교] 교육 콘텐츠 개발자',
+    'job', 16, '[대교] 교육 콘텐츠 개발자',
     '대교 디지털 교육 콘텐츠 개발. 교육학, 심리학 전공자 우대. 초중등 교재 개발 담당.',
     'seoul_gangnam', '["경력"]', '["2년", "3년", "4년"]',
     'college_4', 'N',
-    3500, 5000, SYSDATE + 14, 'ACTIVE',
-    '["교육·학원"]', '["중견기업"]', '["정규직"]', '["주 5일(월~금)"]'
+    3500, 5000, SYSDATE + 7, 'ACTIVE',
+    '["교육·학원"]', '["중견기업"]', '["정규직"]', '["주 5일(월~금)"]',
+    195, SYSDATE - 28, '02-829-1000'
 );
 
 -- 물류·운송 분야
@@ -702,14 +803,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 2, '[CJ대한통운] 물류 관리자',
+    'job', 17, '[CJ대한통운] 물류 관리자',
     'CJ대한통운 물류센터 관리자. WMS 시스템 경험 우대. 재고관리 및 배송 최적화 담당.',
     'gyeonggi_yongin', '["경력"]', '["3년", "4년", "5년"]',
     'college_2_3', 'N',
-    3800, 5500, SYSDATE + 12, 'ACTIVE',
-    '["물류·운송"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)"]'
+    3800, 5500, SYSDATE + 5, 'ACTIVE',
+    '["물류·운송"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)"]',
+    890, SYSDATE - 11, '1588-1255'
 );
 
 -- 건설·건축 분야
@@ -718,14 +821,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 1, '[삼성물산] 건축 현장 소장',
+    'job', 18, '[삼성물산] 건축 현장 소장',
     '삼성물산 건설부문 현장소장. 건축시공기술사 우대. 대형 아파트 현장 관리.',
     'gyeonggi_gwangmyeong', '["경력"]', '["10년 이상"]',
     'college_4', 'N',
     6500, 10000, SYSDATE + 30, 'ACTIVE',
-    '["건설·건축"]', '["대기업"]', '["정규직"]', '["주 6일"]'
+    '["건설·건축"]', '["대기업"]', '["정규직"]', '["주 6일"]',
+    370, SYSDATE - 24, '02-2145-3114'
 );
 
 -- 호텔·관광 분야
@@ -734,14 +839,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 2, '[파라다이스호텔] 프런트 데스크 (신입)',
+    'job', 19, '[파라다이스호텔] 프런트 데스크 (신입)',
     '파라다이스호텔 부산 프런트 데스크 신입 채용. 영어/중국어 가능자 우대. 교대근무.',
     'busan_haeundae', '["경력무관", "신입"]', '[]',
     NULL, 'Y',
     2800, 3800, SYSDATE + 20, 'ACTIVE',
-    '["호텔·관광·여가"]', '["중견기업"]', '["정규직"]', '["교대근무"]'
+    '["호텔·관광·여가"]', '["중견기업"]', '["정규직"]', '["교대근무"]',
+    650, SYSDATE - 10, '051-742-2121'
 );
 
 -- 외식·식음료 분야
@@ -750,14 +857,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 1, '[스타벅스] 매장 매니저 (점장 후보)',
+    'job', 20, '[스타벅스] 매장 매니저 (점장 후보)',
     '스타벅스 매장 매니저 채용. 카페 운영 경험 3년 이상. 매출 관리 및 인력 운영 담당.',
     'seoul_gangnam', '["경력"]', '["3년", "4년", "5년"]',
     'high', 'N',
     3200, 4500, SYSDATE + 15, 'ACTIVE',
-    '["외식·식음료"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)"]'
+    '["외식·식음료"]', '["대기업"]', '["정규직"]', '["주 5일(월~금)"]',
+    480, SYSDATE - 16, '1522-3232'
 );
 
 -- 스타트업 (신입 우대)
@@ -766,14 +875,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 2, '[당근마켓] 풀스택 개발자 (주니어)',
+    'job', 21, '[당근마켓] 풀스택 개발자 (주니어)',
     '당근마켓 풀스택 개발자 채용. React, Node.js 경험자. 스톡옵션 제공, 자율출퇴근.',
     'seoul_gangnam', '["경력무관", "신입", "경력"]', '["1년", "2년"]',
     NULL, 'Y',
     4000, 6000, SYSDATE + 25, 'ACTIVE',
-    '["IT·웹·통신"]', '["스타트업"]', '["정규직"]', '["주 5일(월~금)"]'
+    '["IT·웹·통신"]', '["스타트업"]', '["정규직"]', '["주 5일(월~금)"]',
+    1750, SYSDATE - 4, '1661-8051'
 );
 
 INSERT INTO POST (
@@ -781,14 +892,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 1, '[야놀자] 서비스 기획자 (PM)',
+    'job', 22, '[야놀자] 서비스 기획자 (PM)',
     '야놀자 서비스 기획 담당. 여행/숙박 서비스 기획 경험 우대. 유연근무제.',
     'seoul_gangnam', '["경력"]', '["2년", "3년", "4년"]',
     'college_4', 'N',
     4200, 6500, SYSDATE + 18, 'ACTIVE',
-    '["IT·웹·통신", "호텔·관광·여가"]', '["중견기업"]', '["정규직"]', '["주 5일(월~금)"]'
+    '["IT·웹·통신", "호텔·관광·여가"]', '["중견기업"]', '["정규직"]', '["주 5일(월~금)"]',
+    1060, SYSDATE - 13, '1670-7829'
 );
 
 -- 지방 지역 채용공고
@@ -797,14 +910,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 2, '[부산은행] 창구 텔러 (신입)',
+    'job', 23, '[부산은행] 창구 텔러 (신입)',
     '부산은행 영업점 창구 텔러 채용. 금융권 경험 우대. 정규직 전환 가능.',
     'busan_busanjin', '["경력무관", "신입"]', '[]',
     NULL, 'Y',
     2800, 3500, SYSDATE + 20, 'ACTIVE',
-    '["금융·보험"]', '["중견기업"]', '["정규직"]', '["주 5일(월~금)"]'
+    '["금융·보험"]', '["중견기업"]', '["정규직"]', '["주 5일(월~금)"]',
+    340, SYSDATE - 19, '051-809-2000'
 );
 
 INSERT INTO POST (
@@ -812,14 +927,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 1, '[대구은행] 개인영업 담당자',
+    'job', 24, '[대구은행] 개인영업 담당자',
     '대구은행 PB센터 개인영업 담당. 금융상품 판매 및 자산관리. 인센티브 별도.',
-    'daegu_junggu', '["경력"]', '["2년", "3년", "4년"]',
+    'daegu_jung', '["경력"]', '["2년", "3년", "4년"]',
     'college_2_3', 'N',
     3200, 5000, SYSDATE + 25, 'ACTIVE',
-    '["금융·보험"]', '["중견기업"]', '["정규직"]', '["주 5일(월~금)"]'
+    '["금융·보험"]', '["중견기업"]', '["정규직"]', '["주 5일(월~금)"]',
+    510, SYSDATE - 17, '053-756-2000'
 );
 
 INSERT INTO POST (
@@ -827,14 +944,16 @@ INSERT INTO POST (
     job_region, job_career_type, job_career_years,
     job_education, job_education_exclude,
     job_salary_min, job_salary_max, job_deadline, job_status,
-    job_industries, job_company_types, job_work_types, job_work_days
+    job_industries, job_company_types, job_work_types, job_work_days,
+    view_cnt, created_at, company_phone
 ) VALUES (
-    'job', 2, '[인천공항공사] 시설관리 직원',
+    'job', 25, '[인천공항공사] 시설관리 직원',
     '인천국제공항 시설관리팀. 전기/기계 자격증 소지자 우대. 3교대 근무.',
-    'incheon_junggu', '["경력"]', '["3년", "4년", "5년"]',
+    'incheon_jung', '["경력"]', '["3년", "4년", "5년"]',
     'college_2_3', 'N',
-    3800, 5500, SYSDATE + 15, 'ACTIVE',
-    '["건설·건축", "공공기관"]', '["공기업"]', '["정규직"]', '["교대근무"]'
+    3800, 5500, SYSDATE + 2, 'ACTIVE',
+    '["건설·건축", "공공기관"]', '["공기업"]', '["정규직"]', '["교대근무"]',
+    770, SYSDATE - 20, '032-741-2114'
 );
 
 COMMIT;

@@ -491,11 +491,6 @@ const BoardJobDetailPage = () => {
                     {job.jobIndustries[0]}
                   </span>
                 )}
-                {job.companyPhone && (
-                  <span className="company-card-phone">
-                    📞 {job.companyPhone}
-                  </span>
-                )}
               </div>
             </div>
           </div>

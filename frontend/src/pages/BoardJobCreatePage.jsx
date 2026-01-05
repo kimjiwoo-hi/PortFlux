@@ -140,6 +140,10 @@ const BoardJobCreatePage = () => {
   const validate = useCallback(() => {
     const newErrors = {};
 
+    if (!formData.companyPhone.trim()) {
+      newErrors.companyPhone = "문의 전화번호를 입력해주세요.";
+    }
+
     if (!formData.title.trim()) {
       newErrors.title = "채용공고 제목을 입력해주세요.";
     } else if (formData.title.length > 100) {
@@ -307,7 +311,7 @@ const BoardJobCreatePage = () => {
 
             {/* 문의 전화번호 */}
             <div className="form-group">
-              <label>문의 전화번호</label>
+              <label className="required">문의 전화번호</label>
               <input
                 type="tel"
                 name="companyPhone"
@@ -315,7 +319,11 @@ const BoardJobCreatePage = () => {
                 onChange={handleChange}
                 placeholder="예: 02-1234-5678 또는 010-1234-5678"
                 maxLength={20}
+                className={errors.companyPhone ? "error" : ""}
               />
+              {errors.companyPhone && (
+                <span className="error-message">{errors.companyPhone}</span>
+              )}
               <small className="help-text">
                 지원자가 문의할 수 있는 전화번호를 입력하세요
               </small>
@@ -576,6 +584,25 @@ const BoardJobCreatePage = () => {
                       }
                     />
                     <span className="checkbox-text">{industry.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* 기업형태 */}
+            <div className="form-group">
+              <label>기업형태</label>
+              <div className="checkbox-group wrap">
+                {companyTypes.map((type) => (
+                  <label key={type.value} className="checkbox-item">
+                    <input
+                      type="checkbox"
+                      checked={formData.jobCompanyTypes.includes(type.value)}
+                      onChange={() =>
+                        handleMultiSelect("jobCompanyTypes", type.value)
+                      }
+                    />
+                    <span className="checkbox-text">{type.label}</span>
                   </label>
                 ))}
               </div>

@@ -259,9 +259,19 @@ function RegisterPage() {
   };
 
   const handleRegister = async () => {
-    if (!userId || !email || !password || !passwordCheck || !userName || !nickname || !phoneNumber) {
+    // 개인회원과 기업회원 구분하여 필수 항목 검증
+    if (isIndividual) {
+      // 개인회원: userName(성함) 필수
+      if (!userId || !email || !password || !passwordCheck || !userName || !nickname || !phoneNumber) {
         alert("모든 필수 항목을 입력해주세요."); return;
+      }
+    } else {
+      // 기업회원: userName 불필요, nickname(기업명)만 필수
+      if (!userId || !email || !password || !passwordCheck || !nickname || !phoneNumber) {
+        alert("모든 필수 항목을 입력해주세요."); return;
+      }
     }
+
     if (!isAuthVerified) { alert("이메일 인증을 완료해주세요."); return; }
     if (isIdAvailable !== true) { alert("아이디 중복 확인을 해주세요."); return; }
     if (isNicknameAvailable !== true) { alert("닉네임 중복 확인을 해주세요."); return; }
@@ -353,15 +363,30 @@ function RegisterPage() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">성함 및 닉네임</label>
-            <input type="text" className="reg-input" placeholder="이름을 입력하세요" value={userName} onChange={(e) => setUserName(e.target.value)} />
-            <div className="input-with-btn" style={{ marginTop: "10px" }}>
-              <input type="text" className="reg-input"
-                     placeholder="닉네임을 입력하세요" value={nickname} onChange={handleNicknameChange} />
-              <button className="btn-small" onClick={handleCheckNickname}>중복확인</button>
-            </div>
-            {isNicknameAvailable === true && <span className="valid-msg">사용 가능한 닉네임입니다.</span>}
-            {isNicknameAvailable === false && <span className="error-msg">이미 사용중인 닉네임입니다.</span>}
+            {isIndividual ? (
+              <>
+                <label className="form-label">성함 및 닉네임</label>
+                <input type="text" className="reg-input" placeholder="이름을 입력하세요" value={userName} onChange={(e) => setUserName(e.target.value)} />
+                <div className="input-with-btn" style={{ marginTop: "10px" }}>
+                  <input type="text" className="reg-input"
+                         placeholder="닉네임을 입력하세요" value={nickname} onChange={handleNicknameChange} />
+                  <button className="btn-small" onClick={handleCheckNickname}>중복확인</button>
+                </div>
+                {isNicknameAvailable === true && <span className="valid-msg">사용 가능한 닉네임입니다.</span>}
+                {isNicknameAvailable === false && <span className="error-msg">이미 사용중인 닉네임입니다.</span>}
+              </>
+            ) : (
+              <>
+                <label className="form-label">기업명</label>
+                <div className="input-with-btn">
+                  <input type="text" className="reg-input"
+                         placeholder="기업명을 입력하세요" value={nickname} onChange={handleNicknameChange} />
+                  <button className="btn-small" onClick={handleCheckNickname}>중복확인</button>
+                </div>
+                {isNicknameAvailable === true && <span className="valid-msg">사용 가능한 기업명입니다.</span>}
+                {isNicknameAvailable === false && <span className="error-msg">이미 사용중인 기업명입니다.</span>}
+              </>
+            )}
           </div>
 
           <div className="form-group">

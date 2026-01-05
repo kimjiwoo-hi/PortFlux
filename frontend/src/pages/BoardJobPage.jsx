@@ -51,7 +51,7 @@ const BoardJobPage = () => {
 
   // 페이징
   const [currentPage, setCurrentPage] = useState(0);
-  const pageSize = 20;
+  const pageSize = 10;
 
   // 필터 상태
   const [filters, setFilters] = useState({
