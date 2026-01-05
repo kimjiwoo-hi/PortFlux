@@ -31,32 +31,39 @@ public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final GoogleApi googleApi;
 
-    // [추가] UserDetailsService 인터페이스의 필수 구현 메서드
     @Override
-    @Transactional(readOnly = true)
-    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-        // 1. 먼저 일반 사용자 테이블에서 검색
-        UserBean user = userRepository.findByUserId(userId);
-        if (user != null) {
-            return new org.springframework.security.core.userdetails.User(
-                user.getUserId(),
-                user.getUserPw(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
-            );
-        }
-
-        // 2. 일반 사용자가 없으면 기업 사용자 테이블에서 검색
-        CompanyUserBean company = companyUserMapper.getCompanyUserInfo(userId);
-        if (company != null) {
-            return new org.springframework.security.core.userdetails.User(
-                company.getCompanyId(),
-                company.getCompanyPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_COMPANY"))
-            );
-        }
-
-        throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + userId);
+@Transactional(readOnly = true)
+public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+    System.out.println(">>> loadUserByUsername 호출됨: " + userId);
+    
+    // 1. 먼저 일반 유저 테이블에서 조회
+    UserBean user = userRepository.findByUserId(userId);
+    System.out.println(">>> 일반유저 조회 결과: " + (user != null ? "찾음" : "없음"));
+    
+    if (user != null) {
+        return new org.springframework.security.core.userdetails.User(
+            user.getUserId(),
+            user.getUserPw(),
+            Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+        );
     }
+    
+    // 2. 일반 유저가 없으면 기업 유저 테이블에서 조회
+    System.out.println(">>> 기업유저 조회 시작: " + userId);
+    CompanyUserBean company = companyUserMapper.getCompanyUserInfo(userId);
+    System.out.println(">>> 기업유저 조회 결과: " + (company != null ? "찾음" : "없음"));
+    
+    if (company != null) {
+        return new org.springframework.security.core.userdetails.User(
+            company.getCompanyId(),
+            company.getCompanyPassword(),
+            Collections.singletonList(new SimpleGrantedAuthority("ROLE_COMPANY"))
+        );
+    }
+    
+    // 3. 둘 다 없으면 예외
+    throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + userId);
+}
 
     @Transactional
     public void registerUser(UserRegisterBean registerBean) {
@@ -179,22 +186,31 @@ public class UserService implements UserDetailsService {
         return (userMapper.checkIdDuplicate(userId) + companyUserMapper.checkCompanyIdDuplicate(userId)) > 0; 
     }
 
-    public UserBean getUserInfo(String userId) { 
-        UserBean user = userMapper.getUserInfo(userId); 
-        if (user == null) {
-            CompanyUserBean company = companyUserMapper.getCompanyUserInfo(userId);
-            if (company != null) {
-                user = new UserBean();
-                if (company.getCompanyNum() != null) {
-                    user.setUserNum(company.getCompanyNum().intValue());
-                }
-                user.setUserId(company.getCompanyId());
-                user.setUserNickname(company.getCompanyName());
-                user.setUserEmail(company.getCompanyEmail());
+public UserBean getUserInfo(String userId) {
+    System.out.println(">>> UserService.getUserInfo 호출됨: " + userId);
+    
+    UserBean user = userMapper.getUserInfo(userId);
+    System.out.println(">>> userMapper.getUserInfo 결과: " + (user != null ? "찾음" : "없음"));
+    
+    if (user == null) {
+        CompanyUserBean company = companyUserMapper.getCompanyUserInfo(userId);
+        System.out.println(">>> companyUserMapper.getCompanyUserInfo 결과: " + (company != null ? "찾음" : "없음"));
+        
+        if (company != null) {
+            user = new UserBean();
+            if (company.getCompanyNum() != null) {
+                user.setUserNum(company.getCompanyNum().intValue());
             }
+            user.setUserId(company.getCompanyId());
+            user.setUserNickname(company.getCompanyName());
+            user.setUserEmail(company.getCompanyEmail());
+            System.out.println(">>> 기업회원 UserBean 변환 완료");
         }
-        return user;
     }
+    
+    System.out.println(">>> getUserInfo 최종 반환: " + (user != null ? "있음" : "없음"));
+    return user;
+}
 
     public UserBean findByNameAndEmail(String name, String email) { 
         return userMapper.findByNameAndEmail(name, email); 
@@ -202,6 +218,12 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public void updatePassword(String userId, String newPassword) {
+        // 이전 비밀번호와 동일한지 체크
+        UserBean user = userRepository.findByUserId(userId);
+        if (user != null && passwordEncoder.matches(newPassword, user.getUserPw())) {
+            throw new RuntimeException("이전 비밀번호와 동일합니다.");
+        }
+
         String encodedPassword = passwordEncoder.encode(newPassword);
         userMapper.updatePassword(userId, encodedPassword);
     }

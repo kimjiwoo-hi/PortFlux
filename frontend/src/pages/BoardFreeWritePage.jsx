@@ -12,7 +12,9 @@ const BoardFreeWritePage = () => {
   const [isEditMode] = useState(!!postToEdit);
   const [title, setTitle] = useState(postToEdit ? postToEdit.title : "");
   const [content, setContent] = useState(postToEdit ? postToEdit.content : "");
-  const [isNotice, setIsNotice] = useState(postToEdit ? postToEdit.boardType === 'notice' : false);
+  // 공지사항 체크박스: 새 글 작성시 무조건 false (체크 해제)
+  // 수정시에만 기존 boardType 사용하되, 관리자 글이 자동으로 notice로 표시되는 문제 방지
+  const [isNotice, setIsNotice] = useState(false);
   
   // [린트 해결] 변수명을 대문자로 변경하고 실제 로직에서 사용함
   const [USER_ROLE] = useState(() => {

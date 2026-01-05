@@ -2,13 +2,15 @@ package com.portflux.backend.service;
 
 import com.portflux.backend.dto.CommentDto;
 import com.portflux.backend.beans.UserBean;
+import com.portflux.backend.beans.CompanyUserBean;
 import com.portflux.backend.mapper.CommentMapper;
 import com.portflux.backend.mapper.UserMapper;
+import com.portflux.backend.mapper.CompanyUserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Base64;  // ✅ import 추가
+import java.util.Base64;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -16,12 +18,14 @@ import java.util.NoSuchElementException;
 public class CommentService {
 
     private final CommentMapper commentMapper;
-    private final UserMapper userMapper;  // ✅ final 선언
+    private final UserMapper userMapper;
+    private final CompanyUserMapper companyUserMapper;
 
     @Autowired
-    public CommentService(CommentMapper commentMapper, UserMapper userMapper) {  // ✅ 생성자에 UserMapper 추가
+    public CommentService(CommentMapper commentMapper, UserMapper userMapper, CompanyUserMapper companyUserMapper) {
         this.commentMapper = commentMapper;
-        this.userMapper = userMapper;  // ✅ 초기화
+        this.userMapper = userMapper;
+        this.companyUserMapper = companyUserMapper;
     }
 
     /**
@@ -29,22 +33,26 @@ public class CommentService {
      */
     public List<CommentDto> getCommentsByPostId(int postId) {
         List<CommentDto> comments = commentMapper.findCommentsByPostId(postId);
-        
-        // ✅ 각 댓글 작성자의 이미지를 Base64로 변환
+
         for (CommentDto comment : comments) {
             UserBean user = userMapper.selectUserByNum(comment.getUserNum());
             if (user != null) {
-                // 프로필 이미지 Base64 변환
+                // 일반 회원
                 if (user.getUserImage() != null) {
                     String base64Image = Base64.getEncoder().encodeToString(user.getUserImage());
                     comment.setUserImageBase64(base64Image);
                 }
-                // 닉네임 최신 정보로 업데이트
                 comment.setUserNickname(user.getUserNickname());
+            } else {
+                // 기업 회원 조회
+                CompanyUserBean company = companyUserMapper.getCompanyUserByNum(comment.getUserNum());
+                if (company != null) {
+                    comment.setUserNickname(company.getCompanyName());
+                }
             }
         }
-        
-        return comments;  // ✅ 수정된 리스트 반환
+
+        return comments;
     }
 
     /**
@@ -56,10 +64,10 @@ public class CommentService {
         comment.setPostId(postId);
         comment.setUserNum(userNum);
         comment.setCommentContent(content);
-        
+
         commentMapper.addComment(comment);
-        
-        // ✅ 작성자 이미지 포함하여 반환
+
+        // 작성자 정보 조회
         UserBean user = userMapper.selectUserByNum(userNum);
         if (user != null) {
             comment.setUserNickname(user.getUserNickname());
@@ -67,8 +75,14 @@ public class CommentService {
                 String base64Image = Base64.getEncoder().encodeToString(user.getUserImage());
                 comment.setUserImageBase64(base64Image);
             }
+        } else {
+            // 기업 회원 조회
+            CompanyUserBean company = companyUserMapper.getCompanyUserByNum(userNum);
+            if (company != null) {
+                comment.setUserNickname(company.getCompanyName());
+            }
         }
-        
+
         return comment;
     }
 
