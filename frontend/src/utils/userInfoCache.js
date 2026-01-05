@@ -50,7 +50,8 @@ export const fetchUserInfo = async (forceRefresh = false) => {
   const token = storage.getItem("token");
 
   try {
-    const response = await fetch(`/api/user/info/${userId}`, {
+    // [수정] 절대 경로로 변경
+    const response = await fetch(`http://localhost:8080/api/user/info/${userId}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'

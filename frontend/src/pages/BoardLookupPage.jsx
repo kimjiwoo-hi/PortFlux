@@ -3,10 +3,13 @@ import SearchIcon from "../assets/search.png";
 import cartIcon from "../assets/cartIcon.png";
 import bookmarkIcon from "../assets/Bookmark.png";
 import bookmarkFilledIcon from "../assets/FilldBookmark.png";
-import { useState, useEffect } from "react";
+import binheartIcon from "../assets/binheart.png";
+import eyeIcon from "../assets/Eye.png";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { tagData, tagSearchMap } from "../database/taglist";
 import axios from "axios";
+import UserMiniPopover from "../components/UserMiniPopover";
 
 function BoardLookupPage() {
   const [selectedTags, setSelectedTags] = useState({});
@@ -18,8 +21,31 @@ function BoardLookupPage() {
   const navigate = useNavigate();
   const [showSaveToast, setShowSaveToast] = useState(false);
   const [saveToastMessage, setSaveToastMessage] = useState("");
-  // ✅ 장바구니 토스트 state 추가
   const [showCartToast, setShowCartToast] = useState(false);
+  // 사용자 프로필 popover state
+  const [hoveredAuthor, setHoveredAuthor] = useState(null);
+  const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });
+  const popoverHoverTimeout = useRef(null);
+  const [isPopoverHovered, setIsPopoverHovered] = useState(false);
+  const currentAuthorRef = useRef(null);
+
+  // 스크롤 시 팝오버 위치 업데이트
+  useEffect(() => {
+    const updatePopoverPosition = () => {
+      if (hoveredAuthor && currentAuthorRef.current) {
+        const rect = currentAuthorRef.current.getBoundingClientRect();
+        setPopoverPosition({
+          top: rect.bottom + 10,
+          left: rect.left + rect.width / 2 - 130,
+        });
+      }
+    };
+
+    if (hoveredAuthor) {
+      window.addEventListener('scroll', updatePopoverPosition, true);
+      return () => window.removeEventListener('scroll', updatePopoverPosition, true);
+    }
+  }, [hoveredAuthor]);
 
   // 게시글 목록 로드
   useEffect(() => {
@@ -58,9 +84,9 @@ function BoardLookupPage() {
             title: post.title,
             author: post.userNickname,
             imageUrl: imageUrl,
-            price: post.price, // Add price
-            likes: 0, // TODO: 좋아요 기능 추가 시 구현
-            views: post.viewCnt,
+            price: post.price,
+            likes: post.likeCnt || 0,
+            views: post.viewCnt || 0,
             isLiked: false,
             tags: tagsArray,
           };
@@ -96,13 +122,15 @@ function BoardLookupPage() {
               withCredentials: true,
             }
           );
-          if (response.data.isSaved) {
+          console.log(`Post ${post.id} save status:`, response.data); // 디버깅용
+          if (response.data.isSaved === true) {  // 명시적 비교
             savedPostIds.add(post.id);
           }
         } catch (err) {
           console.error(`저장 상태 확인 실패 (postId: ${post.id}):`, err);
         }
       }
+      console.log('Saved post IDs:', Array.from(savedPostIds)); // 디버깅용
       setSavedPosts(savedPostIds);
     };
 
@@ -154,7 +182,6 @@ function BoardLookupPage() {
     navigate("/board/write");
   };
 
-  // ✅ 장바구니 추가 - 토스트 메시지 포함
   const handleAddToCart = async (e, post) => {
     e.stopPropagation();
 
@@ -183,7 +210,6 @@ function BoardLookupPage() {
         }
       );
 
-      // ✅ alert 대신 토스트 표시
       setShowCartToast(true);
       setTimeout(() => setShowCartToast(false), 3000);
     } catch (err) {
@@ -202,7 +228,6 @@ function BoardLookupPage() {
     }
   };
 
-  // 북마크 토글 핸들러
   const handleToggleSave = async (e, post) => {
     e.stopPropagation();
 
@@ -217,6 +242,8 @@ function BoardLookupPage() {
     const loggedInUser = JSON.parse(storedUser);
 
     try {
+      console.log('Toggling save for post:', post.id); // 디버깅용
+      
       const response = await axios.post(
         `http://localhost:8080/api/boardlookup/${post.id}/save`,
         null,
@@ -226,16 +253,19 @@ function BoardLookupPage() {
         }
       );
 
+      console.log('Save toggle response:', response.data); // 디버깅용
+
       if (response.data.success) {
         setSavedPosts((prev) => {
           const newSet = new Set(prev);
-          if (response.data.isSaved) {
+          if (response.data.isSaved === true) {  // 명시적 비교
             newSet.add(post.id);
             setSaveToastMessage("게시글이 저장되었습니다! 🔖");
           } else {
             newSet.delete(post.id);
             setSaveToastMessage("저장이 취소되었습니다.");
           }
+          console.log('Updated saved posts:', Array.from(newSet)); // 디버깅용
           return newSet;
         });
 
@@ -244,12 +274,63 @@ function BoardLookupPage() {
       }
     } catch (err) {
       console.error("저장 실패:", err);
+      console.error("Error response:", err.response?.data); // 디버깅용
       alert("저장 처리에 실패했습니다.");
     }
   };
 
   const handlePostClick = (postId) => {
     navigate(`/board/lookup/${postId}`);
+  };
+
+  // 작성자 닉네임 호버 핸들러
+  const handleAuthorMouseEnter = (e, author) => {
+    if (popoverHoverTimeout.current) {
+      clearTimeout(popoverHoverTimeout.current);
+    }
+
+    // Store the current author element reference
+    currentAuthorRef.current = e.currentTarget;
+
+    // Calculate new position (viewport-relative for fixed positioning)
+    const rect = e.currentTarget.getBoundingClientRect();
+    const newPosition = {
+      top: rect.bottom + 10, // viewport-relative position
+      left: rect.left + rect.width / 2 - 130, // popover 중앙 정렬
+    };
+
+    // If switching to different user, hide first then update position
+    if (hoveredAuthor && hoveredAuthor !== author) {
+      setHoveredAuthor(null);
+      setTimeout(() => {
+        setPopoverPosition(newPosition);
+        setHoveredAuthor(author);
+      }, 50);
+    } else {
+      setPopoverPosition(newPosition);
+      setHoveredAuthor(author);
+    }
+  };
+
+  const handleAuthorMouseLeave = () => {
+    if (!isPopoverHovered) {
+      popoverHoverTimeout.current = setTimeout(() => {
+        setHoveredAuthor(null);
+      }, 100);
+    }
+  };
+
+  const handlePopoverMouseEnter = () => {
+    if (popoverHoverTimeout.current) {
+      clearTimeout(popoverHoverTimeout.current);
+    }
+    setIsPopoverHovered(true);
+  };
+
+  const handlePopoverMouseLeave = () => {
+    setIsPopoverHovered(false);
+    setHoveredAuthor(null);
+    currentAuthorRef.current = null;
   };
 
   const filteredPosts = posts.filter((post) => {
@@ -297,11 +378,9 @@ function BoardLookupPage() {
           <div className="tag-search-circle">
             <img src={SearchIcon} alt="Search Icon" className="search-icon" />
           </div>
-          {/* 저장 토스트 */}
           <div className={`cart-toast ${showSaveToast ? "show" : ""}`}>
             {saveToastMessage}
           </div>
-          {/* ✅ 장바구니 토스트 추가 */}
           <div className={`cart-toast ${showCartToast ? "show" : ""}`}>
             장바구니에 담겼습니다! 🛒
           </div>
@@ -385,23 +464,48 @@ function BoardLookupPage() {
                 />
               </div>
               <div className="board-item-info">
-                <h4
-                  className="info-title"
-                  onClick={() => handlePostClick(post.id)}
-                >
-                  {post.title}
-                </h4>
-                <span
-                  className="info-author"
-                  onClick={() => navigate(`/mypage/${post.author}`)}
-                >
-                  {post.author}
-                </span>
+                <div className="info-title-row">
+                  <h4
+                    className="info-title"
+                    onClick={() => handlePostClick(post.id)}
+                  >
+                    {post.title}
+                  </h4>
+                  <div className="info-stats">
+                    <span className="stat-item">
+                      <img src={binheartIcon} alt="likes" className="stat-icon" />
+                      {post.likes}
+                    </span>
+                    <span className="stat-item">
+                      <img src={eyeIcon} alt="views" className="stat-icon" />
+                      {post.views}
+                    </span>
+                  </div>
+                </div>
+                <div className="info-row">
+                  <span
+                    className="info-author"
+                    onClick={() => navigate(`/mypage/${post.author}`)}
+                    onMouseEnter={(e) => handleAuthorMouseEnter(e, post.author)}
+                    onMouseLeave={handleAuthorMouseLeave}
+                  >
+                    {post.author}
+                  </span>
+                </div>
               </div>
             </div>
           )
         )}
       </main>
+
+      {/* 사용자 프로필 미니 팝오버 */}
+      <UserMiniPopover
+        nickname={hoveredAuthor}
+        isVisible={!!hoveredAuthor}
+        position={popoverPosition}
+        onMouseEnter={handlePopoverMouseEnter}
+        onMouseLeave={handlePopoverMouseLeave}
+      />
     </div>
   );
 }

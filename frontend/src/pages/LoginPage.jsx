@@ -43,15 +43,25 @@ function LoginPage() {
           sessionStorage.removeItem("prevPage");
         } else {
           localStorage.setItem("isLoggedIn", "true");
-          localStorage.setItem("userId", json.user?.userId || json.userId);
-          localStorage.setItem("userNickname", json.user?.userNickname || json.nickname);
-          localStorage.setItem("userNum", json.user?.userNum || json.userNum);
+          localStorage.setItem("userId", json.user?.userId || json.id);
+          localStorage.setItem("userNickname", json.user?.userNickname || json.name);
+          localStorage.setItem("userNum", json.user?.userNum || json.num);
           localStorage.setItem("role", json.role || "USER");
-          localStorage.setItem("token", json.token); // JWT 토큰 저장
+          localStorage.setItem("memberType", json.memberType || "user");
+          localStorage.setItem("token", json.token);
 
-          // user 객체 저장
+          // user 객체 저장, 없으면 기본 정보로 생성
           if (json.user) {
             localStorage.setItem("user", JSON.stringify(json.user));
+          } else {
+            const userObj = {
+              userId: json.id,
+              userNickname: json.name,
+              userNum: json.num,
+              role: json.role,
+              memberType: json.memberType
+            };
+            localStorage.setItem("user", JSON.stringify(userObj));
           }
 
           const targetPath = getPreviousPage();
@@ -100,9 +110,19 @@ function LoginPage() {
         storage.setItem("userNum", json.num);
         storage.setItem("token", json.token); // JWT 토큰 저장
 
-        // user 객체가 있으면 저장
+        // user 객체가 있으면 저장, 없으면 기본 정보로 생성
         if (json.user) {
           storage.setItem("user", JSON.stringify(json.user));
+        } else {
+          // 기업 로그인 등 user 객체가 없는 경우 기본 정보로 생성
+          const userObj = {
+            userId: json.id,
+            userNickname: json.name,
+            userNum: json.num,
+            role: json.role,
+            memberType: json.memberType
+          };
+          storage.setItem("user", JSON.stringify(userObj));
         }
 
         const targetPath = location.state?.from || "/";

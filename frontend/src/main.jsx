@@ -20,11 +20,11 @@ import BoardJobEditPage from "./pages/BoardJobEditPage.jsx";
 import BoardLookup from "./pages/BoardLookupPage.jsx";
 import BoardLookupWrite from "./pages/BoardLookupWritePage.jsx";
 import BoardLookupRead from "./pages/BoardLookupRead.jsx";
+import BoardLookupEditPage from "./pages/BoardLookupEditPage.jsx";
 import Cart from "./pages/CartPage.jsx";
 // ★ 신규 추가: 결제 페이지 임포트
 import PaymentPage from "./pages/PaymentPage.jsx"; 
 import Chat from "./pages/ChattingPage.jsx";
-import MyPage from "./pages/MyPage.jsx";
 import OrderResultPage from "./pages/OrderResultPage.jsx";
 import OrderListPage from "./pages/OrderListPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
@@ -32,10 +32,6 @@ import RegisterPage from "./pages/RegisterPage.jsx";
 import FindIdPage from "./pages/FindIdPage.jsx";
 import FindPasswordPage from "./pages/FindPasswordPage.jsx";
 import SuccessPage from "./pages/SuccessPage.jsx";
-import MyInfo from "./pages/MyInfo.jsx";
-import MyPosts from "./pages/MyPosts.jsx";
-import MyComments from "./pages/MyComments.jsx";
-import SavedPosts from "./pages/SavedPosts.jsx";
 import UserProfile from "./pages/UserProfile.jsx";
 
 const router = createBrowserRouter([
@@ -54,6 +50,10 @@ const router = createBrowserRouter([
       {
         path: "/board/lookup/:postId",
         element: <BoardLookupRead />,
+      },
+      {
+        path: "/board/lookup/edit/:postId",
+        element: <BoardLookupEditPage />,
       },
     ],
   },
@@ -92,24 +92,6 @@ const router = createBrowserRouter([
       {
         path: "/chat",
         element: <Chat />,
-      },
-      {
-        path: "/mypage",
-        element: <MyPage />,
-        children: [
-          {
-            path: "myposts",
-            element: <MyPosts />,
-          },
-          {
-            path: "mycomments",
-            element: <MyComments />,
-          },
-          {
-            path: "savedposts",
-            element: <SavedPosts />,
-          },
-        ],
       },
       {
         path: "/order-result",

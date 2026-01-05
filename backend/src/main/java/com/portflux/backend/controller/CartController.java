@@ -4,6 +4,8 @@ import com.portflux.backend.model.Cart;
 import com.portflux.backend.service.CartService;
 import com.portflux.backend.repository.UserRepository;
 import com.portflux.backend.beans.UserBean;
+import com.portflux.backend.beans.CompanyUserBean;
+import com.portflux.backend.mapper.CompanyUserMapper;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,15 +23,16 @@ public class CartController {
 
     private final CartService cartService;
     private final UserRepository userRepository;
+    private final CompanyUserMapper companyUserMapper;
 
     @GetMapping
     public ResponseEntity<CartResponse> getCart(@AuthenticationPrincipal UserDetails userDetails) {
-        UserBean user = userRepository.findByUserId(userDetails.getUsername());
-        if (user == null) {
+        Long userNum = getUserNum(userDetails.getUsername());
+        if (userNum == null) {
             return ResponseEntity.status(404).build();
         }
 
-        List<Cart> cartItems = cartService.getCartItems(Long.valueOf(user.getUserNum()));
+        List<Cart> cartItems = cartService.getCartItems(userNum);
 
         List<CartItemResponse> itemResponses = cartItems.stream()
                 .map(item -> new CartItemResponse(
@@ -46,12 +49,12 @@ public class CartController {
     public ResponseEntity<CartItemResponse> addItemToCart(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody AddItemRequest req) {
-        UserBean user = userRepository.findByUserId(userDetails.getUsername());
-        if (user == null) {
+        Long userNum = getUserNum(userDetails.getUsername());
+        if (userNum == null) {
             return ResponseEntity.status(404).build();
         }
 
-        Cart cartItem = cartService.addOrUpdateItem(Long.valueOf(user.getUserNum()), req.getProductId());
+        Cart cartItem = cartService.addOrUpdateItem(userNum, req.getProductId());
         CartItemResponse res = new CartItemResponse(cartItem.getId(), cartItem.getUserId(), cartItem.getPostId());
         return ResponseEntity.ok(res);
     }
@@ -62,6 +65,18 @@ public class CartController {
         return ResponseEntity.noContent().build();
     }
 
+    // 일반 유저 또는 기업 유저의 userNum 가져오기
+    private Long getUserNum(String username) {
+        UserBean user = userRepository.findByUserId(username);
+        if (user != null) {
+            return Long.valueOf(user.getUserNum());
+        }
+        CompanyUserBean company = companyUserMapper.getCompanyUserInfo(username);
+        if (company != null) {
+            return company.getCompanyNum();
+        }
+        return null;
+    }
 
     // --- DTOs ---
     @Data

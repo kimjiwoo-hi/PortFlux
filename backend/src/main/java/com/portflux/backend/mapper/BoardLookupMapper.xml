@@ -23,9 +23,9 @@
         <result property="userImage" column="user_image"/>
     </resultMap>
 
-    <!-- 게시글 상세 조회 -->
+    <!-- 게시글 상세 조회 (일반회원 + 기업회원) -->
     <select id="findPostById" parameterType="int" resultMap="BoardLookupPostResultMap">
-        SELECT 
+        SELECT
             p.post_id,
             p.board_type,
             p.user_num,
@@ -39,17 +39,18 @@
             p.download_cnt,
             p.post_file,
             p.tags,
-            u.user_nickname,
+            COALESCE(u.user_nickname, c.company_name) as user_nickname,
             u.user_image
         FROM POST p
         LEFT JOIN USERS u ON p.user_num = u.user_num
+        LEFT JOIN COMPANY c ON p.user_num = c.company_num
         WHERE p.post_id = #{postId}
           AND p.board_type = 'lookup'
     </select>
 
-    <!-- 전체 게시글 목록 조회 -->
+    <!-- 전체 게시글 목록 조회 (일반회원 + 기업회원) -->
     <select id="findAllLookupPosts" resultMap="BoardLookupPostResultMap">
-        SELECT 
+        SELECT
             p.post_id,
             p.board_type,
             p.user_num,
@@ -63,10 +64,11 @@
             p.download_cnt,
             p.post_file,
             p.tags,
-            u.user_nickname,
+            COALESCE(u.user_nickname, c.company_name) as user_nickname,
             u.user_image
         FROM POST p
         LEFT JOIN USERS u ON p.user_num = u.user_num
+        LEFT JOIN COMPANY c ON p.user_num = c.company_num
         WHERE p.board_type = 'lookup'
         ORDER BY p.created_at DESC
     </select>
@@ -117,7 +119,7 @@
             title = #{title},
             content = #{content},
             price = #{price},
-            ai_summary = #{aiSummary},
+            ai_summary = #{aiSummary, jdbcType=VARCHAR},
             <if test="postFile != null">
                 post_file = #{postFile},
             </if>
@@ -158,7 +160,7 @@
         ORDER BY p.created_at DESC
     </select>
 
-    <!-- 닉네임으로 사용자의 게시글 목록 조회 -->
+    <!-- 닉네임으로 사용자의 게시글 목록 조회 (일반회원 + 기업회원) -->
     <select id="findPostsByNickname" parameterType="string" resultMap="BoardLookupPostResultMap">
         SELECT
             p.post_id,
@@ -174,11 +176,12 @@
             p.download_cnt,
             p.post_file,
             p.tags,
-            u.user_nickname,
+            COALESCE(u.user_nickname, c.company_name) as user_nickname,
             u.user_image
         FROM POST p
         LEFT JOIN USERS u ON p.user_num = u.user_num
-        WHERE u.user_nickname = #{nickname}
+        LEFT JOIN COMPANY c ON p.user_num = c.company_num
+        WHERE u.user_nickname = #{nickname} OR c.company_name = #{nickname}
         ORDER BY p.created_at DESC
     </select>
 
