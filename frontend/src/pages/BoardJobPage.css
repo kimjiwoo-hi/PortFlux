@@ -531,10 +531,27 @@
   gap: 10px;
 }
 
+.company-info-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .company-name {
   font-size: 14px;
   font-weight: 500;
   color: #6b7280;
+}
+
+.company-type {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #6366f1;
+  background-color: #eef2ff;
+  border-radius: 4px;
+  border: 1px solid #c7d2fe;
 }
 
 .job-badges {

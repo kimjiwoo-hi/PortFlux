@@ -19,11 +19,15 @@ export default function OrderResultPage() {
 
   useEffect(() => {
     const handlePaymentResult = async () => {
-      // 1. 결제 실패 체크 (모바일 리다이렉트 시 error_code 존재)
+      // 1. 결제 실패/취소 체크 (모바일 리다이렉트 시 error_code 존재)
       if (errorCode) {
-        console.error("결제 실패:", errorCode, errorMsg);
-        setError(`결제에 실패하였습니다. ${errorMsg || "알 수 없는 오류"}`);
+        console.error("결제 실패/취소:", errorCode, errorMsg);
+        setError(`결제가 취소되었습니다.`);
         setLoading(false);
+        // 3초 후 장바구니로 자동 리다이렉트
+        setTimeout(() => {
+          navigate("/cart");
+        }, 3000);
         return;
       }
 
@@ -31,6 +35,9 @@ export default function OrderResultPage() {
       if (!merchantUid) {
         setError("잘못된 접근입니다. 주문번호가 없습니다.");
         setLoading(false);
+        setTimeout(() => {
+          navigate("/cart");
+        }, 3000);
         return;
       }
 
@@ -96,7 +103,7 @@ export default function OrderResultPage() {
     };
 
     handlePaymentResult();
-  }, [merchantUid, impUid, errorCode, errorMsg]);
+  }, [merchantUid, impUid, errorCode, errorMsg, navigate]);
 
   if (loading) {
     return (
@@ -114,14 +121,15 @@ export default function OrderResultPage() {
       <div className="order-result-page">
         <div className="result-container error">
           <div className="icon-container error-icon">✕</div>
-          <h1>오류 발생</h1>
+          <h1>{error.includes("취소") ? "결제 취소" : "오류 발생"}</h1>
           <p className="error-message">{error}</p>
+          <p className="redirect-message">잠시 후 장바구니 페이지로 이동합니다...</p>
           <div className="action-buttons">
-            <button className="btn-primary" onClick={() => navigate("/")}>
-              홈으로 가기
-            </button>
-            <button className="btn-secondary" onClick={() => navigate("/cart")}>
+            <button className="btn-primary" onClick={() => navigate("/cart")}>
               장바구니로 가기
+            </button>
+            <button className="btn-secondary" onClick={() => navigate("/")}>
+              홈으로 가기
             </button>
           </div>
         </div>
