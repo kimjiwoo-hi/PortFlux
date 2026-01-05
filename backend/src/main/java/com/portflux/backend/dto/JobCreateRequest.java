@@ -23,7 +23,9 @@ public class JobCreateRequest {
     private List<String> jobCompanyTypes;
     private List<String> jobWorkTypes;
     private List<String> jobWorkDays;
-    
+    private String companyLogo; // 기업 로고 이미지 (Base64)
+    private String companyPhone; // 채용공고 문의 전화번호
+
     // Getters and Setters
     public String getTitle() {
         return title;
@@ -143,5 +145,21 @@ public class JobCreateRequest {
 
     public void setJobWorkDays(List<String> jobWorkDays) {
         this.jobWorkDays = jobWorkDays;
+    }
+
+    public String getCompanyLogo() {
+        return companyLogo;
+    }
+
+    public void setCompanyLogo(String companyLogo) {
+        this.companyLogo = companyLogo;
+    }
+
+    public String getCompanyPhone() {
+        return companyPhone;
+    }
+
+    public void setCompanyPhone(String companyPhone) {
+        this.companyPhone = companyPhone;
     }
 }

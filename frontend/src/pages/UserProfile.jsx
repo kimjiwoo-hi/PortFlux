@@ -74,6 +74,7 @@ const UserProfile = () => {
         setIsOwner(owner);
 
         let currentUserInfo = null;
+        let companyUser = false;
 
         // 본인인 경우 전체 정보 API 호출
         if (owner) {
@@ -81,7 +82,7 @@ const UserProfile = () => {
           const user = JSON.parse(storedUser);
           const token = localStorage.getItem("token") || sessionStorage.getItem("token");
           const memberType = localStorage.getItem("memberType") || sessionStorage.getItem("memberType");
-          const companyUser = memberType === "company";
+          companyUser = memberType === "company";
           setIsCompany(companyUser);
 
           let fullInfoResponse;
@@ -156,7 +157,37 @@ const UserProfile = () => {
           axios.get(`/api/boardlookup/user/${endpoint}/${identifier}/comments`)
         ]);
 
-        setPosts(postsResponse.data);
+        let allPosts = postsResponse.data || [];
+
+        // 기업 회원인 경우 작성한 채용공고도 조회
+        if (owner && companyUser) {
+          try {
+            const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+            const jobPostsResponse = await axios.get(
+              `http://localhost:8080/api/jobs/my?page=0&size=100`,
+              {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+                withCredentials: true
+              }
+            );
+            const jobPosts = (jobPostsResponse.data.content || []).map(job => ({
+              ...job,
+              boardType: 'job'  // boardType 명시적으로 추가
+            }));
+            allPosts = [...allPosts, ...jobPosts];
+
+            // 날짜순 정렬 (최신순)
+            allPosts.sort((a, b) => {
+              const dateA = new Date(a.createdAt || a.created_at);
+              const dateB = new Date(b.createdAt || b.created_at);
+              return dateB - dateA;
+            });
+          } catch (err) {
+            console.error("채용공고 조회 실패:", err);
+          }
+        }
+
+        setPosts(allPosts);
         setComments(commentsResponse.data);
 
         // 본인이 아닌 경우 게시글/댓글에서 사용자 정보 추출
@@ -197,6 +228,7 @@ const UserProfile = () => {
             const user = JSON.parse(storedUser);
             const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
+            // 1. boardlookup 저장한 게시글 조회
             const savedIdsResponse = await axios.get(
               `/api/boardlookup/user/${user.userNum}/saved`,
               {
@@ -205,21 +237,58 @@ const UserProfile = () => {
               }
             );
 
-            // ID 배열을 받아서 각 게시글 상세 정보 가져오기
+            // 2. 채용공고 북마크 조회
+            let jobBookmarks = [];
+            try {
+              const jobBookmarksResponse = await axios.get(
+                `http://localhost:8080/api/jobs/bookmarks?page=0&size=100`,
+                {
+                  headers: token ? { Authorization: `Bearer ${token}` } : {},
+                  withCredentials: true
+                }
+              );
+              jobBookmarks = (jobBookmarksResponse.data.content || []).map(job => ({
+                ...job,
+                boardType: 'job'  // boardType 명시적으로 추가
+              }));
+            } catch (err) {
+              console.error("채용공고 북마크 조회 실패:", err);
+            }
+
+            let allSavedPosts = [];
+
+            // boardlookup 게시글 상세 정보 가져오기
             if (savedIdsResponse.data && savedIdsResponse.data.length > 0) {
               const postDetailsPromises = savedIdsResponse.data.map((postId) =>
                 axios.get(`/api/boardlookup/${postId}`, {
                   headers: token ? { Authorization: `Bearer ${token}` } : {},
                   withCredentials: true,
+                }).catch(err => {
+                  console.error(`게시글 ${postId} 조회 실패:`, err);
+                  return null;
                 })
               );
 
               const postDetailsResponses = await Promise.all(postDetailsPromises);
-              const posts = postDetailsResponses.map((res) => res.data.post || res.data);
-              setSavedPosts(posts);
-            } else {
-              setSavedPosts([]);
+              const posts = postDetailsResponses
+                .filter(res => res !== null)
+                .map((res) => res.data.post || res.data);
+              allSavedPosts = [...posts];
             }
+
+            // 채용공고 북마크 추가
+            if (jobBookmarks.length > 0) {
+              allSavedPosts = [...allSavedPosts, ...jobBookmarks];
+            }
+
+            // 날짜순 정렬 (최신순)
+            allSavedPosts.sort((a, b) => {
+              const dateA = new Date(a.createdAt || a.created_at);
+              const dateB = new Date(b.createdAt || b.created_at);
+              return dateB - dateA;
+            });
+
+            setSavedPosts(allSavedPosts);
           } catch (err) {
             console.error("저장한 게시글 조회 실패:", err);
             setSavedPosts([]);
@@ -375,7 +444,7 @@ const UserProfile = () => {
       if (isCompany) {
         // 기업 회원 정보 저장
         const dataToSave = {
-          companyName: editedInfo.userNickname || editedInfo.userName,
+          companyName: editedInfo.userName,
           companyPhone: editedInfo.userPhone,
           companyImage: editedInfo.userImage === "" ? "" : editedInfo.userImage,
           companyBanner: editedInfo.userBanner === "" ? "" : editedInfo.userBanner,
@@ -392,6 +461,25 @@ const UserProfile = () => {
             withCredentials: true
           }
         );
+
+        // 기업명 변경 시 localStorage/sessionStorage 업데이트
+        const storage = localStorage.getItem("isLoggedIn") ? localStorage : sessionStorage;
+        if (storage.getItem("userNickname")) {
+          storage.setItem("userNickname", editedInfo.userName);
+        }
+
+        // user 객체도 업데이트
+        const storedUser = storage.getItem("user");
+        if (storedUser) {
+          try {
+            const user = JSON.parse(storedUser);
+            user.userNickname = editedInfo.userName;
+            user.userName = editedInfo.userName;
+            storage.setItem("user", JSON.stringify(user));
+          } catch (e) {
+            console.error("user 객체 업데이트 실패:", e);
+          }
+        }
       } else {
         // 일반 회원 정보 저장
         const dataToSave = {
@@ -421,9 +509,13 @@ const UserProfile = () => {
       };
 
       setFullUserInfo(updatedInfo);
+
+      // 기업 회원인 경우 userNickname도 userName으로 업데이트
+      const displayNickname = isCompany ? updatedInfo.userName : updatedInfo.userNickname;
+
       setUserInfo({
         userNum: updatedInfo.userNum,
-        userNickname: updatedInfo.userNickname,
+        userNickname: displayNickname,
         userImage: updatedInfo.userImage,
         userBanner: updatedInfo.userBanner
       });
@@ -431,7 +523,7 @@ const UserProfile = () => {
       // 캐시 업데이트
       updateUserInfoCache({
         userName: updatedInfo.userName,
-        userNickname: updatedInfo.userNickname,
+        userNickname: displayNickname,
         userEmail: updatedInfo.userEmail,
         userImage: updatedInfo.userImage,
         userBanner: updatedInfo.userBanner
@@ -442,6 +534,11 @@ const UserProfile = () => {
       setBannerPreview(null);
       setSuccessMessage("정보가 성공적으로 수정되었습니다.");
       setTimeout(() => setSuccessMessage(""), 3000);
+
+      // 닉네임이 변경된 경우 URL도 업데이트
+      if (nickname !== displayNickname) {
+        navigate(`/mypage/${displayNickname}`, { replace: true });
+      }
     } catch (err) {
       console.error(err);
       setError(err.response?.data || "정보 수정에 실패했습니다.");
@@ -751,13 +848,16 @@ const UserProfile = () => {
                   >
                     <div className="post-info-row">
                       <h3 className="post-title">{post.title}</h3>
+                      {post.boardType === 'job' && (
+                        <span className="post-badge">채용</span>
+                      )}
                     </div>
                     <div className="post-bottom-row">
                       <span className="post-date">
                         {new Date(post.createdAt).toLocaleDateString('ko-KR')}
                       </span>
                       <div className="post-meta">
-                        <span>조회 {post.viewCnt}</span>
+                        <span>조회 {post.viewCnt || 0}</span>
                         {post.price && <span className="post-price">{post.price.toLocaleString()}원</span>}
                       </div>
                     </div>
@@ -809,9 +909,11 @@ const UserProfile = () => {
                   <label>{isCompany ? "기업명" : "이름"}</label>
                   <input
                     type="text"
-                    value={fullUserInfo.userName || ""}
-                    disabled
-                    className="input-disabled"
+                    name="userName"
+                    value={isEditing ? (editedInfo.userName || "") : (fullUserInfo.userName || "")}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className={isEditing ? "input-editable" : "input-disabled"}
                   />
                 </div>
 
@@ -844,8 +946,13 @@ const UserProfile = () => {
                     name="userPhone"
                     value={isEditing ? (editedInfo.userPhone || "") : (fullUserInfo.userPhone || "")}
                     onChange={handleChange}
+<<<<<<< HEAD
                     disabled={true}
                     className="input-disabled"
+=======
+                    disabled={!isEditing}
+                    className={isEditing ? "input-editable" : "input-disabled"}
+>>>>>>> b4f3cd3ddd9752f445509642abc023599ca06e9f
                   />
                 </div>
 
@@ -906,17 +1013,20 @@ const UserProfile = () => {
                   <div
                     key={post.postId}
                     className="post-item"
-                    onClick={() => handlePostClick(post.postId, 'lookup')}
+                    onClick={() => handlePostClick(post.postId, post.boardType || 'lookup')}
                   >
                     <div className="post-info-row">
                       <h3 className="post-title">{post.title}</h3>
+                      {post.boardType === 'job' && (
+                        <span className="post-badge">채용</span>
+                      )}
                     </div>
                     <div className="post-bottom-row">
                       <span className="post-date">
                         {new Date(post.createdAt).toLocaleDateString('ko-KR')}
                       </span>
                       <div className="post-meta">
-                        <span>조회 {post.viewCnt}</span>
+                        <span>조회 {post.viewCnt || 0}</span>
                         {post.price && <span className="post-price">{post.price.toLocaleString()}원</span>}
                       </div>
                     </div>

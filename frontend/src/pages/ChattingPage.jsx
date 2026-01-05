@@ -14,8 +14,12 @@ export default function ChatPage({ loginUserNum }) {
 
   useEffect(() => {
     (async () => {
-      const list = await getChatRooms(loginUserNum);
-      setRooms(list);
+      try {
+        const list = await getChatRooms(loginUserNum);
+        setRooms(list);
+      } catch (error) {
+        console.error("Failed to fetch chat rooms:", error);
+      }
     })();
   }, [loginUserNum]);
 
