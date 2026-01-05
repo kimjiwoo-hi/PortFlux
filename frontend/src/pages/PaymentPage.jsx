@@ -133,7 +133,7 @@ function PaymentPage() {
 
       } catch (err) {
         console.error("결제 검증 실패:", err);
-        alert(`결제 검증에 실패했습니다. 결제는 완료되었으나 서버 처리 중 문제가 발생했습니다.\n고객센터로 문의해주세요.`);
+       
         // 결제는 완료되었으므로 주문 결과 페이지로 이동하여 상황 안내
         navigate(`/order-result?merchant_uid=${response.merchant_uid}`);
       }

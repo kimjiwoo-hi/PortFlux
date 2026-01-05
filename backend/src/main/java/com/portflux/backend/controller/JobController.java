@@ -128,11 +128,29 @@ public class JobController {
             filter.setKeyword(keyword);
 
             // JWT 토큰 우선, 없으면 세션에서 사용자 정보 가져오기
-            Long userNum = getUserNumFromJwt(httpRequest);
-            if (userNum == null) {
+            String token = getJwtFromRequest(httpRequest);
+            Long userNum = null;
+            Long companyNum = null;
+
+            if (token != null && jwtTokenProvider.validateToken(token)) {
+                String userType = jwtTokenProvider.getUserTypeFromToken(token);
+                Long num = jwtTokenProvider.getUserNumFromToken(token);
+
+                if ("USER".equals(userType)) {
+                    userNum = num;
+                } else if ("COMPANY".equals(userType)) {
+                    companyNum = num;
+                }
+            } else {
+                // 세션에서 가져오기
                 userNum = (Long) session.getAttribute("userNum");
+                if (userNum == null) {
+                    companyNum = (Long) session.getAttribute("companyNum");
+                }
             }
+
             filter.setUserNum(userNum);
+            filter.setCompanyNum(companyNum);
 
             Map<String, Object> result = jobService.getJobs(filter);
             return ResponseEntity.ok(result);
@@ -150,8 +168,29 @@ public class JobController {
     @GetMapping("/{postId}")
     public ResponseEntity<?> getJobDetail(@PathVariable Long postId, HttpServletRequest httpRequest, HttpSession session) {
         try {
-            Long userNum = (Long) session.getAttribute("userNum");
-            JobDto job = jobService.getJobDetail(postId, userNum);
+            // JWT 토큰 우선, 없으면 세션에서 사용자 정보 가져오기
+            String token = getJwtFromRequest(httpRequest);
+            Long userNum = null;
+            Long companyNumForBookmark = null;
+
+            if (token != null && jwtTokenProvider.validateToken(token)) {
+                String userType = jwtTokenProvider.getUserTypeFromToken(token);
+                Long num = jwtTokenProvider.getUserNumFromToken(token);
+
+                if ("USER".equals(userType)) {
+                    userNum = num;
+                } else if ("COMPANY".equals(userType)) {
+                    companyNumForBookmark = num;
+                }
+            } else {
+                // 세션에서 가져오기
+                userNum = (Long) session.getAttribute("userNum");
+                if (userNum == null) {
+                    companyNumForBookmark = (Long) session.getAttribute("companyNum");
+                }
+            }
+
+            JobDto job = jobService.getJobDetail(postId, userNum, companyNumForBookmark);
 
             if (job == null) {
                 Map<String, Object> error = new HashMap<>();
@@ -353,19 +392,43 @@ public class JobController {
     @PostMapping("/{postId}/bookmark")
     public ResponseEntity<?> toggleBookmark(@PathVariable Long postId, HttpServletRequest httpRequest, HttpSession session) {
         try {
-            // JWT 토큰 우선, 없으면 세션 사용
-            Long userNum = getUserNumFromJwt(httpRequest);
-            if (userNum == null) {
+            // JWT 토큰에서 사용자 타입 확인
+            String token = getJwtFromRequest(httpRequest);
+            Long userNum = null;
+            Long companyNum = null;
+            String userType = null;
+
+            if (token != null && jwtTokenProvider.validateToken(token)) {
+                userType = jwtTokenProvider.getUserTypeFromToken(token);
+                Long num = jwtTokenProvider.getUserNumFromToken(token);
+
+                if ("USER".equals(userType)) {
+                    userNum = num;
+                } else if ("COMPANY".equals(userType)) {
+                    companyNum = num;
+                }
+            } else {
+                // 세션에서 가져오기
                 userNum = (Long) session.getAttribute("userNum");
+                if (userNum == null) {
+                    companyNum = (Long) session.getAttribute("companyNum");
+                }
             }
 
-            if (userNum == null) {
+            // 로그인 여부 확인
+            if (userNum == null && companyNum == null) {
                 Map<String, Object> error = new HashMap<>();
                 error.put("message", "로그인이 필요합니다.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
             }
 
-            boolean bookmarked = jobService.toggleBookmark(userNum, postId);
+            // 북마크 토글 (일반 사용자 또는 기업 회원)
+            boolean bookmarked;
+            if (userNum != null) {
+                bookmarked = jobService.toggleBookmark(userNum, postId);
+            } else {
+                bookmarked = jobService.toggleCompanyBookmark(companyNum, postId);
+            }
 
             Map<String, Object> result = new HashMap<>();
             result.put("bookmarked", bookmarked);
@@ -385,19 +448,42 @@ public class JobController {
     @GetMapping("/{postId}/bookmark/status")
     public ResponseEntity<?> checkBookmarkStatus(@PathVariable Long postId, HttpServletRequest httpRequest, HttpSession session) {
         try {
-            // JWT 토큰 우선, 없으면 세션 사용
-            Long userNum = getUserNumFromJwt(httpRequest);
-            if (userNum == null) {
+            // JWT 토큰에서 사용자 타입 확인
+            String token = getJwtFromRequest(httpRequest);
+            Long userNum = null;
+            Long companyNum = null;
+
+            if (token != null && jwtTokenProvider.validateToken(token)) {
+                String userType = jwtTokenProvider.getUserTypeFromToken(token);
+                Long num = jwtTokenProvider.getUserNumFromToken(token);
+
+                if ("USER".equals(userType)) {
+                    userNum = num;
+                } else if ("COMPANY".equals(userType)) {
+                    companyNum = num;
+                }
+            } else {
+                // 세션에서 가져오기
                 userNum = (Long) session.getAttribute("userNum");
+                if (userNum == null) {
+                    companyNum = (Long) session.getAttribute("companyNum");
+                }
             }
 
-            if (userNum == null) {
+            // 로그인하지 않은 경우
+            if (userNum == null && companyNum == null) {
                 Map<String, Object> result = new HashMap<>();
                 result.put("bookmarked", false);
                 return ResponseEntity.ok(result);
             }
 
-            boolean bookmarked = jobService.checkBookmarkStatus(userNum, postId);
+            // 북마크 상태 확인 (일반 사용자 또는 기업 회원)
+            boolean bookmarked;
+            if (userNum != null) {
+                bookmarked = jobService.checkBookmarkStatus(userNum, postId);
+            } else {
+                bookmarked = jobService.checkCompanyBookmarkStatus(companyNum, postId);
+            }
 
             Map<String, Object> result = new HashMap<>();
             result.put("bookmarked", bookmarked);
@@ -411,7 +497,7 @@ public class JobController {
     }
 
     /**
-     * 북마크 목록 조회
+     * 북마크 목록 조회 (일반 사용자 & 기업 회원)
      */
     @GetMapping("/bookmarks")
     public ResponseEntity<?> getBookmarks(
@@ -420,19 +506,43 @@ public class JobController {
             HttpServletRequest httpRequest,
             HttpSession session) {
         try {
-            // JWT 토큰 우선, 없으면 세션 사용
-            Long userNum = getUserNumFromJwt(httpRequest);
-            if (userNum == null) {
+            // JWT 토큰에서 사용자 타입 확인
+            String token = getJwtFromRequest(httpRequest);
+            Long userNum = null;
+            Long companyNum = null;
+
+            if (token != null && jwtTokenProvider.validateToken(token)) {
+                String userType = jwtTokenProvider.getUserTypeFromToken(token);
+                Long num = jwtTokenProvider.getUserNumFromToken(token);
+
+                if ("USER".equals(userType)) {
+                    userNum = num;
+                } else if ("COMPANY".equals(userType)) {
+                    companyNum = num;
+                }
+            } else {
+                // 세션에서 가져오기
                 userNum = (Long) session.getAttribute("userNum");
+                if (userNum == null) {
+                    companyNum = (Long) session.getAttribute("companyNum");
+                }
             }
 
-            if (userNum == null) {
+            // 로그인 여부 확인
+            if (userNum == null && companyNum == null) {
                 Map<String, Object> error = new HashMap<>();
                 error.put("message", "로그인이 필요합니다.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
             }
 
-            Map<String, Object> result = jobService.getBookmarks(userNum, page, size);
+            // 북마크 목록 조회 (일반 사용자 또는 기업 회원)
+            Map<String, Object> result;
+            if (userNum != null) {
+                result = jobService.getBookmarks(userNum, page, size);
+            } else {
+                result = jobService.getCompanyBookmarks(companyNum, page, size);
+            }
+
             return ResponseEntity.ok(result);
 
         } catch (Exception e) {
