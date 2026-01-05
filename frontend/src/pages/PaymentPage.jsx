@@ -61,7 +61,7 @@ function PaymentPage() {
     const getChannelKey = () => {
       switch (payMethod) {
         case "kakaopay":
-          return "channel-key-5acc4805-406d-4644-b2d0-3bf69d7dd1a5"; // 카카오페이
+          return "channel-key-5acc4805-406d-4644-b2d0-3bf69d7ddfa5"; // 카카오페이
         case "tosspay":
         case "naverpay":
         case "payco":
@@ -74,7 +74,7 @@ function PaymentPage() {
 
     const paymentData = {
       channelKey: getChannelKey(), // V1 최신 방식: channelKey 사용
-      pay_method: payMethod === "card" ? "card" : "easy", // 간편결제는 'easy', 카드는 'card'
+      pay_method: payMethod, // 각 결제 수단의 실제 값 사용 (card, kakaopay, tosspay, naverpay, payco)
       merchant_uid: orderInfo.merchantUid,
       name: orderInfo.items.length > 1 ? `${orderInfo.items[0].productName} 외 ${orderInfo.items.length - 1}건` : orderInfo.items[0].productName,
       amount: orderInfo.totalAmount,
@@ -177,7 +177,8 @@ function PaymentPage() {
             >
               <span style={{ color: '#FEE500' }}>●</span> 카카오페이
             </button>
-            <button
+            {/* 토스페이먼츠 간편결제는 채널 설정 후 활성화 */}
+            {/* <button
               className={`payment-option-btn ${payMethod === 'tosspay' ? 'selected' : ''}`}
               onClick={() => setPayMethod('tosspay')}
             >
@@ -194,7 +195,7 @@ function PaymentPage() {
               onClick={() => setPayMethod('payco')}
             >
               <span style={{ color: '#F23030' }}>●</span> 페이코
-            </button>
+            </button> */}
           </div>
         </div>
 

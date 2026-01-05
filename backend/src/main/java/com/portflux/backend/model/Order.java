@@ -26,10 +26,9 @@ public class Order {
 
     private BigDecimal totalAmount;
 
-    private String status; // CREATED, PENDING, PAID, CANCELLED
+    private String status; // PENDING, PAID, CANCELLED, REFUNDED
 
-    @Column(name = "imp_uid") // 아임포트 거래 고유 ID 컬럼 명시
-    private String impUid; // 아임포트 거래 고유 ID
+    // impUid는 PAYMENT_RECORD 테이블에 저장됨 (ORDERS 테이블에는 없음)
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
