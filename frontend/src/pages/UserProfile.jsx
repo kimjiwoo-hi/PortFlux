@@ -418,6 +418,29 @@ const UserProfile = () => {
     try {
       const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
+      // 닉네임이 변경되었는지 확인
+      const nicknameChanged = editedInfo.userNickname !== fullUserInfo.userNickname;
+
+      // 닉네임이 변경되었다면 중복 체크
+      if (nicknameChanged && editedInfo.userNickname) {
+        const checkResponse = await axios.post(
+          '/api/user/register/check-nickname',
+          { nickname: editedInfo.userNickname },
+          {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        // checkResponse.data가 false면 중복됨 (API가 !isDuplicate 반환)
+        if (checkResponse.data === false) {
+          setError("이미 가입된 닉네임입니다.");
+          setTimeout(() => setError(""), 3000);
+          return;
+        }
+      }
+
       if (isCompany) {
         // 기업 회원 정보 저장
         const dataToSave = {
@@ -894,19 +917,17 @@ const UserProfile = () => {
                   />
                 </div>
 
-                {!isCompany && (
-                  <div className="info-item">
-                    <label>닉네임</label>
-                    <input
-                      type="text"
-                      name="userNickname"
-                      value={isEditing ? (editedInfo.userNickname || "") : (fullUserInfo.userNickname || "")}
-                      onChange={handleChange}
-                      disabled={!isEditing}
-                      className={isEditing ? "input-editable" : "input-disabled"}
-                    />
-                  </div>
-                )}
+                <div className="info-item">
+                  <label>닉네임</label>
+                  <input
+                    type="text"
+                    name="userNickname"
+                    value={isEditing ? (editedInfo.userNickname || "") : (fullUserInfo.userNickname || "")}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className={isEditing ? "input-editable" : "input-disabled"}
+                  />
+                </div>
 
                 <div className="info-item">
                   <label>이메일</label>
@@ -943,14 +964,14 @@ const UserProfile = () => {
                 )}
 
                 <div className="info-item">
-                  <label>가입일</label>
-                  <input
-                    type="text"
-                    value={formatDate(fullUserInfo.userCreateAt)}
-                    disabled
-                    className="input-disabled"
-                  />
-                </div>
+  <label>가입일</label>
+  <input
+    type="text"
+    value={formatDate(fullUserInfo.userCreateAt)}
+    disabled
+    className="input-disabled"
+  />
+</div>
               </div>
 
               {isEditing ? (

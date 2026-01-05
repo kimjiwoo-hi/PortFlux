@@ -23,10 +23,14 @@ const BoardFreeWritePage = () => {
 
   const fileInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  // 기존 파일 정보 (수정 모드용)
+  const [existingFile, setExistingFile] = useState(postToEdit?.postFile || null);
 
   const imageInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  // 기존 이미지 정보 (수정 모드용)
+  const [existingImage, setExistingImage] = useState(postToEdit?.image || null);
 
   // 1. 로그인 여부 확인 및 접근 제어
   useEffect(() => {
@@ -52,6 +56,7 @@ const BoardFreeWritePage = () => {
   };
   const handleRemoveFile = () => {
     setSelectedFile(null);
+    setExistingFile(null); // 기존 파일도 제거
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -74,7 +79,15 @@ const BoardFreeWritePage = () => {
   const handleRemoveImage = () => {
     setSelectedImage(null);
     setImagePreview(null);
+    setExistingImage(null); // 기존 이미지도 제거
     if (imageInputRef.current) imageInputRef.current.value = "";
+  };
+
+  // 파일명에서 UUID 제거하여 원본 파일명 표시
+  const getDisplayName = (filename) => {
+    if (!filename) return "";
+    const underscoreIndex = filename.indexOf('_');
+    return underscoreIndex !== -1 ? filename.substring(underscoreIndex + 1) : filename;
   };
 
   // 4. 게시글 등록/수정 전송 핸들러 (useCallback 적용으로 린트 에러 해결)
@@ -100,7 +113,7 @@ const BoardFreeWritePage = () => {
     // [사용처 확인] USER_ROLE을 formData에 추가하여 린트 에러 및 백엔드 로직 해결
     formData.append("role", USER_ROLE); 
     
-    if (selectedFile) formData.append("file", selectedFile); 
+    if (selectedFile) formData.append("file", selectedFile);
     if (selectedImage) formData.append("image", selectedImage);
 
     let url = "http://localhost:8080/api/board/free/write";
@@ -110,6 +123,10 @@ const BoardFreeWritePage = () => {
       url = "http://localhost:8080/api/board/free/update";
       method = "PUT";
       formData.append("postId", postToEdit.postId);
+
+      // 기존 파일/이미지 유지 여부 전송
+      formData.append("keepExistingFile", existingFile ? "true" : "false");
+      formData.append("keepExistingImage", existingImage ? "true" : "false");
     }
 
     try {
@@ -125,7 +142,7 @@ const BoardFreeWritePage = () => {
       console.error("게시글 처리 중 오류 발생:", error);
       alert("서버 통신 오류가 발생했습니다.");
     }
-  }, [title, content, isNotice, USER_ROLE, selectedFile, selectedImage, isEditMode, postToEdit, navigate]);
+  }, [title, content, isNotice, USER_ROLE, selectedFile, selectedImage, isEditMode, postToEdit, navigate, existingFile, existingImage]);
 
   return (
     <div className="page-wrapper">
@@ -136,21 +153,30 @@ const BoardFreeWritePage = () => {
               <ArrowLeft size={24} />
           </button>
           <h2 className="write-header-title">{isEditMode ? "게시글 수정" : "게시글 작성"}</h2>
-          
+
           {/* 관리자일 경우 공지사항 옵션 노출 */}
           {USER_ROLE === 'ADMIN' && (
             <div className="notice-option">
-              <input 
-                type="checkbox" 
+              <input
+                type="checkbox"
                 id="notice-check"
-                checked={isNotice} 
-                onChange={(e) => setIsNotice(e.target.checked)} 
+                checked={isNotice}
+                onChange={(e) => setIsNotice(e.target.checked)}
               />
               <label htmlFor="notice-check" style={{marginLeft: '5px', fontSize: '14px', cursor: 'pointer'}}>
                 공지사항으로 등록
               </label>
             </div>
           )}
+
+          {/* X 버튼 - 목록으로 돌아가기 */}
+          <button
+            className="close-btn"
+            onClick={() => navigate("/boardfree")}
+            title="목록으로 돌아가기"
+          >
+            <X size={24} />
+          </button>
         </div>
 
         {/* 작성 폼 영역 */}
@@ -178,10 +204,17 @@ const BoardFreeWritePage = () => {
                 <Paperclip size={18} /> 파일
               </button>
               
-              {/* 첨부파일 칩 */}
+              {/* 첨부파일 칩 - 새로 선택한 파일 */}
               {selectedFile && (
                 <div className="file-info-chip">
                   <span className="file-name">📄 {selectedFile.name} ({(selectedFile.size/1024/1024).toFixed(1)}MB)</span>
+                  <button className="file-remove-btn" onClick={handleRemoveFile}><X size={14} /></button>
+                </div>
+              )}
+              {/* 기존 파일 표시 (수정 모드 & 새 파일 미선택 시) */}
+              {!selectedFile && existingFile && (
+                <div className="file-info-chip">
+                  <span className="file-name">📄 {getDisplayName(existingFile)}</span>
                   <button className="file-remove-btn" onClick={handleRemoveFile}><X size={14} /></button>
                 </div>
               )}
@@ -190,10 +223,19 @@ const BoardFreeWritePage = () => {
 
           {/* 본문 에디터 영역 */}
           <div className="editor-area" style={{ display: 'flex', flexDirection: 'column' }}>
-            {/* 이미지 미리보기 */}
+            {/* 새로 선택한 이미지 미리보기 */}
             {imagePreview && (
                 <div style={{ padding: '10px', position: 'relative', width: 'fit-content' }}>
                     <img src={imagePreview} alt="Preview" style={{ maxWidth: '300px', borderRadius: '4px' }} />
+                    <button onClick={handleRemoveImage} style={{ position: 'absolute', top: 15, right: 10, background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', cursor: 'pointer', padding: '5px' }}>
+                      <X size={14}/>
+                    </button>
+                </div>
+            )}
+            {/* 기존 이미지 표시 (수정 모드 & 새 이미지 미선택 시) */}
+            {!imagePreview && existingImage && (
+                <div style={{ padding: '10px', position: 'relative', width: 'fit-content' }}>
+                    <img src={`http://localhost:8080/api/board/free/image/${existingImage}`} alt="Existing" style={{ maxWidth: '300px', borderRadius: '4px' }} />
                     <button onClick={handleRemoveImage} style={{ position: 'absolute', top: 15, right: 10, background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', cursor: 'pointer', padding: '5px' }}>
                       <X size={14}/>
                     </button>

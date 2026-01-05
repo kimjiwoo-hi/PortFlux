@@ -83,7 +83,9 @@ public class BoardFreeController {
             @RequestParam("title") String title,
             @RequestParam("content") String content,
             @RequestParam(value = "file", required = false) MultipartFile file,
-            @RequestParam(value = "image", required = false) MultipartFile image) {
+            @RequestParam(value = "image", required = false) MultipartFile image,
+            @RequestParam(value = "keepExistingFile", required = false, defaultValue = "true") String keepExistingFile,
+            @RequestParam(value = "keepExistingImage", required = false, defaultValue = "true") String keepExistingImage) {
         try {
             BoardFreeBean bean = boardFreeService.getBoardDetail(postId);
             if (bean == null) return ResponseEntity.notFound().build();
@@ -91,7 +93,11 @@ public class BoardFreeController {
             bean.setTitle(title);
             bean.setContent(content);
 
-            boardFreeService.updateBoard(bean, file, image);
+            // 기존 파일/이미지 유지 여부에 따라 처리
+            boolean keepFile = "true".equals(keepExistingFile);
+            boolean keepImage = "true".equals(keepExistingImage);
+
+            boardFreeService.updateBoard(bean, file, image, keepFile, keepImage);
             return ResponseEntity.ok("success");
         } catch (Exception e) {
             e.printStackTrace();

@@ -59,13 +59,25 @@ public class BoardFreeService {
 
     // 게시글 수정
     @Transactional
-    public void updateBoard(BoardFreeBean boardFreeBean, MultipartFile file, MultipartFile image) throws IOException {
+    public void updateBoard(BoardFreeBean boardFreeBean, MultipartFile file, MultipartFile image, boolean keepFile, boolean keepImage) throws IOException {
+        // 새 파일이 업로드된 경우
         if (file != null && !file.isEmpty()) {
             boardFreeBean.setPostFile(saveFile(file));
+        } else if (!keepFile) {
+            // 기존 파일 유지하지 않음 (삭제)
+            boardFreeBean.setPostFile(null);
         }
+        // else: 기존 파일 유지 (bean에 이미 기존 값이 있음)
+
+        // 새 이미지가 업로드된 경우
         if (image != null && !image.isEmpty()) {
             boardFreeBean.setImage(saveFile(image));
+        } else if (!keepImage) {
+            // 기존 이미지 유지하지 않음 (삭제)
+            boardFreeBean.setImage(null);
         }
+        // else: 기존 이미지 유지 (bean에 이미 기존 값이 있음)
+
         boardFreeMapper.updateBoard(boardFreeBean);
     }
 
