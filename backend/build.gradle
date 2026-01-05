@@ -54,23 +54,6 @@ dependencies {
     implementation 'org.apache.poi:poi:5.2.5'
     implementation 'org.apache.poi:poi-ooxml:5.2.5'
 
-<<<<<<< HEAD
-    // Database
-    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
-    runtimeOnly 'com.oracle.database.jdbc:ojdbc11'
-    
-    // Spring AI
-    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
-    
-    // Apache PDFBox (PDF 처리)
-    implementation 'org.apache.pdfbox:pdfbox:2.0.30'
-    
-    // Apache POI (PPT 처리) - ⭐ 중복 제거
-    implementation 'org.apache.poi:poi:5.2.5'
-    implementation 'org.apache.poi:poi-ooxml:5.2.5'
-    
-=======
->>>>>>> 78c81db5e0bc6d0a8daa1b3ac1bafb7213debd55
     // JSON
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
