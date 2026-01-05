@@ -38,20 +38,35 @@ public interface JobRepository {
     // 조회수 증가
     void incrementViewCount(@Param("postId") Long postId);
     
-    // 북마크 추가
+    // 북마크 추가 (일반 사용자)
     void insertBookmark(@Param("userNum") Long userNum, @Param("postId") Long postId);
-    
-    // 북마크 삭제
+
+    // 북마크 추가 (기업 회원)
+    void insertCompanyBookmark(@Param("companyNum") Long companyNum, @Param("postId") Long postId);
+
+    // 북마크 삭제 (일반 사용자)
     void deleteBookmark(@Param("userNum") Long userNum, @Param("postId") Long postId);
-    
-    // 북마크 존재 여부
+
+    // 북마크 삭제 (기업 회원)
+    void deleteCompanyBookmark(@Param("companyNum") Long companyNum, @Param("postId") Long postId);
+
+    // 북마크 존재 여부 (일반 사용자)
     boolean existsBookmark(@Param("userNum") Long userNum, @Param("postId") Long postId);
-    
-    // 북마크 목록 조회
+
+    // 북마크 존재 여부 (기업 회원)
+    boolean existsCompanyBookmark(@Param("companyNum") Long companyNum, @Param("postId") Long postId);
+
+    // 북마크 목록 조회 (일반 사용자)
     List<JobDto> findBookmarks(@Param("userNum") Long userNum, @Param("offset") int offset, @Param("limit") int limit);
-    
-    // 북마크 개수
+
+    // 북마크 목록 조회 (기업 회원)
+    List<JobDto> findCompanyBookmarks(@Param("companyNum") Long companyNum, @Param("offset") int offset, @Param("limit") int limit);
+
+    // 북마크 개수 (일반 사용자)
     int countBookmarks(@Param("userNum") Long userNum);
+
+    // 북마크 개수 (기업 회원)
+    int countCompanyBookmarks(@Param("companyNum") Long companyNum);
     
     // 지역별 채용공고 개수
     List<Map<String, Object>> countJobsByRegion();

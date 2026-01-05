@@ -71,9 +71,17 @@ const Header = () => {
   };
 
   const handleLinkClick = (path) => (e) => {
+    // 경로는 같지만 쿼리 파라미터가 있는 경우도 처리
     if (location.pathname === path) {
-      e.preventDefault();
-      window.location.reload();
+      // 쿼리 파라미터가 있으면 경로만으로 이동
+      if (location.search) {
+        e.preventDefault();
+        navigate(path);
+      } else {
+        // 쿼리 파라미터가 없으면 새로고침
+        e.preventDefault();
+        window.location.reload();
+      }
     }
   };
 

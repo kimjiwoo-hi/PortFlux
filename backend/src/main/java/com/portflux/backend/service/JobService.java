@@ -51,9 +51,11 @@ public class JobService {
                 job.setIsDeadlineSoon(daysLeft >= 0 && daysLeft <= 3);
             }
             
-            // 북마크 여부 확인
+            // 북마크 여부 확인 (일반 사용자 또는 기업 회원)
             if (filter.getUserNum() != null) {
                 job.setIsBookmarked(jobRepository.existsBookmark(filter.getUserNum(), job.getPostId()));
+            } else if (filter.getCompanyNum() != null) {
+                job.setIsBookmarked(jobRepository.existsCompanyBookmark(filter.getCompanyNum(), job.getPostId()));
             } else {
                 job.setIsBookmarked(false);
             }
@@ -75,36 +77,38 @@ public class JobService {
      * 채용공고 상세 조회
      */
     @Transactional
-    public JobDto getJobDetail(Long postId, Long userNum) {
+    public JobDto getJobDetail(Long postId, Long userNum, Long companyNum) {
         // 조회수 증가
         jobRepository.incrementViewCount(postId);
-        
+
         JobDto job = jobRepository.findJobById(postId);
         if (job == null) {
             return null;
         }
-        
+
         // 계산된 필드 설정
         LocalDate today = LocalDate.now();
-        
+
         if (job.getCreatedAt() != null) {
             long daysSinceCreated = ChronoUnit.DAYS.between(job.getCreatedAt().toLocalDate(), today);
             job.setIsNew(daysSinceCreated <= 7);
         }
-        
+
         if (job.getJobDeadline() != null) {
             long daysLeft = ChronoUnit.DAYS.between(today, job.getJobDeadline());
             job.setDaysLeft((int) daysLeft);
             job.setIsDeadlineSoon(daysLeft >= 0 && daysLeft <= 3);
         }
-        
-        // 북마크 여부
+
+        // 북마크 여부 (일반 사용자 또는 기업 회원)
         if (userNum != null) {
             job.setIsBookmarked(jobRepository.existsBookmark(userNum, postId));
+        } else if (companyNum != null) {
+            job.setIsBookmarked(jobRepository.existsCompanyBookmark(companyNum, postId));
         } else {
             job.setIsBookmarked(false);
         }
-        
+
         return job;
     }
 
@@ -196,7 +200,7 @@ public class JobService {
     }
 
     /**
-     * 북마크 토글
+     * 북마크 토글 (일반 사용자)
      */
     public boolean toggleBookmark(Long userNum, Long postId) {
         if (jobRepository.existsBookmark(userNum, postId)) {
@@ -209,7 +213,20 @@ public class JobService {
     }
 
     /**
-     * 북마크 상태 확인
+     * 북마크 토글 (기업 회원)
+     */
+    public boolean toggleCompanyBookmark(Long companyNum, Long postId) {
+        if (jobRepository.existsCompanyBookmark(companyNum, postId)) {
+            jobRepository.deleteCompanyBookmark(companyNum, postId);
+            return false;
+        } else {
+            jobRepository.insertCompanyBookmark(companyNum, postId);
+            return true;
+        }
+    }
+
+    /**
+     * 북마크 상태 확인 (일반 사용자)
      */
     @Transactional(readOnly = true)
     public boolean checkBookmarkStatus(Long userNum, Long postId) {
@@ -217,14 +234,22 @@ public class JobService {
     }
 
     /**
-     * 북마크 목록 조회
+     * 북마크 상태 확인 (기업 회원)
+     */
+    @Transactional(readOnly = true)
+    public boolean checkCompanyBookmarkStatus(Long companyNum, Long postId) {
+        return jobRepository.existsCompanyBookmark(companyNum, postId);
+    }
+
+    /**
+     * 북마크 목록 조회 (일반 사용자)
      */
     @Transactional(readOnly = true)
     public Map<String, Object> getBookmarks(Long userNum, int page, int size) {
         int offset = page * size;
         List<JobDto> jobs = jobRepository.findBookmarks(userNum, offset, size);
         int totalCount = jobRepository.countBookmarks(userNum);
-        
+
         // 계산된 필드 설정
         LocalDate today = LocalDate.now();
         for (JobDto job : jobs) {
@@ -239,14 +264,48 @@ public class JobService {
             }
             job.setIsBookmarked(true);
         }
-        
+
         Map<String, Object> result = new HashMap<>();
         result.put("content", jobs);
         result.put("totalElements", totalCount);
         result.put("totalPages", (int) Math.ceil((double) totalCount / size));
         result.put("page", page);
         result.put("size", size);
-        
+
+        return result;
+    }
+
+    /**
+     * 북마크 목록 조회 (기업 회원)
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Object> getCompanyBookmarks(Long companyNum, int page, int size) {
+        int offset = page * size;
+        List<JobDto> jobs = jobRepository.findCompanyBookmarks(companyNum, offset, size);
+        int totalCount = jobRepository.countCompanyBookmarks(companyNum);
+
+        // 계산된 필드 설정
+        LocalDate today = LocalDate.now();
+        for (JobDto job : jobs) {
+            if (job.getCreatedAt() != null) {
+                long daysSinceCreated = ChronoUnit.DAYS.between(job.getCreatedAt().toLocalDate(), today);
+                job.setIsNew(daysSinceCreated <= 7);
+            }
+            if (job.getJobDeadline() != null) {
+                long daysLeft = ChronoUnit.DAYS.between(today, job.getJobDeadline());
+                job.setDaysLeft((int) daysLeft);
+                job.setIsDeadlineSoon(daysLeft >= 0 && daysLeft <= 3);
+            }
+            job.setIsBookmarked(true);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("content", jobs);
+        result.put("totalElements", totalCount);
+        result.put("totalPages", (int) Math.ceil((double) totalCount / size));
+        result.put("page", page);
+        result.put("size", size);
+
         return result;
     }
 
@@ -257,15 +316,22 @@ public class JobService {
     public Map<String, Integer> getJobCountByRegion() {
         List<Map<String, Object>> regionCounts = jobRepository.countJobsByRegion();
         Map<String, Integer> result = new HashMap<>();
-        
+
         for (Map<String, Object> row : regionCounts) {
             String region = (String) row.get("JOB_REGION");
             Number count = (Number) row.get("JOB_COUNT");
             if (region != null && count != null) {
-                result.put(region, count.intValue());
+                // 하위 지역을 상위 지역으로 매핑 (예: SEOUL_GANGNAM -> SEOUL)
+                String mainRegion = region;
+                if (region.contains("_")) {
+                    mainRegion = region.substring(0, region.indexOf("_"));
+                }
+
+                // 상위 지역별로 카운트 집계
+                result.put(mainRegion, result.getOrDefault(mainRegion, 0) + count.intValue());
             }
         }
-        
+
         return result;
     }
 
