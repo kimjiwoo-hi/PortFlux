@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { tagData, tagSearchMap } from "../database/taglist";
 import axios from "axios";
 import UserMiniPopover from "../components/UserMiniPopover";
+import { isCompanyUser } from "../api/jobApi";
 
 function BoardLookupPage() {
   const [selectedTags, setSelectedTags] = useState({});
@@ -28,6 +29,13 @@ function BoardLookupPage() {
   const popoverHoverTimeout = useRef(null);
   const [isPopoverHovered, setIsPopoverHovered] = useState(false);
   const currentAuthorRef = useRef(null);
+  // 기업회원 여부 상태
+  const [isCompany, setIsCompany] = useState(false);
+
+  // 기업회원 확인 로직
+  useEffect(() => {
+    setIsCompany(isCompanyUser());
+  }, []);
 
   // 스크롤 시 팝오버 위치 업데이트
   useEffect(() => {
@@ -364,7 +372,8 @@ function BoardLookupPage() {
   let postsToRender = [...filteredPosts];
   const storedUser =
     localStorage.getItem("user") || sessionStorage.getItem("user");
-  if (storedUser) {
+  // 로그인했고 기업회원이 아닐 때만 게시글 등록 버튼 표시
+  if (storedUser && !isCompany) {
     postsToRender.unshift({ id: "add-new-post", type: "add-new" });
   }
 

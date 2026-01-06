@@ -541,34 +541,36 @@ const BoardJobEditPage = () => {
             {/* 학력 */}
             <div className="form-group">
               <label className="required">학력</label>
-              <div className="education-group">
-                <label className="checkbox-item highlight">
-                  <input
-                    type="checkbox"
-                    name="jobEducationExclude"
-                    checked={formData.jobEducationExclude}
-                    onChange={handleChange}
-                  />
-                  <span className="checkbox-text">학력무관</span>
-                </label>
-                <select
-                  name="jobEducation"
-                  value={formData.jobEducation}
+              <label className="checkbox-item highlight">
+                <input
+                  type="checkbox"
+                  name="jobEducationExclude"
+                  checked={formData.jobEducationExclude}
                   onChange={handleChange}
-                  disabled={formData.jobEducationExclude}
-                  className={
-                    errors.jobEducation && !formData.jobEducationExclude
-                      ? "error"
-                      : ""
-                  }
-                >
-                  <option value="">학력 선택</option>
-                  {educationLevels.map((level) => (
-                    <option key={level.value} value={level.value}>
-                      {level.label}
-                    </option>
-                  ))}
-                </select>
+                />
+                <span className="checkbox-text">학력 무관</span>
+              </label>
+              <div className="radio-group">
+                {educationLevels.map((level) => (
+                  <label key={level.value} className="radio-item">
+                    <input
+                      type="radio"
+                      name="jobEducation"
+                      checked={formData.jobEducation === level.value}
+                      onChange={() =>
+                        handleChange({
+                          target: {
+                            name: "jobEducation",
+                            value: level.value,
+                            type: "radio",
+                          },
+                        })
+                      }
+                      disabled={formData.jobEducationExclude}
+                    />
+                    <span>{level.label}</span>
+                  </label>
+                ))}
               </div>
               {errors.jobEducation && !formData.jobEducationExclude && (
                 <span className="error-message">{errors.jobEducation}</span>

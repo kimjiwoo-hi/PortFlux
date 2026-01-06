@@ -166,7 +166,7 @@ const BoardJobCreatePage = () => {
 
     if (!formData.jobEducationExclude && !formData.jobEducation) {
       newErrors.jobEducation =
-        "학력 조건을 선택하거나 학력무관을 체크해주세요.";
+        "학력 조건을 선택하거나 학력 무관을 체크해주세요.";
     }
 
     // 급여 검증
@@ -299,7 +299,9 @@ const BoardJobCreatePage = () => {
                     <div className="logo-upload-placeholder">
                       <span className="upload-icon">📷</span>
                       <span className="upload-text">로고 이미지 업로드</span>
-                      <small className="upload-hint">클릭하여 이미지 선택</small>
+                      <small className="upload-hint">
+                        클릭하여 이미지 선택
+                      </small>
                     </div>
                   </label>
                 )}
@@ -437,34 +439,36 @@ const BoardJobCreatePage = () => {
             {/* 학력 */}
             <div className="form-group">
               <label className="required">학력</label>
-              <div className="education-group">
-                <label className="create-checkbox-item highlight">
-                  <input
-                    type="checkbox"
-                    name="jobEducationExclude"
-                    checked={formData.jobEducationExclude}
-                    onChange={handleChange}
-                  />
-                  <span className="create-checkbox-text">학력무관</span>
-                </label>
-                <select
-                  name="jobEducation"
-                  value={formData.jobEducation}
+              <label className="create-checkbox-item highlight">
+                <input
+                  type="checkbox"
+                  name="jobEducationExclude"
+                  checked={formData.jobEducationExclude}
                   onChange={handleChange}
-                  disabled={formData.jobEducationExclude}
-                  className={
-                    errors.jobEducation && !formData.jobEducationExclude
-                      ? "error"
-                      : ""
-                  }
-                >
-                  <option value="">학력 선택</option>
-                  {educationLevels.map((level) => (
-                    <option key={level.value} value={level.value}>
-                      {level.label}
-                    </option>
-                  ))}
-                </select>
+                />
+                <span className="create-checkbox-text">학력 무관</span>
+              </label>
+              <div className="radio-group">
+                {educationLevels.map((level) => (
+                  <label key={level.value} className="radio-item">
+                    <input
+                      type="radio"
+                      name="jobEducation"
+                      checked={formData.jobEducation === level.value}
+                      onChange={() =>
+                        handleChange({
+                          target: {
+                            name: "jobEducation",
+                            value: level.value,
+                            type: "radio",
+                          },
+                        })
+                      }
+                      disabled={formData.jobEducationExclude}
+                    />
+                    <span className="checkbox-text">{level.label}</span>
+                  </label>
+                ))}
               </div>
               {errors.jobEducation && !formData.jobEducationExclude && (
                 <span className="error-message">{errors.jobEducation}</span>
@@ -583,7 +587,9 @@ const BoardJobCreatePage = () => {
                         handleMultiSelect("jobIndustries", industry.value)
                       }
                     />
-                    <span className="create-checkbox-text">{industry.label}</span>
+                    <span className="create-checkbox-text">
+                      {industry.label}
+                    </span>
                   </label>
                 ))}
               </div>
