@@ -5,18 +5,22 @@ import "./FindPage.css"; // 스타일 공유
 function SuccessPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const state = location.state || {};
-  // 제목이 없으면 기본값 '완료'
+  // 제목과 메시지 설정
+  const title = state.title || "완료";
   const message = state.message || "작업이 완료되었습니다.";
   const data = state.data || null; 
 
   return (
     <div className="find-wrapper">
       <div className="find-box">
-        
+
+        {/* 제목 */}
+        <h2 className="find-title">{title}</h2>
+
         <div className="form-container" style={{ alignItems: 'center' }}>
-          
+
           {/* [추가] 성공 애니메이션 아이콘 */}
           <div className="success-icon-wrapper">
             <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
