@@ -21,6 +21,9 @@ public interface CompanyUserMapper {
     // 기업명(닉네임) 중복 확인
     int existsByCompanyName(@Param("name") String name);
 
+    // 기업명 중복 확인 (현재 기업 제외)
+    int existsByCompanyNameExcludingCurrent(@Param("name") String name, @Param("companyId") String companyId);
+
     // 아이디 중복 확인
     int checkCompanyIdDuplicate(String companyId);
 

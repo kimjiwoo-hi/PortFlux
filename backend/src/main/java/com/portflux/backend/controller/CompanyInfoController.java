@@ -37,8 +37,21 @@ public class CompanyInfoController {
             response.put("companyEmail", company.getCompanyEmail());
             response.put("businessNumber", company.getBusinessNumber());
             response.put("companyCreateAt", company.getCompanyCreateAt());
-            response.put("companyImage", company.getCompanyImage());
-            response.put("companyBanner", company.getCompanyBanner());
+
+            // BLOB 데이터를 Base64로 변환
+            if (company.getCompanyImage() != null && company.getCompanyImage().length > 0) {
+                String base64Image = Base64.getEncoder().encodeToString(company.getCompanyImage());
+                response.put("companyImage", "data:image/jpeg;base64," + base64Image);
+            } else {
+                response.put("companyImage", null);
+            }
+
+            if (company.getCompanyBanner() != null && company.getCompanyBanner().length > 0) {
+                String base64Banner = Base64.getEncoder().encodeToString(company.getCompanyBanner());
+                response.put("companyBanner", "data:image/jpeg;base64," + base64Banner);
+            } else {
+                response.put("companyBanner", null);
+            }
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -99,6 +112,27 @@ public class CompanyInfoController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().body("정보 수정 실패: " + e.getMessage());
+        }
+    }
+
+    // 기업명 중복 확인
+    @PostMapping("/check-company-name")
+    public ResponseEntity<Boolean> checkCompanyName(@RequestBody Map<String, String> request) {
+        try {
+            String companyName = request.get("companyName");
+            String currentCompanyId = request.get("companyId"); // 현재 기업 ID (선택사항)
+
+            // 현재 기업 ID가 있으면 자신을 제외하고 중복 체크
+            int count;
+            if (currentCompanyId != null && !currentCompanyId.isEmpty()) {
+                count = companyUserMapper.existsByCompanyNameExcludingCurrent(companyName, currentCompanyId);
+            } else {
+                count = companyUserMapper.existsByCompanyName(companyName);
+            }
+
+            return ResponseEntity.ok(count == 0); // 중복이 아니어야 true(사용가능)
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(false);
         }
     }
 
