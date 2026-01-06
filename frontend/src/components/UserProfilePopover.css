@@ -79,6 +79,7 @@
   position: relative;
   z-index: 1;
   background: #f0f0f0;
+  object-fit: cover;
 }
 
 .popover-name {
