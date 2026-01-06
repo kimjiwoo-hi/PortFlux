@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./RegisterPage.css";
 
@@ -19,6 +19,8 @@ function RegisterPage() {
   const [businessNumber, setBusinessNumber] = useState("");
 
   const [isBizNumValid, setIsBizNumValid] = useState(null);
+  const [isBizNumChecking, setIsBizNumChecking] = useState(false); // 검증 중 상태
+  const lastCheckedBizNum = useRef(""); // 마지막으로 검증한 번호 (중복 방지)
   const [isIdAvailable, setIsIdAvailable] = useState(null);
   const [isEmailValid, setIsEmailValid] = useState(null);
   const [emailMsg, setEmailMsg] = useState("");
@@ -39,9 +41,10 @@ function RegisterPage() {
     setEmail(""); setEmailMsg("");
     setAuthCode(""); setPassword(""); setPasswordCheck("");
     setUserName(""); setNickname(""); setPhoneNumber(""); setBusinessNumber("");
-    setIsBizNumValid(null); setIsEmailValid(null); setIsPwdValid(null);
+    setIsBizNumValid(null); setIsBizNumChecking(false); setIsEmailValid(null); setIsPwdValid(null);
     setIsPwdMatch(null); setIsNicknameAvailable(null); setIsAuthVerified(false);
     setCodeMsg(""); setIsPhoneValid(null);
+    lastCheckedBizNum.current = "";
   };
 
   // 구글 로그인에서 넘어온 경우 이메일과 이름 자동 입력
@@ -179,7 +182,7 @@ function RegisterPage() {
     setIsPhoneValid(rawValue.length === 11);
   };
 
-  const handleBusinessNumberChange = async (e) => {
+  const handleBusinessNumberChange = (e) => {
     const rawValue = e.target.value.replace(/[^0-9]/g, "");
     let formattedValue = "";
     if (rawValue.length <= 3) formattedValue = rawValue;
@@ -189,13 +192,28 @@ function RegisterPage() {
 
     setBusinessNumber(formattedValue);
     setIsBizNumValid(null);
+  };
 
-    if (rawValue.length === 10) {
+  // 사업자번호 10자리 완성 시 자동 검증 (디바운스 1초 적용)
+  useEffect(() => {
+    const rawValue = businessNumber.replace(/[^0-9]/g, "");
+    if (rawValue.length !== 10) {
+      setIsBizNumChecking(false);
+      return;
+    }
+    if (lastCheckedBizNum.current === rawValue) return;
+
+    // 검증 중 상태 표시
+    setIsBizNumChecking(true);
+    setIsBizNumValid(null);
+
+    const timer = setTimeout(async () => {
+      lastCheckedBizNum.current = rawValue;
       try {
         const res = await fetch("http://localhost:8080/api/company/register/check-business", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ businessNumber: formattedValue }),
+          body: JSON.stringify({ businessNumber: businessNumber }),
         });
 
         if (res.ok) {
@@ -209,9 +227,13 @@ function RegisterPage() {
       } catch (error) {
         console.error("사업자 번호 체크 실패:", error);
         setIsBizNumValid(false);
+      } finally {
+        setIsBizNumChecking(false);
       }
-    }
-  };
+    }, 1000); // 1초 디바운스
+
+    return () => clearTimeout(timer);
+  }, [businessNumber]);
 
   const handleSendAuthCode = async () => {
     if (!isEmailValid) { alert("이메일을 확인해 주세요."); return; }
