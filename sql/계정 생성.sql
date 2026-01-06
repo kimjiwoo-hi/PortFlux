@@ -1,19 +1,19 @@
 
--- °èÁ¤µî·Ï ±ÇÇÑ
+-- ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 ALTER SESSION SET "_ORACLE_SCRIPT"=true;
 
--- madang °èÁ¤ »ý¼º
+-- madang ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 create user jh IDENTIFIED BY 12345;
 
--- µî·ÏÇÒ ¼ö ÀÖ´Â ±ÇÇÑ
+-- ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½
 grant connect, resource to jh;
 
--- Ãß°¡ ±ÇÇÑ
+-- ï¿½ß°ï¿½ ï¿½ï¿½ï¿½ï¿½
 grant create view, create sequence, create procedure to jh;
 
--- ¹°¸®Àû ÀúÀå °ø°£
+-- ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 alter user jh DEFAULT TABLESPACE USERS QUOTA UNLIMITED ON USERS;
 
--- °èÁ¤ »èÁ¦
--- drop user jh;
+-- ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+--drop user jh;
 
