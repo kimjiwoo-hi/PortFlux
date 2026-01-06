@@ -314,7 +314,7 @@ const UserProfile = () => {
   }, [userNum, nickname, checkIsOwner]);
 
   // 팔로우 정보 로드
-  const loadFollowInfo = async (targetUserNum, checkIsFollowing) => {
+  const loadFollowInfo = async (targetUserNum, checkIsFollowingStatus) => {
     try {
       const [followersRes, followingRes] = await Promise.all([
         getFollowers(targetUserNum),
@@ -324,10 +324,16 @@ const UserProfile = () => {
       setFollowersCount(followersRes.data.count || 0);
       setFollowingCount(followingRes.data.count || 0);
 
-      // 다른 사용자의 프로필인 경우 팔로우 여부 확인
-      if (checkIsFollowing) {
-        const followingStatus = await checkFollowing(targetUserNum);
-        setIsFollowingUser(followingStatus.data.following);
+      // 다른 사용자의 프로필인 경우 팔로우 여부 확인 (로그인 상태에서만)
+      if (checkIsFollowingStatus) {
+        const userNumStr = localStorage.getItem("userNum") || sessionStorage.getItem("userNum");
+        // 로그인하지 않은 상태면 팔로우 여부 확인 API 호출하지 않음
+        if (userNumStr) {
+          const followingStatus = await checkFollowing(targetUserNum);
+          setIsFollowingUser(followingStatus.data.following);
+        } else {
+          setIsFollowingUser(false);
+        }
       }
     } catch (error) {
       console.error("팔로우 정보 조회 실패:", error);

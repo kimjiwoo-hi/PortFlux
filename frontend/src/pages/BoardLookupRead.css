@@ -80,6 +80,7 @@
   gap: 15px;
   position: relative;
   margin-left: 70px;
+  flex-shrink: 0;
 }
 
 .profile-left {
@@ -295,8 +296,10 @@
   gap: 8px;
   flex-wrap: wrap;
   margin-top: 15px;
-  margin-left: 210px;
+  margin-left: 70px;
+  padding-left: 230px;
   width: 100%;
+  max-width: 1400px;
 }
 
 .tag {
@@ -686,6 +689,7 @@
   flex-direction: column;
   z-index: 200;
   animation: slideIn 0.3s ease;
+  overflow: hidden;
 }
 
 .comments-popup.active {
@@ -709,6 +713,14 @@
   align-items: center;
   padding: 24px;
   border-bottom: 1px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 10;
+}
+
+.comments-header .close-btn {
+  margin-right: 8px;
 }
 
 .comments-header h3 {
@@ -743,7 +755,7 @@
   flex: 1;
   overflow-y: auto;
   padding: 24px;
-  max-height: calc(70vh - 200px);
+  max-height: calc(70vh - 180px);
 }
 
 .comments-list::-webkit-scrollbar {
@@ -912,6 +924,7 @@
   flex-direction: column;
   z-index: 200;
   animation: slideIn 0.3s ease;
+  overflow: hidden;
 }
 
 .ai-summary-popup.active {
@@ -924,6 +937,14 @@
   align-items: center;
   padding: 24px;
   border-bottom: 1px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 10;
+}
+
+.ai-summary-header .close-btn {
+  margin-right: 16px;
 }
 
 .ai-summary-header h3 {
