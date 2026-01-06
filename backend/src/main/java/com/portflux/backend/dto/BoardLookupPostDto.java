@@ -14,7 +14,9 @@ public class BoardLookupPostDto {
     private String content;
     private int price;
     private String postFile;
-    private Integer userNum;  // ✅ Integer로 수정 (integer는 오타)
+    private Integer userNum;      // 일반회원
+    private Integer companyNum;   // 기업회원
+    private String memberType;    // "user" 또는 "company"
     private String userNickname;
     private byte[] userImage;
     private String userImageBase64;  // ✅ Base64 인코딩된 이미지
