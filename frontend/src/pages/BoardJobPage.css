@@ -238,15 +238,21 @@
 .filter-panel {
   background: white;
   border-radius: 12px;
-  padding: 24px;
+  padding: 20px 24px;
   margin-bottom: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .filter-section {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   border-bottom: 1px solid #f3f4f6;
-  padding-bottom: 20px;
+  padding-bottom: 16px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .filter-section:last-of-type {
@@ -260,7 +266,7 @@
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  padding: 8px 0;
+  padding: 6px 0;
 }
 
 .filter-section-header h3 {
@@ -281,38 +287,67 @@
 }
 
 .filter-section-content {
-  margin-top: 16px;
+  margin-top: 12px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.filter-subsection-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #6b7280;
+  margin: 0 0 10px 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* ===== 지역 필터 ===== */
 .region-filter-grid {
   display: grid;
-  grid-template-columns: 180px 1fr;
+  grid-template-columns: 280px 1fr;
   gap: 16px;
+  width: 100%;
+  align-items: stretch;
 }
 
 .main-region-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  max-height: 320px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  max-height: 280px;
   overflow-y: auto;
-  padding-right: 8px;
+  padding-right: 4px;
+}
+
+/* 스크롤바 디자인 */
+.main-region-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.main-region-list::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.main-region-list::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .main-region-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  border: none;
-  background: transparent;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  background: #f9fafb;
   text-align: left;
-  font-size: 14px;
+  font-size: 13px;
   color: #374151;
   cursor: pointer;
   border-radius: 6px;
   transition: all 0.15s;
+  box-sizing: border-box;
 }
 
 .main-region-item:hover {
@@ -321,14 +356,17 @@
 
 .main-region-item.active {
   background: #eff6ff;
+  border-color: #bfdbfe;
   color: #2563eb;
   font-weight: 600;
 }
 
 .main-region-item .count {
-  font-size: 12px;
+  font-size: 11px;
   color: #9ca3af;
   font-weight: 400;
+  margin-left: 8px;
+  flex-shrink: 0;
 }
 
 .main-region-item.active .count {
@@ -338,25 +376,45 @@
 .sub-region-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  max-height: 320px;
-  overflow-y: auto;
-  padding: 4px;
+  gap: 6px;
   align-content: start;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* 스크롤바 디자인 */
+.sub-region-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sub-region-grid::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.sub-region-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sub-region-grid .checkbox-item {
+  padding: 9px 12px;
+  font-size: 13px;
 }
 
 .btn-select-all {
   grid-column: 1 / -1;
-  margin-top: 8px;
-  padding: 10px 16px;
+  margin-top: 2px;
+  padding: 9px 12px;
   background: #f3f4f6;
   border: none;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 500;
   color: #374151;
   cursor: pointer;
   transition: background 0.2s;
+  box-sizing: border-box;
 }
 
 .btn-select-all:hover {
@@ -369,19 +427,37 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* 업종 필터 */
+.industry-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* 기업형태 필터 */
+.company-type-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .checkbox-item,
 .radio-item {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
+  gap: 6px;
+  padding: 8px 12px;
   background: #f9fafb;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s;
   border: 1px solid transparent;
+  box-sizing: border-box;
+  white-space: nowrap;
 }
 
 .checkbox-item:hover,
@@ -396,30 +472,38 @@
 }
 
 .checkbox-item.highlight {
-  background: #fef3c7;
-  border: 1px solid #fcd34d;
+  background: #dbeafe;
+  border: 1px solid #bfdbfe;
 }
 
 .checkbox-item.highlight:has(input:checked) {
-  background: #fde047;
-  border-color: #facc15;
+  background: #bfdbfe;
+  border-color: #93c5fd;
 }
 
 .checkbox-item input[type="checkbox"],
 .radio-item input[type="radio"] {
-  width: 18px;
-  height: 18px;
+  width: 15px;
+  height: 15px;
   accent-color: #2563eb;
   cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 1px;
 }
 
 .checkbox-text {
-  font-size: 14px;
+  font-size: 13px;
   color: #374151;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.35;
 }
 
-.checkbox-item:has(input:checked) .checkbox-text {
+.checkbox-item:has(input:checked) .checkbox-text,
+.radio-item:has(input:checked) .checkbox-text {
   color: #1d4ed8;
   font-weight: 500;
 }
@@ -429,8 +513,8 @@
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 24px;
-  padding-top: 20px;
+  margin-top: 20px;
+  padding-top: 16px;
   border-top: 1px solid #f3f4f6;
 }
 
@@ -591,9 +675,10 @@
 .job-info {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 16px;
+  gap: 6px 12px;
   font-size: 13px;
   color: #6b7280;
+  max-width: 100%;
 }
 
 .job-info .salary {
@@ -795,18 +880,13 @@
 
 /* ===== 반응형 ===== */
 @media (max-width: 1024px) {
-  .region-filter-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .main-region-list {
-    flex-direction: row;
-    flex-wrap: wrap;
-    max-height: none;
-  }
-
   .sub-region-grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+
+  .checkbox-group,
+  .radio-group {
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
   }
 }
 
@@ -859,8 +939,22 @@
     width: 100%;
   }
 
+  .region-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .main-region-list,
+  .sub-region-grid {
+    max-height: none;
+  }
+
   .sub-region-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .checkbox-group,
+  .radio-group {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   }
 
   .filter-actions {
@@ -881,16 +975,11 @@
 @media (max-width: 480px) {
   .checkbox-group,
   .radio-group {
-    flex-direction: column;
-  }
-
-  .checkbox-item,
-  .radio-item {
-    width: 100%;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .sub-region-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .job-info {
