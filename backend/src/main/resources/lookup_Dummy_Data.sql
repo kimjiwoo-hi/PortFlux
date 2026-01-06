@@ -6,7 +6,7 @@ USING (
            3000 price,
            'web_programming_team_project.pdf' post_file,
            15 view_cnt, 3 download_cnt,
-           '["웹","프로젝트","발표"]' tags
+           '["Swift", "웹","프로젝트","발표"]' tags
     FROM dual
 
     UNION ALL
@@ -16,7 +16,7 @@ USING (
            4500,
            'retro-portfolio.pdf',
            30, 7,
-           '["포트폴리오","디자인","레트로"]'
+           '["JavaScript", "포트폴리오","디자인","레트로"]'
     FROM dual
 
     UNION ALL
@@ -26,7 +26,7 @@ USING (
            2000,
            'programer-Self_Introduction.pdf',
            55, 20,
-           '["자기소개서","개발자","취업"]'
+           '["JavaScript", "자기소개서","개발자","취업"]'
     FROM dual
 
     UNION ALL
@@ -36,7 +36,7 @@ USING (
            2500,
            'gray_symple_ppt.pdf',
            25, 6,
-           '["PPT","디자인","심플"]'
+           '["JavaScript", "PPT","디자인","심플"]'
     FROM dual
 
     UNION ALL
@@ -46,7 +46,7 @@ USING (
            3500,
            'blue_modern_template.pdf',
            22, 4,
-           '["PPT","비즈니스","블루"]'
+           '["C++", "PPT","비즈니스","블루"]'
     FROM dual
 
     UNION ALL
@@ -56,7 +56,7 @@ USING (
            5000,
            'Understanding_AI_at_Work.pdf',
            40, 11,
-           '["AI","업무","자동화"]'
+           '["JavaScript", "AI","업무","자동화"]'
     FROM dual
 
     UNION ALL
@@ -66,7 +66,7 @@ USING (
            1500,
            'The_World_of_Mystery.pdf',
            18, 5,
-           '["미스터리","인문","스토리"]'
+           '["JavaScript", "미스터리","인문","스토리"]'
     FROM dual
 
     UNION ALL
@@ -76,7 +76,7 @@ USING (
            4000,
            'Strategic_Content_Marketing_Presentation.pdf',
            35, 9,
-           '["마케팅","콘텐츠","전략"]'
+           '["TypeScript", "마케팅","콘텐츠","전략"]'
     FROM dual
 
     UNION ALL
@@ -86,7 +86,7 @@ USING (
            1000,
            'Music_Library.pdf',
            14, 3,
-           '["음악","라이브러리","저작권"]'
+           '["TypeScript", "음악","라이브러리","저작권"]'
     FROM dual
 
     UNION ALL
@@ -96,7 +96,7 @@ USING (
            1500,
            'Kings_of_Wrestling.pdf',
            16, 2,
-           '["스포츠","레슬링","역사"]'
+           '["PHP", "스포츠","레슬링","역사"]'
     FROM dual
 
     UNION ALL
@@ -106,7 +106,7 @@ USING (
            3000,
            'Fall-themed_Presentations.pdf',
            28, 8,
-           '["PPT","가을","테마"]'
+           '["CSS", "PPT","가을","테마"]'
     FROM dual
 
     UNION ALL
@@ -116,7 +116,7 @@ USING (
            5000,
            'Cyber_Security.pdf',
            45, 15,
-           '["보안","해킹","IT"]'
+           '["JavaScript", "보안","해킹","IT"]'
     FROM dual
 
     UNION ALL
@@ -126,7 +126,7 @@ USING (
            2000,
            'Coffee_Presentation.pdf',
            29, 7,
-           '["커피","프레젠테이션","라이프"]'
+           '["PHP", "커피","프레젠테이션","라이프"]'
     FROM dual
 
     UNION ALL
@@ -136,7 +136,7 @@ USING (
            1500,
            'Coding_Plan.pdf',
            60, 25,
-           '["코딩","학습","계획"]'
+           '["SQL", "코딩","학습","계획"]'
     FROM dual
 
     UNION ALL
@@ -146,7 +146,7 @@ USING (
            4500,
            'AI_literacy_education.pdf',
            38, 12,
-           '["AI","교육","리터러시"]'
+           '["JavaScript", "AI","교육","리터러시"]'
     FROM dual
 
     UNION ALL
@@ -156,7 +156,7 @@ USING (
            1000,
            'upload.pdf',
            5, 1,
-           '["자료","문서","업로드"]'
+           '["JavaScript", "자료","문서","업로드"]'
     FROM dual
 
     UNION ALL
@@ -166,7 +166,7 @@ USING (
            1000,
            'upload2.pdf',
            5, 1,
-           '["자료","문서","업로드"]'
+           '["C++", "자료","문서","업로드"]'
     FROM dual
 ) d
 ON (p.post_id = d.post_id)
