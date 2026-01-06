@@ -36,6 +36,10 @@ const UserProfile = () => {
   const [bannerPreview, setBannerPreview] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
 
+  // 닉네임 중복 검사
+  const [nicknameCheckStatus, setNicknameCheckStatus] = useState(""); // "available", "duplicate", "checking", ""
+  const [isNicknameChecked, setIsNicknameChecked] = useState(false);
+
   // 비밀번호 변경 모달
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwords, setPasswords] = useState({
@@ -402,6 +406,8 @@ const UserProfile = () => {
     setIsEditing(true);
     setError("");
     setSuccessMessage("");
+    setNicknameCheckStatus("");
+    setIsNicknameChecked(false);
   };
 
   // 편집 취소
@@ -411,6 +417,50 @@ const UserProfile = () => {
     setProfilePreview(null);
     setBannerPreview(null);
     setError("");
+    setNicknameCheckStatus("");
+    setIsNicknameChecked(false);
+  };
+
+  // 닉네임 중복 검사
+  const handleCheckNickname = async () => {
+    if (!editedInfo.userNickname || editedInfo.userNickname.trim() === "") {
+      setNicknameCheckStatus("duplicate");
+      setIsNicknameChecked(false);
+      return;
+    }
+
+    // 닉네임이 변경되지 않았으면 검사할 필요 없음
+    if (editedInfo.userNickname === fullUserInfo.userNickname) {
+      setNicknameCheckStatus("available");
+      setIsNicknameChecked(true);
+      return;
+    }
+
+    try {
+      setNicknameCheckStatus("checking");
+      const response = await axios.post(
+        '/api/user/register/check-nickname',
+        { nickname: editedInfo.userNickname },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      // response.data가 true면 사용 가능 (중복 아님)
+      if (response.data === true) {
+        setNicknameCheckStatus("available");
+        setIsNicknameChecked(true);
+      } else {
+        setNicknameCheckStatus("duplicate");
+        setIsNicknameChecked(false);
+      }
+    } catch (err) {
+      console.error("닉네임 중복 검사 실패:", err);
+      setNicknameCheckStatus("duplicate");
+      setIsNicknameChecked(false);
+    }
   };
 
   // 저장
@@ -421,24 +471,11 @@ const UserProfile = () => {
       // 닉네임이 변경되었는지 확인
       const nicknameChanged = editedInfo.userNickname !== fullUserInfo.userNickname;
 
-      // 닉네임이 변경되었다면 중복 체크
-      if (nicknameChanged && editedInfo.userNickname) {
-        const checkResponse = await axios.post(
-          '/api/user/register/check-nickname',
-          { nickname: editedInfo.userNickname },
-          {
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-
-        // checkResponse.data가 false면 중복됨 (API가 !isDuplicate 반환)
-        if (checkResponse.data === false) {
-          setError("이미 가입된 닉네임입니다.");
-          setTimeout(() => setError(""), 3000);
-          return;
-        }
+      // 닉네임이 변경되었다면 중복 체크 확인
+      if (nicknameChanged && !isNicknameChecked) {
+        setError("닉네임 중복 확인을 해주세요.");
+        setTimeout(() => setError(""), 3000);
+        return;
       }
 
       if (isCompany) {
@@ -552,6 +589,12 @@ const UserProfile = () => {
       ...editedInfo,
       [name]: value,
     });
+
+    // 닉네임이 변경되면 중복 검사 상태 초기화
+    if (name === "userNickname") {
+      setNicknameCheckStatus("");
+      setIsNicknameChecked(false);
+    }
   };
 
   // 프로필 이미지 변경
@@ -847,10 +890,8 @@ const UserProfile = () => {
                     onClick={() => handlePostClick(post.postId, post.boardType)}
                   >
                     <div className="post-info-row">
+                      <span className="post-badge">{getBoardTypeName(post.boardType)}</span>
                       <h3 className="post-title">{post.title}</h3>
-                      {post.boardType === 'job' && (
-                        <span className="post-badge">채용</span>
-                      )}
                     </div>
                     <div className="post-bottom-row">
                       <span className="post-date">
@@ -858,7 +899,11 @@ const UserProfile = () => {
                       </span>
                       <div className="post-meta">
                         <span>조회 {post.viewCnt || 0}</span>
-                        {post.price && <span className="post-price">{post.price.toLocaleString()}원</span>}
+                        {post.boardType === 'free' ? (
+                          <span className="post-likes">추천 {post.likeCnt || 0}</span>
+                        ) : (
+                          post.price && <span className="post-price">{post.price.toLocaleString()}원</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -910,23 +955,49 @@ const UserProfile = () => {
                   <input
                     type="text"
                     name="userName"
-                    value={isEditing ? (editedInfo.userName || "") : (fullUserInfo.userName || "")}
-                    onChange={handleChange}
-                    disabled={!isEditing}
-                    className={isEditing ? "input-editable" : "input-disabled"}
+                    value={fullUserInfo.userName || ""}
+                    disabled
+                    className="input-disabled"
                   />
                 </div>
 
                 <div className="info-item">
                   <label>닉네임</label>
-                  <input
-                    type="text"
-                    name="userNickname"
-                    value={isEditing ? (editedInfo.userNickname || "") : (fullUserInfo.userNickname || "")}
-                    onChange={handleChange}
-                    disabled={!isEditing}
-                    className={isEditing ? "input-editable" : "input-disabled"}
-                  />
+                  {isEditing ? (
+                    <>
+                      <div className="input-with-btn">
+                        <input
+                          type="text"
+                          name="userNickname"
+                          placeholder="닉네임을 입력하세요"
+                          value={editedInfo.userNickname || ""}
+                          onChange={handleChange}
+                          className="input-editable"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleCheckNickname}
+                          className="btn-small"
+                          disabled={nicknameCheckStatus === "checking"}
+                        >
+                          {nicknameCheckStatus === "checking" ? "확인 중..." : "중복확인"}
+                        </button>
+                      </div>
+                      {nicknameCheckStatus === "available" && (
+                        <span className="valid-msg">사용 가능한 닉네임입니다.</span>
+                      )}
+                      {nicknameCheckStatus === "duplicate" && (
+                        <span className="error-msg">이미 사용 중인 닉네임입니다.</span>
+                      )}
+                    </>
+                  ) : (
+                    <input
+                      type="text"
+                      value={fullUserInfo.userNickname || ""}
+                      disabled
+                      className="input-disabled"
+                    />
+                  )}
                 </div>
 
                 <div className="info-item">
@@ -944,10 +1015,9 @@ const UserProfile = () => {
                   <input
                     type="tel"
                     name="userPhone"
-                    value={isEditing ? (editedInfo.userPhone || "") : (fullUserInfo.userPhone || "")}
-                    onChange={handleChange}
-                    disabled={!isEditing}
-                    className={isEditing ? "input-editable" : "input-disabled"}
+                    value={fullUserInfo.userPhone || ""}
+                    disabled
+                    className="input-disabled"
                   />
                 </div>
 
@@ -1011,10 +1081,8 @@ const UserProfile = () => {
                     onClick={() => handlePostClick(post.postId, post.boardType || 'lookup')}
                   >
                     <div className="post-info-row">
+                      <span className="post-badge">{getBoardTypeName(post.boardType || 'lookup')}</span>
                       <h3 className="post-title">{post.title}</h3>
-                      {post.boardType === 'job' && (
-                        <span className="post-badge">채용</span>
-                      )}
                     </div>
                     <div className="post-bottom-row">
                       <span className="post-date">
@@ -1022,7 +1090,11 @@ const UserProfile = () => {
                       </span>
                       <div className="post-meta">
                         <span>조회 {post.viewCnt || 0}</span>
-                        {post.price && <span className="post-price">{post.price.toLocaleString()}원</span>}
+                        {post.boardType === 'free' ? (
+                          <span className="post-likes">추천 {post.likeCnt || 0}</span>
+                        ) : (
+                          post.price && <span className="post-price">{post.price.toLocaleString()}원</span>
+                        )}
                       </div>
                     </div>
                   </div>

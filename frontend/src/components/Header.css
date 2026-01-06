@@ -111,7 +111,8 @@ button:hover {
   cursor: pointer;
   border: 3px solid #ccc; /* Adjusted border color */
   transition: transform 0.2s, box-shadow 0.2s;
-  object-fit: cover;
+  object-fit: cover !important;
+  display: block;
 }
 
 .profile-pic:hover {
