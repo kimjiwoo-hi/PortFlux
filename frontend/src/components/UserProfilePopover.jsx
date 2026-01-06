@@ -17,6 +17,7 @@ const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
     userImage: null,
     userBanner: null
   });
+
   const [postCount, setPostCount] = useState(0);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
@@ -218,7 +219,6 @@ const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
         </Link>
         <Link to="/cart" onClick={handleMenuClick("/cart")}><button className="menu-item">장바구니</button></Link>
         <Link to="/order-list" onClick={handleMenuClick("/order-list")}><button className="menu-item">주문 내역</button></Link>
-        <Link to="/chat" onClick={handleMenuClick("/chat")}><button className="menu-item">채팅방</button></Link>
       </div>
 
       <div className="popover-footer">

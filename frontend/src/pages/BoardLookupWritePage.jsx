@@ -69,7 +69,7 @@ export default function BoardLookupWritePage() {
       const formData = new FormData();
       formData.append("pdf", selectedFile);
 
-      const response = await axios.post("/api/pdf/analyze", formData, {
+      const response = await axios.post("http://localhost:8080/api/pdf/analyze", formData, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
       });
@@ -168,6 +168,9 @@ export default function BoardLookupWritePage() {
     }
     const loggedInUser = JSON.parse(storedUser);
 
+    // 회원 유형 가져오기 (company 또는 user)
+    const memberType = localStorage.getItem("memberType") || sessionStorage.getItem("memberType") || "user";
+
     try {
       const formData = new FormData();
       formData.append("file", selectedFile);
@@ -175,6 +178,7 @@ export default function BoardLookupWritePage() {
       formData.append("content", content);
       formData.append("price", parseInt(price));
       formData.append("userNum", loggedInUser.userNum);
+      formData.append("memberType", memberType);  // 회원 유형 전송 (user/company)
       formData.append("tags", JSON.stringify(tags));
       if (isAdmin && isNotice) {
         formData.append("boardType", "notice");

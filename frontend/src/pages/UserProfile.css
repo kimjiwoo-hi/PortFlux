@@ -187,6 +187,7 @@
 .post-info-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .myinfo-container .post-title {
@@ -195,6 +196,7 @@
   color: #333;
   margin: 0;
   flex: 1;
+  order: 1;
 }
 
 .post-bottom-row {
@@ -221,6 +223,11 @@
   font-weight: 600;
 }
 
+.post-likes {
+  color: #fa5252;
+  font-weight: 600;
+}
+
 .post-badge {
   display: inline-block;
   padding: 4px 10px;
@@ -230,6 +237,8 @@
   background: #e3f2fd;
   color: #1976d2;
   white-space: nowrap;
+  order: 2;
+  margin-left: 8px;
 }
 
 .myinfo-container .comment-item {
@@ -627,4 +636,45 @@
   justify-content: flex-end;
   gap: 10px;
   margin-top: 24px;
+}
+
+/* 닉네임 중복 확인 UI (RegisterPage와 동일) */
+.input-with-btn {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-small {
+  width: 120px;
+  height: 48px;
+  background-color: #ccc;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.btn-small:hover {
+  background-color: #bbb;
+}
+
+.btn-small:disabled {
+  background-color: #eee;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.valid-msg {
+  font-size: 12px;
+  color: #3b5bdb;
+  margin-top: 4px;
+}
+
+.error-msg {
+  font-size: 12px;
+  color: #fa5252;
+  margin-top: 4px;
 }
