@@ -156,29 +156,67 @@ const BoardLookupRead = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // 구매 상태 확인 함수 (재사용 가능하도록 분리)
+  const checkPurchaseStatus = async () => {
+    const storedUser =
+      localStorage.getItem("user") || sessionStorage.getItem("user");
+    if (!storedUser || !postId) return;
+
+    const loggedInUser = JSON.parse(storedUser);
+
+    try {
+      console.log("=== 구매 상태 확인 시작 ===");
+      console.log("postId:", postId);
+      console.log("userNum:", loggedInUser.userNum);
+      
+      const response = await axios.get(
+        `http://localhost:8080/api/boardlookup/${postId}/purchased`,
+        {
+          params: { userNum: loggedInUser.userNum },
+          withCredentials: true,
+        }
+      );
+      
+      console.log("구매 상태 응답:", response.data);
+      console.log("isPurchased:", response.data.isPurchased);
+      
+      setIsPurchased(response.data.isPurchased);
+      console.log("=== 구매 상태 업데이트 완료 ===");
+    } catch (err) {
+      console.error("구매 상태 확인 실패:", err);
+    }
+  };
+
   useEffect(() => {
-    const checkPurchaseStatus = async () => {
-      const storedUser =
-        localStorage.getItem("user") || sessionStorage.getItem("user");
-      if (!storedUser || !postId) return;
+    checkPurchaseStatus();
+  }, [postId]);
 
-      const loggedInUser = JSON.parse(storedUser);
+  // URL에 refresh 파라미터가 있을 때 구매 상태 강제 새로고침
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refreshParam = urlParams.get('refresh');
+    
+    if (refreshParam) {
+      console.log("결제 완료 후 페이지 진입 - 구매 상태 새로고침");
+      // 약간의 딜레이 후 구매 상태 확인 (서버 동기화 대기)
+      setTimeout(() => {
+        checkPurchaseStatus();
+      }, 1000);
+      
+      // URL에서 refresh 파라미터 제거
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [postId]);
 
-      try {
-        const response = await axios.get(
-          `http://localhost:8080/api/boardlookup/${postId}/purchased`,
-          {
-            params: { userNum: loggedInUser.userNum },
-            withCredentials: true,
-          }
-        );
-        setIsPurchased(response.data.isPurchased);
-      } catch (err) {
-        console.error("구매 상태 확인 실패:", err);
-      }
+  // 페이지 포커스 시 구매 상태 재확인 (결제 후 돌아왔을 때 감지)
+  useEffect(() => {
+    const handleFocus = () => {
+      console.log("페이지 포커스 - 구매 상태 재확인");
+      checkPurchaseStatus();
     };
 
-    checkPurchaseStatus();
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, [postId]);
 
   useEffect(() => {
