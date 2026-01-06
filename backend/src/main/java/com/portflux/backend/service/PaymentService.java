@@ -39,14 +39,21 @@ public class PaymentService {
         log.info("Starting payment confirmation: impUid={}, merchantUid={}",
                 impUid, merchantUid);
 
-        // 1. 주문 조회
+        // 1. 중복 결제 확인 (imp_uid 우선 - 가장 확실한 중복 체크)
+        PaymentRecord existingByImpUid = paymentRepository.findByImpUid(impUid).orElse(null);
+        if (existingByImpUid != null) {
+            log.warn("Payment already processed with imp_uid: {}, returning existing payment", impUid);
+            return existingByImpUid;
+        }
+
+        // 2. 주문 조회
         Order order = orderService.findByMerchantUid(merchantUid);
         if (order == null) {
             log.error("Order not found: merchantUid={}", merchantUid);
             throw new IllegalArgumentException("Order not found for merchantUid=" + merchantUid);
         }
 
-        // 2. 중복 결제 확인
+        // 3. merchantUid 기반 중복 확인
         paymentRepository.findByMerchantUid(merchantUid).ifPresent(p -> {
             if ("PAID".equals(p.getStatus())) {
                 log.warn("Payment already processed: merchantUid={}", merchantUid);
@@ -54,18 +61,18 @@ public class PaymentService {
             }
         });
 
-        // 3. 아임포트 서버에서 결제 정보 조회
+        // 4. 아임포트 서버에서 결제 정보 조회
         IamportResponse<Payment> iamportResponse = iamportClient.paymentByImpUid(impUid);
         Payment iamportPayment = iamportResponse.getResponse();
 
-        // 4. 결제 상태 확인 ("paid")
+        // 5. 결제 상태 확인 ("paid")
         if (!"paid".equals(iamportPayment.getStatus())) {
             log.error("Invalid payment status from iamport: status={}, impUid={}",
                     iamportPayment.getStatus(), impUid);
             throw new IllegalStateException("Payment status is not 'paid': " + iamportPayment.getStatus());
         }
 
-        // 5. 금액 비교 (DB 주문금액 vs 아임포트 결제금액)
+        // 6. 금액 비교 (DB 주문금액 vs 아임포트 결제금액)
         if (order.getTotalAmount().compareTo(iamportPayment.getAmount()) != 0) {
             log.error("Amount mismatch: orderAmount={}, iamportAmount={}, impUid={}",
                     order.getTotalAmount(), iamportPayment.getAmount(), impUid);
@@ -76,14 +83,14 @@ public class PaymentService {
             );
         }
 
-        // 6. 주문 merchantUid 대조
+        // 7. 주문 merchantUid 대조
         if (!merchantUid.equals(iamportPayment.getMerchantUid())) {
             log.error("MerchantUid mismatch: orderMerchantUid={}, iamportMerchantUid={}",
                     merchantUid, iamportPayment.getMerchantUid());
             throw new IllegalStateException("MerchantUid mismatch");
         }
 
-        // 7. PaymentRecord 레코드 생성 및 저장
+        // 8. PaymentRecord 레코드 생성 및 저장
         PaymentRecord paymentRecord = new PaymentRecord();
         paymentRecord.setOrder(order);
         paymentRecord.setImpUid(impUid);
@@ -99,9 +106,9 @@ public class PaymentService {
 
         PaymentRecord savedPayment = paymentRepository.save(paymentRecord);
 
-        // 8. 주문 상태 변경
+        // 9. 주문 상태 변경 및 DB 저장
         order.setStatus("PAID");
-        // orderService.updateOrderStatus(order); // Order 엔티티가 변경 감지에 의해 자동 업데이트 되도록 설정
+        orderService.updateOrderStatus(order);
 
         log.info("Payment confirmed successfully: paymentId={}, merchantUid={}",
                 savedPayment.getId(), merchantUid);

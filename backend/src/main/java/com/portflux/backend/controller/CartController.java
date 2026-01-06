@@ -46,7 +46,7 @@ public class CartController {
     }
 
     @PostMapping("/items")
-    public ResponseEntity<CartItemResponse> addItemToCart(
+    public ResponseEntity<?> addItemToCart(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody AddItemRequest req) {
         Long userNum = getUserNum(userDetails.getUsername());
@@ -54,9 +54,14 @@ public class CartController {
             return ResponseEntity.status(404).build();
         }
 
-        Cart cartItem = cartService.addOrUpdateItem(userNum, req.getProductId());
-        CartItemResponse res = new CartItemResponse(cartItem.getId(), cartItem.getUserId(), cartItem.getPostId());
-        return ResponseEntity.ok(res);
+        try {
+            Cart cartItem = cartService.addOrUpdateItem(userNum, req.getProductId());
+            CartItemResponse res = new CartItemResponse(cartItem.getId(), cartItem.getUserId(), cartItem.getPostId());
+            return ResponseEntity.ok(res);
+        } catch (IllegalStateException e) {
+            // 이미 구매한 상품인 경우
+            return ResponseEntity.status(400).body(new ErrorResponse(e.getMessage()));
+        }
     }
 
     @DeleteMapping("/items/{cartId}")
@@ -105,6 +110,15 @@ public class CartController {
             this.cartId = cartId;
             this.userId = userId;
             this.postId = postId;
+        }
+    }
+
+    @Data
+    public static class ErrorResponse {
+        private String message;
+
+        public ErrorResponse(String message) {
+            this.message = message;
         }
     }
 }

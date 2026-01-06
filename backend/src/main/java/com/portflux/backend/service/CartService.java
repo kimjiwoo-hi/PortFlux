@@ -15,6 +15,7 @@ import java.util.Optional;
 public class CartService {
 
     private final CartRepository cartRepository;
+    private final BoardLookupService boardLookupService;
 
     public List<Cart> getCartItems(Long userId) {
         return cartRepository.findByUserId(userId);
@@ -22,6 +23,12 @@ public class CartService {
 
     @Transactional
     public Cart addOrUpdateItem(Long userId, Long postId) {
+        // 이미 구매한 상품인지 확인
+        boolean isPurchased = boardLookupService.isPurchased(userId, postId.intValue());
+        if (isPurchased) {
+            throw new IllegalStateException("이미 구매한 상품입니다.");
+        }
+
         // DB 스키마에 따라, 동일 상품 중복 추가를 방지.
         Optional<Cart> existingItem = cartRepository.findByUserIdAndPostId(userId, postId);
 

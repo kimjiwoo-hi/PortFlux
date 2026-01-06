@@ -179,6 +179,25 @@ const BoardLookupRead = () => {
     };
 
     checkPurchaseStatus();
+
+    // 페이지가 포커스를 받을 때(결제 완료 후 돌아올 때) 구매 상태 재확인
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        checkPurchaseStatus();
+      }
+    };
+
+    const handleFocus = () => {
+      checkPurchaseStatus();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [postId]);
 
   useEffect(() => {
@@ -409,6 +428,12 @@ const BoardLookupRead = () => {
       return;
     }
 
+    // 이미 구매한 상품인지 확인
+    if (isPurchased) {
+      alert("이미 구매한 상품입니다.");
+      return;
+    }
+
     const user = JSON.parse(storedUser);
     try {
       console.log("장바구니 추가 요청:", {
@@ -433,7 +458,9 @@ const BoardLookupRead = () => {
     } catch (err) {
       console.error("장바구니 추가 실패:", err);
 
-      if (err.response?.status === 409) {
+      if (err.response?.status === 400) {
+        alert(err.response?.data?.message || "이미 구매한 상품입니다.");
+      } else if (err.response?.status === 409) {
         alert("이미 장바구니에 담긴 항목입니다.");
       } else if (err.response?.status === 404) {
         alert("API 엔드포인트를 찾을 수 없습니다.");
@@ -690,6 +717,9 @@ const BoardLookupRead = () => {
                               ? imgUrl
                               : `http://localhost:8080${imgUrl}`;
 
+                            // 첫 번째 이미지가 아니고, 구매하지 않았으며, 본인 게시글이 아닌 경우 블러 처리
+                            const shouldBlur = index > 0 && !isPurchased && !isOwner;
+
                             return (
                               <div key={index} className="pdf-page-item" style={{
                                 marginBottom: "2rem",
@@ -697,7 +727,8 @@ const BoardLookupRead = () => {
                                 borderRadius: "8px",
                                 boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
                                 overflow: "hidden",
-                                transition: "transform 0.2s"
+                                transition: "transform 0.2s",
+                                position: "relative"
                               }}>
                                 <img
                                   src={fullImageUrl}
@@ -707,13 +738,33 @@ const BoardLookupRead = () => {
                                   style={{
                                     width: "100%",
                                     height: "auto",
-                                    display: "block"
+                                    display: "block",
+                                    filter: shouldBlur ? "blur(10px)" : "none"
                                   }}
                                   onError={(e) => {
                                     console.error(`이미지 로드 실패: ${fullImageUrl}`);
                                     e.target.src = "https://via.placeholder.com/800x600?text=Image+Load+Failed";
                                   }}
                                 />
+                                {shouldBlur && (
+                                  <div style={{
+                                    position: "absolute",
+                                    top: "50%",
+                                    left: "50%",
+                                    transform: "translate(-50%, -50%)",
+                                    background: "rgba(0, 0, 0, 0.7)",
+                                    color: "#fff",
+                                    padding: "1rem 2rem",
+                                    borderRadius: "8px",
+                                    fontSize: "1.1rem",
+                                    fontWeight: "600",
+                                    textAlign: "center",
+                                    pointerEvents: "none",
+                                    zIndex: 10
+                                  }}>
+                                    🔒 구매 후 확인 가능합니다
+                                  </div>
+                                )}
                                 <p className="page-number" style={{
                                   textAlign: "center",
                                   padding: "0.75rem",

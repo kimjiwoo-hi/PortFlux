@@ -22,8 +22,10 @@ public class PaymentRecord {
     @JoinColumn(name = "order_id")
     private Order order;
 
+    @Column(unique = true, nullable = false)
     private String impUid;
 
+    @Column(unique = true, nullable = false)
     private String merchantUid;
 
     private BigDecimal amount;
