@@ -87,22 +87,41 @@ const BoardJobPage = () => {
   useEffect(() => {
     try {
       const urlString = searchParams.toString();
-      console.log("🔄 [" + new Date().getMilliseconds() + "ms] searchParams 변경 감지, 전체 URL:", urlString);
+      console.log(
+        "🔄 [" +
+          new Date().getMilliseconds() +
+          "ms] searchParams 변경 감지, 전체 URL:",
+        urlString
+      );
 
       const keyword = searchParams.get("keyword") || "";
       const sort = searchParams.get("sort") || "latest";
       const page = parseInt(searchParams.get("page")) || 0;
 
       // 필터 파라미터 파싱
-      const regions = searchParams.get("regions") ? JSON.parse(searchParams.get("regions")) : [];
-      const careerType = searchParams.get("careerType") ? JSON.parse(searchParams.get("careerType")) : [];
-      const careerYears = searchParams.get("careerYears") ? JSON.parse(searchParams.get("careerYears")) : [];
+      const regions = searchParams.get("regions")
+        ? JSON.parse(searchParams.get("regions"))
+        : [];
+      const careerType = searchParams.get("careerType")
+        ? JSON.parse(searchParams.get("careerType"))
+        : [];
+      const careerYears = searchParams.get("careerYears")
+        ? JSON.parse(searchParams.get("careerYears"))
+        : [];
       const education = searchParams.get("education") || "";
       const educationExclude = searchParams.get("educationExclude") === "true";
-      const industries = searchParams.get("industries") ? JSON.parse(searchParams.get("industries")) : [];
-      const companyTypes = searchParams.get("companyTypes") ? JSON.parse(searchParams.get("companyTypes")) : [];
-      const workTypes = searchParams.get("workTypes") ? JSON.parse(searchParams.get("workTypes")) : [];
-      const workDays = searchParams.get("workDays") ? JSON.parse(searchParams.get("workDays")) : [];
+      const industries = searchParams.get("industries")
+        ? JSON.parse(searchParams.get("industries"))
+        : [];
+      const companyTypes = searchParams.get("companyTypes")
+        ? JSON.parse(searchParams.get("companyTypes"))
+        : [];
+      const workTypes = searchParams.get("workTypes")
+        ? JSON.parse(searchParams.get("workTypes"))
+        : [];
+      const workDays = searchParams.get("workDays")
+        ? JSON.parse(searchParams.get("workDays"))
+        : [];
       const salaryMin = searchParams.get("salaryMin") || "";
 
       console.log("📍 URL에서 읽은 값:", { page, sort, keyword });
@@ -119,7 +138,19 @@ const BoardJobPage = () => {
         setSortType(sort);
       }
 
-      const newFiltersString = JSON.stringify({ keyword, regions, careerType, careerYears, education, educationExclude, industries, companyTypes, workTypes, workDays, salaryMin });
+      const newFiltersString = JSON.stringify({
+        keyword,
+        regions,
+        careerType,
+        careerYears,
+        education,
+        educationExclude,
+        industries,
+        companyTypes,
+        workTypes,
+        workDays,
+        salaryMin,
+      });
       const currentFiltersString = JSON.stringify(filters);
 
       if (newFiltersString !== currentFiltersString) {
@@ -172,7 +203,12 @@ const BoardJobPage = () => {
 
         // 디버깅: 요청 파라미터 로그
         console.log("=== 채용공고 목록 조회 ===");
-        console.log("페이지:", currentPage, "(0-based, 실제 페이지:", currentPage + 1 + ")");
+        console.log(
+          "페이지:",
+          currentPage,
+          "(0-based, 실제 페이지:",
+          currentPage + 1 + ")"
+        );
         console.log("페이지 크기:", pageSize);
         console.log("정렬:", sortType);
         console.log("필터:", filters);
@@ -200,7 +236,12 @@ const BoardJobPage = () => {
       }
     };
 
-    console.log("🚀 fetchJobs 실행 - currentPage:", currentPage, "sortType:", sortType);
+    console.log(
+      "🚀 fetchJobs 실행 - currentPage:",
+      currentPage,
+      "sortType:",
+      sortType
+    );
     fetchJobs();
   }, [filters, currentPage, sortType]); // 상태가 변경될 때마다 실행
 
@@ -278,15 +319,22 @@ const BoardJobPage = () => {
 
     // 필터 정보를 URL에 저장
     if (filters.keyword) params.set("keyword", filters.keyword);
-    if (filters.regions.length > 0) params.set("regions", JSON.stringify(filters.regions));
-    if (filters.careerType.length > 0) params.set("careerType", JSON.stringify(filters.careerType));
-    if (filters.careerYears.length > 0) params.set("careerYears", JSON.stringify(filters.careerYears));
+    if (filters.regions.length > 0)
+      params.set("regions", JSON.stringify(filters.regions));
+    if (filters.careerType.length > 0)
+      params.set("careerType", JSON.stringify(filters.careerType));
+    if (filters.careerYears.length > 0)
+      params.set("careerYears", JSON.stringify(filters.careerYears));
     if (filters.education) params.set("education", filters.education);
     if (filters.educationExclude) params.set("educationExclude", "true");
-    if (filters.industries.length > 0) params.set("industries", JSON.stringify(filters.industries));
-    if (filters.companyTypes.length > 0) params.set("companyTypes", JSON.stringify(filters.companyTypes));
-    if (filters.workTypes.length > 0) params.set("workTypes", JSON.stringify(filters.workTypes));
-    if (filters.workDays.length > 0) params.set("workDays", JSON.stringify(filters.workDays));
+    if (filters.industries.length > 0)
+      params.set("industries", JSON.stringify(filters.industries));
+    if (filters.companyTypes.length > 0)
+      params.set("companyTypes", JSON.stringify(filters.companyTypes));
+    if (filters.workTypes.length > 0)
+      params.set("workTypes", JSON.stringify(filters.workTypes));
+    if (filters.workDays.length > 0)
+      params.set("workDays", JSON.stringify(filters.workDays));
     if (filters.salaryMin) params.set("salaryMin", filters.salaryMin);
 
     // 현재 정렬 유지
@@ -298,48 +346,71 @@ const BoardJobPage = () => {
 
   // 필터 초기화
   const handleResetFilters = useCallback(() => {
-    setSearchParams(new URLSearchParams()); // URL 완전 초기화
+    // 상태를 초기값으로 직접 리셋
+    setFilters({
+      regions: [],
+      careerType: [],
+      careerYears: [],
+      education: "",
+      educationExclude: false,
+      industries: [],
+      companyTypes: [],
+      workTypes: [],
+      workDays: [],
+      salaryMin: "",
+      keyword: "",
+    });
     setSelectedMainRegion("");
+    setSortType("latest");
+    setCurrentPage(0);
+    // URL도 초기화
+    setSearchParams(new URLSearchParams());
   }, [setSearchParams]);
 
   // 정렬 변경
-  const handleSortChange = useCallback((newSort) => {
-    const params = new URLSearchParams(searchParams);
-    if (newSort !== "latest") {
-      params.set("sort", newSort);
-    } else {
-      params.delete("sort");
-    }
-    params.delete("page"); // 정렬 변경 시 1페이지로
-    setSearchParams(params);
-  }, [searchParams, setSearchParams]);
+  const handleSortChange = useCallback(
+    (newSort) => {
+      const params = new URLSearchParams(searchParams);
+      if (newSort !== "latest") {
+        params.set("sort", newSort);
+      } else {
+        params.delete("sort");
+      }
+      params.delete("page"); // 정렬 변경 시 1페이지로
+      setSearchParams(params);
+    },
+    [searchParams, setSearchParams]
+  );
 
   // 페이지 변경
-  const handlePageChange = useCallback((newPage) => {
-    console.log("🔘 페이지 변경 요청:", newPage);
+  const handlePageChange = useCallback(
+    (newPage) => {
+      console.log("🔘 페이지 변경 요청:", newPage);
 
-    // 현재 URL 파라미터를 그대로 사용
-    const params = new URLSearchParams(searchParams);
+      // 현재 URL 파라미터를 그대로 사용
+      const params = new URLSearchParams(searchParams);
 
-    if (newPage > 0) {
-      params.set("page", newPage.toString());
-    } else {
-      params.delete("page");
-    }
+      if (newPage > 0) {
+        params.set("page", newPage.toString());
+      } else {
+        params.delete("page");
+      }
 
-    const newParamsString = params.toString();
-    const currentParamsString = searchParams.toString();
+      const newParamsString = params.toString();
+      const currentParamsString = searchParams.toString();
 
-    console.log("현재 URL:", currentParamsString);
-    console.log("새 URL:", newParamsString);
+      console.log("현재 URL:", currentParamsString);
+      console.log("새 URL:", newParamsString);
 
-    // URL이 실제로 변경되는 경우에만 업데이트
-    if (newParamsString !== currentParamsString) {
-      setSearchParams(params, { replace: false });
-    }
+      // URL이 실제로 변경되는 경우에만 업데이트
+      if (newParamsString !== currentParamsString) {
+        setSearchParams(params, { replace: false });
+      }
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [searchParams, setSearchParams]);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    },
+    [searchParams, setSearchParams]
+  );
 
   // 채용공고 클릭
   const handleJobClick = useCallback(
@@ -363,33 +434,45 @@ const BoardJobPage = () => {
   }, []);
 
   // 선택된 필터 태그 제거
-  const removeFilterTag = useCallback((filterName, value) => {
-    const newFilters = { ...filters };
+  const removeFilterTag = useCallback(
+    (filterName, value) => {
+      const newFilters = { ...filters };
 
-    if (Array.isArray(newFilters[filterName])) {
-      newFilters[filterName] = newFilters[filterName].filter((v) => v !== value);
-    } else {
-      newFilters[filterName] = filterName === "educationExclude" ? false : "";
-    }
+      if (Array.isArray(newFilters[filterName])) {
+        newFilters[filterName] = newFilters[filterName].filter(
+          (v) => v !== value
+        );
+      } else {
+        newFilters[filterName] = filterName === "educationExclude" ? false : "";
+      }
 
-    // URL 업데이트
-    const params = new URLSearchParams();
-    if (newFilters.keyword) params.set("keyword", newFilters.keyword);
-    if (newFilters.regions.length > 0) params.set("regions", JSON.stringify(newFilters.regions));
-    if (newFilters.careerType.length > 0) params.set("careerType", JSON.stringify(newFilters.careerType));
-    if (newFilters.careerYears.length > 0) params.set("careerYears", JSON.stringify(newFilters.careerYears));
-    if (newFilters.education) params.set("education", newFilters.education);
-    if (newFilters.educationExclude) params.set("educationExclude", "true");
-    if (newFilters.industries.length > 0) params.set("industries", JSON.stringify(newFilters.industries));
-    if (newFilters.companyTypes.length > 0) params.set("companyTypes", JSON.stringify(newFilters.companyTypes));
-    if (newFilters.workTypes.length > 0) params.set("workTypes", JSON.stringify(newFilters.workTypes));
-    if (newFilters.workDays.length > 0) params.set("workDays", JSON.stringify(newFilters.workDays));
-    if (newFilters.salaryMin) params.set("salaryMin", newFilters.salaryMin);
-    if (sortType !== "latest") params.set("sort", sortType);
-    if (currentPage > 0) params.set("page", currentPage.toString());
+      // URL 업데이트
+      const params = new URLSearchParams();
+      if (newFilters.keyword) params.set("keyword", newFilters.keyword);
+      if (newFilters.regions.length > 0)
+        params.set("regions", JSON.stringify(newFilters.regions));
+      if (newFilters.careerType.length > 0)
+        params.set("careerType", JSON.stringify(newFilters.careerType));
+      if (newFilters.careerYears.length > 0)
+        params.set("careerYears", JSON.stringify(newFilters.careerYears));
+      if (newFilters.education) params.set("education", newFilters.education);
+      if (newFilters.educationExclude) params.set("educationExclude", "true");
+      if (newFilters.industries.length > 0)
+        params.set("industries", JSON.stringify(newFilters.industries));
+      if (newFilters.companyTypes.length > 0)
+        params.set("companyTypes", JSON.stringify(newFilters.companyTypes));
+      if (newFilters.workTypes.length > 0)
+        params.set("workTypes", JSON.stringify(newFilters.workTypes));
+      if (newFilters.workDays.length > 0)
+        params.set("workDays", JSON.stringify(newFilters.workDays));
+      if (newFilters.salaryMin) params.set("salaryMin", newFilters.salaryMin);
+      if (sortType !== "latest") params.set("sort", sortType);
+      if (currentPage > 0) params.set("page", currentPage.toString());
 
-    setSearchParams(params);
-  }, [filters, sortType, currentPage, setSearchParams]);
+      setSearchParams(params);
+    },
+    [filters, sortType, currentPage, setSearchParams]
+  );
 
   // 선택된 필터 개수 계산
   const selectedFilterCount = useMemo(() => {
@@ -738,15 +821,6 @@ const BoardJobPage = () => {
             </div>
             {expandedSections.career && (
               <div className="filter-section-content">
-                <h4
-                  style={{
-                    fontSize: "14px",
-                    color: "#6b7280",
-                    marginBottom: "12px",
-                  }}
-                >
-                  경력 구분
-                </h4>
                 <div className="checkbox-group">
                   {careerTypes.map((type) => (
                     <label key={type.value} className="checkbox-item">
@@ -764,11 +838,8 @@ const BoardJobPage = () => {
                 {filters.careerType.includes("EXPERIENCED") && (
                   <>
                     <h4
-                      style={{
-                        fontSize: "14px",
-                        color: "#6b7280",
-                        margin: "20px 0 12px",
-                      }}
+                      className="filter-subsection-title"
+                      style={{ marginTop: "16px" }}
                     >
                       경력 연차
                     </h4>
@@ -890,16 +961,8 @@ const BoardJobPage = () => {
             </div>
             {expandedSections.industry && (
               <div className="filter-section-content">
-                <h4
-                  style={{
-                    fontSize: "14px",
-                    color: "#6b7280",
-                    marginBottom: "12px",
-                  }}
-                >
-                  업종
-                </h4>
-                <div className="checkbox-group">
+                <h4 className="filter-subsection-title">업종</h4>
+                <div className="checkbox-group industry-grid">
                   {industries.map((item) => (
                     <label key={item.value} className="checkbox-item">
                       <input
@@ -914,15 +977,12 @@ const BoardJobPage = () => {
                   ))}
                 </div>
                 <h4
-                  style={{
-                    fontSize: "14px",
-                    color: "#6b7280",
-                    margin: "20px 0 12px",
-                  }}
+                  className="filter-subsection-title"
+                  style={{ marginTop: "16px" }}
                 >
                   기업형태
                 </h4>
-                <div className="checkbox-group">
+                <div className="checkbox-group company-type-grid">
                   {companyTypes.map((item) => (
                     <label key={item.value} className="checkbox-item">
                       <input
@@ -955,15 +1015,7 @@ const BoardJobPage = () => {
             </div>
             {expandedSections.workType && (
               <div className="filter-section-content">
-                <h4
-                  style={{
-                    fontSize: "14px",
-                    color: "#6b7280",
-                    marginBottom: "12px",
-                  }}
-                >
-                  근무형태
-                </h4>
+                <h4 className="filter-subsection-title">근무형태</h4>
                 <div className="checkbox-group">
                   {workTypes.map((item) => (
                     <label key={item.value} className="checkbox-item">
@@ -979,11 +1031,8 @@ const BoardJobPage = () => {
                   ))}
                 </div>
                 <h4
-                  style={{
-                    fontSize: "14px",
-                    color: "#6b7280",
-                    margin: "20px 0 12px",
-                  }}
+                  className="filter-subsection-title"
+                  style={{ marginTop: "16px" }}
                 >
                   근무요일
                 </h4>
@@ -1042,8 +1091,11 @@ const BoardJobPage = () => {
             >
               {/* 회사 로고 */}
               <div className="job-card-logo">
-                {(job.companyLogo || job.companyImage) ? (
-                  <img src={job.companyLogo || job.companyImage} alt={job.companyName} />
+                {job.companyLogo || job.companyImage ? (
+                  <img
+                    src={job.companyLogo || job.companyImage}
+                    alt={job.companyName}
+                  />
                 ) : (
                   <div className="logo-placeholder">
                     {job.companyName?.charAt(0) || "C"}

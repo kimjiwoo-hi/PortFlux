@@ -394,9 +394,9 @@ const BoardJobCreatePage = () => {
             {/* 경력 */}
             <div className="form-group">
               <label className="required">경력</label>
-              <div className="checkbox-group">
+              <div className="create-checkbox-group">
                 {careerTypes.map((type) => (
-                  <label key={type.value} className="checkbox-item">
+                  <label key={type.value} className="create-checkbox-item">
                     <input
                       type="checkbox"
                       checked={formData.jobCareerType.includes(type.value)}
@@ -404,7 +404,7 @@ const BoardJobCreatePage = () => {
                         handleMultiSelect("jobCareerType", type.value)
                       }
                     />
-                    <span className="checkbox-text">{type.label}</span>
+                    <span className="create-checkbox-text">{type.label}</span>
                   </label>
                 ))}
               </div>
@@ -417,9 +417,9 @@ const BoardJobCreatePage = () => {
             {formData.jobCareerType.includes("경력") && (
               <div className="form-group">
                 <label>경력 연차</label>
-                <div className="checkbox-group wrap">
+                <div className="create-checkbox-group wrap">
                   {careerYears.map((year) => (
-                    <label key={year.value} className="checkbox-item">
+                    <label key={year.value} className="create-checkbox-item">
                       <input
                         type="checkbox"
                         checked={formData.jobCareerYears.includes(year.value)}
@@ -427,7 +427,7 @@ const BoardJobCreatePage = () => {
                           handleMultiSelect("jobCareerYears", year.value)
                         }
                       />
-                      <span className="checkbox-text">{year.label}</span>
+                      <span className="create-checkbox-text">{year.label}</span>
                     </label>
                   ))}
                 </div>
@@ -438,14 +438,14 @@ const BoardJobCreatePage = () => {
             <div className="form-group">
               <label className="required">학력</label>
               <div className="education-group">
-                <label className="checkbox-item highlight">
+                <label className="create-checkbox-item highlight">
                   <input
                     type="checkbox"
                     name="jobEducationExclude"
                     checked={formData.jobEducationExclude}
                     onChange={handleChange}
                   />
-                  <span className="checkbox-text">학력무관</span>
+                  <span className="create-checkbox-text">학력무관</span>
                 </label>
                 <select
                   name="jobEducation"
@@ -530,9 +530,9 @@ const BoardJobCreatePage = () => {
             {/* 근무형태 */}
             <div className="form-group">
               <label>근무형태</label>
-              <div className="checkbox-group wrap">
+              <div className="create-checkbox-group wrap">
                 {workTypes.map((type) => (
-                  <label key={type.value} className="checkbox-item">
+                  <label key={type.value} className="create-checkbox-item">
                     <input
                       type="checkbox"
                       checked={formData.jobWorkTypes.includes(type.value)}
@@ -540,7 +540,7 @@ const BoardJobCreatePage = () => {
                         handleMultiSelect("jobWorkTypes", type.value)
                       }
                     />
-                    <span className="checkbox-text">{type.label}</span>
+                    <span className="create-checkbox-text">{type.label}</span>
                   </label>
                 ))}
               </div>
@@ -549,9 +549,9 @@ const BoardJobCreatePage = () => {
             {/* 근무요일 */}
             <div className="form-group">
               <label>근무요일</label>
-              <div className="checkbox-group wrap">
+              <div className="create-checkbox-group wrap">
                 {workDays.map((day) => (
-                  <label key={day.value} className="checkbox-item">
+                  <label key={day.value} className="create-checkbox-item">
                     <input
                       type="checkbox"
                       checked={formData.jobWorkDays.includes(day.value)}
@@ -559,7 +559,7 @@ const BoardJobCreatePage = () => {
                         handleMultiSelect("jobWorkDays", day.value)
                       }
                     />
-                    <span className="checkbox-text">{day.label}</span>
+                    <span className="create-checkbox-text">{day.label}</span>
                   </label>
                 ))}
               </div>
@@ -573,9 +573,9 @@ const BoardJobCreatePage = () => {
             {/* 업종 */}
             <div className="form-group">
               <label>업종</label>
-              <div className="checkbox-group wrap">
+              <div className="create-checkbox-group wrap">
                 {industries.map((industry) => (
-                  <label key={industry.value} className="checkbox-item">
+                  <label key={industry.value} className="create-checkbox-item">
                     <input
                       type="checkbox"
                       checked={formData.jobIndustries.includes(industry.value)}
@@ -583,7 +583,7 @@ const BoardJobCreatePage = () => {
                         handleMultiSelect("jobIndustries", industry.value)
                       }
                     />
-                    <span className="checkbox-text">{industry.label}</span>
+                    <span className="create-checkbox-text">{industry.label}</span>
                   </label>
                 ))}
               </div>
@@ -592,9 +592,9 @@ const BoardJobCreatePage = () => {
             {/* 기업형태 */}
             <div className="form-group">
               <label>기업형태</label>
-              <div className="checkbox-group wrap">
+              <div className="create-checkbox-group wrap">
                 {companyTypes.map((type) => (
-                  <label key={type.value} className="checkbox-item">
+                  <label key={type.value} className="create-checkbox-item">
                     <input
                       type="checkbox"
                       checked={formData.jobCompanyTypes.includes(type.value)}
@@ -602,7 +602,7 @@ const BoardJobCreatePage = () => {
                         handleMultiSelect("jobCompanyTypes", type.value)
                       }
                     />
-                    <span className="checkbox-text">{type.label}</span>
+                    <span className="create-checkbox-text">{type.label}</span>
                   </label>
                 ))}
               </div>

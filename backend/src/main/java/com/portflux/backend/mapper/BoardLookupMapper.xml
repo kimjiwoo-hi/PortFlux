@@ -200,7 +200,7 @@
     INNER JOIN ORDERS o ON oi.order_id = o.id
     WHERE o.user_id = #{userNum}
     AND oi.product_id = #{postId}
-    AND o.status = 'PAID'
+    AND o.status IN ('PAID', 'CREATED')
 </select>
 
 <!-- 다운로드 카운트 증가 -->

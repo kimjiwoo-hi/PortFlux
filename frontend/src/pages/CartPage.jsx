@@ -23,6 +23,7 @@ function CartPage() {
 
       const user = JSON.parse(storedUser);
 
+      // 1. 장바구니 아이템 조회
       const cartResponse = await axios.get(
         `/api/cart`,
         {
@@ -34,21 +35,85 @@ function CartPage() {
       );
 
       const items = cartResponse.data.items || [];
+      console.log("장바구니 원본 데이터:", items);
+
+      // 2. 주문 내역 조회 (구매한 상품 목록 가져오기)
+      let purchasedPostIds = new Set();
+      try {
+        const ordersResponse = await axios.get(
+          `/api/orders/user`,
+          {
+            withCredentials: true,
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+
+        // 주문 내역에서 구매한 모든 postId 추출
+        ordersResponse.data.forEach(order => {
+          if (order.items && Array.isArray(order.items)) {
+            order.items.forEach(orderItem => {
+              purchasedPostIds.add(orderItem.productId);
+            });
+          }
+        });
+
+        console.log("구매한 상품 ID 목록:", Array.from(purchasedPostIds));
+      } catch (err) {
+        console.error("주문 내역 조회 실패:", err);
+        // 주문 내역 조회 실패해도 장바구니는 계속 로드
+      }
+
+      // 3. 이미 구매한 상품은 장바구니에서 제외
+      const filteredItems = items.filter(item => !purchasedPostIds.has(item.postId));
+      console.log("필터링 후 장바구니:", filteredItems);
+
+      // 4. 필터링된 장바구니에서 제거된 항목이 있으면 DB에서도 삭제
+      const removedItems = items.filter(item => purchasedPostIds.has(item.postId));
+      if (removedItems.length > 0) {
+        console.log("장바구니에서 자동 제거할 항목:", removedItems);
+        for (const item of removedItems) {
+          try {
+            await axios.delete(
+              `/api/cart/items/${item.cartId}`,
+              {
+                withCredentials: true,
+                headers: {
+                  'Authorization': `Bearer ${token}`
+                }
+              }
+            );
+            console.log(`장바구니 항목 ${item.cartId} 자동 삭제 완료`);
+          } catch (err) {
+            console.error(`장바구니 항목 ${item.cartId} 삭제 실패:`, err);
+          }
+        }
+      }
+
+      // 5. 게시물 상세 정보 조회
       const enrichedItems = await Promise.all(
-        items.map(async (item) => {
+        filteredItems.map(async (item) => {
           try {
             const postResponse = await axios.get(
-              `/api/boardlookup/${item.postId}`,
+              `http://localhost:8080/api/boardlookup/${item.postId}`,
               { withCredentials: true }
             );
 
             const post = postResponse.data.post || postResponse.data;
+            console.log("게시물 데이터:", post);
 
+            // 이미지 URL 수정
             let imageUrl = 'https://cdn.dribbble.com/userupload/12461999/file/original-251950a7c4585c49086113b190f7f224.png?resize=1024x768';
+            
             if (post.pdfImages && post.pdfImages.length > 0) {
-              imageUrl = `${post.pdfImages[0]}`;
-            } else if (post.postFile) {
-              imageUrl = `/uploads/${post.postFile}`;
+              const firstImage = post.pdfImages[0];
+              if (firstImage.startsWith('http')) {
+                imageUrl = firstImage;
+              } else {
+                imageUrl = `http://localhost:8080${firstImage}`;
+              }
+              console.log("PDF 이미지 사용:", imageUrl);
             }
 
             return {
@@ -102,9 +167,6 @@ function CartPage() {
     }
   };
 
-  // ------------------------------------------------------------------
-  // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 이 부분이 수정됩니다 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
-  // ------------------------------------------------------------------
   const handleCheckout = async () => {
     if (cartItems.length === 0) {
       alert("장바구니가 비어있습니다.");
@@ -131,9 +193,11 @@ function CartPage() {
         qty: 1
       }));
 
+      console.log("주문 생성 요청:", orderItems);
+
       // 1. 백엔드에 주문 생성 요청 (결제 전 'CREATED' 상태의 주문)
       const orderResponse = await axios.post(
-        '/api/orders',
+        'http://localhost:8080/api/orders',
         {
           items: orderItems
         },
@@ -145,11 +209,11 @@ function CartPage() {
 
       console.log("주문 생성 완료:", orderResponse.data);
 
-      // 2. 결제 페이지로 이동 (장바구니는 결제 성공 후에 비움)
-      // merchantUid를 state로 전달하여 PaymentPage에서 사용
+      // 2. 결제 페이지로 이동 (merchantUid와 주문 아이템 정보 전달)
       navigate('/payment', {
         state: {
-          merchantUid: orderResponse.data.merchantUid
+          merchantUid: orderResponse.data.merchantUid,
+          orderItems: cartItems  // ✅ 장바구니 아이템 정보도 함께 전달
         }
       });
 
@@ -158,9 +222,6 @@ function CartPage() {
       alert("주문 처리 중 오류가 발생했습니다.");
     }
   };
-  // ------------------------------------------------------------------
-  // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ 이 부분이 수정됩니다 ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-  // ------------------------------------------------------------------
 
   const calculateTotal = () => {
     return cartItems.reduce((sum, item) => sum + (item.price || 0), 0);
@@ -209,11 +270,18 @@ function CartPage() {
             <div className="cart-items">
               {cartItems.map((item) => (
                 <div key={item.cartId} className="cart-item">
-                  <div className="item-image" onClick={() => navigate(`/board/lookup/${item.postId}`)}>
-                    <img src={item.imageUrl} alt={item.title} />
+                  <div className="item-image" onClick={() => navigate(`/board/lookup/read/${item.postId}`)}>
+                    <img 
+                      src={item.imageUrl} 
+                      alt={item.title}
+                      onError={(e) => {
+                        console.error("이미지 로드 실패:", item.imageUrl);
+                        e.target.src = 'https://cdn.dribbble.com/userupload/12461999/file/original-251950a7c4585c49086113b190f7f224.png?resize=1024x768';
+                      }}
+                    />
                   </div>
                   <div className="item-info">
-                    <h3 className="item-title" onClick={() => navigate(`/board/lookup/${item.postId}`)}>
+                    <h3 className="item-title" onClick={() => navigate(`/board/lookup/read/${item.postId}`)}>
                       {item.title}
                     </h3>
                     <p className="item-author">{item.author}</p>

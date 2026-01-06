@@ -271,34 +271,45 @@
 /* 학력 그룹 */
 .education-group {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 16px;
 }
 
-.education-group select {
-  flex: 1;
+.education-group .create-checkbox-item {
+  width: 50%;
+  flex-shrink: 0;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
 }
 
-.education-group .checkbox-item.highlight {
+.education-group select {
+  width: 50%;
+  flex: 1;
+  height: auto;
+}
+
+.education-group .create-checkbox-item.highlight {
   background: #eef2ff;
   border: 1px solid #c7d2fe;
 }
 
-.education-group .checkbox-item.highlight:has(input:checked) {
+.education-group .create-checkbox-item.highlight:has(input:checked) {
   background: #c7d2fe;
 }
 
 /* 체크박스 그룹 */
-.checkbox-group {
+.create-checkbox-group {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
-.checkbox-group.wrap {
+.create-checkbox-group.wrap {
   flex-wrap: wrap;
 }
 
-.checkbox-item {
+.create-checkbox-item {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -311,16 +322,16 @@
   user-select: none;
 }
 
-.checkbox-item:hover {
+.create-checkbox-item:hover {
   background: #f1f5f9;
 }
 
-.checkbox-item:has(input:checked) {
+.create-checkbox-item:has(input:checked) {
   background: #eef2ff;
   border-color: #c7d2fe;
 }
 
-.checkbox-item input[type="checkbox"] {
+.create-checkbox-item input[type="checkbox"] {
   width: 18px;
   height: 18px;
   margin: 0;
@@ -330,7 +341,7 @@
   vertical-align: middle;
 }
 
-.checkbox-text {
+.create-checkbox-text {
   font-size: 14px;
   color: #334155;
   white-space: nowrap;
@@ -338,7 +349,7 @@
   vertical-align: middle;
 }
 
-.checkbox-item:has(input:checked) .checkbox-text {
+.create-checkbox-item:has(input:checked) .create-checkbox-text {
   color: #4338ca;
   font-weight: 500;
 }
@@ -470,11 +481,7 @@
     gap: 12px;
   }
 
-  .checkbox-group {
-    flex-direction: column;
-  }
-
-  .checkbox-item {
+  .create-checkbox-item {
     width: 100%;
   }
 

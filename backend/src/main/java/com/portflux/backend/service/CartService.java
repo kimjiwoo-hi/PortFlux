@@ -24,7 +24,6 @@ public class CartService {
     public Cart addOrUpdateItem(Long userId, Long postId) {
         // DB 스키마에 따라, 동일 상품 중복 추가를 방지.
         Optional<Cart> existingItem = cartRepository.findByUserIdAndPostId(userId, postId);
-
         if (existingItem.isPresent()) {
             // 이미 상품이 장바구니에 있는 경우: 기존 아이템 반환 (또는 예외 처리)
             return existingItem.get();
@@ -43,5 +42,17 @@ public class CartService {
             throw new IllegalArgumentException("Invalid cart item ID: " + cartId);
         }
         cartRepository.deleteById(cartId);
+    }
+
+    /**
+     * ✅ 특정 사용자의 장바구니 전체 비우기
+     */
+    @Transactional
+    public void emptyCart(Long userId) {
+        List<Cart> userCartItems = cartRepository.findByUserId(userId);
+        if (!userCartItems.isEmpty()) {
+            cartRepository.deleteAll(userCartItems);
+            System.out.println("사용자 " + userId + "의 장바구니 " + userCartItems.size() + "개 항목 삭제 완료");
+        }
     }
 }
