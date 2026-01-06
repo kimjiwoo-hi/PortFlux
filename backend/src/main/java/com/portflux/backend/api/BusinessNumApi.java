@@ -1,246 +1,189 @@
 package com.portflux.backend.api;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 public class BusinessNumApi {
 
-    // 공공데이터포털 인증키 (application.properties에서 주입)
-    @Value("${api.public.data.service-key}")
-    private String SERVICE_KEY;
+    // 공공데이터포털 인증키 (Decoded 상태 - 인코딩 없이 사용)
+    private final String SERVICE_KEY = "a217371dbc2951d98713243018c5f9d825f1a75c803217472581e7b42dc29a05";
 
-    // 국세청 사업자등록정보 상태조회 API URL (application.properties에서 주입)
-    @Value("${api.public.data.url}")
-    private String API_URL;
+    // 국세청 사업자등록정보 상태조회 API URL
+    private final String API_URL = "https://api.odcloud.kr/api/nts-businessman/v1/status";
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    // 타임아웃 설정된 RestTemplate
+    private final RestTemplate restTemplate;
 
-    /**
-     * 사업자번호 검증 및 기업 정보 조회 (validate API 사용)
-     * @param businessNumber 사업자번호
-     * @return Map with "isValid" (boolean) and "companyName" (String)
-     */
+    // 캐시 (5분간 유효)
+    private final Map<String, CacheEntry> cache = new ConcurrentHashMap<>();
+    private static final long CACHE_DURATION_MS = 5 * 60 * 1000; // 5분
+
+    private static class CacheEntry {
+        boolean isValid;
+        long timestamp;
+
+        CacheEntry(boolean isValid) {
+            this.isValid = isValid;
+            this.timestamp = System.currentTimeMillis();
+        }
+
+        boolean isExpired() {
+            return System.currentTimeMillis() - timestamp > CACHE_DURATION_MS;
+        }
+    }
+
+    public BusinessNumApi() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(10000); // 10초
+        factory.setReadTimeout(30000);    // 30초
+        this.restTemplate = new RestTemplate(factory);
+    }
+
+    public boolean checkBusinessNumber(String businessNumber) {
+        if (businessNumber == null) return false;
+        String cleanNum = businessNumber.replace("-", ""); // 하이픈 제거
+
+        // 캐시 확인
+        CacheEntry cached = cache.get(cleanNum);
+        if (cached != null && !cached.isExpired()) {
+            System.out.println("▶ [캐시 히트] 사업자번호: " + cleanNum + ", 결과: " + cached.isValid);
+            return cached.isValid;
+        }
+
+        // 최대 3회 재시도
+        int maxRetries = 3;
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                System.out.println("▶ [API 호출 시도 " + attempt + "/" + maxRetries + "] 사업자번호: " + cleanNum);
+
+                // UriComponentsBuilder로 URL 생성 (자동 인코딩 비활성화)
+                String url = UriComponentsBuilder.fromHttpUrl(API_URL)
+                        .queryParam("serviceKey", SERVICE_KEY)  // Decoded Key 사용
+                        .queryParam("returnType", "JSON")
+                        .build(false)  // 인코딩 하지 않음
+                        .toUriString();
+
+                System.out.println("▶ [요청 URL]: " + url);
+
+                // 요청 헤더 설정
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+
+                // 요청 바디 생성
+                Map<String, List<String>> requestBody = new HashMap<>();
+                requestBody.put("b_no", Collections.singletonList(cleanNum));
+
+                System.out.println("▶ [요청 바디]: " + requestBody);
+
+                HttpEntity<Map<String, List<String>>> entity = new HttpEntity<>(requestBody, headers);
+
+                // API 호출
+                ResponseEntity<Map> response = restTemplate.exchange(
+                        url,
+                        HttpMethod.POST,
+                        entity,
+                        Map.class
+                );
+
+                System.out.println("▶ [응답 코드]: " + response.getStatusCode());
+
+                // 응답 처리
+                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> body = (Map<String, Object>) response.getBody();
+
+                    System.out.println("▶ [응답 바디]: " + body);
+
+                    // API 서버 오류 체크
+                    if (body.containsKey("code")) {
+                        Integer code = (Integer) body.get("code");
+                        if (code != null && code < 0) {
+                            System.err.println("❌ [API 오류] code: " + code + ", msg: " + body.get("msg"));
+                            if (attempt < maxRetries) {
+                                long waitTime = attempt * 3000L;
+                                System.out.println("⏳ " + (waitTime / 1000) + "초 후 재시도...");
+                                Thread.sleep(waitTime);
+                                continue;
+                            }
+                            return false;
+                        }
+                    }
+
+                    if (body.containsKey("data")) {
+                        @SuppressWarnings("unchecked")
+                        List<Map<String, Object>> dataList = (List<Map<String, Object>>) body.get("data");
+
+                        if (dataList != null && !dataList.isEmpty()) {
+                            Map<String, Object> data = dataList.get(0);
+                            String taxType = (String) data.get("tax_type");
+
+                            System.out.println("▶ [국세청 API 판정]: " + taxType);
+
+                            boolean isValid = taxType != null && !taxType.equals("국세청에 등록되지 않은 사업자등록번호입니다.");
+                            cache.put(cleanNum, new CacheEntry(isValid));
+                            return isValid;
+                        }
+                    }
+                }
+
+                cache.put(cleanNum, new CacheEntry(false));
+                return false;
+
+            } catch (HttpClientErrorException | HttpServerErrorException e) {
+                System.err.println("❌ [API HTTP 오류] 시도 " + attempt + " - 상태코드: " + e.getStatusCode() + ", 응답: " + e.getResponseBodyAsString());
+
+                if (attempt < maxRetries) {
+                    try {
+                        long waitTime = attempt * 3000L;
+                        System.out.println("⏳ " + (waitTime / 1000) + "초 후 재시도...");
+                        Thread.sleep(waitTime);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("❌ [API 시스템 오류] 시도 " + attempt + ": " + e.getMessage());
+
+                if (attempt < maxRetries) {
+                    try {
+                        long waitTime = attempt * 3000L;
+                        System.out.println("⏳ " + (waitTime / 1000) + "초 후 재시도...");
+                        Thread.sleep(waitTime);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
     public Map<String, Object> checkBusinessNumberWithInfo(String businessNumber) {
         Map<String, Object> result = new HashMap<>();
         result.put("isValid", false);
         result.put("companyName", null);
 
-        try {
-            System.out.println("====== 사업자번호 검증 시작 (validate API) ======");
-            System.out.println("입력된 사업자번호: " + businessNumber);
-
-            if (businessNumber == null) {
-                System.out.println("❌ 사업자번호가 null입니다.");
-                return result;
-            }
-
-            String cleanNum = businessNumber.replace("-", ""); // 하이픈 제거
-            System.out.println("하이픈 제거 후: " + cleanNum);
-            System.out.println("SERVICE_KEY: " + (SERVICE_KEY != null ? "설정됨 (길이: " + SERVICE_KEY.length() + ")" : "null"));
-            System.out.println("API_URL: " + API_URL);
-
-            // 1. URL 생성
-            String urlString = API_URL + "?serviceKey=" + SERVICE_KEY;
-            System.out.println("요청 URL: " + urlString);
-            URI uri = new URI(urlString);
-
-            // 2. 요청 바디 생성 (validate API는 businesses 배열 사용)
-            // 빈 필드 제거 - 필수 필드만 전송
-            Map<String, Object> business = new HashMap<>();
-            business.put("b_no", cleanNum);
-            // start_dt, p_nm 등 선택적 필드는 빈 값 대신 아예 포함하지 않음
-
-            Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("businesses", Collections.singletonList(business));
-            System.out.println("요청 바디: " + requestBody);
-
-            // 3. 요청 엔티티 생성 (Header + Body)
-            RequestEntity<Map<String, Object>> request = RequestEntity
-                    .post(uri)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(requestBody);
-
-            // 4. API 호출
-            System.out.println("국세청 validate API 호출 중...");
-            ResponseEntity<Map> response = restTemplate.exchange(request, Map.class);
-            System.out.println("응답 상태코드: " + response.getStatusCode());
-            System.out.println("응답 바디: " + response.getBody());
-
-            // 5. 응답 처리
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> body = (Map<String, Object>) response.getBody();
-
-                if (body.containsKey("data")) {
-                    @SuppressWarnings("unchecked")
-                    List<Map<String, Object>> dataList = (List<Map<String, Object>>) body.get("data");
-
-                    if (dataList != null && !dataList.isEmpty()) {
-                        Map<String, Object> data = dataList.get(0);
-                        System.out.println("▶ [전체 데이터]: " + data);
-
-                        String valid = (String) data.get("valid");  // "01": 유효, "02": 무효
-                        String validMsg = (String) data.get("valid_msg");
-
-                        System.out.println("▶ [국세청 validate API 판정]");
-                        System.out.println("  - valid: " + valid);
-                        System.out.println("  - valid_msg: " + validMsg);
-
-                        // request_param 안에 기업명이 있을 수 있음
-                        Object companyNameObj = null;
-                        if (data.containsKey("request_param")) {
-                            @SuppressWarnings("unchecked")
-                            Map<String, Object> requestParam = (Map<String, Object>) data.get("request_param");
-                            companyNameObj = requestParam.get("b_nm");
-                            System.out.println("  - request_param.b_nm: " + companyNameObj);
-                        }
-
-                        // 다른 필드명도 시도
-                        if (companyNameObj == null || companyNameObj.toString().trim().isEmpty()) {
-                            companyNameObj = data.get("b_nm");
-                        }
-                        if (companyNameObj == null || companyNameObj.toString().trim().isEmpty()) {
-                            companyNameObj = data.get("company");
-                        }
-
-                        System.out.println("  - 최종 기업명: " + companyNameObj);
-
-                        // valid가 "01"이면 유효한 사업자
-                        boolean isValid = "01".equals(valid);
-
-                        if (isValid) {
-                            System.out.println("✅ 유효한 사업자번호입니다.");
-                            result.put("isValid", true);
-                            if (companyNameObj != null && !companyNameObj.toString().trim().isEmpty()) {
-                                result.put("companyName", companyNameObj.toString());
-                            }
-                            return result;
-                        } else {
-                            System.out.println("❌ 유효하지 않은 사업자번호입니다. (valid: " + valid + ", msg: " + validMsg + ")");
-                        }
-                    } else {
-                        System.out.println("❌ 응답 데이터 리스트가 비어있습니다.");
-                    }
-                } else {
-                    System.out.println("❌ 응답에 'data' 필드가 없습니다. 전체 응답: " + body);
-                }
-            } else {
-                System.out.println("❌ API 응답 실패 또는 응답 바디가 null입니다.");
-            }
-            System.out.println("====== 사업자번호 검증 종료 (결과: false) ======");
-            return result;
-
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
-            System.err.println("❌ [API HTTP 오류] 상태코드: " + e.getStatusCode());
-            System.err.println("응답 바디: " + e.getResponseBodyAsString());
-            return result;
-        } catch (Exception e) {
-            System.err.println("❌ [API 시스템 오류]: " + e.getMessage());
-            e.printStackTrace();
-            return result;
-        }
-    }
-
-    public boolean checkBusinessNumber(String businessNumber) {
-        try {
-            System.out.println("====== 사업자번호 검증 시작 (status API) ======");
-            System.out.println("입력된 사업자번호: " + businessNumber);
-
-            if (businessNumber == null) {
-                System.out.println("❌ 사업자번호가 null입니다.");
-                return false;
-            }
-
-            String cleanNum = businessNumber.replace("-", ""); // 하이픈 제거
-            System.out.println("하이픈 제거 후: " + cleanNum);
-            System.out.println("SERVICE_KEY: " + (SERVICE_KEY != null ? "설정됨 (길이: " + SERVICE_KEY.length() + ")" : "null"));
-            System.out.println("API_URL: " + API_URL);
-
-            // status API 형식: b_no 배열로 전송
-            String urlString = API_URL + "?serviceKey=" + SERVICE_KEY;
-            System.out.println("요청 URL: " + urlString);
-            URI uri = new URI(urlString);
-
-            // status API 형식으로 요청 바디 생성
-            Map<String, List<String>> requestBody = new HashMap<>();
-            requestBody.put("b_no", Collections.singletonList(cleanNum));
-            System.out.println("요청 바디: " + requestBody);
-
-            // 3. 요청 엔티티 생성 (Header + Body)
-            RequestEntity<Map<String, List<String>>> request = RequestEntity
-                    .post(uri)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(requestBody);
-
-            // 4. API 호출
-            System.out.println("국세청 status API 호출 중...");
-            ResponseEntity<Map> response = restTemplate.exchange(request, Map.class);
-            System.out.println("응답 상태코드: " + response.getStatusCode());
-            System.out.println("응답 바디: " + response.getBody());
-
-            // 5. 응답 처리
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> body = (Map<String, Object>) response.getBody();
-
-                if (body.containsKey("data")) {
-                    @SuppressWarnings("unchecked")
-                    List<Map<String, Object>> dataList = (List<Map<String, Object>>) body.get("data");
-
-                    if (dataList != null && !dataList.isEmpty()) {
-                        Map<String, Object> data = dataList.get(0);
-                        System.out.println("▶ [전체 데이터]: " + data);
-
-                        // status API는 tax_type 필드로 판정
-                        String taxType = (String) data.get("tax_type");
-                        String bStt = (String) data.get("b_stt");
-
-                        System.out.println("▶ [국세청 status API 판정]");
-                        System.out.println("  - tax_type: " + taxType);
-                        System.out.println("  - b_stt (사업자상태): " + bStt);
-
-                        // "국세청에 등록되지 않은..." 메시지가 아니면 유효한 사업자로 판단
-                        if (taxType != null && !taxType.contains("국세청에 등록되지 않은")) {
-                            System.out.println("✅ 유효한 사업자번호입니다.");
-                            return true;
-                        } else {
-                            System.out.println("❌ 유효하지 않은 사업자번호입니다. (tax_type: " + taxType + ")");
-                        }
-                    } else {
-                        System.out.println("❌ 응답 데이터 리스트가 비어있습니다.");
-                    }
-                } else {
-                    System.out.println("❌ 응답에 'data' 필드가 없습니다. 전체 응답: " + body);
-                }
-            } else {
-                System.out.println("❌ API 응답 실패 또는 응답 바디가 null입니다.");
-            }
-            System.out.println("====== 사업자번호 검증 종료 (결과: false) ======");
-            return false;
-
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
-            System.err.println("❌ [API HTTP 오류] 상태코드: " + e.getStatusCode());
-            System.err.println("응답 바디: " + e.getResponseBodyAsString());
-            System.out.println("====== 사업자번호 검증 종료 (HTTP 오류) ======");
-            return false;
-        } catch (Exception e) {
-            System.err.println("❌ [API 시스템 오류]: " + e.getMessage());
-            e.printStackTrace();
-            System.out.println("====== 사업자번호 검증 종료 (시스템 오류) ======");
-            return false;
-        }
+        boolean isValid = checkBusinessNumber(businessNumber);
+        result.put("isValid", isValid);
+        return result;
     }
 }
