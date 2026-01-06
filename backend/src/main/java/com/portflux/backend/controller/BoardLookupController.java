@@ -5,7 +5,7 @@ import com.portflux.backend.dto.CommentDto;
 import com.portflux.backend.service.BoardLookupService;
 import com.portflux.backend.service.LikeService;
 import com.portflux.backend.service.CommentService;
-import com.portflux.backend.service.PdfImageService;
+import com.portflux.backend.service.FileImageService;  // ⭐ 하나만!
 import com.portflux.backend.service.PostSaveService;
 import com.portflux.backend.mapper.PostSaveMapper;
 
@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-
 
 import java.io.File;
 import java.io.IOException;
@@ -39,7 +38,7 @@ public class BoardLookupController {
 
     private final BoardLookupService boardLookupService;
     private final CommentService commentService;
-    private final PdfImageService pdfImageService;
+    private final FileImageService fileImageService;  // ⭐ 하나만!
     private final LikeService likeService;
     private final PostSaveService postSaveService;
     private final PostSaveMapper postSaveMapper;
@@ -51,14 +50,14 @@ public class BoardLookupController {
     public BoardLookupController(
             BoardLookupService boardLookupService,
             CommentService commentService,
-            PdfImageService pdfImageService,
+            FileImageService fileImageService,  // ⭐ 하나만!
             LikeService likeService,
             PostSaveService postSaveService,
             PostSaveMapper postSaveMapper
     ) {
         this.boardLookupService = boardLookupService;
         this.commentService = commentService;
-        this.pdfImageService = pdfImageService;
+        this.fileImageService = fileImageService;  // ⭐ 하나만!
         this.likeService = likeService;
         this.postSaveService = postSaveService;
         this.postSaveMapper = postSaveMapper;
@@ -162,7 +161,7 @@ public class BoardLookupController {
                     post.setPdfImages(images);
                 }
                 
-                // ✅ 좋아요 수 추가
+                // 좋아요 수 추가
                 int likeCount = likeService.getLikeCount(post.getPostId());
                 post.setLikeCnt(likeCount);
             }
@@ -173,8 +172,6 @@ public class BoardLookupController {
             return ResponseEntity.internalServerError().build();
         }
     }
-
-
 
     /**
      * 게시글 작성 API (파일 업로드 포함)
@@ -188,19 +185,20 @@ public class BoardLookupController {
         try {
             postDto.setUserNum(userNum);
 
-            // 1. 파일 유효성 검사 및 저장
-            if (file != null && !file.isEmpty()) {
-                String originalFilename = file.getOriginalFilename();
-                if (originalFilename == null || !isValidFileExtension(originalFilename)) {
-                    return ResponseEntity.badRequest().body(
-                            Map.of("success", false, "message", "허용되지 않는 파일 형식입니다. PDF 파일만 업로드할 수 있습니다.")
-                    );
-                }
-                String fileName = saveFile(file);
-                postDto.setPostFile(fileName);
-            } else {
-                return ResponseEntity.badRequest().body(Map.of("message", "파일이 없습니다."));
+            String fileName = null;
+        // 1. 파일 유효성 검사 및 저장
+        if (file != null && !file.isEmpty()) {
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null || !isValidFileExtension(originalFilename)) {
+                return ResponseEntity.badRequest().body(
+                        Map.of("success", false, "message", "허용되지 않는 파일 형식입니다.")
+                );
             }
+            fileName = saveFile(file);  // ✅ 파일명 저장
+            postDto.setPostFile(fileName);
+        } else {
+            return ResponseEntity.badRequest().body(Map.of("message", "파일이 없습니다."));
+        }
 
             // 2. 초기값 설정
             postDto.setAiSummary("AI 요약 대기 중...");
@@ -210,29 +208,33 @@ public class BoardLookupController {
             // 3. DB 저장 (postId 생성)
             boardLookupService.createPost(postDto);
 
-            System.out.println("=== PDF 변환 시작 ===");
+            System.out.println("=== 파일 변환 시작 ===");
             System.out.println("PostId: " + postDto.getPostId());
             System.out.println("File: " + file.getOriginalFilename());
 
-            // 4. PDF → 이미지 변환
-            List<String> pdfImages = pdfImageService.convertPdfToImages(file, postDto.getPostId());
-            postDto.setPdfImages(pdfImages);
+            // 4. ✅ 저장된 파일을 사용하여 이미지 변환
+        File uploadDirFile = new File(uploadDir);
+        uploadDirFile = uploadDirFile.getAbsoluteFile();
+        File savedFile = new File(uploadDirFile, fileName);
+        
+        List<String> fileImages = fileImageService.convertSavedFileToImages(savedFile, postDto.getPostId());
+        postDto.setPdfImages(fileImages);
 
-            System.out.println("=== PDF 변환 완료 ===");
-            System.out.println("이미지 개수: " + pdfImages.size());
+        System.out.println("=== 파일 변환 완료 ===");
+        System.out.println("이미지 개수: " + fileImages.size());
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("postId", postDto.getPostId());
-            response.put("message", "게시글이 등록되었습니다.");
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("postId", postDto.getPostId());
+        response.put("message", "게시글이 등록되었습니다.");
 
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(
-                    Map.of("success", false, "message", e.getMessage())
-            );
-        }
+        return ResponseEntity.ok(response);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.badRequest().body(
+                Map.of("success", false, "message", e.getMessage())
+        );
+    }
     }
 
     /**
@@ -345,9 +347,7 @@ public class BoardLookupController {
         try {
             List<BoardLookupPostDto> posts = boardLookupService.getPostsByUserNum(userNum);
 
-            // 각 게시글에 PDF 이미지 목록 및 좋아요 수 추가
             for (BoardLookupPostDto post : posts) {
-                // PDF 이미지 추가
                 Path imageDir = Paths.get(uploadDir, "pdf", "post_" + post.getPostId());
                 if (Files.exists(imageDir)) {
                     List<String> images = Files.list(imageDir)
@@ -358,7 +358,6 @@ public class BoardLookupController {
                     post.setPdfImages(images);
                 }
                 
-                // ✅ 좋아요 수 추가
                 int likeCount = likeService.getLikeCount(post.getPostId());
                 post.setLikeCnt(likeCount);
             }
@@ -392,9 +391,7 @@ public class BoardLookupController {
         try {
             List<BoardLookupPostDto> posts = boardLookupService.getPostsByNickname(nickname);
 
-            // 각 게시글에 PDF 이미지 목록 및 좋아요 수 추가
             for (BoardLookupPostDto post : posts) {
-                // PDF 이미지 추가
                 Path imageDir = Paths.get(uploadDir, "pdf", "post_" + post.getPostId());
                 if (Files.exists(imageDir)) {
                     List<String> images = Files.list(imageDir)
@@ -405,7 +402,6 @@ public class BoardLookupController {
                     post.setPdfImages(images);
                 }
                 
-                // ✅ 좋아요 수 추가
                 int likeCount = likeService.getLikeCount(post.getPostId());
                 post.setLikeCnt(likeCount);
             }
@@ -458,7 +454,7 @@ public class BoardLookupController {
     }
 
     /**
-     * PDF 다운로드 API
+     * 파일 다운로드 API (PDF/PPT)
      */
     @GetMapping("/{postId}/download")
     public ResponseEntity<?> downloadPdf(
@@ -556,27 +552,40 @@ public ResponseEntity<List<Integer>> getSavedPostIds(@PathVariable int userNum) 
      * 파일 확장자 검증
      */
     private boolean isValidFileExtension(String filename) {
-        if (filename == null) return false;
-        String lowerFilename = filename.toLowerCase();
-        return lowerFilename.endsWith(".pdf");
+        String lowerCaseFilename = filename.toLowerCase();
+        return lowerCaseFilename.endsWith(".pdf")
+            || lowerCaseFilename.endsWith(".ppt")
+            || lowerCaseFilename.endsWith(".pptx");
     }
 
     /**
      * 파일 저장
      */
     private String saveFile(MultipartFile file) throws IOException {
-        String originalFilename = file.getOriginalFilename();
-        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-        String savedFilename = UUID.randomUUID().toString() + extension;
-
-        File uploadDirFile = new File(uploadDir);
-        if (!uploadDirFile.exists()) {
-            uploadDirFile.mkdirs();
-        }
-
-        Path filePath = Paths.get(uploadDir, savedFilename);
-        file.transferTo(filePath.toFile());
-
-        return savedFilename;
+    if (file == null || file.isEmpty()) {
+        throw new IOException("파일이 비어있습니다.");
     }
+
+    String originalFilename = file.getOriginalFilename();
+    String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+    String savedFilename = UUID.randomUUID().toString() + extension;
+
+    // ✅ File 객체로 생성하면 자동으로 절대 경로로 변환됨
+    File uploadDirFile = new File(uploadDir);
+    uploadDirFile = uploadDirFile.getAbsoluteFile();
+    
+    // ✅ 디렉토리가 없으면 생성
+    if (!uploadDirFile.exists()) {
+        uploadDirFile.mkdirs();
+        System.out.println("✅ 업로드 디렉토리 생성: " + uploadDirFile.getAbsolutePath());
+    }
+
+    // ✅ 파일 저장
+    File destinationFile = new File(uploadDirFile, savedFilename);
+    file.transferTo(destinationFile);
+    
+    System.out.println("✅ 파일 저장 완료: " + destinationFile.getAbsolutePath());
+
+    return savedFilename;
+}
 }

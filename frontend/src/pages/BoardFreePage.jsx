@@ -70,10 +70,10 @@ const BoardFreePage = () => {
     navigate(`/boardfree/${postId}`);
   };
 
-  const goToUserPage = (e, userNum) => {
-    e.stopPropagation(); 
-    if (userNum) {
-      navigate("/mypage", { state: { userNum: userNum } });
+  const goToUserPage = (e, userNickname) => {
+    e.stopPropagation();
+    if (userNickname) {
+      navigate(`/mypage/${userNickname}`);
     }
   };
 
@@ -163,9 +163,9 @@ const BoardFreePage = () => {
                     </td>
                     
                     <td className="td-writer">
-                      <span 
-                        className="writer-link" 
-                        onClick={(e) => goToUserPage(e, post.userNum)}
+                      <span
+                        className="writer-link"
+                        onClick={(e) => goToUserPage(e, post.userNickname)}
                         style={{ cursor: 'pointer', fontWeight: '500' }}
                       >
                         {post.userNickname || "익명"}

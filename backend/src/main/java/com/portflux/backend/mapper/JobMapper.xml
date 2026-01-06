@@ -8,6 +8,8 @@
         <result property="companyNum" column="COMPANY_NUM"/>
         <result property="companyName" column="COMPANY_NAME"/>
         <result property="companyImage" column="COMPANY_IMAGE"/>
+        <result property="companyLogo" column="COMPANY_LOGO"/>
+        <result property="companyPhone" column="COMPANY_PHONE"/>
         <result property="title" column="TITLE"/>
         <result property="content" column="CONTENT"/>
         <result property="createdAt" column="CREATED_AT"/>
@@ -147,11 +149,13 @@
     
     <!-- 채용공고 목록 조회 -->
     <select id="findJobs" parameterType="map" resultMap="JobResultMap">
-        SELECT 
+        SELECT
             p.POST_ID,
             p.COMPANY_NUM,
             c.COMPANY_NAME,
             NULL AS COMPANY_IMAGE,
+            p.COMPANY_LOGO,
+            p.COMPANY_PHONE,
             p.TITLE,
             p.CONTENT,
             p.CREATED_AT,
@@ -187,11 +191,13 @@
     
     <!-- 채용공고 상세 조회 -->
     <select id="findJobById" parameterType="long" resultMap="JobResultMap">
-        SELECT 
+        SELECT
             p.POST_ID,
             p.COMPANY_NUM,
             c.COMPANY_NAME,
             NULL AS COMPANY_IMAGE,
+            p.COMPANY_LOGO,
+            p.COMPANY_PHONE,
             p.TITLE,
             p.CONTENT,
             p.CREATED_AT,
@@ -235,7 +241,9 @@
             JOB_INDUSTRIES,
             JOB_COMPANY_TYPES,
             JOB_WORK_TYPES,
-            JOB_WORK_DAYS
+            JOB_WORK_DAYS,
+            COMPANY_LOGO,
+            COMPANY_PHONE
         ) VALUES (
             'job',
             #{job.companyNum},
@@ -253,7 +261,9 @@
             #{job.jobIndustries, typeHandler=com.portflux.backend.handler.JsonArrayTypeHandler},
             #{job.jobCompanyTypes, typeHandler=com.portflux.backend.handler.JsonArrayTypeHandler},
             #{job.jobWorkTypes, typeHandler=com.portflux.backend.handler.JsonArrayTypeHandler},
-            #{job.jobWorkDays, typeHandler=com.portflux.backend.handler.JsonArrayTypeHandler}
+            #{job.jobWorkDays, typeHandler=com.portflux.backend.handler.JsonArrayTypeHandler},
+            #{job.companyLogo},
+            #{job.companyPhone}
         )
     </insert>
     
@@ -274,7 +284,9 @@
             JOB_INDUSTRIES = #{job.jobIndustries, typeHandler=com.portflux.backend.handler.JsonArrayTypeHandler},
             JOB_COMPANY_TYPES = #{job.jobCompanyTypes, typeHandler=com.portflux.backend.handler.JsonArrayTypeHandler},
             JOB_WORK_TYPES = #{job.jobWorkTypes, typeHandler=com.portflux.backend.handler.JsonArrayTypeHandler},
-            JOB_WORK_DAYS = #{job.jobWorkDays, typeHandler=com.portflux.backend.handler.JsonArrayTypeHandler}
+            JOB_WORK_DAYS = #{job.jobWorkDays, typeHandler=com.portflux.backend.handler.JsonArrayTypeHandler},
+            COMPANY_LOGO = #{job.companyLogo},
+            COMPANY_PHONE = #{job.companyPhone}
         WHERE POST_ID = #{job.postId}
           AND BOARD_TYPE = 'job'
     </update>
@@ -301,34 +313,57 @@
         WHERE POST_ID = #{postId}
     </update>
     
-    <!-- 북마크 추가 -->
+    <!-- 북마크 추가 (일반 사용자) -->
     <insert id="insertBookmark">
         INSERT INTO POST_SAVE (USER_NUM, POST_ID)
         VALUES (#{userNum}, #{postId})
     </insert>
-    
-    <!-- 북마크 삭제 -->
+
+    <!-- 북마크 추가 (기업 회원) -->
+    <insert id="insertCompanyBookmark">
+        INSERT INTO POST_SAVE (COMPANY_NUM, POST_ID)
+        VALUES (#{companyNum}, #{postId})
+    </insert>
+
+    <!-- 북마크 삭제 (일반 사용자) -->
     <delete id="deleteBookmark">
         DELETE FROM POST_SAVE
         WHERE USER_NUM = #{userNum}
           AND POST_ID = #{postId}
     </delete>
-    
-    <!-- 북마크 존재 여부 -->
+
+    <!-- 북마크 삭제 (기업 회원) -->
+    <delete id="deleteCompanyBookmark">
+        DELETE FROM POST_SAVE
+        WHERE COMPANY_NUM = #{companyNum}
+          AND POST_ID = #{postId}
+    </delete>
+
+    <!-- 북마크 존재 여부 (일반 사용자) -->
     <select id="existsBookmark" resultType="boolean">
         SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
         FROM POST_SAVE
         WHERE USER_NUM = #{userNum}
           AND POST_ID = #{postId}
     </select>
+
+    <!-- 북마크 존재 여부 (기업 회원) -->
+    <select id="existsCompanyBookmark" resultType="boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+        FROM POST_SAVE
+        WHERE COMPANY_NUM = #{companyNum}
+          AND POST_ID = #{postId}
+    </select>
     
     <!-- 북마크 목록 조회 -->
     <select id="findBookmarks" resultMap="JobResultMap">
-        SELECT 
+        SELECT
             p.POST_ID,
             p.COMPANY_NUM,
             c.COMPANY_NAME,
             NULL AS COMPANY_IMAGE,
+            p.COMPANY_LOGO,
+            p.COMPANY_PHONE,
             p.TITLE,
             p.CONTENT,
             p.CREATED_AT,
@@ -356,7 +391,7 @@
         OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
     </select>
     
-    <!-- 북마크 개수 -->
+    <!-- 북마크 개수 (일반 사용자) -->
     <select id="countBookmarks" parameterType="long" resultType="int">
         SELECT COUNT(*)
         FROM POST_SAVE ps
@@ -364,7 +399,52 @@
         WHERE ps.USER_NUM = #{userNum}
           AND p.BOARD_TYPE = 'job'
     </select>
-    
+
+    <!-- 북마크 목록 조회 (기업 회원) -->
+    <select id="findCompanyBookmarks" resultMap="JobResultMap">
+        SELECT
+            p.POST_ID,
+            p.COMPANY_NUM,
+            c.COMPANY_NAME,
+            NULL AS COMPANY_IMAGE,
+            p.COMPANY_LOGO,
+            p.COMPANY_PHONE,
+            p.TITLE,
+            p.CONTENT,
+            p.CREATED_AT,
+            p.UPDATED_AT,
+            p.VIEW_CNT,
+            p.JOB_REGION,
+            p.JOB_CAREER_TYPE,
+            p.JOB_CAREER_YEARS,
+            p.JOB_EDUCATION,
+            p.JOB_EDUCATION_EXCLUDE,
+            p.JOB_SALARY_MIN,
+            p.JOB_SALARY_MAX,
+            p.JOB_DEADLINE,
+            p.JOB_STATUS,
+            p.JOB_INDUSTRIES,
+            p.JOB_COMPANY_TYPES,
+            p.JOB_WORK_TYPES,
+            p.JOB_WORK_DAYS
+        FROM POST p
+        JOIN COMPANY c ON p.COMPANY_NUM = c.COMPANY_NUM
+        JOIN POST_SAVE ps ON p.POST_ID = ps.POST_ID
+        WHERE ps.COMPANY_NUM = #{companyNum}
+          AND p.BOARD_TYPE = 'job'
+        ORDER BY ps.BOARD_SAVE_TIME DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
+    </select>
+
+    <!-- 북마크 개수 (기업 회원) -->
+    <select id="countCompanyBookmarks" parameterType="long" resultType="int">
+        SELECT COUNT(*)
+        FROM POST_SAVE ps
+        JOIN POST p ON ps.POST_ID = p.POST_ID
+        WHERE ps.COMPANY_NUM = #{companyNum}
+          AND p.BOARD_TYPE = 'job'
+    </select>
+
     <!-- 지역별 채용공고 개수 -->
     <select id="countJobsByRegion" resultType="map">
         SELECT 
@@ -380,11 +460,13 @@
     
     <!-- 내 채용공고 목록 -->
     <select id="findMyJobs" resultMap="JobResultMap">
-        SELECT 
+        SELECT
             p.POST_ID,
             p.COMPANY_NUM,
             c.COMPANY_NAME,
             NULL AS COMPANY_IMAGE,
+            p.COMPANY_LOGO,
+            p.COMPANY_PHONE,
             p.TITLE,
             p.CONTENT,
             p.CREATED_AT,

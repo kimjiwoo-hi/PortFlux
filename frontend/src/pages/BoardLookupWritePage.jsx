@@ -17,6 +17,19 @@ export default function BoardLookupWritePage() {
   const [suggestions, setSuggestions] = useState([]);
   const [expandedCategories, setExpandedCategories] = useState({});
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isNotice, setIsNotice] = useState(false); // 공지사항 여부
+  const [isAdmin, setIsAdmin] = useState(false); // 관리자 여부
+
+  // 관리자 여부 확인
+  React.useEffect(() => {
+    const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+    const role = localStorage.getItem("role") || sessionStorage.getItem("role");
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      // 관리자 판별: role이 ADMIN이거나, userId가 admin인 경우
+      setIsAdmin(role === "ADMIN" || user.userId === "admin" || user.userNickname === "관리자");
+    }
+  }, []);
 
   const allTags = useMemo(() => {
     return Object.values(tagData).flat();
@@ -42,13 +55,13 @@ export default function BoardLookupWritePage() {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const allowedExtensions = [".pdf"];
+      const allowedExtensions = [".pdf", ".ppt", ".pptx"];
       const fileExtension = `.${file.name.split(".").pop()}`;
 
       if (allowedExtensions.includes(fileExtension.toLowerCase())) {
         setSelectedFile(file);
       } else {
-        alert("PDF 파일만 업로드할 수 있습니다.");
+        alert("PDF 또는 PPT 파일만 업로드할 수 있습니다.");
         e.target.value = null;
         setSelectedFile(null);
       }
@@ -176,14 +189,21 @@ export default function BoardLookupWritePage() {
       formData.append("price", parseInt(price));
       formData.append("userNum", loggedInUser.userNum);
       formData.append("tags", JSON.stringify(tags));
+      // 관리자이고 공지사항 체크시 board_type을 notice로 전송
+      if (isAdmin && isNotice) {
+        formData.append("boardType", "notice");
+      }
 
       console.log("=== 업로드 시작 ===");
       console.log("파일:", selectedFile.name);
       console.log("크기:", formatFileSize(selectedFile.size));
+      console.log("제목:", title);
+      console.log("가격:", price);
 
-      const response = await axios.post("/api/boardlookup/posts", formData, {
+      const response = await axios.post("http://localhost:8080/api/boardlookup/posts", formData, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
+        timeout: 300000, // 5분 타임아웃 (큰 파일 처리 시간 고려)
       });
 
       console.log("=== 업로드 응답 ===");
@@ -193,12 +213,38 @@ export default function BoardLookupWritePage() {
         alert("게시글이 등록되었습니다!");
         navigate("/");
       } else {
-        alert("게시글 등록에 실패했습니다.");
+        alert("게시글 등록에 실패했습니다: " + (response.data.message || "알 수 없는 오류"));
       }
     } catch (error) {
-      console.error("게시글 등록 오류:", error);
-      const errorMsg = error.response?.data?.message || error.message;
-      alert("게시글 등록 중 오류가 발생했습니다: " + errorMsg);
+      console.error("[Error] 게시글 등록 오류:");
+      console.error(error);
+      
+      let errorMsg = "알 수 없는 오류가 발생했습니다.";
+      
+      if (error.response) {
+        // 서버에서 응답을 받은 경우
+        console.error("응답 상태:", error.response.status);
+        console.error("응답 데이터:", error.response.data);
+        
+        if (error.response.data?.message) {
+          errorMsg = error.response.data.message;
+        } else if (error.response.status === 413) {
+          errorMsg = "파일 크기가 너무 큽니다. (최대 50MB)";
+        } else if (error.response.status === 400) {
+          errorMsg = "잘못된 요청입니다. 파일 형식을 확인해주세요.";
+        } else if (error.response.status === 500) {
+          errorMsg = "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+        }
+      } else if (error.request) {
+        // 요청은 보냈지만 응답을 받지 못한 경우
+        console.error("요청:", error.request);
+        errorMsg = "서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.";
+      } else {
+        // 요청 설정 중 오류가 발생한 경우
+        errorMsg = error.message;
+      }
+      
+      alert("게시글 등록 실패\n\n" + errorMsg);
     } finally {
       setIsUploading(false);
     }
@@ -221,12 +267,12 @@ export default function BoardLookupWritePage() {
               {!selectedFile ? (
                 <div className="upload-placeholder">
                   <Upload className="upload-icon" />
-                  <p className="upload-text">파일 업로드 (PDF)</p>
+                  <p className="upload-text">파일 업로드 (PDF, PPT)</p>
                   <label className="file-select-button">
                     파일 선택
                     <input
                       type="file"
-                      accept=".pdf"
+                      accept=".pdf,.ppt,.pptx"
                       onChange={handleImageUpload}
                       className="file-input"
                     />
@@ -240,7 +286,7 @@ export default function BoardLookupWritePage() {
                   <div className="pdf-info">
                     <div className="pdf-success">
                       <CheckCircle size={20} color="#10b981" />
-                      <span>PDF 업로드 완료</span>
+                      <span>파일 업로드 완료</span>
                     </div>
                     <p className="pdf-filename">{selectedFile.name}</p>
                     <p className="pdf-filesize">
@@ -283,7 +329,7 @@ export default function BoardLookupWritePage() {
               )}
             </div>
             <div className="feature-description">
-              <p>• PDF 업로드 후 자동으로 페이지별 이미지 변환</p>
+              <p>• PDF/PPT 업로드 후 자동으로 페이지별 이미지 변환</p>
               <p>• AI가 PDF 내용을 분석하여 '내용'에 요약 제공</p>
               <p>• 태그를 추가하여 검색 최적화</p>
             </div>
@@ -356,14 +402,30 @@ export default function BoardLookupWritePage() {
               <input
                 type="number"
                 value={price}
-                onChange={handlePriceChange} // ✅ 여기 수정
+                onChange={handlePriceChange}
                 className="form-input"
                 placeholder="가격을 입력하세요 (100원 단위)"
                 min="0"
                 step="100"
               />
             </div>
-            
+
+            {/* 관리자 전용 공지사항 체크박스 */}
+            {isAdmin && (
+              <div className="form-group notice-checkbox-group">
+                <label className="notice-checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={isNotice}
+                    onChange={(e) => setIsNotice(e.target.checked)}
+                    className="notice-checkbox"
+                  />
+                  <span className="notice-checkbox-text">📢 공지사항으로 등록</span>
+                </label>
+                <p className="notice-hint">체크 시 공지사항으로 상단에 고정됩니다.</p>
+              </div>
+            )}
+
             <button
               onClick={handleSubmit}
               disabled={!selectedFile || !title || !price || isUploading}

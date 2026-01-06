@@ -34,7 +34,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 20px; /* 각 입력 그룹 간 간격 */
+  gap: 12px; /* 각 입력 그룹 간 간격 - 회원가입처럼 촘촘하게 */
 }
 
 /* 5. 입력 그룹 (라벨 + 인풋) */
@@ -101,22 +101,25 @@
   cursor: not-allowed;
 }
 
-/* 9. 제출 버튼 (파란색) */
-.btn-submit {
-  width: 100%;
-  padding: 15px;
+/* 9. 제출 버튼 (로그인 버튼과 완전히 동일하게 - 2026-01-05 수정) */
+.find-wrapper .btn-submit,
+.find-box .btn-submit {
+  width: 100% !important;
+  padding: 16px !important;
   margin-top: 20px;
-  background-color: #3b5bdb;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 700;
-  border: none;
-  border-radius: 4px;
+  background-color: #3b5bdb !important;
+  color: white !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  border: none !important;
+  border-radius: 8px !important;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
-.btn-submit:hover {
-  background-color: #2f49b0;
+.find-wrapper .btn-submit:hover,
+.find-box .btn-submit:hover {
+  background-color: #2f49b0 !important;
 }
 
 /* 10. 에러 메시지 */
@@ -139,4 +142,116 @@
   margin-bottom: 30px;
   font-size: 14px;
   line-height: 1.5;
+}
+
+/* ===== SuccessPage 전용 스타일 ===== */
+
+/* 성공 아이콘 애니메이션 */
+.success-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 30px;
+}
+
+.checkmark {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: block;
+  stroke-width: 2;
+  stroke: #3b5bdb;
+  stroke-miterlimit: 10;
+  animation: fill 0.4s ease-in-out 0.4s forwards, scale 0.3s ease-in-out 0.9s both;
+}
+
+.checkmark__circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  stroke-width: 2;
+  stroke-miterlimit: 10;
+  stroke: #3b5bdb;
+  fill: none;
+  animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark__check {
+  transform-origin: 50% 50%;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  stroke: #3b5bdb;
+  animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+}
+
+@keyframes stroke {
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes scale {
+  0%, 100% {
+    transform: none;
+  }
+  50% {
+    transform: scale3d(1.1, 1.1, 1);
+  }
+}
+
+@keyframes fill {
+  100% {
+    box-shadow: inset 0px 0px 0px 40px transparent;
+  }
+}
+
+/* 성공 메시지 */
+.success-message {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+/* 결과 박스 (아이디 표시 등) */
+.result-box {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.result-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.result-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #3b5bdb;
+}
+
+/* 버튼 그룹 (세로 배치) */
+.btn-group-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+/* 아웃라인 버튼 스타일 */
+.find-wrapper .btn-submit.btn-outline,
+.find-box .btn-submit.btn-outline {
+  background-color: white !important;
+  color: #3b5bdb !important;
+  border: 2px solid #3b5bdb !important;
+}
+
+.find-wrapper .btn-submit.btn-outline:hover,
+.find-box .btn-submit.btn-outline:hover {
+  background-color: #f8f9fa !important;
 }

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -65,6 +66,7 @@ public class SecurityConfig {
 
                         // 사용자 정보 조회 허용 (개발용 - 프로덕션에서는 .authenticated() 사용)
                         .requestMatchers("/api/user/info/**").permitAll()
+                        .requestMatchers("/api/company/info/**").permitAll()
 
                         // 정적 리소스 및 에러 페이지
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/error").permitAll()

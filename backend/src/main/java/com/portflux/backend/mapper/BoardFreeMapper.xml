@@ -45,24 +45,21 @@
     </update>
 
     <select id="getBoardList" parameterType="String" resultType="com.portflux.backend.beans.BoardFreeBean">
-    SELECT p.post_id as postId, 
-           CASE 
-               WHEN p.board_type = 'notice' OR a.user_num IS NOT NULL THEN 'notice' 
-               ELSE 'free' 
-           END as boardType, 
-           p.title, 
-           p.content, 
-           p.created_at as createdAt, 
-           NVL(p.view_cnt, 0) as viewCnt, 
-           NVL(p.like_cnt, 0) as likeCnt, 
-           p.post_file as postFile, 
-           p.image as image, 
+    SELECT p.post_id as postId,
+           p.board_type as boardType,
+           p.title,
+           p.content,
+           p.created_at as createdAt,
+           NVL(p.view_cnt, 0) as viewCnt,
+           NVL(p.like_cnt, 0) as likeCnt,
+           p.post_file as postFile,
+           p.image as image,
            p.user_num as userNum,
            p.company_num as companyNum,
            COALESCE(u.user_nickname, c.company_name, '관리자') as userNickname,
            COALESCE(u.user_nickname, c.company_name, '관리자') as writerNickname,
            (SELECT COUNT(*) FROM POST_COMMENT com WHERE com.post_id = p.post_id) as commentCnt
-    FROM POST p 
+    FROM POST p
     LEFT JOIN USERS u ON p.user_num = u.user_num
     LEFT JOIN COMPANY c ON p.company_num = c.company_num
     LEFT JOIN ADMIN_ACCOUNT a ON p.user_num = a.user_num
@@ -72,7 +69,7 @@
         </if>
         AND p.board_type IN ('free', 'notice')
     </where>
-    ORDER BY CASE WHEN p.board_type = 'notice' OR a.user_num IS NOT NULL THEN 0 ELSE 1 END ASC, p.post_id DESC
+    ORDER BY CASE WHEN p.board_type = 'notice' THEN 0 ELSE 1 END ASC, p.post_id DESC
 </select>
 
 <select id="getBoardDetail" parameterType="int" resultType="com.portflux.backend.beans.BoardFreeBean">
@@ -108,9 +105,9 @@
     </update>
 
     <update id="updateBoard" parameterType="com.portflux.backend.beans.BoardFreeBean">
-        UPDATE POST SET title = #{title}, content = #{content}
-        <if test="postFile != null">, post_file = #{postFile, jdbcType=VARCHAR}</if>
-        <if test="image != null">, image = #{image, jdbcType=VARCHAR}</if>
+        UPDATE POST SET title = #{title}, content = #{content},
+        post_file = #{postFile, jdbcType=VARCHAR},
+        image = #{image, jdbcType=VARCHAR}
         WHERE post_id = #{postId}
     </update>
 

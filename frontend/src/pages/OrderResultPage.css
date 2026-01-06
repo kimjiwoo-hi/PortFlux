@@ -42,6 +42,14 @@
   margin: 0;
 }
 
+/* Redirect Message */
+.redirect-message {
+  color: #666;
+  font-size: 14px;
+  margin-top: 16px;
+  font-style: italic;
+}
+
 /* Result Container */
 .result-container {
   background: white;

@@ -29,8 +29,6 @@ const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
   const followersRef = useRef(null);
   const followingRef = useRef(null);
 
-  const USER_ROLE = localStorage.getItem("role") || sessionStorage.getItem("role") || "USER";
-
   // Popover 위치 계산
   useEffect(() => {
     if (isOpen && popoverRef.current) {
@@ -135,7 +133,7 @@ const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
   };
 
   const handleMenuClick = (path) => (e) => {
-    const myPagePath = USER_ROLE === "COMPANY" ? "/company/mypage" : `/mypage/${userInfo.userNickname}`;
+    const myPagePath = `/mypage/${userInfo.userNickname}`;
     const isOnMyPage = location.pathname.startsWith('/mypage/');
     const isSamePath = location.pathname === path;
 
@@ -213,10 +211,10 @@ const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
 
       <div className="menu-list">
         <Link
-          to={USER_ROLE === "COMPANY" ? "/company/mypage" : `/mypage/${userInfo.userNickname}`}
-          onClick={handleMenuClick(USER_ROLE === "COMPANY" ? "/company/mypage" : `/mypage/${userInfo.userNickname}`)}
+          to={`/mypage/${userInfo.userNickname}`}
+          onClick={handleMenuClick(`/mypage/${userInfo.userNickname}`)}
         >
-          <button className="menu-item">{USER_ROLE === "COMPANY" ? "기업 정보 관리" : "내 정보 보기"}</button>
+          <button className="menu-item">내 정보 보기</button>
         </Link>
         <Link to="/cart" onClick={handleMenuClick("/cart")}><button className="menu-item">장바구니</button></Link>
         <Link to="/order-list" onClick={handleMenuClick("/order-list")}><button className="menu-item">주문 내역</button></Link>

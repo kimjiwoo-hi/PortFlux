@@ -217,24 +217,72 @@
 /* 하단 버튼 영역 */
 .write-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   margin-top: 24px;
+  width: 100%;
 }
 
-.btn-submit {
-  padding: 12px 40px;
-  background-color: #111;
-  border: 1px solid #111;
-  color: white;
-  font-size: 15px;
-  font-weight: 600;
-  border-radius: 4px;
+/* 등록/수정 버튼 - 전체 너비 & 로그인 버튼과 동일한 스타일 */
+.write-form .write-footer .btn-submit,
+.write-container .write-footer .btn-submit,
+.write-footer > .btn-submit,
+button.btn-submit {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 16px !important;
+  margin: 0 !important;
+  background: #3b5bdb !important;
+  background-color: #3b5bdb !important;
+  background-image: none !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s !important;
+  box-shadow: none !important;
+  height: auto !important;
+  min-height: 52px !important;
+}
+
+.write-form .write-footer .btn-submit:hover,
+.write-container .write-footer .btn-submit:hover,
+.write-footer > .btn-submit:hover,
+button.btn-submit:hover {
+  background: #2f49b0 !important;
+  background-color: #2f49b0 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* X 버튼 (닫기/목록으로 돌아가기) */
+.close-btn {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
   cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
   transition: all 0.2s;
 }
 
-.btn-submit:hover {
-  background-color: #333;
-  border-color: #333;
-  transform: translateY(-1px);
+.close-btn:hover {
+  background-color: #f1f3f5;
+  color: #333;
+}
+
+.write-header-row {
+  position: relative;
 }

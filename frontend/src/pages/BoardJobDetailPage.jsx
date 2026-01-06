@@ -85,7 +85,7 @@ const BoardJobDetailPage = () => {
     } finally {
       setBookmarkLoading(false);
     }
-  }, [postId, bookmarkLoading, navigate, isLoggedIn]);
+  }, [postId, bookmarkLoading, navigate]);
 
   // 수정 페이지로 이동
   const handleEdit = useCallback(() => {
@@ -114,7 +114,12 @@ const BoardJobDetailPage = () => {
 
   // 목록으로 돌아가기
   const handleBack = useCallback(() => {
-    navigate("/boardjob");
+    // 이전 페이지가 boardjob이면 뒤로가기, 아니면 /boardjob으로 이동
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate("/boardjob");
+    }
   }, [navigate]);
 
   // 공유하기
@@ -240,8 +245,8 @@ const BoardJobDetailPage = () => {
           {/* 기업 정보 헤더 */}
           <div className="company-header">
             <div className="company-logo">
-              {job.companyImage ? (
-                <img src={job.companyImage} alt={job.companyName} />
+              {(job.companyLogo || job.companyImage) ? (
+                <img src={job.companyLogo || job.companyImage} alt={job.companyName} />
               ) : (
                 <div className="logo-placeholder">
                   <span>{job.companyName?.charAt(0) || "?"}</span>
@@ -352,7 +357,6 @@ const BoardJobDetailPage = () => {
 
           {/* 추가 정보 태그 */}
           {(job.jobIndustries?.length > 0 ||
-            job.jobCompanyTypes?.length > 0 ||
             job.jobWorkTypes?.length > 0 ||
             job.jobWorkDays?.length > 0) && (
             <div className="additional-info">
@@ -363,18 +367,6 @@ const BoardJobDetailPage = () => {
                     {job.jobIndustries.map((industry, index) => (
                       <span key={index} className="tag">
                         {industry}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {job.jobCompanyTypes?.length > 0 && (
-                <div className="info-group">
-                  <span className="info-group-label">기업형태</span>
-                  <div className="tag-list">
-                    {job.jobCompanyTypes.map((type, index) => (
-                      <span key={index} className="tag">
-                        {type}
                       </span>
                     ))}
                   </div>
@@ -459,6 +451,14 @@ const BoardJobDetailPage = () => {
                   {formatSalary(job.jobSalaryMin, job.jobSalaryMax)}
                 </span>
               </div>
+              {job.companyPhone && (
+                <div className="apply-info-row">
+                  <span className="apply-label">문의</span>
+                  <span className="apply-value">
+                    📞 {job.companyPhone}
+                  </span>
+                </div>
+              )}
             </div>
 
             {!isOwner && (
@@ -481,8 +481,8 @@ const BoardJobDetailPage = () => {
             <h4>기업 정보</h4>
             <div className="company-card-content">
               <div className="company-card-logo">
-                {job.companyImage ? (
-                  <img src={job.companyImage} alt={job.companyName} />
+                {(job.companyLogo || job.companyImage) ? (
+                  <img src={job.companyLogo || job.companyImage} alt={job.companyName} />
                 ) : (
                   <div className="logo-placeholder small">
                     <span>{job.companyName?.charAt(0) || "?"}</span>

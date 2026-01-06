@@ -36,6 +36,10 @@ public class CompanyUserService {
             throw new RuntimeException("이미 사용 중인 이메일입니다.");
         }
         
+        if (companyUserMapper.checkBusinessNumber(registerBean.getBusinessNumber()) > 0) {
+            throw new RuntimeException("이미 등록된 사업자번호입니다.");
+        }
+
         // 1. 사업자번호 유효성 검사 (외부 API)
         if (!businessNumApi.checkBusinessNumber(registerBean.getBusinessNumber())) {
             throw new RuntimeException("유효하지 않은 사업자번호입니다.");

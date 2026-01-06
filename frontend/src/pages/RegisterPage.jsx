@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./RegisterPage.css";
 
 function RegisterPage() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // 1. 상태 변수 선언
   const [isIndividual, setIsIndividual] = useState(true);
@@ -42,6 +43,22 @@ function RegisterPage() {
     setIsPwdMatch(null); setIsNicknameAvailable(null); setIsAuthVerified(false);
     setCodeMsg(""); setIsPhoneValid(null);
   };
+
+  // 구글 로그인에서 넘어온 경우 이메일과 이름 자동 입력
+  useEffect(() => {
+    if (location.state?.provider === 'google') {
+      if (location.state.email) {
+        setEmail(location.state.email);
+        setIsEmailValid(true);
+        setIsAuthVerified(true); // 구글 이메일은 이미 인증됨
+        setEmailMsg("구글 계정 이메일입니다.");
+        setCodeMsg("구글 계정으로 인증되었습니다.");
+      }
+      if (location.state.name) {
+        setUserName(location.state.name);
+      }
+    }
+  }, [location.state]);
 
   // 3. 핸들러 함수들
   const handleIdChange = (e) => {
@@ -206,6 +223,7 @@ function RegisterPage() {
       });
       if (res.ok) {
         alert("인증코드가 발송되었습니다.");
+        setEmailMsg("인증번호가 발송됐습니다."); // 메시지 변경
         setAuthCode(""); setIsAuthVerified(false);
       }
     } catch (error) {
@@ -241,9 +259,19 @@ function RegisterPage() {
   };
 
   const handleRegister = async () => {
-    if (!userId || !email || !password || !passwordCheck || !userName || !nickname || !phoneNumber) {
+    // 개인회원과 기업회원 구분하여 필수 항목 검증
+    if (isIndividual) {
+      // 개인회원: userName(성함) 필수
+      if (!userId || !email || !password || !passwordCheck || !userName || !nickname || !phoneNumber) {
         alert("모든 필수 항목을 입력해주세요."); return;
+      }
+    } else {
+      // 기업회원: userName 불필요, nickname(기업명)만 필수
+      if (!userId || !email || !password || !passwordCheck || !nickname || !phoneNumber) {
+        alert("모든 필수 항목을 입력해주세요."); return;
+      }
     }
+
     if (!isAuthVerified) { alert("이메일 인증을 완료해주세요."); return; }
     if (isIdAvailable !== true) { alert("아이디 중복 확인을 해주세요."); return; }
     if (isNicknameAvailable !== true) { alert("닉네임 중복 확인을 해주세요."); return; }
@@ -290,28 +318,28 @@ function RegisterPage() {
           {!isIndividual && (
             <div className="form-group">
               <label className="form-label">사업자등록번호</label>
-              <input type="text" className={`reg-input ${isBizNumValid === false ? "input-error" : isBizNumValid === true ? "" : ""}`}
+              <input type="text" className="reg-input"
                      placeholder="사업자 등록번호 10자리" value={businessNumber} onChange={handleBusinessNumberChange} maxLength={12} />
-              {isBizNumValid === true && <span className="valid-msg">✓ 유효한 사업자번호입니다</span>}
-              {isBizNumValid === false && <span className="error-msg">✗ 유효하지 않은 사업자번호입니다</span>}
+              {isBizNumValid === true && <span className="valid-msg">유효한 사업자번호입니다.</span>}
+              {isBizNumValid === false && <span className="error-msg">유효하지 않은 사업자번호입니다.</span>}
             </div>
           )}
 
           <div className="form-group">
             <label className="form-label">아이디</label>
             <div className="input-with-btn">
-              <input type="text" className={`reg-input ${isIdAvailable === false ? "input-error" : ""}`} 
+              <input type="text" className="reg-input"
                      placeholder="영문 소문자/숫자 4~12자" value={userId} onChange={handleIdChange} />
               <button className="btn-small" onClick={handleCheckId}>중복확인</button>
             </div>
             {isIdAvailable === true && <span className="valid-msg">사용 가능한 아이디입니다.</span>}
-            {isIdAvailable === false && <span className="error-msg">이미 사용중인 아이디입니다</span>}
+            {isIdAvailable === false && <span className="error-msg">이미 사용중인 아이디입니다.</span>}
           </div>
 
           <div className="form-group">
             <label className="form-label">이메일 인증</label>
             <div className="input-with-btn">
-              <input type="text" className={`reg-input ${isEmailValid === false ? "input-error" : ""}`}
+              <input type="text" className="reg-input"
                 placeholder="이메일을 입력하세요" value={email} onChange={handleEmailChange} disabled={isAuthVerified} />
               <button className="btn-small" onClick={handleSendAuthCode} disabled={isAuthVerified}>코드발송</button>
             </div>
@@ -326,33 +354,65 @@ function RegisterPage() {
 
           <div className="form-group">
             <label className="form-label">비밀번호</label>
-            <input type="password" className={`reg-input ${isPwdValid === false ? "input-error" : ""}`} 
+            <input type="password" className="reg-input"
                    placeholder="8~16자/대소문자,숫자,특수문자" value={password} onChange={handlePasswordChange} />
-            <input type="password" className={`reg-input ${isPwdMatch === false ? "input-error" : ""}`} 
-                   style={{marginTop: "10px"}} placeholder="비밀번호 재입력" value={passwordCheck} onChange={handlePasswordCheckChange} />
+            {isPwdValid === false && <span className="error-msg">유효하지 않은 비밀번호 형식입니다.</span>}
+            <input type="password" className="reg-input"
+                   style={{marginTop: isPwdValid === false ? "0" : "10px"}} placeholder="비밀번호 재입력" value={passwordCheck} onChange={handlePasswordCheckChange} />
             {isPwdMatch === false && <span className="error-msg">비밀번호가 일치하지 않습니다.</span>}
           </div>
 
           <div className="form-group">
-            <label className="form-label">성함 및 닉네임</label>
-            <input type="text" className="reg-input" placeholder="이름을 입력하세요" value={userName} onChange={(e) => setUserName(e.target.value)} />
-            <div className="input-with-btn" style={{ marginTop: "10px" }}>
-              <input type="text" className={`reg-input ${isNicknameAvailable === false ? "input-error" : ""}`} 
-                     placeholder="닉네임을 입력하세요" value={nickname} onChange={handleNicknameChange} />
-              <button className="btn-small" onClick={handleCheckNickname}>중복확인</button>
-            </div>
-            {isNicknameAvailable === true && <span className="valid-msg">사용 가능</span>}
-            {isNicknameAvailable === false && <span className="error-msg">이미 사용 중</span>}
+            {isIndividual ? (
+              <>
+                <label className="form-label">성함 및 닉네임</label>
+                <input type="text" className="reg-input" placeholder="이름을 입력하세요" value={userName} onChange={(e) => setUserName(e.target.value)} />
+                <div className="input-with-btn" style={{ marginTop: "10px" }}>
+                  <input type="text" className="reg-input"
+                         placeholder="닉네임을 입력하세요" value={nickname} onChange={handleNicknameChange} />
+                  <button className="btn-small" onClick={handleCheckNickname}>중복확인</button>
+                </div>
+                {isNicknameAvailable === true && <span className="valid-msg">사용 가능한 닉네임입니다.</span>}
+                {isNicknameAvailable === false && <span className="error-msg">이미 사용중인 닉네임입니다.</span>}
+              </>
+            ) : (
+              <>
+                <label className="form-label">기업명</label>
+                <div className="input-with-btn">
+                  <input type="text" className="reg-input"
+                         placeholder="기업명을 입력하세요" value={nickname} onChange={handleNicknameChange} />
+                  <button className="btn-small" onClick={handleCheckNickname}>중복확인</button>
+                </div>
+                {isNicknameAvailable === true && <span className="valid-msg">사용 가능한 기업명입니다.</span>}
+                {isNicknameAvailable === false && <span className="error-msg">이미 사용중인 기업명입니다.</span>}
+              </>
+            )}
           </div>
 
           <div className="form-group">
             <label className="form-label">휴대전화번호</label>
-            <input type="text" className={`reg-input ${isPhoneValid === false ? "input-error" : ""}`} 
+            <input type="text" className="reg-input"
                    placeholder="010-0000-0000" value={phoneNumber} onChange={handlePhoneNumberChange} maxLength={13} />
             {isPhoneValid === false && <span className="error-msg">11자리 번호를 입력해주세요.</span>}
           </div>
 
-          <button className="btn-submit" onClick={handleRegister}>회원가입 완료</button>
+          <button
+            className="btn-submit"
+            onClick={handleRegister}
+            style={{
+              width: '100%',
+              padding: '16px',
+              backgroundColor: '#3b5bdb',
+              background: '#3b5bdb',
+              color: 'white',
+              fontSize: '16px',
+              fontWeight: '700',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              marginTop: '30px'
+            }}
+          >회원가입 완료</button>
         </div>
       </div>
     </div>
