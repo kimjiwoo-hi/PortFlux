@@ -122,15 +122,15 @@ function BoardLookupPage() {
               withCredentials: true,
             }
           );
-          console.log(`Post ${post.id} save status:`, response.data); // 디버깅용
-          if (response.data.isSaved === true) {  // 명시적 비교
+          console.log(`Post ${post.id} save status:`, response.data);
+          if (response.data.isSaved === true) {
             savedPostIds.add(post.id);
           }
         } catch (err) {
           console.error(`저장 상태 확인 실패 (postId: ${post.id}):`, err);
         }
       }
-      console.log('Saved post IDs:', Array.from(savedPostIds)); // 디버깅용
+      console.log('Saved post IDs:', Array.from(savedPostIds));
       setSavedPosts(savedPostIds);
     };
 
@@ -185,16 +185,40 @@ function BoardLookupPage() {
   const handleAddToCart = async (e, post) => {
     e.stopPropagation();
 
+    const storedUser =
+      localStorage.getItem("user") || sessionStorage.getItem("user");
     const token =
       localStorage.getItem("token") || sessionStorage.getItem("token");
 
-    if (!token) {
+    if (!token || !storedUser) {
       alert("로그인이 필요합니다.");
       navigate("/login");
       return;
     }
 
+    const loggedInUser = JSON.parse(storedUser);
+
     try {
+      // ✅ 먼저 구매 여부 확인
+      const purchaseCheckResponse = await axios.get(
+        `http://localhost:8080/api/boardlookup/${post.id}/purchased`,
+        {
+          params: { userNum: loggedInUser.userNum },
+          withCredentials: true,
+        }
+      );
+
+      console.log("구매 여부 확인:", purchaseCheckResponse.data);
+
+      // 이미 구매한 게시물인 경우
+      if (purchaseCheckResponse.data.isPurchased === true) {
+        setSaveToastMessage("이미 구매한 게시물입니다.");
+        setShowSaveToast(true);
+        setTimeout(() => setShowSaveToast(false), 3000);
+        return;
+      }
+
+      // 구매하지 않은 게시물인 경우 장바구니에 추가
       const requestData = {
         productId: post.id,
       };
@@ -242,7 +266,7 @@ function BoardLookupPage() {
     const loggedInUser = JSON.parse(storedUser);
 
     try {
-      console.log('Toggling save for post:', post.id); // 디버깅용
+      console.log('Toggling save for post:', post.id);
       
       const response = await axios.post(
         `http://localhost:8080/api/boardlookup/${post.id}/save`,
@@ -253,19 +277,19 @@ function BoardLookupPage() {
         }
       );
 
-      console.log('Save toggle response:', response.data); // 디버깅용
+      console.log('Save toggle response:', response.data);
 
       if (response.data.success) {
         setSavedPosts((prev) => {
           const newSet = new Set(prev);
-          if (response.data.isSaved === true) {  // 명시적 비교
+          if (response.data.isSaved === true) {
             newSet.add(post.id);
             setSaveToastMessage("게시글이 저장되었습니다! 🔖");
           } else {
             newSet.delete(post.id);
             setSaveToastMessage("저장이 취소되었습니다.");
           }
-          console.log('Updated saved posts:', Array.from(newSet)); // 디버깅용
+          console.log('Updated saved posts:', Array.from(newSet));
           return newSet;
         });
 
@@ -274,7 +298,7 @@ function BoardLookupPage() {
       }
     } catch (err) {
       console.error("저장 실패:", err);
-      console.error("Error response:", err.response?.data); // 디버깅용
+      console.error("Error response:", err.response?.data);
       alert("저장 처리에 실패했습니다.");
     }
   };
@@ -289,17 +313,14 @@ function BoardLookupPage() {
       clearTimeout(popoverHoverTimeout.current);
     }
 
-    // Store the current author element reference
     currentAuthorRef.current = e.currentTarget;
 
-    // Calculate new position (viewport-relative for fixed positioning)
     const rect = e.currentTarget.getBoundingClientRect();
     const newPosition = {
-      top: rect.bottom + 10, // viewport-relative position
-      left: rect.left + rect.width / 2 - 130, // popover 중앙 정렬
+      top: rect.bottom + 10,
+      left: rect.left + rect.width / 2 - 130,
     };
 
-    // If switching to different user, hide first then update position
     if (hoveredAuthor && hoveredAuthor !== author) {
       setHoveredAuthor(null);
       setTimeout(() => {

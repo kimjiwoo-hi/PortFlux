@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -33,7 +34,6 @@ public class CartController {
         }
 
         List<Cart> cartItems = cartService.getCartItems(userNum);
-
         List<CartItemResponse> itemResponses = cartItems.stream()
                 .map(item -> new CartItemResponse(
                         item.getId(),
@@ -65,16 +65,37 @@ public class CartController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * ✅ 장바구니 전체 비우기 엔드포인트
+     */
+    @DeleteMapping("/{userNum}/empty")
+    public ResponseEntity<Map<String, Object>> emptyCart(@PathVariable Long userNum) {
+        try {
+            cartService.emptyCart(userNum);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "장바구니가 비워졌습니다."
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "장바구니 비우기 실패: " + e.getMessage()
+            ));
+        }
+    }
+
     // 일반 유저 또는 기업 유저의 userNum 가져오기
     private Long getUserNum(String username) {
         UserBean user = userRepository.findByUserId(username);
         if (user != null) {
             return Long.valueOf(user.getUserNum());
         }
+
         CompanyUserBean company = companyUserMapper.getCompanyUserInfo(username);
         if (company != null) {
             return company.getCompanyNum();
         }
+
         return null;
     }
 
@@ -87,11 +108,9 @@ public class CartController {
     @Data
     public static class CartResponse {
         private List<CartItemResponse> items;
-        // private BigDecimal total; // Removed
 
-        public CartResponse(List<CartItemResponse> items) { // Constructor updated
+        public CartResponse(List<CartItemResponse> items) {
             this.items = items;
-            // this.total = total; // Removed
         }
     }
 
