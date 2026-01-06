@@ -42,6 +42,13 @@
         WHERE lower(company_name) = lower(#{name})
     </select>
 
+    <select id="existsByCompanyNameExcludingCurrent" resultType="int">
+        SELECT COUNT(*)
+        FROM COMPANY
+        WHERE lower(company_name) = lower(#{name})
+        AND company_id != #{companyId}
+    </select>
+
     <select id="checkCompanyIdDuplicate" parameterType="String" resultType="int">
         SELECT COUNT(*) 
         FROM COMPANY 
@@ -64,7 +71,9 @@
             company_phone AS companyPhone,
             company_email AS companyEmail,
             drawn_company AS drawnCompany,
-            company_create_at AS companyCreateAt
+            company_create_at AS companyCreateAt,
+            company_image AS companyImage,
+            company_banner AS companyBanner
         FROM COMPANY
         WHERE company_id = #{companyId}
     </select>
@@ -100,7 +109,9 @@
             company_phone AS companyPhone,
             company_email AS companyEmail,
             drawn_company AS drawnCompany,
-            company_create_at AS companyCreateAt
+            company_create_at AS companyCreateAt,
+            company_image AS companyImage,
+            company_banner AS companyBanner
         FROM COMPANY
         WHERE company_num = #{companyNum}
     </select>

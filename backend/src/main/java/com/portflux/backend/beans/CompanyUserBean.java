@@ -14,8 +14,8 @@ public class CompanyUserBean {
     private String businessNumber; // business_number
     private String drawnCompany;   // drawn_company (Y/N)
     private Date companyCreateAt;  // company_create_at
-    
-    // BLOB 이미지는 필요시 byte[] 또는 String으로 처리
-    private String companyImage;   
-    private String companyBanner;  
+
+    // BLOB 이미지는 byte[]로 처리
+    private byte[] companyImage;
+    private byte[] companyBanner;
 }

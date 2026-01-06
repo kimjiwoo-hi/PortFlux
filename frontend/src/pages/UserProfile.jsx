@@ -36,9 +36,11 @@ const UserProfile = () => {
   const [bannerPreview, setBannerPreview] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
 
-  // 닉네임 중복 검사
+  // 닉네임/기업명 중복 검사
   const [nicknameCheckStatus, setNicknameCheckStatus] = useState(""); // "available", "duplicate", "checking", ""
   const [isNicknameChecked, setIsNicknameChecked] = useState(false);
+  const [companyNameCheckStatus, setCompanyNameCheckStatus] = useState(""); // "available", "duplicate", "checking", ""
+  const [isCompanyNameChecked, setIsCompanyNameChecked] = useState(false);
 
   // 비밀번호 변경 모달
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -408,6 +410,8 @@ const UserProfile = () => {
     setSuccessMessage("");
     setNicknameCheckStatus("");
     setIsNicknameChecked(false);
+    setCompanyNameCheckStatus("");
+    setIsCompanyNameChecked(false);
   };
 
   // 편집 취소
@@ -419,6 +423,8 @@ const UserProfile = () => {
     setError("");
     setNicknameCheckStatus("");
     setIsNicknameChecked(false);
+    setCompanyNameCheckStatus("");
+    setIsCompanyNameChecked(false);
   };
 
   // 닉네임 중복 검사
@@ -463,22 +469,67 @@ const UserProfile = () => {
     }
   };
 
+  // 기업명 중복 검사
+  const handleCheckCompanyName = async () => {
+    if (!editedInfo.userName || editedInfo.userName.trim() === "") {
+      setCompanyNameCheckStatus("duplicate");
+      setIsCompanyNameChecked(false);
+      return;
+    }
+
+    // 기업명이 변경되지 않았으면 검사할 필요 없음
+    if (editedInfo.userName === fullUserInfo.userName) {
+      setCompanyNameCheckStatus("available");
+      setIsCompanyNameChecked(true);
+      return;
+    }
+
+    try {
+      setCompanyNameCheckStatus("checking");
+      const response = await axios.post(
+        '/api/company/info/check-company-name',
+        {
+          companyName: editedInfo.userName,
+          companyId: fullUserInfo.userId // 현재 기업 ID 전달
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      // response.data가 true면 사용 가능 (중복 아님)
+      if (response.data === true) {
+        setCompanyNameCheckStatus("available");
+        setIsCompanyNameChecked(true);
+      } else {
+        setCompanyNameCheckStatus("duplicate");
+        setIsCompanyNameChecked(false);
+      }
+    } catch (err) {
+      console.error("기업명 중복 검사 실패:", err);
+      setCompanyNameCheckStatus("duplicate");
+      setIsCompanyNameChecked(false);
+    }
+  };
+
   // 저장
   const handleSave = async () => {
     try {
       const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
-      // 닉네임이 변경되었는지 확인
-      const nicknameChanged = editedInfo.userNickname !== fullUserInfo.userNickname;
-
-      // 닉네임이 변경되었다면 중복 체크 확인
-      if (nicknameChanged && !isNicknameChecked) {
-        setError("닉네임 중복 확인을 해주세요.");
-        setTimeout(() => setError(""), 3000);
-        return;
-      }
-
       if (isCompany) {
+        // 기업명이 변경되었는지 확인
+        const companyNameChanged = editedInfo.userName !== fullUserInfo.userName;
+
+        // 기업명이 변경되었다면 중복 체크 확인
+        if (companyNameChanged && !isCompanyNameChecked) {
+          setError("기업명 중복 확인을 해주세요.");
+          setTimeout(() => setError(""), 3000);
+          return;
+        }
+
         // 기업 회원 정보 저장
         const dataToSave = {
           companyName: editedInfo.userName,
@@ -518,6 +569,16 @@ const UserProfile = () => {
           }
         }
       } else {
+        // 닉네임이 변경되었는지 확인
+        const nicknameChanged = editedInfo.userNickname !== fullUserInfo.userNickname;
+
+        // 닉네임이 변경되었다면 중복 체크 확인
+        if (nicknameChanged && !isNicknameChecked) {
+          setError("닉네임 중복 확인을 해주세요.");
+          setTimeout(() => setError(""), 3000);
+          return;
+        }
+
         // 일반 회원 정보 저장
         const dataToSave = {
           ...editedInfo,
@@ -594,6 +655,12 @@ const UserProfile = () => {
     if (name === "userNickname") {
       setNicknameCheckStatus("");
       setIsNicknameChecked(false);
+    }
+
+    // 기업명이 변경되면 중복 검사 상태 초기화
+    if (name === "userName") {
+      setCompanyNameCheckStatus("");
+      setIsCompanyNameChecked(false);
     }
   };
 
@@ -952,53 +1019,84 @@ const UserProfile = () => {
 
                 <div className="info-item">
                   <label>{isCompany ? "기업명" : "이름"}</label>
-                  <input
-                    type="text"
-                    name="userName"
-                    value={fullUserInfo.userName || ""}
-                    disabled
-                    className="input-disabled"
-                  />
-                </div>
-
-                <div className="info-item">
-                  <label>닉네임</label>
-                  {isEditing ? (
+                  {isEditing && isCompany ? (
                     <>
                       <div className="input-with-btn">
                         <input
                           type="text"
-                          name="userNickname"
-                          placeholder="닉네임을 입력하세요"
-                          value={editedInfo.userNickname || ""}
+                          name="userName"
+                          placeholder="기업명을 입력하세요"
+                          value={editedInfo.userName || ""}
                           onChange={handleChange}
                           className="input-editable"
                         />
                         <button
                           type="button"
-                          onClick={handleCheckNickname}
+                          onClick={handleCheckCompanyName}
                           className="btn-small"
-                          disabled={nicknameCheckStatus === "checking"}
+                          disabled={companyNameCheckStatus === "checking"}
                         >
-                          {nicknameCheckStatus === "checking" ? "확인 중..." : "중복확인"}
+                          {companyNameCheckStatus === "checking" ? "확인 중..." : "중복확인"}
                         </button>
                       </div>
-                      {nicknameCheckStatus === "available" && (
-                        <span className="valid-msg">사용 가능한 닉네임입니다.</span>
+                      {companyNameCheckStatus === "available" && (
+                        <span className="valid-msg">사용 가능한 기업명입니다.</span>
                       )}
-                      {nicknameCheckStatus === "duplicate" && (
-                        <span className="error-msg">이미 사용 중인 닉네임입니다.</span>
+                      {companyNameCheckStatus === "duplicate" && (
+                        <span className="error-msg">이미 사용 중인 기업명입니다.</span>
                       )}
                     </>
                   ) : (
                     <input
                       type="text"
-                      value={fullUserInfo.userNickname || ""}
+                      name="userName"
+                      value={fullUserInfo.userName || ""}
                       disabled
                       className="input-disabled"
                     />
                   )}
                 </div>
+
+                {!isCompany && (
+                  <div className="info-item">
+                    <label>닉네임</label>
+                    {isEditing ? (
+                      <>
+                        <div className="input-with-btn">
+                          <input
+                            type="text"
+                            name="userNickname"
+                            placeholder="닉네임을 입력하세요"
+                            value={editedInfo.userNickname || ""}
+                            onChange={handleChange}
+                            className="input-editable"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleCheckNickname}
+                            className="btn-small"
+                            disabled={nicknameCheckStatus === "checking"}
+                          >
+                            {nicknameCheckStatus === "checking" ? "확인 중..." : "중복확인"}
+                          </button>
+                        </div>
+                        {nicknameCheckStatus === "available" && (
+                          <span className="valid-msg">사용 가능한 닉네임입니다.</span>
+                        )}
+                        {nicknameCheckStatus === "duplicate" && (
+                          <span className="error-msg">이미 사용 중인 닉네임입니다.</span>
+                        )}
+                      </>
+                    ) : (
+                      <input
+                        type="text"
+                        value={fullUserInfo.userNickname || ""}
+                        disabled
+                        className="input-disabled"
+                      />
+                    )}
+                  </div>
+                )}
 
                 <div className="info-item">
                   <label>이메일</label>
