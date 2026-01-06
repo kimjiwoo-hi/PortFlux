@@ -180,10 +180,18 @@ public class BoardLookupController {
     public ResponseEntity<Map<String, Object>> createPost(
             @ModelAttribute BoardLookupPostDto postDto,
             @RequestParam(value = "file", required = false) MultipartFile file,
-            @RequestParam("userNum") int userNum
+            @RequestParam("userNum") int userNum,
+            @RequestParam(value = "memberType", defaultValue = "user") String memberType
     ) {
         try {
-            postDto.setUserNum(userNum);
+            // 회원 유형에 따라 userNum 또는 companyNum 설정
+            if ("company".equalsIgnoreCase(memberType)) {
+                postDto.setCompanyNum(userNum);
+                postDto.setUserNum(null);
+            } else {
+                postDto.setUserNum(userNum);
+                postDto.setCompanyNum(null);
+            }
 
             String fileName = null;
         // 1. 파일 유효성 검사 및 저장

@@ -36,22 +36,24 @@ public class BoardLookupService {
         BoardLookupPostDto post = boardLookupMapper.findPostById(postId);
 
         if (post != null) {
-            // 작성자 정보 조회 및 이미지 Base64 변환
-            UserBean author = userMapper.selectUserByNum(post.getUserNum());
-            if (author != null) {
+            // 작성자 정보 조회 및 Base64 변환
+            if (post.getUserNum() != null) {
                 // 일반 회원
-                if (author.getUserImage() != null) {
-                    String base64Image = Base64.getEncoder().encodeToString(author.getUserImage());
-                    post.setUserImageBase64(base64Image);
+                UserBean author = userMapper.selectUserByNum(post.getUserNum());
+                if (author != null) {
+                    if (author.getUserImage() != null) {
+                        String base64Image = Base64.getEncoder().encodeToString(author.getUserImage());
+                        post.setUserImageBase64(base64Image);
+                    }
+                    if (author.getUserBanner() != null) {
+                        String base64Banner = Base64.getEncoder().encodeToString(author.getUserBanner());
+                        post.setUserBannerBase64(base64Banner);
+                    }
+                    post.setUserNickname(author.getUserNickname());
                 }
-                if (author.getUserBanner() != null) {
-                    String base64Banner = Base64.getEncoder().encodeToString(author.getUserBanner());
-                    post.setUserBannerBase64(base64Banner);
-                }
-                post.setUserNickname(author.getUserNickname());
-            } else {
+            } else if (post.getCompanyNum() != null) {
                 // 기업 회원 조회
-                CompanyUserBean company = companyUserMapper.getCompanyUserByNum(post.getUserNum());
+                CompanyUserBean company = companyUserMapper.getCompanyUserByNum(post.getCompanyNum());
                 if (company != null) {
                     post.setUserNickname(company.getCompanyName());
                 }
@@ -72,24 +74,26 @@ public class BoardLookupService {
 
         // 각 게시글의 작성자 이미지 및 배너 추가
         for (BoardLookupPostDto post : posts) {
-            UserBean author = userMapper.selectUserByNum(post.getUserNum());
-            if (author != null) {
+            if (post.getUserNum() != null) {
                 // 일반 회원
                 // 프로필 이미지 Base64 변환
-                if (author.getUserImage() != null) {
-                    String base64Image = Base64.getEncoder().encodeToString(author.getUserImage());
-                    post.setUserImageBase64(base64Image);
+                UserBean author = userMapper.selectUserByNum(post.getUserNum());
+                if (author != null) {
+                    if (author.getUserImage() != null) {
+                        String base64Image = Base64.getEncoder().encodeToString(author.getUserImage());
+                        post.setUserImageBase64(base64Image);
+                    }
+                    // 배너 이미지 Base64 변환
+                    if (author.getUserBanner() != null) {
+                        String base64Banner = Base64.getEncoder().encodeToString(author.getUserBanner());
+                        post.setUserBannerBase64(base64Banner);
+                    }
+                    // 닉네임
+                    post.setUserNickname(author.getUserNickname());
                 }
-                // 배너 이미지 Base64 변환
-                if (author.getUserBanner() != null) {
-                    String base64Banner = Base64.getEncoder().encodeToString(author.getUserBanner());
-                    post.setUserBannerBase64(base64Banner);
-                }
-                // 닉네임
-                post.setUserNickname(author.getUserNickname());
-            } else {
+            } else if (post.getCompanyNum() != null) {
                 // 기업 회원 조회
-                CompanyUserBean company = companyUserMapper.getCompanyUserByNum(post.getUserNum());
+                CompanyUserBean company = companyUserMapper.getCompanyUserByNum(post.getCompanyNum());
                 if (company != null) {
                     post.setUserNickname(company.getCompanyName());
                 }
@@ -113,20 +117,24 @@ public class BoardLookupService {
      */
     @Transactional
     public BoardLookupPostDto updatePost(BoardLookupPostDto postDto, Long userNum) throws IllegalAccessException {
-        BoardLookupPostDto existingPost = boardLookupMapper.findPostById(postDto.getPostId());  // ✅ 변경
-        
+        BoardLookupPostDto existingPost = boardLookupMapper.findPostById(postDto.getPostId());
+
         if (existingPost == null) {
             throw new NoSuchElementException("게시글을 찾을 수 없습니다.");
         }
-        
-        if (!existingPost.getUserNum().equals(userNum.intValue())) {
+
+        // 권한 검사: 일반 userNum, 기업 companyNum으로 모두 확인
+        boolean hasPermission = (existingPost.getUserNum() != null && existingPost.getUserNum().equals(userNum.intValue())) ||
+                               (existingPost.getCompanyNum() != null && existingPost.getCompanyNum().equals(userNum.intValue()));
+
+        if (!hasPermission) {
             throw new IllegalAccessException("이 게시글을 수정할 권한이 없습니다.");
         }
-        
+
         validateTitle(postDto.getTitle());
 
         boardLookupMapper.updatePost(postDto);
-        return boardLookupMapper.findPostById(postDto.getPostId());  // ✅ 변경
+        return boardLookupMapper.findPostById(postDto.getPostId());
     }
 
     /**
@@ -134,16 +142,20 @@ public class BoardLookupService {
      */
     @Transactional
     public void deletePost(int postId, Long userNum) throws IllegalAccessException {
-        BoardLookupPostDto post = boardLookupMapper.findPostById(postId);  // ✅ 변경
-        
+        BoardLookupPostDto post = boardLookupMapper.findPostById(postId);
+
         if (post == null) {
             throw new NoSuchElementException("게시글을 찾을 수 없습니다.");
         }
-        
-        if (!post.getUserNum().equals(userNum.intValue())) {
+
+        // 권한 검사: 일반 userNum, 기업 companyNum으로 모두 확인
+        boolean hasPermission = (post.getUserNum() != null && post.getUserNum().equals(userNum.intValue())) ||
+                               (post.getCompanyNum() != null && post.getCompanyNum().equals(userNum.intValue()));
+
+        if (!hasPermission) {
             throw new IllegalAccessException("이 게시글을 삭제할 권한이 없습니다.");
         }
-        
+
         boardLookupMapper.deletePost(postId);
     }
 
@@ -162,24 +174,26 @@ public class BoardLookupService {
 
         // 각 게시글의 작성자 이미지 및 배너 추가
         for (BoardLookupPostDto post : posts) {
-            UserBean author = userMapper.selectUserByNum(post.getUserNum());
-            if (author != null) {
+            if (post.getUserNum() != null) {
                 // 일반 회원
                 // 프로필 이미지 Base64 변환
-                if (author.getUserImage() != null) {
-                    String base64Image = Base64.getEncoder().encodeToString(author.getUserImage());
-                    post.setUserImageBase64(base64Image);
+                UserBean author = userMapper.selectUserByNum(post.getUserNum());
+                if (author != null) {
+                    if (author.getUserImage() != null) {
+                        String base64Image = Base64.getEncoder().encodeToString(author.getUserImage());
+                        post.setUserImageBase64(base64Image);
+                    }
+                    // 배너 이미지 Base64 변환
+                    if (author.getUserBanner() != null) {
+                        String base64Banner = Base64.getEncoder().encodeToString(author.getUserBanner());
+                        post.setUserBannerBase64(base64Banner);
+                    }
+                    // 닉네임
+                    post.setUserNickname(author.getUserNickname());
                 }
-                // 배너 이미지 Base64 변환
-                if (author.getUserBanner() != null) {
-                    String base64Banner = Base64.getEncoder().encodeToString(author.getUserBanner());
-                    post.setUserBannerBase64(base64Banner);
-                }
-                // 닉네임
-                post.setUserNickname(author.getUserNickname());
-            } else {
+            } else if (post.getCompanyNum() != null) {
                 // 기업 회원 조회
-                CompanyUserBean company = companyUserMapper.getCompanyUserByNum(post.getUserNum());
+                CompanyUserBean company = companyUserMapper.getCompanyUserByNum(post.getCompanyNum());
                 if (company != null) {
                     post.setUserNickname(company.getCompanyName());
                 }
@@ -217,4 +231,3 @@ private void validateTitle(String title) {
     }
 }
 }
-

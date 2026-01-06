@@ -64,8 +64,10 @@ function LoginPage() {
             localStorage.setItem("user", JSON.stringify(userObj));
           }
 
-          const targetPath = getPreviousPage();
+          const fromPath = getPreviousPage();
           sessionStorage.removeItem("prevPage");
+          // 이전 페이지가 회원가입 또는 성공 페이지인 경우 메인으로 이동
+          const targetPath = (fromPath === "/register" || fromPath === "/success") ? "/" : fromPath;
           navigate(targetPath);
         }
       } else {
@@ -125,7 +127,9 @@ function LoginPage() {
           storage.setItem("user", JSON.stringify(userObj));
         }
 
-        const targetPath = location.state?.from || "/";
+        // 이전 페이지가 회원가입 또는 성공 페이지인 경우 메인으로 이동
+        const fromPath = location.state?.from || "/";
+        const targetPath = (fromPath === "/register" || fromPath === "/success") ? "/" : fromPath;
         navigate(targetPath);
       } else {
         setLoginError("아이디 혹은 비밀번호가 일치하지 않습니다.");

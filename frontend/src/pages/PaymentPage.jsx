@@ -29,11 +29,15 @@ function PaymentPage() {
     const fetchOrderInfo = async () => {
       try {
         // 백엔드에서 merchant_uid로 주문 정보 조회 (PaymentService에서 사용되는 API와는 다름)
-        const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-        const response = await axios.get(`http://localhost:8080/api/orders/${merchantUid}`, {
-          withCredentials: true,
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const token =
+          localStorage.getItem("token") || sessionStorage.getItem("token");
+        const response = await axios.get(
+          `http://localhost:8080/api/orders/${merchantUid}`,
+          {
+            withCredentials: true,
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setOrderInfo(response.data);
         setLoading(false);
       } catch (err) {
@@ -76,7 +80,12 @@ function PaymentPage() {
       channelKey: getChannelKey(), // V1 최신 방식: channelKey 사용
       pay_method: payMethod, // 각 결제 수단의 실제 값 사용 (card, kakaopay, tosspay, naverpay, payco)
       merchant_uid: orderInfo.merchantUid,
-      name: orderInfo.items.length > 1 ? `${orderInfo.items[0].productName} 외 ${orderInfo.items.length - 1}건` : orderInfo.items[0].productName,
+      name:
+        orderInfo.items.length > 1
+          ? `${orderInfo.items[0].productName} 외 ${
+              orderInfo.items.length - 1
+            }건`
+          : orderInfo.items[0].productName,
       amount: orderInfo.totalAmount,
       buyer_email: orderInfo.buyerEmail,
       buyer_name: orderInfo.buyerName,
@@ -94,7 +103,8 @@ function PaymentPage() {
 
       // 결제 성공 - 백엔드 검증 진행
       try {
-        const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+        const token =
+          localStorage.getItem("token") || sessionStorage.getItem("token");
 
         // 백엔드에 결제 검증 요청
         await axios.post(
@@ -105,22 +115,20 @@ function PaymentPage() {
           },
           {
             withCredentials: true,
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
 
         // 장바구니 비우기 (검증 성공 후)
-        const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+        const storedUser =
+          localStorage.getItem("user") || sessionStorage.getItem("user");
         if (storedUser) {
           const user = JSON.parse(storedUser);
           try {
-            await axios.delete(
-              `/api/cart/${user.userNum}/empty`,
-              {
-                withCredentials: true,
-                headers: { 'Authorization': `Bearer ${token}` }
-              }
-            );
+            await axios.delete(`/api/cart/${user.userNum}/empty`, {
+              withCredentials: true,
+              headers: { Authorization: `Bearer ${token}` },
+            });
             console.log("장바구니 비우기 성공");
           } catch (err) {
             console.error("장바구니 비우기 실패:", err);
@@ -130,22 +138,26 @@ function PaymentPage() {
 
         // 주문 완료 페이지로 이동
         navigate(`/order-result?merchant_uid=${response.merchant_uid}`);
-
       } catch (err) {
         console.error("결제 검증 실패:", err);
-       
+
         // 결제는 완료되었으므로 주문 결과 페이지로 이동하여 상황 안내
         navigate(`/order-result?merchant_uid=${response.merchant_uid}`);
       }
     });
   };
-  
+
   if (loading) return <div>주문 정보를 불러오는 중...</div>;
   if (error) return <div className="error-container">오류: {error}</div>;
-  if (!orderInfo) return <div className="error-container">주문 정보를 불러올 수 없습니다.</div>;
+  if (!orderInfo)
+    return (
+      <div className="error-container">주문 정보를 불러올 수 없습니다.</div>
+    );
 
   return (
-    <div className="checkout-page"> {/* CheckoutPage.css의 스타일을 활용 */}
+    <div className="checkout-page">
+      {" "}
+      {/* CheckoutPage.css의 스타일을 활용 */}
       <div className="checkout-container">
         <h1>결제하기</h1>
         <div className="order-summary">
@@ -166,16 +178,20 @@ function PaymentPage() {
           <h2>결제 수단 선택</h2>
           <div className="payment-options">
             <button
-              className={`payment-option-btn ${payMethod === 'card' ? 'selected' : ''}`}
-              onClick={() => setPayMethod('card')}
+              className={`payment-option-btn ${
+                payMethod === "card" ? "selected" : ""
+              }`}
+              onClick={() => setPayMethod("card")}
             >
               💳 신용카드
             </button>
             <button
-              className={`payment-option-btn ${payMethod === 'kakaopay' ? 'selected' : ''}`}
-              onClick={() => setPayMethod('kakaopay')}
+              className={`payment-option-btn ${
+                payMethod === "kakaopay" ? "selected" : ""
+              }`}
+              onClick={() => setPayMethod("kakaopay")}
             >
-              <span style={{ color: '#FEE500' }}>●</span> 카카오페이
+              <span style={{ color: "#FEE500" }}>●</span> 카카오페이
             </button>
             {/* 토스페이먼츠 간편결제는 채널 설정 후 활성화 */}
             {/* <button
