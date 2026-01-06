@@ -298,6 +298,45 @@
   background: #c7d2fe;
 }
 
+/* 라디오 그룹 */
+.radio-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.radio-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+  user-select: none;
+}
+
+.radio-item:hover {
+  background: #f1f5f9;
+}
+
+.radio-item:has(input:checked) {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+}
+
+.radio-item input[type="radio"] {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  flex-shrink: 0;
+  accent-color: #4f46e5;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
 /* 체크박스 그룹 */
 .create-checkbox-group {
   display: flex;
@@ -312,8 +351,8 @@
 .create-checkbox-item {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: 10px;
+  padding: 8px 12px;
   background: #f8fafc;
   border-radius: 8px;
   cursor: pointer;
@@ -332,8 +371,8 @@
 }
 
 .create-checkbox-item input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+  width: 15px;
+  height: 15px;
   margin: 0;
   flex-shrink: 0;
   accent-color: #4f46e5;
@@ -342,10 +381,10 @@
 }
 
 .create-checkbox-text {
-  font-size: 14px;
+  font-size: 13px;
   color: #334155;
   white-space: nowrap;
-  line-height: 18px;
+  line-height: 1.35;
   vertical-align: middle;
 }
 

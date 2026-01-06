@@ -521,7 +521,7 @@ const BoardJobPage = () => {
       tags.push({
         type: "educationExclude",
         value: true,
-        label: "학력무관",
+        label: "학력 무관",
       });
     }
     filters.industries.forEach((v) =>
@@ -835,7 +835,7 @@ const BoardJobPage = () => {
                     </label>
                   ))}
                 </div>
-                {filters.careerType.includes("EXPERIENCED") && (
+                {filters.careerType.includes("경력") && (
                   <>
                     <h4
                       className="filter-subsection-title"
@@ -889,7 +889,7 @@ const BoardJobPage = () => {
                       )
                     }
                   />
-                  <span className="checkbox-text">학력무관</span>
+                  <span className="checkbox-text">학력 무관</span>
                 </label>
                 <div className="radio-group">
                   {educationLevels.map((level) => (

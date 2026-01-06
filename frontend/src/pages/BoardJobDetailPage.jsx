@@ -159,7 +159,7 @@ const BoardJobDetailPage = () => {
   // 학력 표시 헬퍼 (jobEducationExclude는 'Y'/'N' 또는 boolean)
   const displayEducation = useCallback((education, educationExclude) => {
     if (educationExclude === true || educationExclude === "Y") {
-      return "학력무관";
+      return "학력 무관";
     }
     return getEducationLabel(education);
   }, []);
@@ -245,8 +245,11 @@ const BoardJobDetailPage = () => {
           {/* 기업 정보 헤더 */}
           <div className="company-header">
             <div className="company-logo">
-              {(job.companyLogo || job.companyImage) ? (
-                <img src={job.companyLogo || job.companyImage} alt={job.companyName} />
+              {job.companyLogo || job.companyImage ? (
+                <img
+                  src={job.companyLogo || job.companyImage}
+                  alt={job.companyName}
+                />
               ) : (
                 <div className="logo-placeholder">
                   <span>{job.companyName?.charAt(0) || "?"}</span>
@@ -454,9 +457,7 @@ const BoardJobDetailPage = () => {
               {job.companyPhone && (
                 <div className="apply-info-row">
                   <span className="apply-label">문의</span>
-                  <span className="apply-value">
-                    📞 {job.companyPhone}
-                  </span>
+                  <span className="apply-value">📞 {job.companyPhone}</span>
                 </div>
               )}
             </div>
@@ -481,8 +482,11 @@ const BoardJobDetailPage = () => {
             <h4>기업 정보</h4>
             <div className="company-card-content">
               <div className="company-card-logo">
-                {(job.companyLogo || job.companyImage) ? (
-                  <img src={job.companyLogo || job.companyImage} alt={job.companyName} />
+                {job.companyLogo || job.companyImage ? (
+                  <img
+                    src={job.companyLogo || job.companyImage}
+                    alt={job.companyName}
+                  />
                 ) : (
                   <div className="logo-placeholder small">
                     <span>{job.companyName?.charAt(0) || "?"}</span>
