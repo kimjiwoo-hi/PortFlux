@@ -117,6 +117,26 @@ const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
     }
   }, [isOpen]);
 
+  // 프로필 업데이트 이벤트 리스너
+  useEffect(() => {
+    const handleProfileUpdate = (event) => {
+      const { userImage, userBanner, userNickname } = event.detail;
+      console.log("Popover: 프로필 업데이트 이벤트 수신");
+      setUserInfo(prev => ({
+        ...prev,
+        userImage: userImage || prev.userImage,
+        userBanner: userBanner || prev.userBanner,
+        userNickname: userNickname || prev.userNickname
+      }));
+    };
+
+    window.addEventListener('userProfileUpdated', handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener('userProfileUpdated', handleProfileUpdate);
+    };
+  }, []);
+
   const getProfileImage = () => {
     if (userInfo.userImage && userInfo.userImage.trim() !== "") return userInfo.userImage;
     return UserDefaultIcon;

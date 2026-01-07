@@ -58,12 +58,21 @@ const BoardJobEditPage = () => {
         setLoading(true);
         const data = await getJobDetail(postId);
 
-        // 권한 체크
-        if (data.isOwner === false) {
+        // 디버깅: 권한 체크 정보 출력
+        console.log("=== 채용공고 수정 페이지 디버깅 ===");
+        console.log("게시물 ID:", postId);
+        console.log("isOwner 값:", data.isOwner);
+        console.log("isOwner 타입:", typeof data.isOwner);
+
+        // 권한 체크 - isOwner가 명시적으로 true가 아니면 권한 없음
+        if (data.isOwner !== true) {
+          console.log("❌ 수정 권한 없음");
           alert("수정 권한이 없습니다.");
           navigate("/boardjob");
           return;
         }
+
+        console.log("✅ 수정 권한 확인됨");
 
         // 지역 정보에서 상위 지역 추출
         if (data.jobRegion) {

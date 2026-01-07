@@ -199,12 +199,23 @@ public class JobController {
             }
 
             // 소유자 여부 추가 - JWT 토큰 우선, 없으면 세션 사용
-            Long companyNum = getCompanyNumFromJwt(httpRequest);
+            // companyNumForBookmark와 동일한 로직 사용
+            Long companyNum = companyNumForBookmark;
+            if (companyNum == null) {
+                companyNum = getCompanyNumFromJwt(httpRequest);
+            }
             if (companyNum == null) {
                 companyNum = (Long) session.getAttribute("companyNum");
             }
 
+            System.out.println("=== 채용공고 상세 조회 디버깅 ===");
+            System.out.println("게시물 ID: " + postId);
+            System.out.println("기업 번호 (companyNum): " + companyNum);
+            System.out.println("게시물의 기업 번호: " + job.getCompanyNum());
+
             boolean isOwner = jobService.isOwner(postId, companyNum);
+
+            System.out.println("isOwner 결과: " + isOwner);
 
             Map<String, Object> result = new HashMap<>();
             result.put("job", job);

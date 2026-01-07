@@ -66,6 +66,22 @@ const Header = () => {
     }
   }, [isLoggedIn]);
 
+  // 3. 프로필 업데이트 이벤트 리스너
+  useEffect(() => {
+    const handleProfileUpdate = (event) => {
+      const { userImage } = event.detail;
+      const newImage = userImage || UserDefaultIcon;
+      console.log("프로필 업데이트 이벤트 수신:", newImage);
+      setUserProfileImage(newImage);
+    };
+
+    window.addEventListener('userProfileUpdated', handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener('userProfileUpdated', handleProfileUpdate);
+    };
+  }, []);
+
   const getLinkClass = (path) => {
     return location.pathname === path ? "link hoverable-link active" : "link hoverable-link";
   };
