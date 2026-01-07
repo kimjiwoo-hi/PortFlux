@@ -163,7 +163,8 @@ const UserProfile = () => {
           axios.get(`/api/boardlookup/user/${endpoint}/${identifier}/comments`)
         ]);
 
-        let allPosts = postsResponse.data || [];
+        // boardlookup에서 가져온 게시글 (채용공고 제외)
+        let allPosts = (postsResponse.data || []).filter(post => post.boardType !== 'job');
 
         // 기업 회원인 경우 작성한 채용공고도 조회
         if (owner && companyUser) {
@@ -556,13 +557,15 @@ const UserProfile = () => {
           storage.setItem("userNickname", editedInfo.userName);
         }
 
-        // user 객체도 업데이트
+        // user 객체도 업데이트 (이미지 포함)
         const storedUser = storage.getItem("user");
         if (storedUser) {
           try {
             const user = JSON.parse(storedUser);
             user.userNickname = editedInfo.userName;
             user.userName = editedInfo.userName;
+            user.userImage = editedInfo.userImage;
+            user.userBanner = editedInfo.userBanner;
             storage.setItem("user", JSON.stringify(user));
           } catch (e) {
             console.error("user 객체 업데이트 실패:", e);
@@ -597,6 +600,26 @@ const UserProfile = () => {
             withCredentials: true
           }
         );
+
+        // localStorage/sessionStorage 업데이트 (닉네임, 이미지)
+        const storage = localStorage.getItem("isLoggedIn") ? localStorage : sessionStorage;
+        if (nicknameChanged && storage.getItem("userNickname")) {
+          storage.setItem("userNickname", editedInfo.userNickname);
+        }
+
+        // user 객체도 업데이트
+        const storedUser = storage.getItem("user");
+        if (storedUser) {
+          try {
+            const user = JSON.parse(storedUser);
+            user.userNickname = editedInfo.userNickname;
+            user.userImage = editedInfo.userImage;
+            user.userBanner = editedInfo.userBanner;
+            storage.setItem("user", JSON.stringify(user));
+          } catch (e) {
+            console.error("user 객체 업데이트 실패:", e);
+          }
+        }
       }
 
       // 저장된 데이터로 상태 업데이트 (빈 문자열은 그대로 유지)
@@ -626,6 +649,15 @@ const UserProfile = () => {
         userImage: updatedInfo.userImage,
         userBanner: updatedInfo.userBanner
       });
+
+      // Header와 다른 컴포넌트에 프로필 업데이트 이벤트 발생
+      window.dispatchEvent(new CustomEvent('userProfileUpdated', {
+        detail: {
+          userImage: updatedInfo.userImage,
+          userBanner: updatedInfo.userBanner,
+          userNickname: displayNickname
+        }
+      }));
 
       setIsEditing(false);
       setProfilePreview(null);
@@ -966,10 +998,11 @@ const UserProfile = () => {
                       </span>
                       <div className="post-meta">
                         <span>조회 {post.viewCnt || 0}</span>
-                        {post.boardType === 'free' ? (
+                        {post.boardType === 'free' && (
                           <span className="post-likes">추천 {post.likeCnt || 0}</span>
-                        ) : (
-                          post.price && <span className="post-price">{post.price.toLocaleString()}원</span>
+                        )}
+                        {post.boardType === 'lookup' && post.price && (
+                          <span className="post-price">{post.price.toLocaleString()}원</span>
                         )}
                       </div>
                     </div>
@@ -1188,10 +1221,11 @@ const UserProfile = () => {
                       </span>
                       <div className="post-meta">
                         <span>조회 {post.viewCnt || 0}</span>
-                        {post.boardType === 'free' ? (
+                        {post.boardType === 'free' && (
                           <span className="post-likes">추천 {post.likeCnt || 0}</span>
-                        ) : (
-                          post.price && <span className="post-price">{post.price.toLocaleString()}원</span>
+                        )}
+                        {post.boardType === 'lookup' && post.price && (
+                          <span className="post-price">{post.price.toLocaleString()}원</span>
                         )}
                       </div>
                     </div>
