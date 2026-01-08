@@ -69,7 +69,7 @@
         </if>
         AND p.board_type IN ('free', 'notice')
     </where>
-    ORDER BY CASE WHEN p.board_type = 'notice' THEN 0 ELSE 1 END ASC, p.post_id DESC
+    ORDER BY CASE WHEN p.board_type = 'notice' THEN 0 ELSE 1 END ASC, p.created_at DESC, p.post_id DESC
 </select>
 
 <select id="getBoardDetail" parameterType="int" resultType="com.portflux.backend.beans.BoardFreeBean">
