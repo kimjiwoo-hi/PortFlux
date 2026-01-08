@@ -17,7 +17,8 @@
       "Bash(./gradlew bootRun:*)",
       "Bash(taskkill:*)",
       "Bash(tasklist:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(wc:*)"
     ]
   }
 }

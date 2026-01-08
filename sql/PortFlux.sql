@@ -482,15 +482,15 @@ VALUES ('airport', 'comp123!', '인천공항공사', '032-741-2114', 'recruit@ai
 -- 커뮤니티(free) 게시글: POST_ID 2001~2014 사용
 -- 공지사항(notice) 게시글: POST_ID 3001~3002 사용
 INSERT INTO POST (post_id, board_type, user_num, title, content, view_cnt)
-VALUES (2001, 'free', 1, '오라클 DB 설치 중 에러 해결 방법',
+VALUES (2011, 'free', 1, '오라클 DB 설치 중 에러 해결 방법',
         '오라클 19c 설치하다가 ORA-12154 에러가 발생했어요. 해결 방법 공유합니다.', 85);
 
 INSERT INTO POST (post_id, board_type, user_num, title, content, view_cnt)
-VALUES (2002, 'free', 2, 'Spring Boot 프로젝트 구조 추천해주세요',
+VALUES (2012, 'free', 2, 'Spring Boot 프로젝트 구조 추천해주세요',
         '처음으로 Spring Boot로 큰 프로젝트를 시작하는데요. 패키지 구조 조언 부탁드립니다.', 120);
 
 INSERT INTO POST (post_id, board_type, user_num, title, content, view_cnt)
-VALUES (2003, 'free', 3, 'PortFlux 첫 이용 후기입니다!',
+VALUES (2013, 'free', 3, 'PortFlux 첫 이용 후기입니다!',
 '안녕하세요, 취준생입니다.
 
 PortFlux에서 포트폴리오 템플릿 구매해서 사용해봤는데요.
@@ -507,7 +507,7 @@ PortFlux에서 포트폴리오 템플릿 구매해서 사용해봤는데요.
 전체적으로 만족합니다! 포트폴리오 준비하시는 분들께 추천드려요~', 234);
 
 INSERT INTO POST (post_id, board_type, user_num, title, content, view_cnt)
-VALUES (2004, 'free', 4, 'PortFlux 포트폴리오 판매 팁 공유',
+VALUES (2014, 'free', 4, 'PortFlux 포트폴리오 판매 팁 공유',
 '안녕하세요, PortFlux에서 포트폴리오 판매 중인 개발자입니다.
 
 3개월 동안 판매하면서 느낀 점 공유드려요.
@@ -527,7 +527,7 @@ VALUES (2004, 'free', 4, 'PortFlux 포트폴리오 판매 팁 공유',
 도움이 되셨으면 좋겠습니다!', 456);
 
 INSERT INTO POST (post_id, board_type, user_num, title, content, view_cnt)
-VALUES (2005, 'free', 2, '기업회원으로 채용 성공한 후기',
+VALUES (2015, 'free', 2, '기업회원으로 채용 성공한 후기',
 '스타트업 CTO입니다.
 
 PortFlux에서 기업회원으로 채용공고 올리고 프론트엔드 개발자 채용에 성공해서 후기 남깁니다.
@@ -546,7 +546,7 @@ PortFlux에서 기업회원으로 채용공고 올리고 프론트엔드 개발�
 개발자 채용 고민이시라면 PortFlux 추천드립니다.', 321);
 
 INSERT INTO POST (post_id, board_type, user_num, title, content, view_cnt)
-VALUES (2006, 'free', 1, 'PortFlux AI 요약 기능 진짜 좋네요',
+VALUES (2016, 'free', 1, 'PortFlux AI 요약 기능 진짜 좋네요',
 '포트폴리오 올리려고 PDF 업로드했는데
 AI 요약 버튼 하나로 내용이 자동 생성되네요!
 
@@ -556,7 +556,7 @@ AI가 핵심만 쏙쏙 뽑아줘서 편했습니다.
 다들 이 기능 활용해보세요~', 178);
 
 INSERT INTO POST (post_id, board_type, user_num, title, content, view_cnt)
-VALUES (2007, 'free', 3, 'React 18 Concurrent 기능 정리',
+VALUES (2017, 'free', 3, 'React 18 Concurrent 기능 정리',
 'React 18에서 추가된 Concurrent 기능 정리해봤습니다.
 
 1. useTransition
@@ -579,7 +579,7 @@ const deferredValue = useDeferredValue(value);
 실제 프로젝트에 적용해보니 체감 성능이 확실히 좋아졌어요!', 567);
 
 INSERT INTO POST (post_id, board_type, user_num, title, content, view_cnt)
-VALUES (2008, 'free', 4, 'Git Flow vs GitHub Flow 실무 경험',
+VALUES (2018, 'free', 4, 'Git Flow vs GitHub Flow 실무 경험',
 '팀 프로젝트에서 두 가지 브랜치 전략 모두 써본 경험 공유합니다.
 
 [Git Flow]
@@ -599,7 +599,7 @@ VALUES (2008, 'free', 4, 'Git Flow vs GitHub Flow 실무 경험',
 여러분은 어떤 전략 쓰시나요?', 423);
 
 INSERT INTO POST (post_id, board_type, user_num, title, content, view_cnt)
-VALUES (2009, 'free', 1, '신입 프론트엔드 면접 질문 정리',
+VALUES (2019, 'free', 1, '신입 프론트엔드 면접 질문 정리',
 '최근 면접 다니면서 받은 질문들 정리합니다.
 
 [기술 질문]
@@ -622,7 +622,7 @@ VALUES (2009, 'free', 1, '신입 프론트엔드 면접 질문 정리',
 준비 잘 하시고 좋은 결과 있길 바랍니다!', 892);
 
 INSERT INTO POST (post_id, board_type, user_num, title, content, view_cnt)
-VALUES (2010, 'free', 2, 'TypeScript 유틸리티 타입 정리',
+VALUES (2020, 'free', 2, 'TypeScript 유틸리티 타입 정리',
 'TypeScript 실무에서 자주 쓰는 유틸리티 타입 정리입니다.
 
 1. Partial<T> - 모든 속성을 optional로
@@ -645,7 +645,7 @@ type UserWithoutAge = Omit<User, "age">;
 특히 API 응답 타입 정의할 때 유용해요.', 345);
 
 INSERT INTO POST (post_id, board_type, user_num, title, content, view_cnt)
-VALUES (2011, 'free', 3, 'Spring Boot 자주 만나는 에러 해결법',
+VALUES (2021, 'free', 3, 'Spring Boot 자주 만나는 에러 해결법',
 'Spring Boot 개발하면서 자주 만나는 에러 정리합니다.
 
 1. Whitelabel Error Page
@@ -670,7 +670,7 @@ VALUES (2011, 'free', 3, 'Spring Boot 자주 만나는 에러 해결법',
 도움이 되셨으면 좋겠습니다!', 678);
 
 INSERT INTO POST (post_id, board_type, user_num, title, content, view_cnt)
-VALUES (2012, 'free', 4, '개발자 번아웃 극복기 (1년차)',
+VALUES (2022, 'free', 4, '개발자 번아웃 극복기 (1년차)',
 '입사 후 1년차에 심한 번아웃을 겪었습니다.
 비슷한 분들께 도움이 될까 싶어 공유해요.
 
@@ -691,7 +691,7 @@ VALUES (2012, 'free', 4, '개발자 번아웃 극복기 (1년차)',
 번아웃은 누구에게나 올 수 있으니 자책하지 마세요!', 1234);
 
 INSERT INTO POST (post_id, board_type, user_num, title, content, view_cnt)
-VALUES (2013, 'free', 1, 'VSCode 필수 익스텐션 추천',
+VALUES (2023, 'free', 1, 'VSCode 필수 익스텐션 추천',
 '제가 사용하는 VSCode 익스텐션 공유합니다.
 
 [필수]
@@ -715,7 +715,7 @@ VALUES (2013, 'free', 1, 'VSCode 필수 익스텐션 추천',
 다른 추천 있으시면 댓글로 알려주세요!', 567);
 
 INSERT INTO POST (post_id, board_type, user_num, title, content, view_cnt)
-VALUES (2014, 'free', 2, 'JWT vs Session 인증 비교',
+VALUES (2024, 'free', 2, 'JWT vs Session 인증 비교',
 '프로젝트에서 인증 방식 고민하시는 분들을 위해 정리했습니다.
 
 [JWT (JSON Web Token)]
@@ -802,28 +802,28 @@ VALUES (1, 10, '감사합니다! 많은 도움이 되셨으면 좋겠어요~');
 
 -- 커뮤니티 게시글(2001~)에 대한 댓글
 INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
-VALUES (2, 2001, '오라클 에러 해결법 감사합니다! 저도 같은 문제 있었어요.');
+VALUES (2, 2011, '오라클 에러 해결법 감사합니다! 저도 같은 문제 있었어요.');
 
 INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
-VALUES (1, 2001, '다행이네요! 도움이 되셨다니 기쁩니다~');
+VALUES (1, 2011, '다행이네요! 도움이 되셨다니 기쁩니다~');
 
 INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
-VALUES (3, 2007, 'React 18 정리 잘 봤습니다! Concurrent 기능 유용하네요.');
+VALUES (3, 2017, 'React 18 정리 잘 봤습니다! Concurrent 기능 유용하네요.');
 
 INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
-VALUES (4, 2011, 'Spring Boot 에러 해결법 질문있어요! CORS 에러 계속 나는데요...');
+VALUES (4, 2021, 'Spring Boot 에러 해결법 질문있어요! CORS 에러 계속 나는데요...');
 
 INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
-VALUES (3, 2011, 'WebMvcConfigurer에서 allowedOrigins 설정해보세요!');
+VALUES (3, 2021, 'WebMvcConfigurer에서 allowedOrigins 설정해보세요!');
 
 INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
-VALUES (1, 2009, '면접 질문 정리 감사합니다! 저도 곧 면접인데 참고할게요.');
+VALUES (1, 2019, '면접 질문 정리 감사합니다! 저도 곧 면접인데 참고할게요.');
 
 INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
-VALUES (4, 2012, '번아웃 극복기 공감되네요... 저도 비슷한 시기 겪고 있어요.');
+VALUES (4, 2022, '번아웃 극복기 공감되네요... 저도 비슷한 시기 겪고 있어요.');
 
 INSERT INTO POST_COMMENT (user_num, post_id, comment_content)
-VALUES (2, 2013, 'VSCode 익스텐션 추천 감사합니다! GitLens 설치했어요.');
+VALUES (2, 2023, 'VSCode 익스텐션 추천 감사합니다! GitLens 설치했어요.');
 
 -- 5) POST_SAVE
 -- 둘러보기 게시글에 대한 북마크
@@ -831,12 +831,12 @@ INSERT INTO POST_SAVE (user_num, post_id) VALUES (1, 11);
 INSERT INTO POST_SAVE (user_num, post_id) VALUES (2, 10);
 
 -- 커뮤니티 게시글(2003~) 저장
-INSERT INTO POST_SAVE (user_num, post_id) VALUES (1, 2007);
-INSERT INTO POST_SAVE (user_num, post_id) VALUES (2, 2009);
-INSERT INTO POST_SAVE (user_num, post_id) VALUES (3, 2010);
-INSERT INTO POST_SAVE (user_num, post_id) VALUES (4, 2012);
-INSERT INTO POST_SAVE (user_num, post_id) VALUES (1, 2003);
-INSERT INTO POST_SAVE (user_num, post_id) VALUES (2, 2004);
+INSERT INTO POST_SAVE (user_num, post_id) VALUES (1, 2017);
+INSERT INTO POST_SAVE (user_num, post_id) VALUES (2, 2019);
+INSERT INTO POST_SAVE (user_num, post_id) VALUES (3, 2020);
+INSERT INTO POST_SAVE (user_num, post_id) VALUES (4, 2022);
+INSERT INTO POST_SAVE (user_num, post_id) VALUES (1, 2023);
+INSERT INTO POST_SAVE (user_num, post_id) VALUES (2, 2024);
 
 -- 6) FOLLOWS
 INSERT INTO FOLLOWS (follower_id, following_id) VALUES (1, 2);
@@ -884,18 +884,18 @@ INSERT INTO POST_LIKE (user_num, post_id) VALUES (1, 10);
 INSERT INTO POST_LIKE (user_num, post_id) VALUES (2, 10);
 
 -- 커뮤니티 게시글(2001~) 좋아요
-INSERT INTO POST_LIKE (user_num, post_id) VALUES (1, 2001);
-INSERT INTO POST_LIKE (user_num, post_id) VALUES (2, 2001);
-INSERT INTO POST_LIKE (user_num, post_id) VALUES (3, 2007);
-INSERT INTO POST_LIKE (user_num, post_id) VALUES (4, 2009);
-INSERT INTO POST_LIKE (user_num, post_id) VALUES (1, 2012);
-INSERT INTO POST_LIKE (user_num, post_id) VALUES (2, 2012);
-INSERT INTO POST_LIKE (user_num, post_id) VALUES (3, 2012);
-INSERT INTO POST_LIKE (user_num, post_id) VALUES (4, 2013);
-INSERT INTO POST_LIKE (user_num, post_id) VALUES (1, 2003);
-INSERT INTO POST_LIKE (user_num, post_id) VALUES (2, 2005);
-INSERT INTO POST_LIKE (user_num, post_id) VALUES (3, 2008);
-INSERT INTO POST_LIKE (user_num, post_id) VALUES (4, 2014);
+INSERT INTO POST_LIKE (user_num, post_id) VALUES (1, 2011);
+INSERT INTO POST_LIKE (user_num, post_id) VALUES (2, 2011);
+INSERT INTO POST_LIKE (user_num, post_id) VALUES (3, 2017);
+INSERT INTO POST_LIKE (user_num, post_id) VALUES (4, 2019);
+INSERT INTO POST_LIKE (user_num, post_id) VALUES (1, 2022);
+INSERT INTO POST_LIKE (user_num, post_id) VALUES (2, 2022);
+INSERT INTO POST_LIKE (user_num, post_id) VALUES (3, 2022);
+INSERT INTO POST_LIKE (user_num, post_id) VALUES (4, 2023);
+INSERT INTO POST_LIKE (user_num, post_id) VALUES (1, 2013);
+INSERT INTO POST_LIKE (user_num, post_id) VALUES (2, 2015);
+INSERT INTO POST_LIKE (user_num, post_id) VALUES (3, 2018);
+INSERT INTO POST_LIKE (user_num, post_id) VALUES (4, 2024);
 
 -- 14) COMMENT_LIKE
 INSERT INTO COMMENT_LIKE (user_num, comment_id) VALUES (2, 1);

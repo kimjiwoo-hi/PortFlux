@@ -49,16 +49,16 @@ const BoardFreePage = () => {
     if (e.key === 'Enter') handleSearch();
   };
 
-  // 공지사항과 일반 게시글 분리 및 정렬
+  // 공지사항과 일반 게시글 분리 (백엔드에서 이미 정렬됨)
   const noticePosts = posts.filter(p => p.boardType === 'notice');
-  const normalPosts = posts.filter(p => p.boardType !== 'notice')
-                           .sort((a, b) => b.postId - a.postId);
+  const normalPosts = posts.filter(p => p.boardType !== 'notice');
 
   let displayPosts = [];
   if (activeTab === "notice") {
     displayPosts = noticePosts;
   } else {
-    displayPosts = [...noticePosts, ...normalPosts];
+    // 백엔드에서 이미 정렬된 순서 유지: 공지사항 먼저, 그 다음 최신 일반글
+    displayPosts = posts;
   }
 
   const indexOfLastPost = currentPage * postsPerPage;
