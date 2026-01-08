@@ -22,6 +22,7 @@ const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [showAbove, setShowAbove] = useState(false);
+  const [isCompany, setIsCompany] = useState(false); // 기업 회원 여부
   const popoverRef = useRef(null);
 
   // 팔로우 리스트 팝오버
@@ -45,6 +46,10 @@ const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
 
   useEffect(() => {
     if (isOpen) {
+      // 기업 회원 여부 확인
+      const memberType = localStorage.getItem("memberType") || sessionStorage.getItem("memberType");
+      setIsCompany(memberType === "company");
+
       const loadUserInfo = async () => {
         // 먼저 캐시 확인 - 즉시 적용
         const cachedInfo = getCachedUserInfo();
@@ -200,34 +205,39 @@ const UserProfilePopover = ({ isOpen, onLogout, onClose }) => {
           <div className="stat-number">{postCount}</div>
           <div className="stat-label">게시글</div>
         </div>
-        <div className="stat-divider"></div>
-        <div
-          className="stat-item clickable"
-          ref={followersRef}
-          onClick={(e) => {
-            e.stopPropagation();
-            setFollowPopoverTab('followers');
-            setShowFollowPopover(true);
-          }}
-          style={{ cursor: 'pointer' }}
-        >
-          <div className="stat-number">{followersCount}</div>
-          <div className="stat-label">팔로워</div>
-        </div>
-        <div className="stat-divider"></div>
-        <div
-          className="stat-item clickable"
-          ref={followingRef}
-          onClick={(e) => {
-            e.stopPropagation();
-            setFollowPopoverTab('following');
-            setShowFollowPopover(true);
-          }}
-          style={{ cursor: 'pointer' }}
-        >
-          <div className="stat-number">{followingCount}</div>
-          <div className="stat-label">팔로잉</div>
-        </div>
+        {/* 팔로우 통계 - 기업회원일 때는 숨김 */}
+        {!isCompany && (
+          <>
+            <div className="stat-divider"></div>
+            <div
+              className="stat-item clickable"
+              ref={followersRef}
+              onClick={(e) => {
+                e.stopPropagation();
+                setFollowPopoverTab('followers');
+                setShowFollowPopover(true);
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className="stat-number">{followersCount}</div>
+              <div className="stat-label">팔로워</div>
+            </div>
+            <div className="stat-divider"></div>
+            <div
+              className="stat-item clickable"
+              ref={followingRef}
+              onClick={(e) => {
+                e.stopPropagation();
+                setFollowPopoverTab('following');
+                setShowFollowPopover(true);
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className="stat-number">{followingCount}</div>
+              <div className="stat-label">팔로잉</div>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="menu-list">

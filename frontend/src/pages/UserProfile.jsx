@@ -828,33 +828,35 @@ const UserProfile = () => {
           <div className="profile-info">
             <h2 className="profile-nickname">{userInfo?.userNickname}</h2>
 
-            {/* 팔로우 통계 */}
-            <div className="profile-stats">
-              <div
-                className="stat-item clickable"
-                ref={followersRef}
-                onClick={() => {
-                  setFollowPopoverTab('followers');
-                  setShowFollowPopover(true);
-                }}
-                style={{ cursor: 'pointer' }}
-              >
-                <span className="stat-number">{followersCount}</span>
-                <span className="stat-label">팔로워</span>
+            {/* 팔로우 통계 - 기업회원일 때는 숨김 */}
+            {!isCompany && (
+              <div className="profile-stats">
+                <div
+                  className="stat-item clickable"
+                  ref={followersRef}
+                  onClick={() => {
+                    setFollowPopoverTab('followers');
+                    setShowFollowPopover(true);
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <span className="stat-number">{followersCount}</span>
+                  <span className="stat-label">팔로워</span>
+                </div>
+                <div
+                  className="stat-item clickable"
+                  ref={followingRef}
+                  onClick={() => {
+                    setFollowPopoverTab('following');
+                    setShowFollowPopover(true);
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <span className="stat-number">{followingCount}</span>
+                  <span className="stat-label">팔로잉</span>
+                </div>
               </div>
-              <div
-                className="stat-item clickable"
-                ref={followingRef}
-                onClick={() => {
-                  setFollowPopoverTab('following');
-                  setShowFollowPopover(true);
-                }}
-                style={{ cursor: 'pointer' }}
-              >
-                <span className="stat-number">{followingCount}</span>
-                <span className="stat-label">팔로잉</span>
-              </div>
-            </div>
+            )}
 
             {/* 팔로우 버튼 (다른 사용자의 프로필일 때만 표시) */}
             {!isOwner && (
