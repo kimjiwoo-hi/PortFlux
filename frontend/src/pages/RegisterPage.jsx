@@ -82,6 +82,8 @@ function RegisterPage() {
       if (res.ok) {
         const isDuplicate = await res.json();
         setIsIdAvailable(!isDuplicate);
+        if(isDuplicate) alert("이미 사용 중인 아이디입니다.");
+        else alert("사용 가능한 아이디입니다.");
       } else {
         alert("중복 확인 중 에러가 발생했습니다. (관리자 문의)");
       }
@@ -160,8 +162,10 @@ function RegisterPage() {
         body: JSON.stringify({ nickname }),
       });
       if (res.ok) {
-          const isAvailable = await res.json();
+          const isAvailable = await res.json(); 
           setIsNicknameAvailable(isAvailable);
+          if(!isAvailable) alert("이미 사용 중인 닉네임입니다.");
+          else alert("사용 가능한 닉네임입니다.");
       }
     } catch (error) { 
         console.error("닉네임 체크 연결 실패:", error); 
@@ -240,6 +244,7 @@ function RegisterPage() {
         body: JSON.stringify({ email: email }),
       });
       if (res.ok) {
+        alert("인증코드가 발송되었습니다.");
         setEmailMsg("인증번호가 발송됐습니다."); // 메시지 변경
         setAuthCode(""); setIsAuthVerified(false);
       }
@@ -260,9 +265,11 @@ function RegisterPage() {
       if (res.ok) {
         const isSuccess = await res.json();
         if (isSuccess) {
+          alert("이메일 인증 성공!");
           setIsAuthVerified(true);
           setCodeMsg("인증이 완료되었습니다.");
         } else {
+          alert("인증코드가 일치하지 않습니다.");
           setIsAuthVerified(false);
           setCodeMsg("코드가 틀렸습니다.");
         }
