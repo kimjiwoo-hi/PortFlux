@@ -1,12 +1,30 @@
-# PortFlux
+<img width="453" height="171" alt="PortFlux_logo_background" src="https://github.com/user-attachments/assets/bc41a304-33ba-460c-8541-a8477d60f185" />
 
-> 포트폴리오를 사고파는 SNS형 마켓플레이스 + 채용공고 플랫폼
+# 📁 포트폴리오를 사고파는 SNS형 마켓플레이스 + 채용공고 플랫폼 (PortFlux)
 
 • 사용자는 다른 개발자들이 취업·이직 준비 과정에서 어떤 기술 스택을 활용하고, 어떤 프로젝트를 구현했는지 참고할 수 있습니다.
 
 • 양질의 포트폴리오 자료는 결제를 통해 구매할 수 있으며, 커뮤니티 게시판을 통해 개발자 간 정보 공유가 가능합니다.
 
 • 또한 기업 회원이 등록한 채용 공고를 확인하여 취업 기회를 탐색할 수 있습니다.
+
+## 📅 프로젝트 기간
+
+2025년 11월 18일 ~ 2026년 1월 9일
+
+## 🙋 팀 소개
+
+|프로필| <img src="https://github.com/유저1.png" width="100"> | <img src="https://github.com/유저2.png" width="100"> | <img src="https://github.com/유저3.png" width="100"> |
+| :---: | :---: | :---: | :---: |
+|이름| **(팀장)김상훈** | **김동후** | **김지우** |
+|GitHub| [@github_id1](https://github.com/id1) | [@github_id2](https://github.com/id2) | [@github_id3](https://github.com/id3) |
+|이메일| email1@example.com | email2@example.com | email3@example.com |
+
+|프로필| <img src="https://github.com/유저1.png" width="100"> | <img width="100" alt="증명사진_정장" src="https://github.com/user-attachments/assets/a9366efc-a88d-4b87-a027-28d11da4d559" /> | <img src="https://github.com/유저3.png" width="100"> |
+| :---: | :---: | :---: | :---: |
+|이름| **양재명** | **최현규** | **홍성훈** |
+|GitHub| [@github_id4](https://github.com/id1) | [@FillDDak](https://github.com/FillDDak) | [@github_id6](https://github.com/id3) |
+|이메일| email1@example.com | cgr456@naver.com | email3@example.com |
 
 ---
 
