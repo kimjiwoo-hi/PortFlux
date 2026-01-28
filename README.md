@@ -16,14 +16,16 @@
 
 | 프로필 | <img height="200" src="https://github.com/user-attachments/assets/761f4776-1d5b-4af2-af34-7d54c5d4e316" /> | <img height="200" src="https://github.com/user-attachments/assets/59800ac5-cafa-4530-a510-5e935eba152f" /> | <img height="200" src="https://github.com/user-attachments/assets/a01bf328-9e92-4aa0-8009-aa8878448c14" /> |
 | :---: | :---: | :---: | :---: |
-| 이름 | <img width="50" height="1">**김상훈**<img width="50" height="1"> | <img width="50" height="1">**김동후**<img width="50" height="1"> | <img width="50" height="1">**김지우**<img width="50" height="1"> |
+| | <img width="250" height="1"> | <img width="250" height="1"> | <img width="250" height="1"> |
+| 이름 | **(팀장)김상훈** | **김동후** | **김지우** |
 | GitHub | [@sanghunKim-964](https://github.com/sanghunKim-964) | [@donghoo80](https://github.com/donghoo80) | [@kimjiwoo-hi](https://github.com/kimjiwoo-hi) |
 | 이메일 | kim199603330@gmail.com | rlaehdgn80@gmail.com | rlawldn1015@gmail.com |
-| 역할 | 팀장, 팔로우, 팔로워 | 로그인, 회원가입<br>커뮤니티 게시판 | 둘러보기 게시판 |
+| 역할 | 팔로우, 팔로워 | 로그인, 회원가입<br>커뮤니티 게시판 | 둘러보기 게시판 |
 
 | 프로필 | <img height="200" src="https://github.com/user-attachments/assets/bd83f747-61ad-4bb9-b601-32d7ed1553d3" /> | <img height="200" src="https://github.com/user-attachments/assets/a9366efc-a88d-4b87-a027-28d11da4d559" /> | <img height="200" src="https://github.com/user-attachments/assets/b0c4ec36-fcd7-4cca-ad2c-2b3d173834c4" /> |
 | :---: | :---: | :---: | :---: |
-| 이름 | <img width="50" height="1">**양재명**<img width="50" height="1"> | <img width="50" height="1">**최현규**<img width="50" height="1"> | <img width="50" height="1">**홍성훈**<img width="50" height="1"> |
+| | <img width="250" height="1"> | <img width="250" height="1"> | <img width="250" height="1"> |
+| 이름 | **양재명** | **최현규** | **홍성훈** |
 | GitHub | [@toyj903](https://github.com/toyj903) | [@FillDDak](https://github.com/FillDDak) | [@HoRivest](https://github.com/HoRivest) |
 | 이메일 | toyj903@naver.com | cgr456@naver.com | ghdtjdgns536@gmail.com |
 | 역할 | 장바구니, 결제 | 마이페이지<br>PPT 제작 | 채용 게시판 |
