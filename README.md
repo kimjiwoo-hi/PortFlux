@@ -32,7 +32,7 @@
 
 ---
 
-## 📋 목차
+# 📋 목차
 
 - [프로젝트 구성](#-프로젝트-구성)
 - [기술 스택](#-기술-스택)
@@ -60,20 +60,32 @@
 - **Vite** 7.2.4
 - **React Router DOM** 7.9.6
 - **Axios** 1.13.2
+- **HTML + CSS + JavaScript**
 
 ### Backend
 - **Java** 17
 - **Spring Boot** 3.5.8
 - **Spring Security** (JWT 인증)
 - **Spring Data JPA** / **MyBatis** 3.0.3
-- **Oracle Database** (JDBC 11)
 - **Spring AI** (OpenAI 연동)
+
+### Database
+- **Oracle Database 18c** (ojdbc11)
 
 ### 주요 라이브러리
 - **PDF 처리**: Apache PDFBox 2.0.30
 - **결제**: 아임포트 REST Client 0.2.23
 - **이메일**: Spring Boot Mail
 - **OAuth**: Google OAuth 2.0
+
+### 기타 툴
+- **VS Code**
+- **SQL Developer**
+- **Git**
+- **GitHub**
+- **Sourcetree**
+- **Notion**
+- **Figma**
 
 ---
 
