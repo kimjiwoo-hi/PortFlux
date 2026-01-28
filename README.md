@@ -14,13 +14,13 @@
 
 ## 🙋 팀 소개
 
-|프로필| <img src="https://github.com/유저1.png" width="100"> | <img src="https://github.com/유저2.png" width="100"> | <img src="https://github.com/유저3.png" width="100"> |
+|프로필| <img height="200" src="https://github.com/user-attachments/assets/761f4776-1d5b-4af2-af34-7d54c5d4e316" /> |<img height="200" src="https://github.com/user-attachments/assets/59800ac5-cafa-4530-a510-5e935eba152f" /> | <img height="200" src="https://github.com/user-attachments/assets/a01bf328-9e92-4aa0-8009-aa8878448c14" /> |
 | :---: | :---: | :---: | :---: |
 |이름| **(팀장)김상훈** | **김동후** | **김지우** |
-|GitHub| [@github_id1](https://github.com/id1) | [@github_id2](https://github.com/id2) | [@github_id3](https://github.com/id3) |
-|이메일| email1@example.com | email2@example.com | email3@example.com |
+|GitHub| [@sanghunKim-964](https://github.com/sanghunKim-964) | [@donghoo80](https://github.com/donghoo80) | [@github_id3](https://github.com/id3) |
+|이메일| kim199603330@gmail.com | rlaehdgn80@gmail.com | email3@example.com |
 
-|프로필| <img src="https://github.com/유저1.png" width="100"> | <img width="100" alt="증명사진_정장" src="https://github.com/user-attachments/assets/a9366efc-a88d-4b87-a027-28d11da4d559" /> | <img src="https://github.com/유저3.png" width="100"> |
+|프로필|<img height="200" src="https://github.com/user-attachments/assets/bd83f747-61ad-4bb9-b601-32d7ed1553d3" /> | <img height="200" src="https://github.com/user-attachments/assets/a9366efc-a88d-4b87-a027-28d11da4d559" /> | <img height="200" src="https://github.com/user-attachments/assets/b0c4ec36-fcd7-4cca-ad2c-2b3d173834c4" /> |
 | :---: | :---: | :---: | :---: |
 |이름| **양재명** | **최현규** | **홍성훈** |
 |GitHub| [@github_id4](https://github.com/id1) | [@FillDDak](https://github.com/FillDDak) | [@github_id6](https://github.com/id3) |
