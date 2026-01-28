@@ -34,6 +34,7 @@
 
 ## 📋 목차
 
+- [프로젝트 구성](#-프로젝트-구성)
 - [기술 스택](#-기술-스택)
 - [주요 기능](#-주요-기능)
 - [시스템 요구사항](#-시스템-요구사항)
@@ -44,6 +45,14 @@
 
 ---
 
+## 💻 프로젝트 구성
+
+### 📌 Database ERD
+
+<img width="1878" height="1283" alt="PortFlux" src="https://github.com/user-attachments/assets/482cb02f-bc75-4ec4-89c6-0f3fc6c75de5" />
+
+---
+
 ## 🛠 기술 스택
 
 ### Frontend
@@ -51,7 +60,6 @@
 - **Vite** 7.2.4
 - **React Router DOM** 7.9.6
 - **Axios** 1.13.2
-- **Socket.io Client** 4.8.1
 
 ### Backend
 - **Java** 17
@@ -59,7 +67,6 @@
 - **Spring Security** (JWT 인증)
 - **Spring Data JPA** / **MyBatis** 3.0.3
 - **Oracle Database** (JDBC 11)
-- **Socket.io** 4.8.1 (실시간 채팅)
 - **Spring AI** (OpenAI 연동)
 
 ### 주요 라이브러리
