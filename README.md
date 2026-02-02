@@ -225,11 +225,11 @@ spring.mail.password=your-app-password
 
 #### 3.2 백엔드 빌드 및 실행
 
-**Windows (Gradle Wrapper 사용):**
+**Windows:**
 ```bash
 cd backend
-gradlew.bat clean build
-gradlew.bat bootRun
+.\gradlew clean build
+.\gradlew bootRun
 ```
 
 **macOS/Linux:**
