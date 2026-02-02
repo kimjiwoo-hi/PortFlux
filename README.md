@@ -49,7 +49,7 @@
 
 ### 📌 Database ERD
 
-<img width="1878" height="1283" alt="PortFlux" src="https://github.com/user-attachments/assets/482cb02f-bc75-4ec4-89c6-0f3fc6c75de5" />
+<img width="2063" height="2258" alt="PortFlux_ERD" src="https://github.com/user-attachments/assets/4efe5048-991d-4d94-850f-2bc4be24b3ed" />
 
 ---
 
