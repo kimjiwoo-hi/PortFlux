@@ -35,13 +35,15 @@
 # 📋 목차
 
 - [프로젝트 구성](#-프로젝트-구성)
-- [기술 스택](#-기술-스택)
+- [기술 스택 및 버전](#-기술-스택-및-버전)
 - [주요 기능](#-주요-기능)
 - [시스템 요구사항](#-시스템-요구사항)
 - [설치 및 실행 방법](#-설치-및-실행-방법)
 - [프로젝트 구조](#-프로젝트-구조)
 - [API 문서](#-api-문서)
 - [문제 해결](#-문제-해결)
+- [개발 가이드](#-개발-가이드)
+- [발표 PPT 이미지](#-발표-PPT-이미지)
 
 ---
 
@@ -53,7 +55,7 @@
 
 ---
 
-## 🛠 기술 스택
+## 🛠 기술 스택 및 버전
 
 ### Frontend
 - **React** 18.3.1
@@ -61,9 +63,11 @@
 - **React Router DOM** 7.9.6
 - **Axios** 1.13.2
 - **HTML + CSS + JavaScript**
+- **Node.js** 24.11.1
+- **npm** 11.6.2
 
 ### Backend
-- **Java** 17
+- **Java** 17.0.9
 - **Spring Boot** 3.5.8
 - **Spring Security** (JWT 인증)
 - **Spring Data JPA** / **MyBatis** 3.0.3
@@ -80,7 +84,7 @@
 
 ### 기타 툴
 - **VS Code**
-- **SQL Developer**
+- **SQL Developer** 21.4.3
 - **Git**
 - **GitHub**
 - **Sourcetree**
@@ -92,29 +96,26 @@
 ## ✨ 주요 기능
 
 ### 1. 자료 관리
-- PDF 파일 업로드 및 미리보기
+- 포트폴리오 PDF 파일 업로드 및 미리보기
 - 태그 기반 검색 및 필터링
 - 조회수 및 다운로드 통계
 
 ### 2. 거래 시스템
 - 장바구니 기능
 - 주문 및 결제 내역 관리
-- 아임포트 결제 연동 (개발 중)
+- 아임포트 결제 연동 (신용카드 or 카카오페이)
 
 ### 3. 소셜 기능
 - 게시물 좋아요 및 댓글
 - 사용자 팔로우
-- 레벨 시스템
 
 ### 4. AI 기능
 - OpenAI를 활용한 자료 요약
-- 챗봇 지원
 
-### 5. 실시간 채팅
-- Socket.io 기반 실시간 메시징
-- 1:1 채팅 및 그룹 채팅
+### 5. 채용 게시판
+- 구인 구직 기능
 
-### 6. 인증 및 보안
+### 5. 인증 및 보안
 - JWT 기반 인증
 - Google OAuth 2.0 로그인
 - Spring Security 통합
@@ -128,14 +129,13 @@
 | 소프트웨어 | 버전 | 다운로드 링크 |
 |-----------|------|--------------|
 | **Java JDK** | 17 이상 | [Oracle JDK](https://www.oracle.com/java/technologies/downloads/) |
-| **Node.js** | 18 이상 | [Node.js](https://nodejs.org/) |
+| **Node.js** | 24 이상 | [Node.js](https://nodejs.org/) |
 | **Oracle Database** | 11g XE 이상 | [Oracle Database XE](https://www.oracle.com/database/technologies/xe-downloads.html) |
 | **Git** | 최신 버전 | [Git](https://git-scm.com/) |
 
 ### 권장 환경
-- **OS**: Windows 10/11, macOS, Linux
-- **RAM**: 8GB 이상
-- **디스크**: 10GB 이상 여유 공간
+- **OS**: Windows 10/11, macOS
+- **디스크**: 2GB 이상 여유 공간
 
 ---
 
@@ -502,27 +502,31 @@ const response = await axios.get('/api/example', {
 
 ---
 
-## 🤝 기여하기
+## 📽️ 발표 PPT 이미지
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-## 📄 라이선스
-
-This project is licensed under the MIT License.
-
----
-
-## 👥 팀원
-
-- **개발팀**: [팀원 이름]
-- **디자인**: [팀원 이름]
-- **기획**: [팀원 이름]
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_1" src="https://github.com/user-attachments/assets/e3e2007a-c367-49bc-9772-8d1ba40c4f8c" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_2" src="https://github.com/user-attachments/assets/89b20b35-1c24-44ad-863b-1542d637f5ca" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_3" src="https://github.com/user-attachments/assets/40ee8e2e-0c42-4833-8fc6-d90c1b2ac59f" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_4" src="https://github.com/user-attachments/assets/b2a4cd90-976a-40a9-8418-94c359039b22" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_5" src="https://github.com/user-attachments/assets/affadf11-2fb5-4bc6-84db-6114605cf685" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_6" src="https://github.com/user-attachments/assets/01cd297f-03bf-4ff5-8169-e07897c067b8" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_7" src="https://github.com/user-attachments/assets/3edc24e3-3524-40fe-8357-3c563d9a31f0" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_8" src="https://github.com/user-attachments/assets/43e10cfa-d4de-4100-b71b-8bb48d7ab1a9" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_9" src="https://github.com/user-attachments/assets/585475e6-53e3-4d02-8719-1518f087d8d1" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_10" src="https://github.com/user-attachments/assets/0235a0a1-7ee7-4c64-a5cf-e09c1aaf1c15" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_11" src="https://github.com/user-attachments/assets/e8b872ec-ee8c-48b3-82e5-bef9980794da" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_12" src="https://github.com/user-attachments/assets/640f7eb4-6bf5-4c3f-8fe9-a5b6f8251839" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_13" src="https://github.com/user-attachments/assets/c27fd936-df8b-4dff-b1f9-601cadf442fa" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_14" src="https://github.com/user-attachments/assets/7383e17d-a989-4079-a99e-29f5f147b4c5" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_15" src="https://github.com/user-attachments/assets/1babc839-5f13-4842-919c-c23e2af0bb26" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_16" src="https://github.com/user-attachments/assets/af16e7df-38b1-478c-8b49-8b8cdd6aadb9" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_17" src="https://github.com/user-attachments/assets/0fed5690-8727-449f-ae59-baef4e29f187" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_18" src="https://github.com/user-attachments/assets/736e019e-cfce-4359-8a4a-66cc5a4f038a" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_19" src="https://github.com/user-attachments/assets/0cbaf0bb-0cd5-4d61-a260-64439af892e6" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_20" src="https://github.com/user-attachments/assets/033c3586-526e-4262-aa27-cc0ae7469fc7" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_21" src="https://github.com/user-attachments/assets/ae33c83b-d581-4d18-948d-4077529df010" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_22" src="https://github.com/user-attachments/assets/cdf2081a-dde2-4bc0-8828-469122dbba9d" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_23" src="https://github.com/user-attachments/assets/4b3b591e-5811-4ef1-8908-48dbd2195357" />
 
 ---
 
