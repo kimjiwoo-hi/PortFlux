@@ -152,20 +152,50 @@ cd PortFlux
 
 ### 2. 데이터베이스 설정
 
-#### 2.1 Oracle Database 설치 및 실행
+#### 2.1 Oracle Database 설치 및 계정 생성
 
 1. Oracle Database 11g XE 이상 설치
 2. SQL Developer 또는 SQL*Plus 실행
-3. 다음 명령어로 사용자 생성:
+3. PortFlux\sql\계정_생성.sql 전체 스크립트 실행:
 
 ```sql
 -- 관리자 계정으로 로그인 후
+
+-- 1. 스크립트 실행 모드 활성화 
+-- 일반 사용자(C## 접두어 없는 계정) 생성을 가능하게 설정합니다.
+ALTER SESSION SET "_ORACLE_SCRIPT"=true;
+
+-- 2. 사용자(jh) 생성 및 비밀번호 설정
+-- 아이디: jh, 비밀번호: 12345
 CREATE USER jh IDENTIFIED BY 12345;
-GRANT CONNECT, RESOURCE, DBA TO jh;
-GRANT UNLIMITED TABLESPACE TO jh;
+
+-- 3. 기본 시스템 권한 부여
+-- CONNECT: 데이터베이스 접속 권한
+-- RESOURCE: 테이블, 인덱스 등의 리소스 생성 권한
+GRANT CONNECT, RESOURCE TO jh;
+
+-- 4. 추가 개체 생성 권한 부여
+-- 뷰(View), 시퀀스(Sequence), 프로시저(Procedure)를 생성할 수 있는 권한을 줍니다.
+GRANT CREATE VIEW, CREATE SEQUENCE, CREATE PROCEDURE TO jh;
+
+-- 5. 테이블스페이스 할당량 설정
+-- jh 사용자가 USERS 테이블스페이스에서 용량 제한 없이 데이터를 사용할 수 있도록 설정합니다.
+ALTER USER jh DEFAULT TABLESPACE USERS QUOTA UNLIMITED ON USERS;
+
+-- 6. (선택사항) 사용자 삭제
+-- 계정을 삭제해야 할 때 주석을 해제하고 실행합니다.
+-- DROP USER jh CASCADE;
 ```
 
-#### 2.2 테이블 생성
+#### 2.2 새 접속 생성
+
+1. SQL Developer에서 새 접속... 버튼 클릭
+2. Name에 JH 작성
+3. 사용자 이름에 jh, 비밀번호에 12345 작성
+4. 테스트 버튼 클릭 후 성공 시 접속 버튼 클릭
+5. 새로 만든 JH 접속으로 선택
+
+#### 2.3 테이블 생성
 
 1. `sql/PortFlux.sql` 파일을 SQL Developer에서 열기
 2. **스크립트 전체 실행** (F5 또는 "스크립트 실행" 버튼)
