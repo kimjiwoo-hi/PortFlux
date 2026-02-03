@@ -399,7 +399,7 @@ VALUES ('admin', 'admin123!', '관리자', '010-0000-0000', 'admin@portflux.com'
 
 -- 1-2) 테스트용 더미 계정 (BCrypt 암호화된 비밀번호: !Aa123123)
 INSERT INTO USERS (user_id, user_password, user_name, user_phone, user_email, user_nickname, user_level)
-VALUES ('asdasd', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3m0fCpBYCJ3.4mLgO4Hy', 'ASD이름', '01012345678', 'asd@naver.com', 'ASD닉네임', 1);
+VALUES ('asdasd', '$2a$10$Z5vnwKlbnX9k532EoJztUetGYFKs73hSEeL2NPVFX8bCCXJZUGWdm', 'ASD이름', '01012345678', 'asd@naver.com', 'ASD닉네임', 1);
 
 INSERT INTO ADMIN_ACCOUNT (user_num, admin_id, admin_password, admin_name)
 SELECT user_num, 'admin', 'admin123!', '관리자'
