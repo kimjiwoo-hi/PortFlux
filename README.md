@@ -8,11 +8,11 @@
 
 - 또한 기업 회원이 등록한 채용 공고를 확인하여 취업 기회를 탐색할 수 있습니다.
 
-## 📅 프로젝트 기간
+<h2 id="프로젝트-기간">📅 프로젝트 기간</h2>
 
 - 2025년 11월 18일 ~ 2026년 1월 9일
 
-## 🙋 팀 소개
+<h2 id="팀-소개">🙋 팀 소개</h2>
 
 | 프로필 | <img height="200" src="https://github.com/user-attachments/assets/761f4776-1d5b-4af2-af34-7d54c5d4e316" /> | <img height="200" src="https://github.com/user-attachments/assets/59800ac5-cafa-4530-a510-5e935eba152f" /> | <img height="200" src="https://github.com/user-attachments/assets/a01bf328-9e92-4aa0-8009-aa8878448c14" /> |
 | :---: | :---: | :---: | :---: |
@@ -50,7 +50,7 @@
 
 ---
 
-## 💻 프로젝트 구성
+<h2 id="프로젝트-구성">💻 프로젝트 구성</h2>
 
 ### 📌 Database ERD
 
@@ -58,7 +58,7 @@
 
 ---
 
-## 🛠 기술 스택 및 버전
+<h2 id="기술-스택-및-버전">🛠 기술 스택 및 버전</h2>
 
 ### Frontend
 - **React** 18.3.1
@@ -96,7 +96,7 @@
 
 ---
 
-## ✨ 주요 기능
+<h2 id="주요-기능">✨ 주요 기능</h2>
 
 ### 1. 자료 관리
 - 포트폴리오 PDF 파일 업로드 및 미리보기
@@ -125,7 +125,7 @@
 
 ---
 
-## 💻 시스템 요구사항
+<h2 id="시스템-요구사항">💻 시스템 요구사항</h2>
 
 ### 필수 소프트웨어
 
@@ -142,7 +142,7 @@
 
 ---
 
-## 🚀 설치 및 실행 방법
+<h2 id="설치-및-실행-방법">🚀 설치 및 실행 방법</h2>
 
 ### 1. 저장소 클론
 
@@ -303,7 +303,7 @@ npm run dev
 
 ---
 
-## 📁 프로젝트 구조
+<h2 id="프로젝트-구조">📁 프로젝트 구조</h2>
 
 ```
 PortFlux/
@@ -361,7 +361,7 @@ PortFlux/
 
 ---
 
-## 🔌 API 문서
+<h2 id="api-문서">🔌 API 문서</h2>
 
 ### 인증 API
 
@@ -412,7 +412,7 @@ PortFlux/
 
 ---
 
-## 🔧 문제 해결
+<h2 id="문제-해결">🔧 문제 해결</h2>
 
 ### 1. 백엔드가 시작되지 않을 때
 
@@ -516,7 +516,7 @@ npm install
 
 ---
 
-## 📝 개발 가이드
+<h2 id="개발-가이드">📝 개발 가이드</h2>
 
 ### 새로운 API 추가하기
 
@@ -553,7 +553,7 @@ const response = await axios.get('/api/example', {
 
 ---
 
-## 📽️ 발표 PPT 이미지
+<h2 id="발표-ppt-이미지">📽️ 발표 PPT 이미지</h2>
 
 <img width="4000" height="2250" alt="PPT(2차PPT_JH)_1" src="https://github.com/user-attachments/assets/e3e2007a-c367-49bc-9772-8d1ba40c4f8c" />
 <img width="4000" height="2250" alt="PPT(2차PPT_JH)_2" src="https://github.com/user-attachments/assets/89b20b35-1c24-44ad-863b-1542d637f5ca" />
@@ -581,7 +581,7 @@ const response = await axios.get('/api/example', {
 
 ---
 
-## 📞 문의
+<h2 id="문의">📞 문의</h2>
 
 프로젝트에 대한 질문이나 제안사항이 있으시면 Issue를 생성해주세요.
 
