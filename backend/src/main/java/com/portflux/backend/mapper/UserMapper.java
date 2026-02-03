@@ -1,12 +1,11 @@
 package com.portflux.backend.mapper;
 
-import com.portflux.backend.beans.UserBean;
-import com.portflux.backend.beans.UserLoginBean;
-import com.portflux.backend.beans.UserRegisterBean;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.List;
+import com.portflux.backend.beans.UserBean;
+import com.portflux.backend.beans.UserLoginBean;
+import com.portflux.backend.beans.UserRegisterBean;
 
 @Mapper
 public interface UserMapper {

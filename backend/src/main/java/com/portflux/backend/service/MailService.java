@@ -1,20 +1,19 @@
 package com.portflux.backend.service;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Value;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @ConditionalOnProperty(name = "spring.mail.host")

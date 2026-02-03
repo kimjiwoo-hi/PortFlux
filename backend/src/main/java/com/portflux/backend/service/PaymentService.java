@@ -1,5 +1,12 @@
 package com.portflux.backend.service;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.portflux.backend.model.Order;
 import com.portflux.backend.model.PaymentRecord;
 import com.portflux.backend.repository.PaymentRepository;
@@ -7,16 +14,9 @@ import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 
 @Slf4j
 @Service
@@ -35,7 +35,8 @@ public class PaymentService {
     }
 
     @Transactional
-    public PaymentRecord confirmPayment(String impUid, String merchantUid) throws IamportResponseException, IOException {
+    public PaymentRecord confirmPayment(String impUid, String merchantUid)
+            throws IamportResponseException, IOException {
         log.info("Starting payment confirmation: impUid={}, merchantUid={}",
                 impUid, merchantUid);
 
@@ -72,8 +73,7 @@ public class PaymentService {
             // TODO: 금액 불일치 시 결제 취소 로직 추가
             throw new IllegalStateException(
                     String.format("Amount mismatch: expected %s, got %s",
-                            order.getTotalAmount(), iamportPayment.getAmount())
-            );
+                            order.getTotalAmount(), iamportPayment.getAmount()));
         }
 
         // 6. 주문 merchantUid 대조
@@ -91,7 +91,8 @@ public class PaymentService {
         paymentRecord.setAmount(iamportPayment.getAmount());
         paymentRecord.setStatus("PAID");
         if (iamportPayment.getPaidAt() != null) {
-            paymentRecord.setPaidAt(LocalDateTime.ofInstant(iamportPayment.getPaidAt().toInstant(), ZoneId.systemDefault()));
+            paymentRecord
+                    .setPaidAt(LocalDateTime.ofInstant(iamportPayment.getPaidAt().toInstant(), ZoneId.systemDefault()));
         } else {
             paymentRecord.setPaidAt(LocalDateTime.now());
         }

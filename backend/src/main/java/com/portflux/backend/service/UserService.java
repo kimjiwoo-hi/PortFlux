@@ -1,24 +1,29 @@
 package com.portflux.backend.service;
 
-import com.portflux.backend.api.GoogleApi;
-import com.portflux.backend.beans.*;
-import com.portflux.backend.mapper.AdminMapper;
-import com.portflux.backend.mapper.CompanyUserMapper;
-import com.portflux.backend.mapper.UserMapper;
-import com.portflux.backend.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 // [추가] 시큐리티 관련 임포트
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import com.portflux.backend.api.GoogleApi;
+import com.portflux.backend.beans.CompanyUserBean;
+import com.portflux.backend.beans.UserBean;
+import com.portflux.backend.beans.UserLoginBean;
+import com.portflux.backend.beans.UserRegisterBean;
+import com.portflux.backend.mapper.AdminMapper;
+import com.portflux.backend.mapper.CompanyUserMapper;
+import com.portflux.backend.mapper.UserMapper;
+import com.portflux.backend.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

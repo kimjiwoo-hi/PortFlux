@@ -1,0 +1,313 @@
+================================================================================
+                    PortFlux 프로젝트 - 포트폴리오 공개 전 점검 보고서
+================================================================================
+
+작성일: 2026-02-04
+분석 대상: PortFlux 프로젝트 전체 (Backend + Frontend)
+
+================================================================================
+                              [1] 즉시 해결 필수 - 심각한 보안 문제
+================================================================================
+
+1-1. 하드코딩된 API 키 및 비밀번호 노출
+------------------------------------------------------------------------------
+위치: backend/.env
+문제: OpenAI API 키가 실제 값으로 저장됨
+     sk-proj-xxx...xxx 형태의 실제 API 키 노출
+위험: API 키 탈취 시 금전적 손실 발생 가능
+조치:
+     - API 키 즉시 폐기 후 재발급
+     - .env 파일을 .gitignore에 추가 (이미 되어있다면 Git 히스토리에서 제거 필요)
+
+------------------------------------------------------------------------------
+위치: frontend/.env
+문제: 결제 시스템(PortOne/아임포트) 관련 키 노출
+     - VITE_IMP_KEY
+     - VITE_PORTONE_STORE_ID
+     - VITE_PORTONE_CHANNEL_KEY
+위험: 결제 사기 위험
+조치: 결제 서비스 대시보드에서 키 재발급
+
+------------------------------------------------------------------------------
+위치: backend/src/main/resources/application.properties
+문제: 다수의 민감한 정보 노출
+     - 데이터베이스 비밀번호: 12345
+     - Google Client Secret: GOCSPX-xxx
+     - Gmail 계정 및 앱 비밀번호
+     - JWT Secret Key
+     - 국세청 API Key
+     - Iamport API Key/Secret
+위험: 모든 외부 서비스 접근 권한 탈취 가능
+조치:
+     - 모든 비밀번호/키 변경
+     - 환경 변수로 전환
+     - application-example.properties 별도 작성
+
+------------------------------------------------------------------------------
+위치: sql/PortFlux.sql, sql/계정_생성.sql
+문제: 데이터베이스 계정 정보 평문 노출
+     - CREATE USER jh IDENTIFIED BY 12345
+     - 더미 계정 비밀번호: password123!, admin123!, comp123!
+위험: 데이터베이스 무단 접근 가능
+조치:
+     - DB 비밀번호 변경
+     - SQL 파일에서 실제 비밀번호 제거
+     - 더미 데이터는 bcrypt 해시된 값만 포함
+
+
+================================================================================
+                          [2] Git 히스토리 정리 필수
+================================================================================
+
+문제: 민감한 파일들이 이미 Git에 커밋되어 히스토리에 영구 저장됨
+     - .gitignore에 추가해도 과거 커밋에는 여전히 존재
+
+해결 방법 (주의: 협업자가 있다면 사전 공지 필수):
+------------------------------------------------------------------------------
+# 방법 1: git filter-branch 사용
+git filter-branch --force --index-filter \
+  "git rm --cached --ignore-unmatch backend/.env" \
+  --prune-empty --tag-name-filter cat -- --all
+
+git filter-branch --force --index-filter \
+  "git rm --cached --ignore-unmatch backend/src/main/resources/application.properties" \
+  --prune-empty --tag-name-filter cat -- --all
+
+# 강제 푸시 (주의!)
+git push origin --force --all
+------------------------------------------------------------------------------
+
+# 방법 2: BFG Repo-Cleaner 사용 (더 빠름)
+bfg --delete-files application.properties
+bfg --delete-files .env
+git reflog expire --expire=now --all && git gc --prune=now --aggressive
+git push --force
+------------------------------------------------------------------------------
+
+권장: 민감한 정보가 많이 노출된 경우, 새 저장소를 만들고 정리된 코드만
+     최초 커밋하는 것이 가장 안전함
+
+
+================================================================================
+                          [3] Frontend 하드코딩 문제
+================================================================================
+
+위치: frontend/src 전역 (68개 이상 위치)
+문제: http://localhost:8080 주소가 하드코딩됨
+
+영향받는 파일들:
+- frontend/src/api/jobApi.js
+- frontend/src/api/api.js
+- frontend/src/pages/BoardFreeDetailPage.jsx
+- frontend/src/pages/BoardLookupDetailPage.jsx
+- frontend/src/components/FollowListPopover.jsx
+- frontend/src/components/UserMiniPopover.jsx
+- 그 외 다수...
+
+조치:
+1. 환경 변수 사용
+   // .env
+   VITE_API_URL=http://localhost:8080
+
+   // 코드에서
+   const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080'
+
+2. vite.config.js의 proxy 설정도 환경 변수화
+
+
+================================================================================
+                          [4] CORS 설정 문제
+================================================================================
+
+위치: backend/src/main/java/com/portflux/backend/config/SecurityConfig.java
+     및 각 Controller 파일들
+
+문제: CORS 허용 도메인이 localhost로 하드코딩됨
+     - http://localhost:3000
+     - http://localhost:5173
+
+영향:
+- 프로덕션 배포 시 CORS 에러 발생
+- 모든 API 호출 실패
+
+조치:
+// application.properties
+cors.allowed-origins=http://localhost:5173,https://your-domain.com
+
+// SecurityConfig.java
+@Value("${cors.allowed-origins}")
+private String allowedOrigins;
+
+config.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+
+
+================================================================================
+                          [5] 디버그 코드 잔존
+================================================================================
+
+5-1. Backend - System.out.println() 다수 존재
+------------------------------------------------------------------------------
+위치: backend/src/main/java/com/portflux/backend/service/UserService.java
+예시: System.out.println(">>> loadUserByUsername 호출됨: " + userId);
+
+위치: backend/src/main/java/com/portflux/backend/api/BusinessNumApi.java
+예시: System.out.println("▶ [캐시 히트] 사업자번호: " + cleanNum);
+
+위치: backend/src/main/java/com/portflux/backend/controller/*.java
+예시: e.printStackTrace(); (다수 위치)
+
+조치:
+- System.out.println() 전부 제거 또는 SLF4J Logger로 교체
+- e.printStackTrace() -> logger.error("message", e) 로 변경
+
+5-2. Frontend - console.log/alert 다수 존재
+------------------------------------------------------------------------------
+위치:
+- frontend/src/components/ChatModal.jsx: alert("첨부 기능은 준비중입니다.")
+- frontend/src/components/CheckoutModal.jsx: console.error(e)
+- frontend/src/components/FollowListPopover.jsx: console.error(...)
+- 그 외 다수...
+
+조치: 모든 console.log, console.error, alert 제거
+
+
+================================================================================
+                          [6] 개발 환경 설정 프로덕션 유지
+================================================================================
+
+위치: backend/src/main/resources/application.properties
+
+문제 설정들:
+spring.devtools.restart.enabled=true      # 개발 도구
+spring.devtools.livereload.enabled=true   # 라이브 리로드
+spring.jpa.show-sql=true                  # SQL 로깅 (성능 저하)
+spring.jpa.properties.hibernate.format_sql=true  # SQL 포맷팅
+
+조치: 프로덕션용 application-prod.properties 별도 작성
+spring.devtools.restart.enabled=false
+spring.jpa.show-sql=false
+
+
+================================================================================
+                          [7] 인증 보안 개선 필요
+================================================================================
+
+현재 문제:
+1. JWT 토큰이 localStorage에 저장됨 -> XSS 공격에 취약
+2. 토큰 만료/갱신 로직 미흡
+3. CSRF 보호 미적용
+
+권장 개선:
+1. 토큰을 httpOnly 쿠키로 저장
+2. Refresh Token 구현
+3. CSRF 토큰 추가
+
+
+================================================================================
+                          [8] 더미 계정 및 테스트 데이터
+================================================================================
+
+위치: sql/PortFlux.sql
+
+노출된 테스트 계정:
+- 사용자: asdasd (비밀번호: !Aa123123)
+- 관리자: admin (비밀번호: admin123!)
+- 더미 사용자: user001~user030 (비밀번호: password123!)
+- 더미 회사: naver, kakao 등 15개 (비밀번호: comp123!)
+
+조치:
+- 프로덕션 SQL에서 테스트 계정 제거
+- 테스트용 seed 스크립트 별도 분리 (seed-test-data.sql)
+- README에 테스트 계정 정보 노출 여부 확인
+
+
+================================================================================
+                          [9] 기타 코드 품질 문제
+================================================================================
+
+9-1. 미사용/미구현 컨트롤러
+------------------------------------------------------------------------------
+위치: backend/src/main/java/com/portflux/backend/controller/FileUploadController.java
+내용: 빈 컨트롤러 (구현 없음)
+조치: 제거 또는 구현
+
+9-2. 유틸리티 클래스에 하드코딩된 비밀번호
+------------------------------------------------------------------------------
+위치:
+- backend/src/.../util/GeneratePasswords.java
+- backend/src/.../util/PasswordEncoderUtil.java
+- backend/src/.../util/PasswordHashGenerator.java
+
+내용: admin123! 등 비밀번호 평문 존재
+조치: 유틸리티 클래스 제거 또는 정리
+
+
+================================================================================
+                     [10] 포트폴리오 공개 전 체크리스트
+================================================================================
+
+[필수 - 즉시 처리]
+[ ] Git 히스토리에서 민감한 파일 완전 제거
+[ ] OpenAI API 키 폐기 및 재발급
+[ ] PortOne 결제 키 재발급
+[ ] Google API 인증정보 재발급
+[ ] Gmail 앱 비밀번호 변경
+[ ] 데이터베이스 비밀번호 변경
+[ ] JWT Secret Key 변경
+
+[필수 - 1일 내 처리]
+[ ] application.properties -> 환경 변수 전환
+[ ] Frontend localhost 하드코딩 제거
+[ ] CORS 설정 환경 변수화
+[ ] System.out.println() 전체 제거
+[ ] console.log/alert 전체 제거
+[ ] e.printStackTrace() -> Logger 변경
+
+[권장 - 1주일 내 처리]
+[ ] httpOnly 쿠키 기반 인증으로 변경
+[ ] CSRF 토큰 적용
+[ ] application-example.properties 작성
+[ ] .env.example 작성
+[ ] README.md에서 민감 정보 확인 및 제거
+[ ] 더미 계정 SQL 분리
+[ ] 미사용 코드 정리
+
+
+================================================================================
+                              [11] 환경 변수 설정 예시
+================================================================================
+
+# backend/.env.example
+DB_USERNAME=your_db_username
+DB_PASSWORD=your_db_password
+OPENAI_API_KEY=your_openai_api_key
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+JWT_SECRET=your_jwt_secret_key
+MAIL_USERNAME=your_email
+MAIL_PASSWORD=your_email_app_password
+
+# frontend/.env.example
+VITE_API_URL=http://localhost:8080
+VITE_IMP_KEY=your_imp_key
+VITE_PORTONE_STORE_ID=your_store_id
+VITE_PORTONE_CHANNEL_KEY=your_channel_key
+
+
+================================================================================
+                                    요약
+================================================================================
+
+심각도 분류:
+- 즉시 해결 필수 (Critical): 7건
+- 빠른 해결 권장 (High): 5건
+- 개선 권장 (Medium): 4건
+
+가장 시급한 조치:
+1. 모든 API 키/비밀번호 즉시 변경
+2. Git 히스토리 정리 (새 저장소 생성 권장)
+3. 환경 변수 기반 설정으로 전환
+
+이 보고서의 모든 항목을 해결한 후 포트폴리오를 공개하시기 바랍니다.
+
+================================================================================
