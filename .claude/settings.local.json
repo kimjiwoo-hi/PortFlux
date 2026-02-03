@@ -18,7 +18,11 @@
       "Bash(taskkill:*)",
       "Bash(tasklist:*)",
       "Bash(findstr:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(du:*)",
+      "Bash(for f in *.pdf)",
+      "Bash(do mv \"$f\" \"[DUMMY]$f\")",
+      "Bash(ls:*)"
     ]
   }
 }

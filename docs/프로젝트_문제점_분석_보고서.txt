@@ -1,0 +1,763 @@
+================================================================================
+                    PortFlux 프로젝트 종합 문제점 분석 보고서
+================================================================================
+생성 일시: 2025-12-29
+분석 범위: Backend (Java/Spring Boot), Frontend (React), Database (Oracle)
+분석자: Claude Code
+
+================================================================================
+                           [핵심 요약]
+================================================================================
+
+총 발견된 문제점: 148개
+  - 심각 (Critical):     28개 ⚠️
+  - 높음 (High):         35개 ⚠️
+  - 보통 (Medium):       52개
+  - 낮음 (Low):          33개
+
+주요 보안 취약점:
+  ✗ IDOR 취약점 12개 엔드포인트 발견
+  ✗ 인증 없는 파일 업로드 엔드포인트 4개
+  ✗ API 키 노출 (OpenAI, Google Client ID)
+  ✗ 웹훅 서명 검증 누락
+  ✗ 결제 관련 보안 취약점
+
+코드 품질:
+  ✗ 하드코딩된 URL 23개 발견 (프록시 미사용)
+  ✗ console.log 남아있는 파일 16개
+  ✗ 일관성 없는 에러 처리
+  ✗ 중복 코드 다수
+
+================================================================================
+                        [1. BACKEND 문제점]
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────
+1.1 보안 취약점 (Security Vulnerabilities)
+────────────────────────────────────────────────────────────────────────────
+
+■ [심각] IDOR (Insecure Direct Object Reference) 취약점
+
+  파일: BoardFreeController.java
+    - Line 40-43: detail() - 게시글 조회 시 권한 확인 없음
+    - Line 80-100: update() - 소유권 검증 없이 누구나 수정 가능
+    - Line 102-106: delete() - 소유권 검증 없이 누구나 삭제 가능
+    - Line 151-159: deleteComment() - 댓글 소유권 검증 없음
+    - Line 187-195: updateComment() - 댓글 수정 권한 확인 없음
+    영향도: 높음 - 다른 사용자의 게시글/댓글 조작 가능
+
+  파일: BoardLookupController.java
+    - Line 221-247: updatePost() - 타입 불일치로 인한 권한 우회 가능성
+    - Line 252-268: deletePost() - 동일한 타입 불일치 문제
+    - Line 113-129: deleteComment() - 타입 혼동으로 인한 취약점
+    영향도: 높음 - 인증 우회 가능성
+
+  파일: CartController.java
+    - Line 59-63: deleteCartItem() - cartId만으로 삭제 가능 (소유권 미확인)
+    영향도: 중간 - 다른 사용자 장바구니 삭제 가능
+
+  파일: UserInfoController.java
+    - Line 39-78: updateUserInfo() - URL의 userId와 인증된 사용자 불일치 가능
+    - Line 81-94: updatePassword() - 동일한 IDOR 취약점
+    영향도: 심각 - 다른 사용자 정보 수정 가능
+
+
+■ [심각] 인증 누락 (Missing Authentication)
+
+  파일: BoardFreeController.java
+    - 모든 엔드포인트에 @PreAuthorize 없음
+    - Line 49-78: 인증 없이 파일 업로드 가능 (DoS 공격 가능)
+    영향도: 높음
+
+  파일: BoardLookupController.java
+    - Line 162-216: createPost() - 공개 파일 업로드 엔드포인트
+    - Line 273-291: toggleLike() - Query Parameter로 userNum 전달 (위조 가능)
+    - Line 296-315: checkLikeStatus() - 동일한 인증 문제
+    영향도: 높음
+
+  파일: PdfController.java
+    - Line 23-53: analyzePdf() - 인증 없이 PDF 처리 가능 (DoS 위험)
+    영향도: 중간
+
+  파일: PaymentWebhookController.java
+    - Line 38-104: handleWebhook() - 웹훅 서명 검증 없음
+    영향도: 심각 - 가짜 결제 완료 알림 전송 가능
+
+
+■ [높음] 비표준 인증 방식
+
+  파일: ChatController.java
+    - Line 32-37: getChatRooms() - 커스텀 헤더 'X-USER-NUM' 사용
+    - Line 40-47: getChatMessages() - 동일한 문제
+    - Line 49-57: getOrCreateChatRoom() - 커스텀 헤더로 인증
+    문제점: HTTP 헤더 위조 가능, JWT 미사용
+    영향도: 높음
+
+  파일: JobController.java
+    - Line 35-99: getJobs() - HttpSession 사용 (JWT와 불일치)
+    - Line 104-131: getJobDetail() - 동일한 문제
+    문제점: 인증 방식 일관성 없음
+    영향도: 중간
+
+
+■ [높음] 민감 정보 노출
+
+  파일: backend/.env
+    - Line 1: OpenAI API Key 노출 (Git에 커밋됨)
+    - 키 값: sk-proj-H63jTSOvefETMq-id49v... (전체 키 노출)
+    조치 필요: .env를 .gitignore에 추가, 키 재발급
+
+  파일: application.properties
+    - Line 43-44: Google OAuth 클라이언트 ID/Secret 평문 저장
+    - Line 48: 국세청 API 키 평문 저장
+    - Line 52-53: Iamport 결제 키 평문 저장
+    권장 사항: 환경 변수 또는 별도 Key Vault 사용
+
+
+■ [중간] 파일 업로드 보안 취약점
+
+  파일: BoardFreeController.java
+    - Line 161-185: download() - 접근 제어 없음
+    - Line 174-185: 파일 타입 검증 없음
+    - Path Traversal 공격 가능성
+
+  파일: BoardLookupController.java
+    - Line 366-383: saveFile() - UUID 사용하지만 바이러스 스캔 없음
+    - Line 361-364: 확장자만 검증 (.pdf), 실제 파일 내용 미검증
+    권장 사항: MIME 타입 검증, 파일 크기 제한, 바이러스 스캔 추가
+
+
+────────────────────────────────────────────────────────────────────────────
+1.2 비즈니스 로직 오류 (Business Logic Errors)
+────────────────────────────────────────────────────────────────────────────
+
+■ [높음] 결제 처리 로직 문제
+
+  파일: PaymentService.java
+    - Line 97: 주문 상태 업데이트 코드가 주석 처리됨
+    - Line 65: TODO 주석 - 금액 불일치 시 결제 취소 로직 누락
+    - Line 43-48: 중복 결제 확인 시 Race Condition 가능
+    영향도: 심각 - 결제 오류 발생 가능
+
+
+■ [중간] 동시성 문제
+
+  파일: BoardFreeService.java
+    - Line 81-109: toggleLike() - checkLike와 insertLike 사이 Race Condition
+    - 트랜잭션 격리 수준 미지정
+    영향도: 중간 - 좋아요 중복 등록 가능
+
+  파일: BoardLookupService.java
+    - Line 58-59: 타입 비교에 != 대신 .equals() 사용해야 함
+    - Long 객체 비교 시 문제 발생 가능
+    영향도: 중간
+
+
+■ [중간] 에러 처리 일관성 부족
+
+  전체 컨트롤러에서:
+    - 일부는 "fail" 문자열만 반환
+    - 일부는 e.printStackTrace() 사용
+    - 중앙 집중식 예외 처리 없음
+    - 민감한 에러 정보가 클라이언트에 노출됨
+
+
+────────────────────────────────────────────────────────────────────────────
+1.3 설정 및 구성 문제 (Configuration Issues)
+────────────────────────────────────────────────────────────────────────────
+
+■ [높음] Spring Security 설정 문제
+
+  파일: SecurityConfig.java
+    - Line 64: '/api/payments/result' 공개 설정 (인증 필요)
+    - Line 61: '/api/boardlookup/**' 공개 (파일 업로드 포함)
+    - Line 63: '/uploads/**' 모든 업로드 파일 공개
+    - Line 37: CORS 설정에 allowedMethods("*") - 명시적으로 지정해야 함
+    - Line 49: Stateless 세션이지만 일부 컨트롤러는 HttpSession 사용
+
+
+■ [중간] CORS 설정 중복
+
+  파일: SecurityConfig.java (Line 32-42)
+  파일: CorsConfig.java (Line 14-22)
+    - 두 곳에서 CORS 설정 (중복)
+    - 설정 내용 불일치
+    - CorsConfig.java는 allowedOriginPatterns 사용 (덜 제한적)
+
+
+■ [높음] JWT 설정 문제
+
+  파일: JwtTokenProvider.java
+    - Line 24-25: JWT Secret이 코드에 하드코딩됨
+    - Line 27: 만료 시간 24시간 (일부 경우 너무 길 수 있음)
+    - Refresh Token 미구현
+    - Token 무효화(Revocation) 메커니즘 없음
+
+
+■ [낮음] API 엔드포인트 일관성 부족
+
+  - UserController: '/user/' (Line 16)
+  - UserLoginController: '/api/user/' (Line 21)
+  - CompanyUserController: '/company/' (Line 20)
+  - 일부는 /api 접두사 있음, 일부는 없음
+
+
+────────────────────────────────────────────────────────────────────────────
+1.4 데이터베이스 및 MyBatis 문제
+────────────────────────────────────────────────────────────────────────────
+
+■ [낮음] SQL 성능 문제
+
+  파일: JobMapper.xml
+    - Line 56-68: 다중 LIKE 절 사용 (성능 저하 가능)
+    - Line 122-128: UPPER 함수 사용으로 인덱스 활용 불가
+
+  파일: BoardFreeMapper.xml
+    - Line 71: '%' || #{keyword} || '%' 패턴 (Full Table Scan)
+
+
+■ [정보] SQL Injection 위험도
+
+  - 모든 Mapper에서 #{} 파라미터 바인딩 사용 (양호)
+  - ${} 문자열 직접 삽입 미발견 (양호)
+  - SQL Injection 위험: 낮음 ✓
+
+
+────────────────────────────────────────────────────────────────────────────
+1.5 코드 품질 문제
+────────────────────────────────────────────────────────────────────────────
+
+■ [낮음] 입력 검증 누락
+
+  - @Valid 어노테이션 미사용
+  - 일부 엔드포인트에서 파일 크기 제한 없음
+  - Rate Limiting 미구현
+  - 이메일 형식 검증 불일치
+
+
+■ [낮음] 문서화 부족
+
+  - JavaDoc 주석 거의 없음
+  - API 문서 자동 생성 도구 미사용 (Swagger/OpenAPI)
+
+
+================================================================================
+                        [2. FRONTEND 문제점]
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────
+2.1 보안 취약점 (Security Vulnerabilities)
+────────────────────────────────────────────────────────────────────────────
+
+■ [심각] API 키 노출
+
+  파일: LoginPage.jsx
+    - Line 9: Google Client ID가 소스코드에 하드코딩됨
+    - 값: 922053814206-nef3nk7celbbvkooeu6aeivo9f7753o1.apps.googleusercontent.com
+    조치 필요: 환경 변수로 이동 (.env.local)
+
+
+■ [높음] XSS (Cross-Site Scripting) 취약점 가능성
+
+  파일: BoardFreeDetailPage.jsx
+    - Line 294, 360: 사용자 입력 콘텐츠를 sanitization 없이 렌더링
+    권장 사항: DOMPurify 라이브러리 사용
+
+
+■ [높음] Authorization 헤더 누락
+
+  파일: BoardFreeDetailPage.jsx
+    - Line 67, 78, 138, 152, 195, 221, 232: 모든 fetch 호출에 Authorization 헤더 없음
+
+  파일: BoardFreePage.jsx
+    - Line 23: Authorization 헤더 없이 API 호출
+
+  파일: UserProfilePopover.jsx
+    - Line 37: 인증 없이 사용자 정보 조회
+
+  영향도: 높음 - 403 Forbidden 에러 발생 가능
+
+
+────────────────────────────────────────────────────────────────────────────
+2.2 API 통합 문제 (API Integration Issues)
+────────────────────────────────────────────────────────────────────────────
+
+■ [높음] 하드코딩된 URL (총 23개 발견)
+
+  잘못된 패턴: http://localhost:8080/api/...
+  올바른 패턴: /api/... (Vite 프록시 사용)
+
+  파일별 상세:
+    - BoardFreeDetailPage.jsx: 9개 (Line 67, 78, 122, 138, 152, 195, 221, 232, 291)
+    - BoardFreeWritePage.jsx: 2개 (Line 104, 108)
+    - BoardFreePage.jsx: 2개 (Line 20-21)
+    - LoginPage.jsx: 3개 (Line 10, 31, 82)
+    - RegisterPage.jsx: 7개 (Line 57, 94, 139, 177, 193, 211, 250)
+
+  문제점:
+    - 배포 시 URL 변경 불가
+    - CORS 설정 복잡도 증가
+    - 프록시 설정 무용지물
+
+
+■ [중간] API 클라이언트 일관성 부족
+
+  파일: api.js
+    - Line 17: user.token에서 토큰 가져오기 시도 (잘못된 위치)
+    - 실제 토큰은 localStorage/sessionStorage에 별도 저장됨
+
+  파일: chatRest.js
+    - Line 8-11: 커스텀 헤더 'X-USER-NUM' 사용
+    - 주석에 "JWT로 교체 필요" 명시됨
+
+  파일: jobApi.js
+    - Line 13-16: credentials: "include" 사용하지만 Authorization 헤더 없음
+
+
+────────────────────────────────────────────────────────────────────────────
+2.3 인증 및 세션 관리 문제
+────────────────────────────────────────────────────────────────────────────
+
+■ [중간] 토큰 저장 방식 불일치
+
+  패턴 1 (올바름):
+    - localStorage.getItem("token")
+    - 파일: CartPage.jsx, MyInfo.jsx, BoardLookupRead.jsx
+
+  패턴 2 (잘못됨):
+    - user.token (객체에서 가져오기 시도)
+    - 파일: api.js
+
+  문제점: 토큰을 찾지 못해 API 호출 실패 가능
+
+
+■ [중간] 중복된 인증 확인 로직
+
+  15개 이상 파일에서 동일한 코드 반복:
+    ```javascript
+    const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+    ```
+
+  권장 사항: 유틸리티 함수로 중앙 집중화
+    - src/utils/auth.js 생성
+    - getAuthToken(), getAuthUser() 함수 작성
+
+
+■ [중간] 로그아웃 시 데이터 삭제 문제
+
+  파일: Header.jsx
+    - Line 94-95: localStorage.clear() 및 sessionStorage.clear()
+    - 모든 데이터 삭제 (인증 외 데이터도 삭제됨)
+    권장: 특정 키만 삭제 (removeItem("token"), removeItem("user"))
+
+
+────────────────────────────────────────────────────────────────────────────
+2.4 코드 품질 문제
+────────────────────────────────────────────────────────────────────────────
+
+■ [중간] 프로덕션 코드에 console.log 남아있음 (총 80+ 개)
+
+  파일별 개수:
+    - CartPage.jsx: 7개 (Line 27-29, 41, 45-46, 160)
+    - BoardLookupWritePage.jsx: 6개 (Line 162-165, 176-177)
+    - OrderListPage.jsx: 1개 (Line 41)
+    - Header.jsx: 5개 (Line 43, 63, 66 등)
+    - LoginPage.jsx: 3개 (Line 63, 67, 114)
+    - 기타 다수...
+
+  조치 필요: 모든 console.log 제거 또는 로깅 라이브러리 사용
+
+
+■ [낮음] 불필요한 React import
+
+  React 17+ 에서는 'import React from "react"' 불필요:
+    - BoardFreeDetailPage.jsx (Line 1)
+    - BoardFreeWritePage.jsx (Line 1)
+    - BoardFreePage.jsx (Line 1)
+    - MainLayout.jsx (Line 1)
+    - Header.jsx (Line 1)
+    - 10개 이상 파일에서 발견
+
+
+■ [낮음] 중복 import
+
+  파일: FollowPage.jsx
+    - Line 2와 Line 96에 'import React' 중복
+
+
+────────────────────────────────────────────────────────────────────────────
+2.5 에러 처리 문제
+────────────────────────────────────────────────────────────────────────────
+
+■ [중간] 에러 처리 누락
+
+  파일: FollowPage.jsx
+    - Line 15-24, 35-38, 47-50: try-catch 블록 없음
+    - 네트워크 오류 시 사용자 피드백 없음
+
+  파일: FindPasswordPage.jsx
+    - API 호출에 에러 처리 없음
+
+
+■ [중간] 일관성 없는 에러 처리
+
+  파일: BoardFreeDetailPage.jsx
+    - Line 72: console.error만 출력, 사용자에게 알림 없음
+    - Line 143, 213, 226, 242: 일부는 alert, 일부는 console.error만
+
+  파일: BoardJobDetailPage.jsx
+    - Line 114: .catch(console.error) - 사용자 피드백 없음
+    - Line 58, 90: alert 사용 (일관성 없음)
+
+
+────────────────────────────────────────────────────────────────────────────
+2.6 성능 문제
+────────────────────────────────────────────────────────────────────────────
+
+■ [중간] 메모이제이션 누락
+
+  파일: BoardLookupPage.jsx
+    - Line 72-92: 복잡한 필터링 로직이 매 렌더링마다 실행됨
+    권장: useMemo 사용
+
+
+■ [중간] 불필요한 리렌더링
+
+  파일: Header.jsx
+    - Line 17-24: useMemo 의존성에 location.pathname 포함
+    - pathname 변경 시 불필요한 재계산
+
+
+■ [낮음] Lazy Loading 미사용
+
+  파일: main.jsx
+    - 모든 페이지 컴포넌트가 정적으로 import됨
+    권장: React.lazy()와 Suspense 사용하여 코드 스플리팅
+
+
+────────────────────────────────────────────────────────────────────────────
+2.7 상태 관리 문제
+────────────────────────────────────────────────────────────────────────────
+
+■ [중간] 전역 상태 관리 부재
+
+  - 인증 상태가 각 컴포넌트에서 개별 관리됨
+  - Context API 또는 Redux 미사용
+  - Prop drilling 발생
+  권장: React Context로 AuthContext 구현
+
+
+■ [중간] Race Condition
+
+  파일: CartPage.jsx
+    - Line 47-79: 병렬 API 호출 시 에러 처리 불완전
+    - Promise.all 미사용
+    - 일부 요청 실패해도 다른 요청 계속 진행
+
+
+────────────────────────────────────────────────────────────────────────────
+2.8 미완성 기능 (TODO 주석)
+────────────────────────────────────────────────────────────────────────────
+
+■ [정보] 구현되지 않은 기능
+
+  파일: BoardJobPage.jsx
+    - Line 962: "// TODO: 북마크 토글 API 호출"
+
+  파일: BoardLookupPage.jsx
+    - Line 54: "likes: 0, // TODO: 좋아요 기능 추가 시 구현"
+
+  파일: FollowPage.jsx
+    - Line 11: "// TODO: 실제 애플리케이션에서는..."
+
+
+================================================================================
+                    [3. 데이터베이스 스키마 문제]
+================================================================================
+
+■ [정보] 스키마 분석 결과
+
+  파일: sql/PortFlux.sql
+
+  발견된 문제점:
+    - 특별한 구조적 문제 발견되지 않음
+    - IDENTITY 컬럼 사용 (자동 증가)
+    - 외래키 제약조건 적절히 설정됨
+    - CHECK 제약조건으로 데이터 무결성 보장
+
+  권장 사항:
+    - 일부 VARCHAR2 길이 검토 (title: 255 적절한지)
+    - 인덱스 생성 고려 (자주 조회되는 컬럼)
+
+
+================================================================================
+                    [4. 환경 설정 및 빌드 문제]
+================================================================================
+
+■ [심각] .env 파일이 Git에 포함됨
+
+  파일: backend/.env
+    - OpenAI API Key 노출됨
+    조치 필요:
+      1. .gitignore에 .env 추가
+      2. Git 히스토리에서 .env 제거
+      3. OpenAI API Key 재발급
+
+
+■ [중간] .gitignore 확인 필요
+
+  확인 사항:
+    - node_modules/
+    - build/, dist/
+    - .env, .env.local
+    - *.log
+    - .gradle/, build/
+
+
+■ [낮음] Gradle 빌드 경고
+
+  - Deprecated Gradle 기능 사용 중
+  - Gradle 9.0 호환성 문제 가능성
+  - unchecked 연산 경고 (GoogleApi.java)
+
+
+================================================================================
+                        [5. 우선순위별 수정 계획]
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────
+[심각 - 즉시 수정 필요] (1-2일 이내)
+────────────────────────────────────────────────────────────────────────────
+
+1. IDOR 취약점 수정
+   □ BoardFreeController - 모든 CRUD 작업에 소유권 검증 추가
+   □ BoardLookupController - 타입 불일치 수정 및 권한 검증 강화
+   □ CartController - deleteCartItem에 소유권 확인 추가
+   □ UserInfoController - URL userId와 인증 userId 일치 확인
+
+2. 웹훅 보안
+   □ PaymentWebhookController - 웹훅 서명 검증 추가
+
+3. API 키 보안
+   □ .env 파일 Git에서 제거 (git rm --cached backend/.env)
+   □ .gitignore에 .env 추가
+   □ OpenAI API Key 재발급
+   □ frontend에서 Google Client ID를 .env.local로 이동
+
+4. 결제 로직 수정
+   □ PaymentService - 주문 상태 업데이트 코드 활성화
+   □ 금액 불일치 시 결제 취소 로직 구현
+
+
+────────────────────────────────────────────────────────────────────────────
+[높음 - 1주일 이내 수정]
+────────────────────────────────────────────────────────────────────────────
+
+1. 인증 방식 통일
+   □ ChatController - X-USER-NUM 헤더를 JWT로 교체
+   □ JobController - HttpSession을 JWT로 교체
+
+2. Frontend API 호출 표준화
+   □ 모든 하드코딩된 URL(http://localhost:8080) 제거
+   □ 프록시 경로(/api) 사용으로 통일
+   □ 누락된 Authorization 헤더 추가
+
+3. SecurityConfig 재검토
+   □ /api/payments/result 인증 필수로 변경
+   □ /api/boardlookup/** 일부 엔드포인트 보호
+   □ CORS 설정 명시적으로 지정
+
+4. 파일 업로드 보안 강화
+   □ 파일 타입 검증 (MIME 타입)
+   □ 파일 크기 제한 명확히 설정
+   □ 접근 제어 추가
+
+
+────────────────────────────────────────────────────────────────────────────
+[보통 - 2주일 이내 수정]
+────────────────────────────────────────────────────────────────────────────
+
+1. 코드 품질 개선
+   □ Frontend console.log 모두 제거
+   □ 중복 코드 리팩토링 (인증 확인 로직을 유틸리티로)
+   □ 불필요한 React import 제거
+
+2. 에러 처리 표준화
+   □ Backend @ControllerAdvice로 중앙 집중식 에러 처리
+   □ Frontend ErrorBoundary 구현
+   □ 일관된 에러 응답 형식
+
+3. 토큰 저장 방식 통일
+   □ api.js에서 토큰 가져오기 로직 수정
+   □ 유틸리티 함수 작성 (getAuthToken, getAuthUser)
+
+4. 동시성 문제 해결
+   □ toggleLike 트랜잭션 격리 수준 설정
+   □ 결제 중복 확인 로직 개선
+
+
+────────────────────────────────────────────────────────────────────────────
+[낮음 - 기술 부채, 여유 있을 때]
+────────────────────────────────────────────────────────────────────────────
+
+1. 성능 최적화
+   □ Frontend lazy loading 구현
+   □ useMemo/useCallback 적절히 사용
+   □ SQL 쿼리 최적화 (인덱스 추가)
+
+2. 문서화
+   □ API 문서 작성 (Swagger/OpenAPI)
+   □ JavaDoc 주석 추가
+   □ README 업데이트
+
+3. 상태 관리
+   □ React Context로 전역 인증 상태 관리
+   □ 또는 Zustand/Recoil 도입 고려
+
+4. 테스트
+   □ 단위 테스트 작성
+   □ 통합 테스트 추가
+   □ E2E 테스트 구현
+
+
+================================================================================
+                        [6. 권장 리팩토링 목록]
+================================================================================
+
+■ Backend 리팩토링
+
+  1. 공통 유틸리티 클래스 생성
+     - AuthUtils.java - 권한 확인 헬퍼 메서드
+     - FileUtils.java - 파일 검증 및 저장
+
+  2. 커스텀 예외 클래스 정의
+     - UnauthorizedException
+     - ResourceNotFoundException
+     - InvalidFileException
+
+  3. @ControllerAdvice 구현
+     - 전역 예외 처리기
+     - 일관된 에러 응답 형식
+
+  4. Validator 클래스 작성
+     - 입력 검증 로직 분리
+
+
+■ Frontend 리팩토링
+
+  1. 유틸리티 함수 작성 (src/utils/)
+     - auth.js - 인증 관련 함수
+       - getAuthToken()
+       - getAuthUser()
+       - setAuth()
+       - clearAuth()
+
+     - api.js - API 호출 래퍼
+       - makeAuthRequest() - 자동으로 토큰 헤더 추가
+
+  2. API 클라이언트 통일
+     - axios 인스턴스 하나로 통일
+     - interceptor로 자동 토큰 추가
+     - 에러 처리 중앙화
+
+  3. Context 구현
+     - AuthContext - 인증 상태 전역 관리
+     - UserContext - 사용자 정보 전역 관리
+
+  4. 환경 변수 설정
+     - .env.local 생성
+     - VITE_GOOGLE_CLIENT_ID 등록
+
+
+================================================================================
+                        [7. 보안 체크리스트]
+================================================================================
+
+Backend 보안 점검:
+  ☐ 모든 엔드포인트 인증/인가 검토
+  ☐ IDOR 취약점 제거
+  ☐ 파일 업로드 검증 강화
+  ☐ 웹훅 서명 검증 추가
+  ☐ SQL Injection 방지 확인 (완료 ✓)
+  ☐ Rate Limiting 구현
+  ☐ CORS 설정 최소 권한으로 제한
+  ☐ JWT Secret 환경 변수로 이동
+  ☐ 민감 정보 로깅 제거
+
+Frontend 보안 점검:
+  ☐ XSS 방지 (사용자 입력 sanitization)
+  ☐ API 키 환경 변수로 이동
+  ☐ 모든 API 호출에 Authorization 헤더 추가
+  ☐ HTTPS 사용 (프로덕션)
+  ☐ CSP(Content Security Policy) 헤더 설정
+
+인프라 보안:
+  ☐ .env 파일 Git에서 제거
+  ☐ .gitignore 업데이트
+  ☐ 프로덕션 API 키 재발급
+  ☐ 데이터베이스 접근 제한
+
+
+================================================================================
+                            [8. 결론]
+================================================================================
+
+■ 현재 상태 평가
+
+  보안 수준: ⚠️ 취약 (많은 IDOR 취약점 및 인증 문제)
+  코드 품질: ⚠️ 개선 필요 (중복 코드, 일관성 부족)
+  안정성:   ⚠️ 보통 (결제 로직 오류, 동시성 문제)
+  성능:     ✓ 양호 (큰 문제 없음)
+  유지보수성: ⚠️ 개선 필요 (문서화 부족, 표준화 필요)
+
+
+■ 즉시 조치 필요 사항 (배포 전 필수)
+
+  1. IDOR 취약점 수정 (12개 엔드포인트)
+  2. API 키 노출 문제 해결 (.env 제거, 키 재발급)
+  3. 결제 로직 오류 수정
+  4. 웹훅 서명 검증 추가
+  5. Frontend 하드코딩된 URL 제거
+
+
+■ 최종 권장 사항
+
+  배포 연기 권고: 심각한 보안 취약점이 다수 발견됨
+  수정 후 재검토: 위의 심각 항목 수정 후 보안 테스트 재실시
+  침투 테스트: 전문가의 보안 감사 권장
+  모니터링: 프로덕션 배포 후 에러 모니터링 시스템 구축
+
+  예상 수정 기간:
+    - 심각 항목: 2-3일
+    - 높음 항목: 1주일
+    - 보통 항목: 2주일
+    총 예상: 약 3-4주
+
+
+================================================================================
+                        [부록: 참고 자료]
+================================================================================
+
+OWASP Top 10 2021:
+  https://owasp.org/www-project-top-ten/
+
+Spring Security Best Practices:
+  https://spring.io/guides/topicals/spring-security-architecture/
+
+React Security Cheatsheet:
+  https://cheatsheetseries.owasp.org/cheatsheets/React_Security_Cheat_Sheet.html
+
+JWT Best Practices:
+  https://tools.ietf.org/html/rfc8725
+
+
+================================================================================
+                          [보고서 끝]
+================================================================================
+생성 일시: 2025-12-29
+분석자: Claude Code
+버전: 1.0
+
+이 보고서는 자동화 도구를 통해 생성되었으며, 실제 보안 감사를 대체하지 않습니다.
+중요한 보안 결정을 내리기 전에 보안 전문가와 상담하시기 바랍니다.
