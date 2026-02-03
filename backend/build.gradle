@@ -99,4 +99,10 @@ tasks.named('processResources') {
 bootRun {
     systemProperty 'file.encoding', 'UTF-8'
     systemProperty 'oracle.jdbc.defaultNChar', 'true'
+    systemProperty 'stdout.encoding', 'UTF-8'
+    systemProperty 'stderr.encoding', 'UTF-8'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
 }

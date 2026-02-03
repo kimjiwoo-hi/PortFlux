@@ -1,6 +1,6 @@
 MERGE INTO POST p
 USING (
-    SELECT 1 post_id, 'lookup' board_type, 1 user_num,
+    SELECT 1001 post_id, 'lookup' board_type, 1 user_num,
            '웹 프로그래밍 팀 프로젝트' title,
            '웹 프로그래밍 팀 프로젝트 발표 자료입니다.' content,
            3000 price,
@@ -10,7 +10,7 @@ USING (
     FROM dual
 
     UNION ALL
-    SELECT 2, 'lookup', 2,
+    SELECT 1002, 'lookup', 2,
            '레트로 포트폴리오',
            '개성을 드러내는 레트로 스타일 포트폴리오입니다.',
            4500,
@@ -20,7 +20,7 @@ USING (
     FROM dual
 
     UNION ALL
-    SELECT 3, 'lookup', 1,
+    SELECT 1003, 'lookup', 1,
            '개발자 자기소개서',
            '합격률을 높이는 개발자 자기소개서 샘플입니다.',
            2000,
@@ -30,7 +30,7 @@ USING (
     FROM dual
 
     UNION ALL
-    SELECT 4, 'lookup', 2,
+    SELECT 1004, 'lookup', 2,
            '심플한 회색 PPT',
            '어디에나 잘 어울리는 심플한 회색 테마 PPT입니다.',
            2500,
@@ -40,7 +40,7 @@ USING (
     FROM dual
 
     UNION ALL
-    SELECT 5, 'lookup', 1,
+    SELECT 1005, 'lookup', 1,
            '블루 모던 템플릿',
            '신뢰감을 주는 블루 모던 스타일 템플릿입니다.',
            3500,
@@ -50,7 +50,7 @@ USING (
     FROM dual
 
     UNION ALL
-    SELECT 6, 'lookup', 2,
+    SELECT 1006, 'lookup', 2,
            '업무에 AI 활용하기',
            '업무 효율을 높이는 AI 활용 자료입니다.',
            5000,
@@ -60,7 +60,7 @@ USING (
     FROM dual
 
     UNION ALL
-    SELECT 7, 'lookup', 1,
+    SELECT 1007, 'lookup', 1,
            '미스터리의 세계',
            '세계의 불가사의와 미스터리에 대한 이야기입니다.',
            1500,
@@ -70,7 +70,7 @@ USING (
     FROM dual
 
     UNION ALL
-    SELECT 8, 'lookup', 2,
+    SELECT 1008, 'lookup', 2,
            '전략적 콘텐츠 마케팅',
            '콘텐츠 마케팅 전략 프레젠테이션입니다.',
            4000,
@@ -80,7 +80,7 @@ USING (
     FROM dual
 
     UNION ALL
-    SELECT 9, 'lookup', 1,
+    SELECT 1009, 'lookup', 1,
            '음악 라이브러리',
            '저작권 걱정 없는 음악 라이브러리입니다.',
            1000,
@@ -90,7 +90,7 @@ USING (
     FROM dual
 
     UNION ALL
-    SELECT 10, 'lookup', 2,
+    SELECT 1010, 'lookup', 2,
            '레슬링의 제왕',
            '프로 레슬링의 역사 자료입니다.',
            1500,
@@ -100,7 +100,7 @@ USING (
     FROM dual
 
     UNION ALL
-    SELECT 11, 'lookup', 1,
+    SELECT 1011, 'lookup', 1,
            '가을 테마 프레젠테이션',
            '분위기 있는 가을 테마 PPT입니다.',
            3000,
@@ -110,7 +110,7 @@ USING (
     FROM dual
 
     UNION ALL
-    SELECT 12, 'lookup', 2,
+    SELECT 1012, 'lookup', 2,
            '사이버 보안',
            '개인과 기업을 위한 사이버 보안 자료입니다.',
            5000,
@@ -120,7 +120,7 @@ USING (
     FROM dual
 
     UNION ALL
-    SELECT 13, 'lookup', 1,
+    SELECT 1013, 'lookup', 1,
            '커피 프레젠테이션',
            '커피의 역사와 추출 방법 자료입니다.',
            2000,
@@ -130,7 +130,7 @@ USING (
     FROM dual
 
     UNION ALL
-    SELECT 14, 'lookup', 2,
+    SELECT 1014, 'lookup', 2,
            '코딩 계획',
            '성공적인 코딩 학습 계획서입니다.',
            1500,
@@ -140,7 +140,7 @@ USING (
     FROM dual
 
     UNION ALL
-    SELECT 15, 'lookup', 1,
+    SELECT 1015, 'lookup', 1,
            'AI 리터러시 교육',
            'AI 시대를 위한 기초 교육 자료입니다.',
            4500,
@@ -150,7 +150,7 @@ USING (
     FROM dual
 
     UNION ALL
-    SELECT 16, 'lookup', 2,
+    SELECT 1016, 'lookup', 2,
            '업로드 자료 1',
            '업로드된 문서 자료입니다.',
            1000,
@@ -160,7 +160,7 @@ USING (
     FROM dual
 
     UNION ALL
-    SELECT 17, 'lookup', 1,
+    SELECT 1017, 'lookup', 1,
            '업로드 자료 2',
            '업로드된 문서 자료입니다.',
            1000,
