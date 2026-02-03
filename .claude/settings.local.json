@@ -22,7 +22,11 @@
       "Bash(du:*)",
       "Bash(for f in *.pdf)",
       "Bash(do mv \"$f\" \"[DUMMY]$f\")",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(do mv \"$d\" ../)",
+      "Bash(for i in {1..17})",
+      "Bash(do touch \"post_$i/.dummy\")",
+      "Bash(do rm -f \"post_$i/.dummy\")"
     ]
   }
 }
