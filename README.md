@@ -561,7 +561,7 @@ const response = await axios.get('/api/example', {
 <img width="4000" height="2250" alt="PPT(2차PPT_JH)_4" src="https://github.com/user-attachments/assets/b2a4cd90-976a-40a9-8418-94c359039b22" />
 <img width="4000" height="2250" alt="PPT(2차PPT_JH)_5" src="https://github.com/user-attachments/assets/affadf11-2fb5-4bc6-84db-6114605cf685" />
 <img width="4000" height="2250" alt="PPT(2차PPT_JH)_6" src="https://github.com/user-attachments/assets/01cd297f-03bf-4ff5-8169-e07897c067b8" />
-<img width="4000" height="2250" alt="PPT(2차PPT_JH)_7" src="https://github.com/user-attachments/assets/3edc24e3-3524-40fe-8357-3c563d9a31f0" />
+<img width="4000" height="2250" alt="PPT(2차PPT_JH)_7" src="https://github.com/user-attachments/assets/cedff6a8-ad07-45e7-a52a-722650f4ac07" />
 <img width="4000" height="2250" alt="PPT(2차PPT_JH)_8" src="https://github.com/user-attachments/assets/43e10cfa-d4de-4100-b71b-8bb48d7ab1a9" />
 <img width="4000" height="2250" alt="PPT(2차PPT_JH)_9" src="https://github.com/user-attachments/assets/585475e6-53e3-4d02-8719-1518f087d8d1" />
 <img width="4000" height="2250" alt="PPT(2차PPT_JH)_10" src="https://github.com/user-attachments/assets/0235a0a1-7ee7-4c64-a5cf-e09c1aaf1c15" />
