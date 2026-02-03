@@ -304,38 +304,56 @@ npm run dev
 
 ```
 PortFlux/
-├── backend/                      # Spring Boot 백엔드
+├── backend/                          # Spring Boot 백엔드
 │   ├── src/main/java/com/portflux/backend/
-│   │   ├── config/              # 설정 (Security, CORS, WebSocket)
-│   │   ├── controller/          # REST API 컨트롤러
-│   │   ├── service/             # 비즈니스 로직
-│   │   ├── repository/          # JPA Repository
-│   │   ├── model/               # Entity 클래스
-│   │   ├── security/            # JWT, 인증/인가
+│   │   ├── api/                      # 외부 API 연동 (Google, 사업자등록번호)
+│   │   ├── beans/                    # 데이터 빈 클래스
+│   │   ├── config/                   # 설정 (Security, CORS, Iamport 등)
+│   │   ├── controller/               # REST API 컨트롤러
+│   │   ├── dao/                      # 데이터 접근 객체
+│   │   ├── dto/                      # 데이터 전송 객체
+│   │   ├── handler/                  # 타입 핸들러
+│   │   ├── interceptor/              # 인터셉터
+│   │   ├── mapper/                   # MyBatis 매퍼 (Java + XML)
+│   │   ├── model/                    # JPA Entity 클래스
+│   │   ├── repository/               # JPA Repository
+│   │   ├── scheduler/                # 스케줄러
+│   │   ├── security/                 # JWT, 인증/인가
+│   │   ├── service/                  # 비즈니스 로직
 │   │   └── BackendApplication.java
 │   ├── src/main/resources/
-│   │   ├── application.properties
-│   │   └── mapper/              # MyBatis XML
+│   │   ├── application.properties    # 애플리케이션 설정
+│   │   └── lookup_Dummy_Data.sql     # 더미 데이터 SQL
+│   ├── uploads/                      # 업로드된 파일
+│   │   ├── [DUMMY]/                  # 더미 PDF 원본
+│   │   └── pdf/                      # 변환된 이미지
+│   │       └── [DUMMY]/              # 더미 이미지 폴더
 │   └── build.gradle
 │
-├── frontend/                     # React 프론트엔드
+├── frontend/                         # React 프론트엔드
 │   ├── src/
-│   │   ├── api/                 # API 호출 함수
-│   │   ├── components/          # 재사용 컴포넌트
-│   │   ├── pages/               # 페이지 컴포넌트
-│   │   ├── database/            # 태그 데이터 등
-│   │   ├── assets/              # 이미지, 아이콘
+│   │   ├── api/                      # API 호출 함수
+│   │   ├── components/               # 재사용 컴포넌트
+│   │   ├── pages/                    # 페이지 컴포넌트
+│   │   ├── database/                 # 태그 데이터 등
+│   │   ├── assets/                   # 이미지, 아이콘
 │   │   ├── App.jsx
 │   │   └── main.jsx
 │   ├── package.json
 │   └── vite.config.js
 │
-├── sql/                          # SQL 스크립트
-│   └── PortFlux.sql             # 테이블 생성 스크립트
+├── sql/                              # SQL 스크립트
+│   ├── PortFlux.sql                  # 테이블 생성 스크립트
+│   ├── community_Dummy_Data.sql      # 커뮤니티 더미 데이터
+│   ├── 계정_생성.sql                  # DB 계정 생성 스크립트
+│   └── PortFlux_ERD.png              # ERD 다이어그램
 │
-├── uploads/                      # 업로드된 파일 (자동 생성)
+├── docs/                             # 프로젝트 문서
+│   ├── JWT_개선_가이드.md
+│   ├── PRESENTATION.md
+│   └── 문제점_분석.md
 │
-└── README.md                     # 이 파일
+└── README.md                         # 이 파일
 ```
 
 ---
