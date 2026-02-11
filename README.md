@@ -347,7 +347,6 @@ PortFlux/
 │
 ├── sql/                              # SQL 스크립트
 │   ├── PortFlux.sql                  # 테이블 생성 스크립트
-│   ├── community_Dummy_Data.sql      # 커뮤니티 더미 데이터
 │   ├── 계정_생성.sql                  # DB 계정 생성 스크립트
 │   └── PortFlux_ERD.png              # ERD 다이어그램
 │
