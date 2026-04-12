@@ -22,7 +22,7 @@
 | 이메일 | kim199603330@gmail.com | rlaehdgn80@gmail.com | rlawldn1015@gmail.com |
 | 역할 | 팔로우, 팔로워 | 로그인, 회원가입<br>커뮤니티 게시판 | 둘러보기 게시판 |
 
-| 프로필 | <img height="200" src="https://github.com/user-attachments/assets/bd83f747-61ad-4bb9-b601-32d7ed1553d3" /> | <img height="200" src="https://github.com/user-attachments/assets/a9366efc-a88d-4b87-a027-28d11da4d559" /> | <img height="200" src="https://github.com/user-attachments/assets/b0c4ec36-fcd7-4cca-ad2c-2b3d173834c4" /> |
+| 프로필 | <img height="200" src="https://github.com/user-attachments/assets/bd83f747-61ad-4bb9-b601-32d7ed1553d3" /> | <img height="200" src="https://github.com/user-attachments/assets/cfd60a64-c363-4734-8e28-270b19cd30c7" /> | <img height="200" src="https://github.com/user-attachments/assets/b0c4ec36-fcd7-4cca-ad2c-2b3d173834c4" /> |
 | :---: | :---: | :---: | :---: |
 | | <img width="200" height="1"> | <img width="200" height="1"> | <img width="200" height="1"> |
 | 이름 | **양재명** | **최현규** | **홍성훈** |
